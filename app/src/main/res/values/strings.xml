@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Coffee Compass</string>
+
+    <string name="title_coffeesite_detail">CoffeeSite Detail</string>
+    <string name="num_all_sites_label">Počet všech lokací: </string>
+    <string name="num_all_sites7_label">Nové lokace za posledních 7 dnů: </string>
+    <string name="num_all_users_label">Počet všech uživatelů: </string>
+    <string name="coffee_sites_today">Nové lokace dnes: </string>
+    <string name="no_site_found">Bohužel, žádná káva poblíž.</string>
+
+    <string name="action_settings">Nastavení</string>
+    <string name="action_about">O aplikaci</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="action_map">Mapa</string>
+    <string name="currentPosition">Vaše poloha</string>
+</resources>
