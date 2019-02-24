@@ -124,11 +124,16 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     public void onImageButtonClick(View v) {
         Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
         imageIntent.putExtra("site", content.getItemsMap().get(selectedItemID));
         startActivity(imageIntent);
+    }
+
+    public void onCommentsButtonClick(View v) {
+        Intent commentsIntent = new Intent(this, CommentsActivity.class);
+        commentsIntent.putExtra("site", content.getItemsMap().get(selectedItemID));
+        startActivity(commentsIntent);
     }
 
     public void onMapButtonClick(View v) {

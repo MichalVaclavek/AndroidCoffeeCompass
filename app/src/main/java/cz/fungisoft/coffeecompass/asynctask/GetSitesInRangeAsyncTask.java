@@ -47,13 +47,15 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
         this.parentActivity = parentActivity;
     }
 
-    public GetSitesInRangeAsyncTask(MainActivity parentActivity, String latFrom, String longFrom, String range) {
+    public GetSitesInRangeAsyncTask(MainActivity parentActivity, String latFrom, String longFrom, String range, String coffeeSort) {
         this(parentActivity);
 
         this.latFrom = Double.valueOf(latFrom);
         this.longFrom = Double.valueOf(longFrom);
 
-        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=?";
+        String sort = coffeeSort.isEmpty() ? "?" : coffeeSort;
+
+        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=" + sort;
     }
 
     @Override

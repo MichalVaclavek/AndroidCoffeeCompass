@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,13 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.Utils;
@@ -47,20 +46,16 @@ public class MainActivity extends AppCompatActivity {
     private boolean bPrvni = true;
     private int barva = Color.BLACK;
 
-    private TextView lat;
-    private TextView lon;
-    private TextView time, accuracy;
-    public TextView searchStatus;
-    public TextView searchRangeView;
+    private TextView accuracy;
 
-//    private TextView devTextViewOld;
-//    private TextView devTextViewNew;
+    private ImageView locationImageView;
 
     private LocationManager locManager;
     private Location location;
     private LocationListener locListener;
 
-    private Button searchButton;
+    private Button searchEspressoButton;
+    private Button searchKafeButton;
 
     private String searchRange = "500"; // range in meters for searching from current position - 500 m default value
 
@@ -81,22 +76,20 @@ public class MainActivity extends AppCompatActivity {
         //Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
-        lat = (TextView) findViewById(R.id.latitude);
-        lon = (TextView) findViewById(R.id.longitude);
-        time = (TextView) findViewById(R.id.time);
         accuracy = (TextView) findViewById(R.id.accuracy);
 
-        // Only for Development, DELETE after usage
-//        devTextViewOld = (TextView) findViewById(R.id.devTextViewOld);
-//        devTextViewNew = (TextView) findViewById(R.id.devTextViewNew);
+        searchEspressoButton = (Button) findViewById(R.id.searchEspressoButton);
+        searchEspressoButton.setTransformationMethod(null);
+        searchEspressoButton.setText("Hledej\n\r" + "ESPRESSO\n\r" + "(" + searchRange + " m)");
 
-        searchStatus = (TextView) findViewById(R.id.searchStatusTextView);
-        searchStatus.setText("");
+        searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
+        searchKafeButton.setTransformationMethod(null);
+        searchKafeButton.setText("Hledej\n\r" + "KAFE\n\r" + "(" + searchRange + " m)");
 
-        searchRangeView = (TextView) findViewById(R.id.searchRangeTextView);
-        searchRangeView.setText(this.searchRange + " m");
+        locationImageView = (ImageView) findViewById(R.id.locationImageView);
 
-        searchButton = (Button) findViewById(R.id.searchButton);
+        Drawable locBad = getResources().getDrawable(R.drawable.location_bad);
+        locationImageView.setBackground(locBad);
 
         if ((locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE)) == null) {
             finish();
@@ -106,8 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (location != null) {
             zobrazPolohu(location);
-        } else
-            accuracy.setText("Poslední poloha starší než 2 minuty");
+        }
 
         locListener = new LocationListener() {
 
@@ -117,7 +109,9 @@ public class MainActivity extends AppCompatActivity {
                 if (bPrvni) { // prvni platna detekce polohy
                     barvyTextu(barva);
                     bPrvni = false;
-                    searchButton.setEnabled(true);
+                    searchEspressoButton.setEnabled(true);
+                    searchKafeButton.setEnabled(true);
+                    updateAccuracyIndicator(location);
                 }
 
                 if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
@@ -126,29 +120,16 @@ public class MainActivity extends AppCompatActivity {
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
                                 && ((loc.getAccuracy() < location.getAccuracy()) || (loc.getAccuracy() < MIN_PRESNOST)))
                 {
-                       /*
-                    || (loc.getAccuracy() < location.getAccuracy()
-                        && location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
-                    || (loc.getAccuracy() < MIN_PRESNOST
-                        && location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))) {
-                        */
-
-//                    if (location != null)
-//                            devTextViewOld.setText("onLocationChanged() Accuracy: " + location.getAccuracy() + ". Time: " +  location.getTime());
-
                     location = loc;
                     zobrazPolohu(loc);
 
-                    if (!searchButton.isEnabled())
-                        searchButton.setEnabled(true);
-
-//                    devTextViewNew.setText("onLocationChanged() Accuracy: " + loc.getAccuracy() + ". Time: " +  loc.getTime());
-
-/*
-                    if (location.getAccuracy() < MIN_PRESNOST) {
-                        locManager.removeUpdates(locListener);
+                    if (!searchEspressoButton.isEnabled()) {
+                        searchEspressoButton.setEnabled(true);
+                        searchKafeButton.setEnabled(true);
                     }
-                    */
+
+                    updateAccuracyIndicator(location);
+
                 }
             }
 
@@ -175,6 +156,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void updateAccuracyIndicator(Location loc) {
+
+        if (loc != null) {
+            Drawable locIndic = getResources().getDrawable(R.drawable.location_better);
+
+            if (loc.getAccuracy() <= MIN_PRESNOST) {
+                locIndic = getResources().getDrawable(R.drawable.location_good);
+
+            }
+            locationImageView.setBackground(locIndic);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -216,16 +209,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void showAbout() {
         Intent i = new Intent(this, AboutActivity.class);
-//        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         this.startActivity(i);
     }
 
 
     private void barvyTextu(int barva) {
         accuracy.setTextColor(barva);
-        time.setTextColor(barva);
-        lat.setTextColor(barva);
-        lon.setTextColor(barva);
     }
 
     /**
@@ -249,11 +238,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void zobrazPolohu(Location location) {
-        lat.setText("Zeměpisná šířka: " + String.valueOf(location.getLatitude()));
-        lon.setText("Zeměpisná délka: " + String.valueOf(location.getLongitude()));
-
-        accuracy.setText("Přesnost: " + location.getAccuracy());
-        time.setText("Čas: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(new Date(location.getTime())));
+        accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
     }
 
     public void onClickMapButton(View view) {
@@ -276,10 +261,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onHledejClick(View view) {
+    public void onHledejEspressoClick(View view) {
 
         if (Utils.isOnline()) {
-            new GetSitesInRangeAsyncTask(this, String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), String.valueOf(searchRange)).execute();
+            new GetSitesInRangeAsyncTask(this,
+                                         String.valueOf(location.getLatitude()),
+                                         String.valueOf(location.getLongitude()),
+                                         String.valueOf(searchRange),
+                                         "espresso").execute();
         } else {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No Internet connection.",
@@ -288,8 +277,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void onHledejKafeClick(View view) {
+
+        if (Utils.isOnline()) {
+            new GetSitesInRangeAsyncTask(this,
+                    String.valueOf(location.getLatitude()),
+                    String.valueOf(location.getLongitude()),
+                    String.valueOf(searchRange),
+                    "").execute();
+        } else {
+            Toast toast = Toast.makeText(getApplicationContext(),
+                            "No Internet connection.",
+                             Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
+
     public void showNothingFoundStatus() {
-        searchStatus.setText(R.string.no_site_found);
+        Toast toast = Toast.makeText(getApplicationContext(),
+                R.string.no_site_found,
+                Toast.LENGTH_SHORT);
+        toast.show();
+//        searchStatus.setText(R.string.no_site_found);
     }
 
 
@@ -318,8 +327,6 @@ public class MainActivity extends AppCompatActivity {
             if (location != null) {
                 float accuracy = location.getAccuracy();
                 long time = location.getTime();
-
-//                devTextViewOld.setText("posledniPozice() Accuracy: " + location.getAccuracy() + ". Time: " +  location.getTime());
 
                 if (accuracy < topPresnost) {
                     vysledek = location;
@@ -362,7 +369,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        searchStatus.setText("");
+//        searchStatus.setText("");
+
+        updateAccuracyIndicator(location);
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -372,7 +381,6 @@ public class MainActivity extends AppCompatActivity {
         }
         locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
         locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
-
     }
 
 

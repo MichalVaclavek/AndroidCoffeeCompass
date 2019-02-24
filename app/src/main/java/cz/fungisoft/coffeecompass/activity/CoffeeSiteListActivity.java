@@ -219,5 +219,4 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
     }
 
     /* Adapter end */
-
 }

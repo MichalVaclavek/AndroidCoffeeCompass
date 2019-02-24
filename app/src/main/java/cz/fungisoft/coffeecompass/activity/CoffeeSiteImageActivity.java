@@ -15,18 +15,17 @@ import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteImageFragment;
 
-
 public class CoffeeSiteImageActivity extends AppCompatActivity {
 
     private Integer siteId;
-
     private CoffeeSite cs;
 
-    private TextView nameLabel;
+//    private TextView nameLabel;
     private TextView distLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coffee_site_image_activity);
 
@@ -45,7 +44,6 @@ public class CoffeeSiteImageActivity extends AppCompatActivity {
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
         if (appBarLayout != null) {
-
             appBarLayout.setTitle(cs.name);
         }
 
