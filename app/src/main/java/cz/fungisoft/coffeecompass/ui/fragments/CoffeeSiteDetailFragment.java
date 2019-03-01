@@ -61,7 +61,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.name);
+                appBarLayout.setTitle(mItem.getName());
             }
         }
     }
@@ -73,7 +73,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
         // Show the CoffeeSite info in a TextViews.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.nameTextView)).setText(mItem.name);
+            ((TextView) rootView.findViewById(R.id.nameTextView)).setText(mItem.getName());
             ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(mItem.getStatusZarizeni());
             ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(mItem.getTypPodniku());
             ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(mItem.getTypLokality());
@@ -83,10 +83,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
             ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
             ((TextView) rootView.findViewById(R.id.streetTextView)).setText(mItem.getUliceCP());
-            ((TextView) rootView.findViewById(R.id.distanceTextView)).setText(String.valueOf(mItem.distance) + " m");
+            ((TextView) rootView.findViewById(R.id.distanceTextView)).setText(String.valueOf(mItem.getDistance()) + " m");
             ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
             ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
+            ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
             ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(mItem.getUvodniKoment());
         }
 

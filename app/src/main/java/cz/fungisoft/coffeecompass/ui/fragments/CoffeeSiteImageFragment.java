@@ -12,14 +12,15 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import cz.fungisoft.coffeecompass.R;
+import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 
 
 public class CoffeeSiteImageFragment extends Fragment {
 
-    private Integer siteId;
+    private CoffeeSite site;
 
-    private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
-    private String requestURL;
+//    private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
+//    private String requestImageURL;
 
     public static CoffeeSiteImageFragment newInstance() {
 
@@ -34,17 +35,16 @@ public class CoffeeSiteImageFragment extends Fragment {
         View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
 
-        //TODO AsyncTask
-        if (this.siteId != null) {
-            Picasso.get().load(requestURL).rotate(90).into(pictureImageView);
+        if (this.site != null) {
+            Picasso.get().load(site.getRequestImageURL()).rotate(90).into(pictureImageView);
         }
 
         return view;
     }
 
-    public void setCoffeeSiteId(Integer siteId) {
-        this.siteId = siteId;
-        requestURL = baseURL + siteId;
+    public void setCoffeeSiteId(CoffeeSite site) {
+        this.site = site;
+//        requestImageURL = baseURL + siteId;
     }
 
 }

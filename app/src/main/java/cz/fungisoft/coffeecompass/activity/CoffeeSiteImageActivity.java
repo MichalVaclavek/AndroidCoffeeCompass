@@ -17,7 +17,7 @@ import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteImageFragment;
 
 public class CoffeeSiteImageActivity extends AppCompatActivity {
 
-    private Integer siteId;
+//    private Integer siteId;
     private CoffeeSite cs;
 
 //    private TextView nameLabel;
@@ -32,9 +32,6 @@ public class CoffeeSiteImageActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.image_toolbar);
         setSupportActionBar(toolbar);
 
-        cs = (CoffeeSite) getIntent().getSerializableExtra("site");
-        siteId = cs.id;
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -43,19 +40,21 @@ public class CoffeeSiteImageActivity extends AppCompatActivity {
 
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
+        cs = (CoffeeSite) getIntent().getSerializableExtra("site");
+
         if (appBarLayout != null) {
-            appBarLayout.setTitle(cs.name);
+            appBarLayout.setTitle(cs.getName());
         }
 
         distLabel = (TextView) findViewById(R.id.distTextView);
-        distLabel.setText("Vzdálenost: "+ String.valueOf(cs.distance) + " m");
+        distLabel.setText("Vzdálenost: "+ String.valueOf(cs.getDistance()) + " m");
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
-        fragment.setCoffeeSiteId(siteId);
+        fragment.setCoffeeSiteId(cs);
 
         //TODO - osetrit situaci, kdy je otocen diplay
         if (savedInstanceState == null) { // is this enough?
-            if (siteId != null) {
+            if (cs != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.imageContainer, fragment)
                         .commitNow();

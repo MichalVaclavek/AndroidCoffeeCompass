@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+            <stroke android:width="2dp" android:color="#FF8000" />
+            <corners android:radius="3dp" />
+            <gradient android:startColor="#FF6800" android:centerColor="#FF8000" android:endColor="#FF9700" android:angle="90" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/kafe_480x480"
+        android:maxHeight="140dp"
+        android:maxWidth="140dp"
+        android:radius="3dp" />
+</layer-list>

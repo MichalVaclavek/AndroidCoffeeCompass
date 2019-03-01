@@ -1,6 +1,11 @@
 package cz.fungisoft.coffeecompass.entity;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -8,9 +13,77 @@ import java.util.List;
  */
 public class CoffeeSite implements Serializable
 {
-    public int id;
-    public String name;
-    public long distance;
+    private int id;
+    private String name;
+    private long distance;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getDistance() {
+        return distance;
+    }
+
+    public void setDistance(long distance) {
+        this.distance = distance;
+    }
+
+    /**
+     * URL for image
+     */
+    private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
+    private String requestImageURL;
+
+    public String getRequestImageURL() {
+        requestImageURL = baseURL + id;
+        return requestImageURL;
+    }
+
+    private final SimpleDateFormat format = new SimpleDateFormat("dd. MM. yyyy HH:mm");
+
+    private Date createdOn;
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+        this.createdOnString = format.format(this.createdOn);
+    }
+
+    private String createdOnString;
+
+    public String getCreatedOnString() {
+        return createdOnString;
+    }
+
+    public void setCreatedOnString(String createdOnString) {
+        this.createdOnString = createdOnString;
+        Date created;
+
+        try {
+            created  = format.parse ( this.createdOnString);
+        } catch (ParseException e) {
+            created = new Date();
+        }
+
+        this.createdOn = created;
+    }
+
 
     private double latitude;
     private double longitude;

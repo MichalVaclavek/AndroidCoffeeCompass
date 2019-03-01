@@ -32,7 +32,7 @@ public class CoffeeSiteListContent implements Serializable {
     public CoffeeSiteListContent(List<CoffeeSite> coffeeSiteList) {
         this.items = coffeeSiteList;
         for (CoffeeSite cs : items) {
-            items_map.put(String.valueOf(cs.id), cs);
+            items_map.put(String.valueOf(cs.getId()), cs);
         }
     }
 

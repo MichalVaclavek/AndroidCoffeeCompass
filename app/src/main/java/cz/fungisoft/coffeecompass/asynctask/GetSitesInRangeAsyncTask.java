@@ -1,8 +1,15 @@
 package cz.fungisoft.coffeecompass.asynctask;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.AsyncTask;
+import android.util.Base64;
 import android.util.Log;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,6 +17,8 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,8 +26,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import cz.fungisoft.coffeecompass.activity.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass.activity.MainActivity;
@@ -42,6 +57,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     double latFrom, longFrom;
 
     private List<CoffeeSite> coffeeSites;
+    private ProgressDialog progressDialog;
 
     public GetSitesInRangeAsyncTask(MainActivity parentActivity) {
         this.parentActivity = parentActivity;
@@ -155,6 +171,8 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         cs.setStatusZarizeni(csObject.getJSONObject("statusZarizeni").getString("status"));
                         cs.setHodnoceni(csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common"));
                         cs.setCreatedByUser(csObject.getString("originalUserName"));
+                        cs.setCreatedOnString(csObject.getString("createdOn"));
+
                         cs.setUvodniKoment(csObject.getString("initialComment"));
 
                         cs.setOteviraciDobaDny(csObject.getString("pristupnostDny"));
@@ -200,13 +218,42 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
             }
         }
 
+        // CoffeeSite can have image - try to load
+        /*
+        for (CoffeeSite cs : retSites) {
+
+            Bitmap bitmap = getByteArrayImage(cs.getRequestImageURL());
+            if (bitmap != null)
+                cs.setFoto(bitmap);
+        }
+*/
         return retSites;
     }
+
+    /*
+    private Bitmap getByteArrayImage(String url){
+        try {
+            URL imageUrl = new URL(url);
+            URLConnection ucon = imageUrl.openConnection();
+
+            InputStream is = ucon.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+
+            return BitmapFactory.decodeStream(bis);
+
+        } catch (Exception e) {
+            Log.d("ImageManager", "Error: " + e.toString());
+        }
+        return null;
+    }
+    */
 
     @Override
     protected void onPostExecute(String result) {
 
         if (coffeeSites.size() > 0) {
+
+
             CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
 
             Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
@@ -219,5 +266,16 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
         } else
             parentActivity.showNothingFoundStatus();
     }
+
+    /*
+    @Override
+    protected void onPreExecute() {
+        progressDialog = new ProgressDialog(parentActivity);
+        progressDialog.setMessage("Searching ...");
+        progressDialog.show();
+        progressDialog.setCanceledOnTouchOutside(false);
+        super.onPreExecute();
+    }
+    */
 
 }

@@ -17,8 +17,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="AppTheme.RoundedCornerButtonWithImage" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:background">@drawable/button_background_selector</item>
+    <style name="AppTheme.RoundedCornerKafeButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/button_kafe_background_selector</item>
+    </style>
+
+    <style name="AppTheme.RoundedCornerEspressoButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/button_espresso_background_selector</item>
     </style>
 
 

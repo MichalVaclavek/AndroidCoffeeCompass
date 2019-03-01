@@ -43,7 +43,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
         this.coffeeSite = cs;
 
         if (this.coffeeSite != null) {
-            sURL = sURLCore + this.coffeeSite.id;
+            sURL = sURLCore + this.coffeeSite.getId();
         }
     }
 
@@ -136,19 +136,16 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
                         String commentText = commentObject.getString("text");
                         String createdOn = commentObject.getString("created");
 
-                        SimpleDateFormat format = new SimpleDateFormat("dd. MM. yyyy HH:mm");
-                        Date date  = format.parse ( createdOn );
-
                         Integer coffeeSiteId = commentObject.getInt("coffeeSiteID");
                         String userName = commentObject.getString("userName");
                         boolean canBeDeleted = commentObject.getBoolean("canBeDeleted");
 
-                        Comment comment = new Comment(id, commentText, date, coffeeSiteId, userName, canBeDeleted);
+                        Comment comment = new Comment(id, commentText, createdOn, coffeeSiteId, userName, canBeDeleted);
 
                         retComments.add(comment);
                     }
                 }
-            } catch (JSONException | ParseException e) {
+            } catch (JSONException e) {
                 Log.e(TAG, "Exception during parsing JSON : " + e.getMessage());
             }
         }

@@ -131,7 +131,7 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
     }
 
     public void onCommentsButtonClick(View v) {
-        Intent commentsIntent = new Intent(this, CommentsActivity.class);
+        Intent commentsIntent = new Intent(this, CommentsListActivity.class);
         commentsIntent.putExtra("site", content.getItemsMap().get(selectedItemID));
         startActivity(commentsIntent);
     }

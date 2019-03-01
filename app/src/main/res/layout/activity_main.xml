@@ -10,6 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#FFE0B2"
         android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
@@ -37,7 +38,7 @@
 
                 <Button
                     android:id="@+id/searchEspressoButton"
-                    style="@style/AppTheme.RoundedCornerButtonWithImage"
+                    style="@style/AppTheme.RoundedCornerEspressoButton"
                     android:layout_width="165dp"
                     android:layout_height="165dp"
                     android:layout_marginRight="3dp"
@@ -47,7 +48,7 @@
 
                 <Button
                     android:id="@+id/searchKafeButton"
-                    style="@style/AppTheme.RoundedCornerButtonWithImage"
+                    style="@style/AppTheme.RoundedCornerKafeButton"
                     android:layout_width="165dp"
                     android:layout_height="165dp"
                     android:layout_marginLeft="3dp"
@@ -77,12 +78,12 @@
                     android:paddingLeft="10dp"
                     android:text="Vaše poloha:"
                     android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
+                    android:textSize="14sp"
                     android:textStyle="normal" />
 
                 <ImageView
                     android:id="@+id/locationImageView"
-                    android:layout_width="16dp"
+                    android:layout_width="14dp"
                     android:layout_height="14dp"
                     android:layout_marginLeft="10dp"
                     android:adjustViewBounds="false"
@@ -95,7 +96,8 @@
                     android:layout_marginLeft="15dp"
                     android:paddingLeft="10dp"
                     android:textAlignment="textStart"
-                    android:textColor="@android:color/holo_red_dark" />
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12sp" />
 
             </TableRow>
 
@@ -120,7 +122,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="#4DB405"
+            android:background="#F0F4C3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

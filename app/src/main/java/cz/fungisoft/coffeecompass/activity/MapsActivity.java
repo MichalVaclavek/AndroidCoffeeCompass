@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (content != null) {
             for (CoffeeSite cs : content.getItems()) {
                 LatLng siteLoc = new LatLng(cs.getLatitude(), cs.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(siteLoc).title(cs.name)
+                mMap.addMarker(new MarkerOptions().position(siteLoc).title(cs.getName())
                         .snippet(cs.getTypPodniku()) // .snippet(cs.getTypPodniku()).snippet(cs.getHodnoceni())
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
                 builder.include(siteLoc);
@@ -86,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (site != null) {
             LatLng siteLoc = new LatLng(site.getLatitude(), site.getLongitude());
             mMap.addMarker(new MarkerOptions().position(siteLoc)
-                    .title(site.name)
+                    .title(site.getName())
                     .snippet(site.getTypPodniku())
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
             builder.include(siteLoc);

@@ -2,7 +2,6 @@ package cz.fungisoft.coffeecompass.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -123,100 +125,121 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteListContent listContent) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, listContent, fromLat, fromLong, mTwoPane));
+        recyclerView.setAdapter(new CoffeeSiteItemRecyclerViewAdapter(this, listContent, fromLat, fromLong, mTwoPane));
     }
 
-    /* *********** RecyclerViewAdapter ************* */
+        /* Inner class */
+        /* *********** RecyclerViewAdapter ************* */
 
-    public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
-    {
+        public static class CoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<CoffeeSiteItemRecyclerViewAdapter.ViewHolder>
+        {
 
-        private final CoffeeSiteListActivity mParentActivity;
-        private final List<CoffeeSite> mValues;
-        private final CoffeeSiteListContent content;
+            private final CoffeeSiteListActivity mParentActivity;
+            private final List<CoffeeSite> mValues;
+            private final CoffeeSiteListContent content;
 
-        private final boolean mTwoPane;
+            private final boolean mTwoPane;
 
-        private View.OnClickListener mOnClickListener;
+            private View.OnClickListener mOnClickListener;
 
-        SimpleItemRecyclerViewAdapter(CoffeeSiteListActivity parent, CoffeeSiteListContent content,
-                                      double fromLatLoc, double fromLongLoc,
-                                      boolean twoPane) {
-            this.content = content;
-            mValues = this.content.getItems();
-            mParentActivity = parent;
-            mTwoPane = twoPane;
+//            private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
+//            private String requestImageURL;
 
-            mOnClickListener = createOnClickListener(fromLatLoc, fromLongLoc);
-        }
+            CoffeeSiteItemRecyclerViewAdapter(CoffeeSiteListActivity parent, CoffeeSiteListContent content,
+                                              double fromLatLoc, double fromLongLoc,
+                                              boolean twoPane) {
+                this.content = content;
+                mValues = this.content.getItems();
+                mParentActivity = parent;
+                mTwoPane = twoPane;
+
+                mOnClickListener = createOnClickListener(fromLatLoc, fromLongLoc);
+            }
 
 
-        private View.OnClickListener createOnClickListener(final double fromLong, final double fromLat) {
-            View.OnClickListener retVal;
+            private View.OnClickListener createOnClickListener(final double fromLong, final double fromLat) {
+                View.OnClickListener retVal;
 
-            retVal = new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CoffeeSite item = (CoffeeSite) view.getTag();
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.id));
-                        CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
-                        fragment.setArguments(arguments);
-                        mParentActivity.getSupportFragmentManager().beginTransaction()
-                                .addToBackStack(null)
-                                .replace(R.id.coffeesite_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = view.getContext();
-                        Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                retVal = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        CoffeeSite item = (CoffeeSite) view.getTag();
+                        if (mTwoPane) {
+                            Bundle arguments = new Bundle();
+                            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.getId()));
+                            CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
+                            fragment.setArguments(arguments);
+                            mParentActivity.getSupportFragmentManager().beginTransaction()
+                                    .addToBackStack(null)
+                                    .replace(R.id.coffeesite_detail_container, fragment)
+                                    .commit();
+                        } else {
+                            Context context = view.getContext();
+                            Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
 
-                        intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.id));
-                        intent.putExtra("listContent", content);
-                        intent.putExtra("latFrom", fromLong);
-                        intent.putExtra("longFrom", fromLat);
+                            intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
+                            intent.putExtra("listContent", content);
+                            intent.putExtra("latFrom", fromLong);
+                            intent.putExtra("longFrom", fromLat);
 
-                        context.startActivity(intent);
+                            context.startActivity(intent);
+                        }
                     }
+                };
+                return retVal;
+            }
+
+            @Override
+            public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.coffeesite_list_content, parent, false);
+                return new ViewHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(final ViewHolder holder, int position) {
+    //            holder.csNameView.setText(String.valueOf(mValues.get(position).id));
+//                holder.csNameView.setText(String.valueOf(position + 1))
+// ;
+                holder.csNameView.setText(mValues.get(position).getName());
+                holder.locAndTypeView.setText(mValues.get(position).getTypPodniku() + ", " +  mValues.get(position).getTypLokality());
+                holder.coffeeSortView.setText(mValues.get(position).getCoffeeSorts());
+                holder.distanceView.setText(mValues.get(position).getDistance() + " m");
+
+                Picasso.get().load(mValues.get(position).getRequestImageURL()).rotate(90).into(holder.foto);
+//                holder.foto.setImageBitmap(mValues.get(position).getFoto());
+
+                holder.itemView.setTag(mValues.get(position));
+                holder.itemView.setOnClickListener(mOnClickListener);
+            }
+
+            @Override
+            public int getItemCount() {
+                return mValues.size();
+            }
+
+            /* Inner Holder class */
+            class ViewHolder extends RecyclerView.ViewHolder {
+
+                final TextView csNameView;
+                final TextView locAndTypeView;
+                final TextView coffeeSortView;
+                final TextView distanceView;
+
+                final ImageView foto;
+
+                ViewHolder(View view) {
+                    super(view);
+                    csNameView = (TextView) view.findViewById(R.id.csNameTextView);
+                    locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
+                    coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
+                    distanceView = (TextView) view.findViewById(R.id.csDistanceTextView);
+
+                    foto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+//                    locAndTypeView.setTypeface(locAndTypeView.getTypeface(), Typeface.BOLD);
                 }
-            };
-            return retVal;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.coffeesite_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-//            holder.mIdView.setText(String.valueOf(mValues.get(position).id));
-            holder.mIdView.setText(String.valueOf(position + 1));
-            holder.mContentView.setText(mValues.get(position).name + " (" + mValues.get(position).distance + " m)");
-
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mIdView;
-            final TextView mContentView;
-
-            ViewHolder(View view) {
-                super(view);
-                mIdView = (TextView) view.findViewById(R.id.id_text);
-                mContentView = (TextView) view.findViewById(R.id.content);
-                mContentView.setTypeface(mContentView.getTypeface(), Typeface.BOLD);
             }
         }
-    }
 
-    /* Adapter end */
+        /* Adapter end */
 }
