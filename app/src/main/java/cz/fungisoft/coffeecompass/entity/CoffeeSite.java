@@ -41,17 +41,6 @@ public class CoffeeSite implements Serializable
         this.distance = distance;
     }
 
-    /**
-     * URL for image
-     */
-    private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
-    private String requestImageURL;
-
-    public String getRequestImageURL() {
-        requestImageURL = baseURL + id;
-        return requestImageURL;
-    }
-
     private final SimpleDateFormat format = new SimpleDateFormat("dd. MM. yyyy HH:mm");
 
     private Date createdOn;
@@ -88,7 +77,10 @@ public class CoffeeSite implements Serializable
     private double latitude;
     private double longitude;
 
-    private boolean imageAvailable = false;
+    /**
+     * URL of the main image of this CoffeeSite
+     */
+    private String mainImageURL = ""; // default empty, means image not available
 
     private String statusZarizeni;
     private String uliceCP;
@@ -118,12 +110,12 @@ public class CoffeeSite implements Serializable
         this.comments = comments;
     }
 
-    public boolean isImageAvailable() {
-        return imageAvailable;
+    public String getMainImageURL() {
+        return mainImageURL;
     }
 
-    public void setImageAvailable(boolean imageAvailable) {
-        this.imageAvailable = imageAvailable;
+    public void setMainImageURL(String mainImageURL) {
+        this.mainImageURL = mainImageURL;
     }
 
     public String getCreatedByUser() {

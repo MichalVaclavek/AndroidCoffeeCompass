@@ -17,10 +17,8 @@ import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteImageFragment;
 
 public class CoffeeSiteImageActivity extends AppCompatActivity {
 
-//    private Integer siteId;
     private CoffeeSite cs;
 
-//    private TextView nameLabel;
     private TextView distLabel;
 
     @Override
@@ -52,7 +50,6 @@ public class CoffeeSiteImageActivity extends AppCompatActivity {
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
         fragment.setCoffeeSiteId(cs);
 
-        //TODO - osetrit situaci, kdy je otocen diplay
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {
                 getSupportFragmentManager().beginTransaction()

@@ -59,7 +59,7 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
 
         selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
         content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
-        boolean imageAvail = content.getItemsMap().get(selectedItemID).isImageAvailable();
+        boolean imageAvail = !content.getItemsMap().get(selectedItemID).getMainImageURL().isEmpty();
 
         if (imageAvail) {
             Button imageButton = (Button) findViewById(R.id.imageButton);

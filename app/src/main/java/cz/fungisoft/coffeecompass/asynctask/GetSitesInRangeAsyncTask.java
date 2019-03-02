@@ -40,38 +40,46 @@ import cz.fungisoft.coffeecompass.activity.MainActivity;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
 
-
+/**
+ * Class to run AsyncTask to read CoffeeSites in range from server via JSON
+ * Should not be called and run if the internet connection is not available.
+ */
 public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Read list async.";
 
-//    private static String sURL = "http://coffeecompass.cz/rest/site/getSitesInRange/?lat1=50.1669497&lon1=14.7657927&range=5000";
-//    http://coffeecompass.cz/rest/site/searchSites/?lat1=50.1669497&lon1=14.7657927&range=50000&status=V%20provozu&sort=espresso // %20 je mezera v parametru HTTP headeru
-//    private static String sURL = "http://coffeecompass.cz/rest/site/getSitesInRange/";
-
-      private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
-      private String sURL;
+    private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
+    private String sURL;
 
     private MainActivity parentActivity;
 
     double latFrom, longFrom;
 
     private List<CoffeeSite> coffeeSites;
-    private ProgressDialog progressDialog;
+    private String searchCoffeeSort;
 
     public GetSitesInRangeAsyncTask(MainActivity parentActivity) {
         this.parentActivity = parentActivity;
     }
 
+    /**
+     * Basic Constructor
+     *
+     * @param parentActivity - what activity created and run this task
+     * @param latFrom - latitude of searching from point
+     * @param longFrom - longitude of searching from point
+     * @param range - range of meters from searching point
+     * @param coffeeSort - coffee sort (espresso, instant and so on) as filter for searched Coffee sites
+     */
     public GetSitesInRangeAsyncTask(MainActivity parentActivity, String latFrom, String longFrom, String range, String coffeeSort) {
         this(parentActivity);
 
         this.latFrom = Double.valueOf(latFrom);
         this.longFrom = Double.valueOf(longFrom);
 
-        String sort = coffeeSort.isEmpty() ? "?" : coffeeSort;
+        this.searchCoffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
 
-        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=" + sort;
+        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=" + this.searchCoffeeSort;
     }
 
     @Override
@@ -141,6 +149,13 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
         return sJSON;
     }
 
+    /**
+     * Private method to process JSON string return from server.
+     * Finds expected list of found CoffeeSites
+     *
+     * @param sJSON JSON string returned from server containing list of CoffeeSites
+     * @return list of CoffeeSites parsed from sJSON string returnd from server
+     */
     private List<CoffeeSite>  parseJSONWithFoundSitesResult(String sJSON) {
 
         List<CoffeeSite> retSites = new ArrayList<>();
@@ -162,7 +177,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         cs.setLatitude(csObject.getDouble("zemSirka"));
                         cs.setLongitude(csObject.getDouble("zemDelka"));
 
-                        cs.setImageAvailable(csObject.getBoolean("imageAvailable"));
+                        cs.setMainImageURL(csObject.getString("mainImageURL"));
 
                         cs.setCena(csObject.getJSONObject("cena").getString("priceRange"));
                         cs.setUliceCP(csObject.getString("uliceCP"));
@@ -218,41 +233,20 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
             }
         }
 
-        // CoffeeSite can have image - try to load
-        /*
-        for (CoffeeSite cs : retSites) {
-
-            Bitmap bitmap = getByteArrayImage(cs.getRequestImageURL());
-            if (bitmap != null)
-                cs.setFoto(bitmap);
-        }
-*/
         return retSites;
     }
 
-    /*
-    private Bitmap getByteArrayImage(String url){
-        try {
-            URL imageUrl = new URL(url);
-            URLConnection ucon = imageUrl.openConnection();
-
-            InputStream is = ucon.getInputStream();
-            BufferedInputStream bis = new BufferedInputStream(is);
-
-            return BitmapFactory.decodeStream(bis);
-
-        } catch (Exception e) {
-            Log.d("ImageManager", "Error: " + e.toString());
-        }
-        return null;
-    }
-    */
-
+    /**
+     * If some CoffeeSites are returned from server, go to CoffeeSiteListActivity,
+     * which shows the basic info about CoffeeSites in a list
+     * If no CoffeeSite found, then go back to parent activity (MainActivity)
+     *
+     * @param result
+     */
     @Override
     protected void onPostExecute(String result) {
 
         if (coffeeSites.size() > 0) {
-
 
             CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
 
@@ -264,18 +258,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
             parentActivity.startActivity(csListIntent);
 
         } else
-            parentActivity.showNothingFoundStatus();
+            parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
     }
-
-    /*
-    @Override
-    protected void onPreExecute() {
-        progressDialog = new ProgressDialog(parentActivity);
-        progressDialog.setMessage("Searching ...");
-        progressDialog.show();
-        progressDialog.setCanceledOnTouchOutside(false);
-        super.onPreExecute();
-    }
-    */
 
 }

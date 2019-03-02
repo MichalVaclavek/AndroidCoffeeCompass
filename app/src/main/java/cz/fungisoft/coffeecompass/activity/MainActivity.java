@@ -30,15 +30,25 @@ import cz.fungisoft.coffeecompass.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass.entity.Statistics;
 
+/**
+ * Main activity to show:
+ *  - search buttons to find either ESPRESSO CoffeeSites only or any CoffeeSite within specified distance range
+ *  - info about location of the phone and accuracy of this location
+ *  - basic statistics info about CoffeeSites and Users
+ *
+ *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
+ *  Calls standard Android service to detect location based on GPS or network info.
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final int LOCATION_REQUEST_CODE = 101;
-    private String TAG = "Navigation";
+    private String TAG = "Main";
 
     private static final long VZORKOVANI = 1000 * 30;
-    private static final long GPS_REFRESH_TIME_MS = 5_000; // milisecond of GPS refresh ?
+    private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
-    private static final long POLLING = 1000 * 5; // milisecond of GPS refresh ?
+    private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
     private static final float MIN_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
     private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
@@ -115,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
-                        // and time period for observing location elapsed
+                                        // and time period for observing location elapsed
                         ||
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
                                 && ((loc.getAccuracy() < location.getAccuracy()) || (loc.getAccuracy() < MIN_PRESNOST)))
@@ -129,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     updateAccuracyIndicator(location);
-
                 }
             }
 
@@ -149,13 +158,20 @@ public class MainActivity extends AppCompatActivity {
         if (Utils.isOnline()) {
             new ReadStatsAsyncTask(this).execute();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No Internet connection.",
-                    Toast.LENGTH_SHORT);
-            toast.show();
+            showNoInternetToast();
         }
     }
 
+    /**
+     * Method to update color of location Accuracy indicator image according
+     * current accuracy value.
+     * <br>
+     * If the accuracy is not known or too old, then it has default RED color
+     * if the accuracy is known, but higher than MIN_PRESNOST, then it has ORANGE (R.drawable.location_better) color
+     * if the accuracy is known, and lower than MIN_PRESNOST, then it has GREEN (R.drawable.location_good) color
+     *
+     * @param loc
+     */
     private void updateAccuracyIndicator(Location loc) {
 
         if (loc != null) {
@@ -188,10 +204,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Utils.isOnline()) {
                     openMap();
                 } else {
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "No Internet connection.",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
+                    showNoInternetToast();
                 }
                 return true;
             default:
@@ -244,10 +257,7 @@ public class MainActivity extends AppCompatActivity {
         if (Utils.isOnline()) {
             openMap();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No Internet connection.",
-                    Toast.LENGTH_SHORT);
-            toast.show();
+            showNoInternetToast();
         }
     }
 
@@ -269,10 +279,7 @@ public class MainActivity extends AppCompatActivity {
                                          String.valueOf(searchRange),
                                          "espresso").execute();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No Internet connection.",
-                    Toast.LENGTH_SHORT);
-            toast.show();
+            showNoInternetToast();
         }
     }
 
@@ -285,19 +292,30 @@ public class MainActivity extends AppCompatActivity {
                     String.valueOf(searchRange),
                     "").execute();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                            "No Internet connection.",
-                             Toast.LENGTH_SHORT);
-            toast.show();
+            showNoInternetToast();
         }
     }
 
-    public void showNothingFoundStatus() {
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    private void showNoInternetToast() {
         Toast toast = Toast.makeText(getApplicationContext(),
-                R.string.no_site_found,
+                "No Internet connection.",
                 Toast.LENGTH_SHORT);
         toast.show();
-//        searchStatus.setText(R.string.no_site_found);
+    }
+
+    /**
+     * Show info Toast message, that no CoffeeSite was found
+     */
+    public void showNothingFoundStatus(String subject) {
+
+        int resource = (subject.equals("espresso")) ? R.string.no_espresso_found : R.string.no_site_found;
+        Toast toast = Toast.makeText(getApplicationContext(),
+                                    resource,
+                                    Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 
@@ -368,8 +386,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-//        searchStatus.setText("");
-
         updateAccuracyIndicator(location);
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -396,4 +412,5 @@ public class MainActivity extends AppCompatActivity {
         }
         locManager.removeUpdates(locListener);
     }
+
 }

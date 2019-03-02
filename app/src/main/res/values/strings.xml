@@ -6,6 +6,7 @@
     <string name="num_all_sites7_label">Nové lokace za posledních 7 dnů: </string>
     <string name="num_all_users_label">Počet všech uživatelů: </string>
     <string name="coffee_sites_today">Nové lokace dnes: </string>
+    <string name="no_espresso_found">Bohužel, žádné espresso poblíž.</string>
     <string name="no_site_found">Bohužel, žádná káva poblíž.</string>
 
     <string name="action_settings">Nastavení</string>

@@ -35,8 +35,8 @@ public class CoffeeSiteImageFragment extends Fragment {
         View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
 
-        if (this.site != null) {
-            Picasso.get().load(site.getRequestImageURL()).rotate(90).into(pictureImageView);
+        if (this.site != null && !site.getMainImageURL().isEmpty()) {
+            Picasso.get().load(site.getMainImageURL()).rotate(90).into(pictureImageView);
         }
 
         return view;

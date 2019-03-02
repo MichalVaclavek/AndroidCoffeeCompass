@@ -198,16 +198,15 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
 
             @Override
             public void onBindViewHolder(final ViewHolder holder, int position) {
-    //            holder.csNameView.setText(String.valueOf(mValues.get(position).id));
-//                holder.csNameView.setText(String.valueOf(position + 1))
-// ;
+
                 holder.csNameView.setText(mValues.get(position).getName());
                 holder.locAndTypeView.setText(mValues.get(position).getTypPodniku() + ", " +  mValues.get(position).getTypLokality());
                 holder.coffeeSortView.setText(mValues.get(position).getCoffeeSorts());
                 holder.distanceView.setText(mValues.get(position).getDistance() + " m");
 
-                Picasso.get().load(mValues.get(position).getRequestImageURL()).rotate(90).into(holder.foto);
-//                holder.foto.setImageBitmap(mValues.get(position).getFoto());
+                if (!mValues.get(position).getMainImageURL().isEmpty()) {
+                    Picasso.get().load(mValues.get(position).getMainImageURL()).rotate(90).into(holder.foto);
+                }
 
                 holder.itemView.setTag(mValues.get(position));
                 holder.itemView.setOnClickListener(mOnClickListener);
