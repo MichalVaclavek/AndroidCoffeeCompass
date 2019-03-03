@@ -10,6 +10,10 @@ import android.widget.ListView;
 
 import cz.fungisoft.coffeecompass.R;
 
+/**
+ * Activity to allow selection of the maximum distance for searching CoffeeSites from
+ * current phone location.
+ */
 public class SelectSearchDistanceActivity extends AppCompatActivity implements  View.OnClickListener {
 
     private ListView selectSearchDistanceListView;
@@ -35,8 +39,7 @@ public class SelectSearchDistanceActivity extends AppCompatActivity implements  
 
         vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
 
-        adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_single_choice, vzdalenosti);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, vzdalenosti);
 
         selectSearchDistanceListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         selectSearchDistanceListView.setAdapter(adapter);
@@ -68,4 +71,5 @@ public class SelectSearchDistanceActivity extends AppCompatActivity implements  
         this.startActivity(i);
         finish();
     }
+
 }

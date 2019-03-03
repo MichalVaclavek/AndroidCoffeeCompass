@@ -16,7 +16,6 @@ import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
 
-
 /**
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
@@ -35,7 +34,7 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
     private double fromLat;
     private double fromLong;
 
-    private Button commentsButton; // je p
+    private Button commentsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +78,6 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
         // For more information, see the Fragments API guide at:
         //
         // http://developer.android.com/guide/components/fragments.html
-        //
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
@@ -107,11 +105,7 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
 //            navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
-            /*
-            Intent myIntent = new Intent(getApplicationContext(), CoffeeSiteListActivity.class);
-            startActivity(myIntent);
-            finish();
-            */
+
             /*
             * The standard way, navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
             * did not work for me. I have implemented this hint based on

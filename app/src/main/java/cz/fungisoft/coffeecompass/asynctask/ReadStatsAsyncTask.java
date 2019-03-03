@@ -19,10 +19,13 @@ import java.net.URL;
 import cz.fungisoft.coffeecompass.activity.MainActivity;
 import cz.fungisoft.coffeecompass.entity.Statistics;
 
-
+/**
+ * AsyncTask to read basic statistics from coffeecompass.cz about saved CoffeeSites.
+ * The task runs at the start of the MainActivity.
+ */
 public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
-    private static final String TAG = "Read compass";
+    private static final String TAG = "Read statistics";
 
     private static String sURL = "http://coffeecompass.cz/rest/home";
 

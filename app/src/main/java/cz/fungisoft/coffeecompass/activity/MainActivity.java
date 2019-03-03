@@ -38,7 +38,6 @@ import cz.fungisoft.coffeecompass.entity.Statistics;
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  *  Calls standard Android service to detect location based on GPS or network info.
- *
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -80,8 +79,9 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.AllSitesTextView);
 
-        if (getIntent().getStringExtra("searchRange") != null)
+        if (getIntent().getStringExtra("searchRange") != null) {
             this.searchRange = getIntent().getStringExtra("searchRange");
+        }
 
         //Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
-                                        // and time period for observing location elapsed
+                                     // and time period for observing location elapsed
                         ||
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
                                 && ((loc.getAccuracy() < location.getAccuracy()) || (loc.getAccuracy() < MIN_PRESNOST)))

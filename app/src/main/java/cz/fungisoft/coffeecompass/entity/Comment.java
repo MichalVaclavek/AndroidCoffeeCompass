@@ -5,6 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * A comment belonging to a CoffeeSite
+ */
 public class Comment implements Serializable {
 
     private Integer id;

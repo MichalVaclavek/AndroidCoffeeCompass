@@ -26,10 +26,13 @@ import cz.fungisoft.coffeecompass.activity.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.Comment;
 
-
+/**
+ * Class to asynchronously load all the comments for the
+ * specified CoffeeSite
+ */
 public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
-    private static final String TAG = "Read comments async.";
+    private static final String TAG = "Read comments async. ";
 
     private static final String sURLCore = "http://coffeecompass.cz/rest/starsAndComments/comments/";
     private String sURL;
@@ -52,8 +55,6 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
         String sJSON = null;
         InputStream inpStream = null;
-
-        //TODO - ověření, že je k dispozici připojení k internetu ??
 
         try {
             URL url = new URL(sURL);

@@ -41,12 +41,12 @@ import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
 
 /**
- * Class to run AsyncTask to read CoffeeSites in range from server via JSON
+ * Class to run AsyncTask to read CoffeeSites in specified distance from coffeecompass.cz server via JSON.
  * Should not be called and run if the internet connection is not available.
  */
 public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> {
 
-    private static final String TAG = "Read list async.";
+    private static final String TAG = "Read CoffeeSite list ";
 
     private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
     private String sURL;
@@ -79,6 +79,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
         this.searchCoffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
 
+        // Creates actual REST request for CoffeeSites
         sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=" + this.searchCoffeeSort;
     }
 
@@ -150,11 +151,11 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     }
 
     /**
-     * Private method to process JSON string return from server.
+     * Private method to process JSON string returned from server.
      * Finds expected list of found CoffeeSites
      *
      * @param sJSON JSON string returned from server containing list of CoffeeSites
-     * @return list of CoffeeSites parsed from sJSON string returnd from server
+     * @return list of CoffeeSites parsed from sJSON string returned from server
      */
     private List<CoffeeSite>  parseJSONWithFoundSitesResult(String sJSON) {
 
@@ -238,7 +239,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
     /**
      * If some CoffeeSites are returned from server, go to CoffeeSiteListActivity,
-     * which shows the basic info about CoffeeSites in a list
+     * which shows the basic info about CoffeeSites in a list.
      * If no CoffeeSite found, then go back to parent activity (MainActivity)
      *
      * @param result

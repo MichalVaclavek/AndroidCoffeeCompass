@@ -16,12 +16,15 @@ import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
 
+/**
+ * Activity to show CoffeeSite's location on the map
+ */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
 
     /**
-     * Current location to show
+     * Current phone location to show
      */
     private LatLng currentLoc;
 
@@ -31,7 +34,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private CoffeeSite site;
 
     /**
-     * List of CoffeeSites to show
+     * List of found CoffeeSites to show
      */
     private CoffeeSiteListContent content;
 
@@ -56,11 +59,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     *
+     * Shows the current phone location as passed from parent activity
+     * and
+     * one CoffeeSite if passed from CoffeeSiteDetailActivity
+     * or
+     * list of CoffeeSites if passed from CoffeeSiteListActivity
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -68,11 +72,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
+        // Marker for current location
         if (currentLoc != null) {
             mMap.addMarker(new MarkerOptions().position(currentLoc).title(getString(R.string.currentPosition)));
             builder.include(currentLoc);
         }
 
+        // Markers for the list of CoffeeSites
         if (content != null) {
             for (CoffeeSite cs : content.getItems()) {
                 LatLng siteLoc = new LatLng(cs.getLatitude(), cs.getLongitude());
@@ -83,6 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
+        // Marker for one CoffeeSite
         if (site != null) {
             LatLng siteLoc = new LatLng(site.getLatitude(), site.getLongitude());
             mMap.addMarker(new MarkerOptions().position(siteLoc)
@@ -104,7 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             int padding = (int) (width * 0.12); // offset from edges of the map 12% of screen
 
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 99));
         }
     }
 }

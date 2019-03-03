@@ -14,4 +14,11 @@
     <string name="title_activity_maps">Map</string>
     <string name="action_map">Mapa</string>
     <string name="currentPosition">Vaše poloha</string>
+
+    <string name="about_author">Vytvořil: Michal Václavek, fungisoft.cz</string>
+    <string name="about_version">v. 0.1.0</string>
+    <string name="about_datum">2. 3. 2019</string>
+    <string name="about_sentence1">Tato aplikace je součástí webové aplikace Coffee Compass na stránce coffeecompass.cz</string>
+    <string name="about_sentence2">Podle aktuální polohy umožňuje vyhledat "kávové lokace", které zadali zaregistrovaní uživatelé.</string>
+    <string name="about_sentence3">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní automaty na kávu, pekárny, cukrárny, bistra, občerstvení atp.</string>
 </resources>

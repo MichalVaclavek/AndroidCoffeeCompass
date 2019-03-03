@@ -32,7 +32,8 @@ import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
  * lead to a {@link CoffeeSiteDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
+ * item details.
+ * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
 public class CoffeeSiteListActivity extends AppCompatActivity {
@@ -43,10 +44,14 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
+    /**
+     * The main attribute of activity containing all the CoffeeSites to show
+     * on this or child Activities
+     */
     private CoffeeSiteListContent content;
 
     /**
-     * Location of the searchFromPoint to be passed to Map if selected
+     * Location of the searchFromPoint to be passed to MapActivity, if selected
      */
     private double fromLat;
     private double fromLong;
@@ -129,11 +134,9 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
     }
 
         /* Inner class */
-        /* *********** RecyclerViewAdapter ************* */
-
+        /* *********** RecyclerViewAdapter, needed for RecyclerView ************* */
         public static class CoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<CoffeeSiteItemRecyclerViewAdapter.ViewHolder>
         {
-
             private final CoffeeSiteListActivity mParentActivity;
             private final List<CoffeeSite> mValues;
             private final CoffeeSiteListContent content;
@@ -142,9 +145,15 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
 
             private View.OnClickListener mOnClickListener;
 
-//            private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
-//            private String requestImageURL;
-
+            /**
+             * Standard constructor of the inner class CoffeeSiteItemRecyclerViewAdapter
+             *
+             * @param parent - parent Activity for the Adapter, in this case this CoffeeSiteListActivity
+             * @param content - instance of the CoffeeSiteListContent to be displayed by this activity
+             * @param fromLatLoc - needed to be passed to MapsActivity if chosen in child CoffeeSiteDetailActivity
+             * @param fromLongLoc - needed to be passed to MapsActivity if chosen in child CoffeeSiteDetailActivity
+             * @param twoPane
+             */
             CoffeeSiteItemRecyclerViewAdapter(CoffeeSiteListActivity parent, CoffeeSiteListContent content,
                                               double fromLatLoc, double fromLongLoc,
                                               boolean twoPane) {
@@ -158,6 +167,7 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
 
 
             private View.OnClickListener createOnClickListener(final double fromLong, final double fromLat) {
+
                 View.OnClickListener retVal;
 
                 retVal = new View.OnClickListener() {
@@ -179,7 +189,7 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
 
                             intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
                             intent.putExtra("listContent", content);
-                            intent.putExtra("latFrom", fromLong);
+                            intent.putExtra("latFrom", fromLong); // needed to be passed to MapsActivity if chosen in CoffeeSiteDetailActivity
                             intent.putExtra("longFrom", fromLat);
 
                             context.startActivity(intent);
@@ -205,7 +215,7 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
                 holder.distanceView.setText(mValues.get(position).getDistance() + " m");
 
                 if (!mValues.get(position).getMainImageURL().isEmpty()) {
-                    Picasso.get().load(mValues.get(position).getMainImageURL()).rotate(90).into(holder.foto);
+                    Picasso.get().load(mValues.get(position).getMainImageURL()).rotate(90).into(holder.siteFoto);
                 }
 
                 holder.itemView.setTag(mValues.get(position));
@@ -217,16 +227,23 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
                 return mValues.size();
             }
 
-            /* Inner Holder class */
+
+            /**
+             * Inner ViewHolder class for CoffeeSiteItemRecyclerViewAdapter
+             */
             class ViewHolder extends RecyclerView.ViewHolder {
 
-                final TextView csNameView;
-                final TextView locAndTypeView;
-                final TextView coffeeSortView;
-                final TextView distanceView;
+                final TextView csNameView; // to show name of CoffeeSite
+                final TextView locAndTypeView; // to show type of the CoffeeSite and location type
+                final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
+                final TextView distanceView; // to show distance attribute of the CoffeeSite
 
-                final ImageView foto;
+                final ImageView siteFoto;
 
+                /**
+                 * Standard constructor for ViewHolder
+                 * @param view
+                 */
                 ViewHolder(View view) {
                     super(view);
                     csNameView = (TextView) view.findViewById(R.id.csNameTextView);
@@ -234,10 +251,10 @@ public class CoffeeSiteListActivity extends AppCompatActivity {
                     coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
                     distanceView = (TextView) view.findViewById(R.id.csDistanceTextView);
 
-                    foto = (ImageView) view.findViewById(R.id.csListFotoImageView);
-//                    locAndTypeView.setTypeface(locAndTypeView.getTypeface(), Typeface.BOLD);
+                    siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
                 }
             }
+
         }
 
         /* Adapter end */

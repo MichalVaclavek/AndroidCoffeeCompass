@@ -1,8 +1,5 @@
 package cz.fungisoft.coffeecompass.activity;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
@@ -18,18 +15,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass.entity.Comment;
-import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
 
+/**
+ * Activity to show list of CoffeeSite's Comments
+ * Later it should allow to add a Comment for logged-in User
+ */
 public class CommentsListActivity extends AppCompatActivity {
 
     private CoffeeSite cs;
@@ -62,16 +57,18 @@ public class CommentsListActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.commentsList);
         assert recyclerView != null;
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
-        RecyclerView.ItemDecoration itemDecoration = new
-                DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        /*
+        * adds underline under every Comment in the list
+         */
+        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
 
         if (comments != null) {
             setupRecyclerView((RecyclerView) recyclerView, comments);
         }
-
     }
 
     @Override
@@ -86,62 +83,17 @@ public class CommentsListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, List<Comment> comments) {
-        recyclerView.setAdapter(new CommentsListActivity.CommentItemRecyclerViewAdapter(this, comments ));
+        recyclerView.setAdapter(new CommentsListActivity.CommentItemRecyclerViewAdapter(comments ));
     }
 
         /* *********** RecyclerViewAdapter ************* */
 
         public static class CommentItemRecyclerViewAdapter extends RecyclerView.Adapter<CommentItemRecyclerViewAdapter.ViewHolder>
         {
-
-            private final CommentsListActivity mParentActivity;
             private final List<Comment> mValues;
-    //        private final CoffeeSiteListContent content;
 
-    //        private final boolean mTwoPane;
-
-//            private View.OnClickListener mOnClickListener;
-
-            CommentItemRecyclerViewAdapter(CommentsListActivity parent, List<Comment> comments) {
-    //            this.content = content;
+            CommentItemRecyclerViewAdapter(List<Comment> comments) {
                 mValues = comments;
-                mParentActivity = parent;
-    //            mTwoPane = twoPane;
-
-            }
-
-            private View.OnClickListener createOnClickListener() {
-                View.OnClickListener retVal = null;
-
-                /*
-                retVal = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        CoffeeSite item = (CoffeeSite) view.getTag();
-                        if (mTwoPane) {
-                            Bundle arguments = new Bundle();
-                            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.id));
-                            CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
-                            fragment.setArguments(arguments);
-                            mParentActivity.getSupportFragmentManager().beginTransaction()
-                                    .addToBackStack(null)
-                                    .replace(R.id.coffeesite_detail_container, fragment)
-                                    .commit();
-                        } else {
-                            Context context = view.getContext();
-                            Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-
-                            intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.id));
-                            intent.putExtra("listContent", content);
-                            intent.putExtra("latFrom", fromLong);
-                            intent.putExtra("longFrom", fromLat);
-
-                            context.startActivity(intent);
-                        }
-                    }
-                };
-                */
-                return retVal;
             }
 
             @Override
@@ -153,15 +105,10 @@ public class CommentsListActivity extends AppCompatActivity {
 
             @Override
             public void onBindViewHolder(final ViewHolder holder, int position) {
-    //            holder.csNameView.setText(String.valueOf(mValues.get(position).id));
-//                holder.csNameView.setText(String.valueOf(position + 1));
-    //            holder.locAndTypeView.setText(mValues.get(position).name + " (" + mValues.get(position).distance + " m)");
 
                 holder.userAndDateText.setText(mValues.get(position).getUserName() + ", " + mValues.get(position).getCreatedOnString());
-                //            holder.locAndTypeView.setText(mValues.get(position).name + " (" + mValues.get(position).distance + " m)");
                 holder.commentText.setText(mValues.get(position).getCommentText());
                 holder.itemView.setTag(mValues.get(position));
-//                holder.itemView.setOnClickListener(mOnClickListener);
             }
 
             @Override
@@ -169,6 +116,10 @@ public class CommentsListActivity extends AppCompatActivity {
                 return mValues.size();
             }
 
+
+                /**
+                * Inner ViewHolder class for CommentItemRecyclerViewAdapter
+                */
                 class ViewHolder extends RecyclerView.ViewHolder {
                     final TextView userAndDateText;
                     final TextView commentText;
@@ -177,9 +128,9 @@ public class CommentsListActivity extends AppCompatActivity {
                         super(view);
                         userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
                         commentText = (TextView) view.findViewById(R.id.commentText);
-//                        locAndTypeView.setTypeface(locAndTypeView.getTypeface(), Typeface.BOLD);
                     }
                 }
+
         }
 
 }

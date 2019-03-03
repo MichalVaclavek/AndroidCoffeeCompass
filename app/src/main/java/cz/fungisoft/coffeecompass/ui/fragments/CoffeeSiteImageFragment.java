@@ -19,11 +19,7 @@ public class CoffeeSiteImageFragment extends Fragment {
 
     private CoffeeSite site;
 
-//    private final String baseURL = "http://coffeecompass.cz/rest/image/bytes/";
-//    private String requestImageURL;
-
     public static CoffeeSiteImageFragment newInstance() {
-
         return new CoffeeSiteImageFragment();
     }
 
@@ -31,7 +27,7 @@ public class CoffeeSiteImageFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState); // ??
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
 
@@ -42,9 +38,8 @@ public class CoffeeSiteImageFragment extends Fragment {
         return view;
     }
 
-    public void setCoffeeSiteId(CoffeeSite site) {
+    public void setCoffeeSite(CoffeeSite site) {
         this.site = site;
-//        requestImageURL = baseURL + siteId;
     }
 
 }

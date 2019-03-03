@@ -12,7 +12,7 @@ import java.util.Map;
 public class CoffeeSiteListContent implements Serializable {
 
     /**
-     * An array of sample (dummy) items.
+     * An array of CoffeeSite items.
      */
     private List<CoffeeSite> items = new ArrayList<CoffeeSite>();
 
@@ -21,7 +21,7 @@ public class CoffeeSiteListContent implements Serializable {
     }
 
     /**
-     * A map of sample (dummy) items, by ID.
+     * A map of CoffeeSite items, by ID. Used by RecyclerView in the CoffeeSiteListActivity
      */
     private Map<String, CoffeeSite> items_map = new HashMap<String, CoffeeSite>();
 

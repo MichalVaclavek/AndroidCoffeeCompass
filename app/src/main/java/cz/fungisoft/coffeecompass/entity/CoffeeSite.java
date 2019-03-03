@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * A CoffeeSite
+ * A CoffeeSite, main app. entity
  */
 public class CoffeeSite implements Serializable
 {

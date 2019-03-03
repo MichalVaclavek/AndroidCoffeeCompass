@@ -15,6 +15,10 @@ import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteImageFragment;
 
+/**
+ * Activity to show main Image of the CoffeeSite and the distance attribute
+ * of the CoffeeSite
+ */
 public class CoffeeSiteImageActivity extends AppCompatActivity {
 
     private CoffeeSite cs;
@@ -48,7 +52,7 @@ public class CoffeeSiteImageActivity extends AppCompatActivity {
         distLabel.setText("Vzdálenost: "+ String.valueOf(cs.getDistance()) + " m");
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
-        fragment.setCoffeeSiteId(cs);
+        fragment.setCoffeeSite(cs);
 
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {
