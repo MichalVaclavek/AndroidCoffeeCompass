@@ -15,10 +15,16 @@
     <string name="action_map">Mapa</string>
     <string name="currentPosition">Vaše poloha</string>
 
-    <string name="about_author">Vytvořil: Michal Václavek, fungisoft.cz</string>
+    <string name="about_author">Vytvořil: Michal Václavek</string>
     <string name="about_version">v. 0.1.0</string>
     <string name="about_datum">2. 3. 2019</string>
-    <string name="about_sentence1">Tato aplikace je součástí webové aplikace Coffee Compass na stránce coffeecompass.cz</string>
-    <string name="about_sentence2">Podle aktuální polohy umožňuje vyhledat "kávové lokace", které zadali zaregistrovaní uživatelé.</string>
-    <string name="about_sentence3">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní automaty na kávu, pekárny, cukrárny, bistra, občerstvení atp.</string>
+    <string name="about_sentence1">Tato aplikace umožňuje vyhledat "kávové lokace", které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
+    <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní automaty na kávu, pekárny, cukrárny, bistra, občerstvení atp.</string>
+    <string name="about_sentence3">Pokud se vám aplikace líbí, prosím, zaregistrujte se na stránce coffeecompass.cz a pomozte vytvořit další kávové lokace.</string>
+
+    <string name="local_service_started">Location Service started</string>
+    <string name="local_service_stopped">Location service stoped.</string>
+    <string name="local_service_label">Location service</string>
+    <string name="local_service_connected">Connected to location service.</string>
+    <string name="local_service_disconnected">Disconnected from location service.</string>
 </resources>

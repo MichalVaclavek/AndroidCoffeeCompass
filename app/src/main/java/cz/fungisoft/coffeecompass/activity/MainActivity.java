@@ -42,7 +42,7 @@ import cz.fungisoft.coffeecompass.entity.Statistics;
 public class MainActivity extends AppCompatActivity {
 
     private static final int LOCATION_REQUEST_CODE = 101;
-    private String TAG = "Main";
+    private static final String TAG = "Main";
 
     private static final long VZORKOVANI = 1000 * 30;
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
@@ -253,14 +253,6 @@ public class MainActivity extends AppCompatActivity {
         accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
     }
 
-    public void onClickMapButton(View view) {
-        if (Utils.isOnline()) {
-            openMap();
-        } else {
-            showNoInternetToast();
-        }
-    }
-
     private void openMap() {
         if (location != null) {
             Intent mapIntent = new Intent(this, MapsActivity.class);
@@ -320,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * Zjisteni posledni zname pozice po spusteni.
+     * Zjisteni posledni zname pozice po spusteni MainActivity.
      *
      * @param minAccuracy
      * @param cas

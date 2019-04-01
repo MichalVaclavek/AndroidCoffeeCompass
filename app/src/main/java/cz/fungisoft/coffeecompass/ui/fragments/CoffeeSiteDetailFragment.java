@@ -37,6 +37,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     private CoffeeSiteListContent content;
 
+    private TextView distanceTextView;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -53,9 +55,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy name specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load name from a name provider.
             mItem = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
 
             Activity activity = this.getActivity();
@@ -83,7 +82,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
             ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
             ((TextView) rootView.findViewById(R.id.streetTextView)).setText(mItem.getUliceCP());
-            ((TextView) rootView.findViewById(R.id.distanceTextView)).setText(String.valueOf(mItem.getDistance()) + " m");
+            distanceTextView = ((TextView) rootView.findViewById(R.id.distanceTextView));
+            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
             ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
             ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
@@ -92,6 +92,10 @@ public class CoffeeSiteDetailFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    public void updateDistanceTextView(long meters) {
+        distanceTextView.setText(String.valueOf(meters) + " m");
     }
 
 }

@@ -43,10 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_fragment);
 
-        double currentLat = getIntent().getExtras().getDouble("currentLat");
-        double currentLong = getIntent().getExtras().getDouble("currentLong");
-        currentLoc = new LatLng(currentLat, currentLong);
-
+        currentLoc = (LatLng) getIntent().getExtras().get("currentLocation");
         content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
         site = (CoffeeSite) getIntent().getSerializableExtra("site");
 
@@ -57,7 +54,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     /**
-     * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      *
      * Shows the current phone location as passed from parent activity

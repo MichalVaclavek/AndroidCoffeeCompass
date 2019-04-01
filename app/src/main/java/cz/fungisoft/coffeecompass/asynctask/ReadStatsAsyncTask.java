@@ -27,11 +27,11 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Read statistics";
 
-    private static String sURL = "http://coffeecompass.cz/rest/home";
+    private static final String bURL = "http://coffeecompass.cz/rest/home";
 
     private MainActivity parentActivity;
 
-    Statistics stats;
+    private Statistics stats;
 
     public ReadStatsAsyncTask(MainActivity parentActivity) {
         this.parentActivity = parentActivity;
@@ -44,7 +44,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
         InputStream inpStream = null;
 
         try {
-            URL url = new URL(sURL);
+            URL url = new URL(bURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -98,7 +98,6 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-
         parentActivity.zobrazStatistiky(stats);
     }
 }

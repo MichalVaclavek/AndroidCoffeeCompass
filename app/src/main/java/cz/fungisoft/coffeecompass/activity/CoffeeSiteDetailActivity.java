@@ -4,16 +4,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.Utils;
 import cz.fungisoft.coffeecompass.asynctask.GetCommentsAsyncTask;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass.services.UpdateDistanceTimerTask;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
 
 /**
@@ -22,7 +26,7 @@ import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
  * item details are presented side-by-side with a list of items
  * in a {@link CoffeeSiteListActivity}.
  */
-public class CoffeeSiteDetailActivity extends AppCompatActivity {
+public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     private CoffeeSiteListContent content;
 
@@ -35,6 +39,13 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
     private double fromLong;
 
     private Button commentsButton;
+
+    private CoffeeSiteDetailFragment detailFragment;
+
+    private CoffeeSite coffeeSite;
+    private LatLng siteLatLng;
+
+    private UpdateDistanceTimerTask checkingDistanceTimerTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +69,10 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
 
         selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
         content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
-        boolean imageAvail = !content.getItemsMap().get(selectedItemID).getMainImageURL().isEmpty();
+
+        coffeeSite = content.getItemsMap().get(selectedItemID);
+
+        boolean imageAvail = !coffeeSite.getMainImageURL().isEmpty();
 
         if (imageAvail) {
             Button imageButton = (Button) findViewById(R.id.imageButton);
@@ -69,6 +83,8 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
         if (Utils.isOnline()) {
             new GetCommentsAsyncTask(this, content.getItemsMap().get(selectedItemID)).execute();
         }
+
+        siteLatLng = new LatLng(coffeeSite.getLatitude(), coffeeSite.getLongitude());
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -84,13 +100,54 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
 
             arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
-            CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
-            fragment.setArguments(arguments);
+            detailFragment = new CoffeeSiteDetailFragment();
+            detailFragment.setArguments(arguments);
 
-            fragment.setCoffeeSiteListContent(content);
+            detailFragment.setCoffeeSiteListContent(content);
             getSupportFragmentManager().beginTransaction()
-                                       .add(R.id.coffeesite_detail_container, fragment)
+                                       .add(R.id.coffeesite_detail_container, detailFragment)
                                        .commit();
+        }
+    }
+
+    @Override
+    public void updateDistanceTextViewAndOrModel(int position, long meters) {
+        coffeeSite.setDistance(meters);
+        detailFragment.updateDistanceTextView(meters);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (checkingDistanceTimerTask != null) {
+            checkingDistanceTimerTask.stopTimerTask();
+        }
+        super.onDestroy();
+    }
+
+    /**
+     * locationService is not null here
+     */
+    @Override
+    public void onLocationServiceConnected() {
+        super.onLocationServiceConnected();
+        checkingDistanceTimerTask  = new UpdateDistanceTimerTask(this, -1, siteLatLng, locationService);
+        checkingDistanceTimerTask.startTimerTask(1000, 1000);
+    }
+
+    @Override
+    public void onPause() {
+        if (checkingDistanceTimerTask != null) {
+            checkingDistanceTimerTask.stopTimerTask();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (checkingDistanceTimerTask != null && !checkingDistanceTimerTask.isRunning() && locationService != null) {
+            checkingDistanceTimerTask  = new UpdateDistanceTimerTask(this, -1, siteLatLng, locationService);
+            checkingDistanceTimerTask.startTimerTask(1000, 1000);
         }
     }
 
@@ -133,8 +190,7 @@ public class CoffeeSiteDetailActivity extends AppCompatActivity {
     public void onMapButtonClick(View v) {
         Intent mapIntent = new Intent(this, MapsActivity.class);
         CoffeeSite cs = content.getItemsMap().get(selectedItemID);
-        mapIntent.putExtra("currentLong", fromLong);
-        mapIntent.putExtra("currentLat", fromLat);
+        mapIntent.putExtra("currentLocation", locationService.getCurrentLocation());
         mapIntent.putExtra("site", cs);
         startActivity(mapIntent);
     }
