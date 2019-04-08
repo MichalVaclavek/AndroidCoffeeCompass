@@ -8,28 +8,30 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import cz.fungisoft.coffeecompass.R;
-import cz.fungisoft.coffeecompass.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass.services.UpdateDistanceTimerTask;
+import cz.fungisoft.coffeecompass.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteImageFragment;
 
 /**
  * Activity to show main Image of the CoffeeSite and the distance attribute
  * of the CoffeeSite
  */
-public class CoffeeSiteImageActivity extends ActivityWithLocationService {
+public class CoffeeSiteImageActivity extends ActivityWithLocationService
+{
+    private static final String TAG = "CoffeeSiteImageAct";
 
-    private CoffeeSite cs;
-    private LatLng siteLatLng;
+    private CoffeeSiteMovable cs;
 
-    private TextView distLabel;
+    private DistanceChangeTextView distLabel;
 
-    private UpdateDistanceTimerTask checkingDistanceTimerTask;
+    private String selectedItemID;
+    private CoffeeSiteListContent content;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,26 +50,35 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService {
 
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
-        cs = (CoffeeSite) getIntent().getSerializableExtra("site");
+//        cs = (CoffeeSiteMovable) getIntent().getSerializableExtra("site");
+
+        content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
+        selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
+        cs = content.getItemsMap().get(selectedItemID);
 
         if (appBarLayout != null) {
             appBarLayout.setTitle(cs.getName());
         }
 
-        distLabel = (TextView) findViewById(R.id.distTextView);
-        distLabel.setText("Vzdálenost: " + String.valueOf(cs.getDistance()) + " m");
+        distLabel = (DistanceChangeTextView) findViewById(R.id.distTextView);
+        distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+        distLabel.setTag(TAG + ". DistanceTextView for " + cs.getName());
+        distLabel.setCoffeeSite(cs);
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
-        fragment.setCoffeeSite(cs);
 
-        siteLatLng = new LatLng(cs.getLatitude(), cs.getLongitude());
+        Bundle arguments = new Bundle();
+
+        arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
+        fragment.setArguments(arguments);
+        fragment.setCoffeeSiteListContent(content);
+//        fragment.setCoffeeSite(cs);
 
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.imageContainer, fragment)
                         .commitNow();
-
             } else {
                 imageNotAvailable();
             }
@@ -75,41 +86,36 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService {
     }
 
     @Override
-    public void onDestroy() {
-        if (checkingDistanceTimerTask != null) {
-            checkingDistanceTimerTask.stopTimerTask();
+    public void onLocationServiceConnected() {
+        super.onLocationServiceConnected();
+        if (cs != null) {
+            cs.setLocationService(locationService);
+            locationService.addPropertyChangeListener(cs);
         }
-        super.onDestroy();
     }
 
     @Override
     public void onPause() {
-        if (checkingDistanceTimerTask != null) {
-            checkingDistanceTimerTask.stopTimerTask();
+        cs.removePropertyChangeListener(distLabel);
+        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " removed to listen distance change of " + cs.getName() + ". Object id: " + cs);
+
+        // Listener for Location service can be removed, as there is no 'follow' Activity, from which
+        // the CoffeeSiteImageActivity could be called back
+        if (locationService != null) {
+            locationService.removePropertyChangeListener(cs);
         }
         super.onPause();
     }
 
     @Override
     public void onResume() {
-        super.onResume();
-        if (checkingDistanceTimerTask != null && !checkingDistanceTimerTask.isRunning() && locationService != null) {
-            checkingDistanceTimerTask  = new UpdateDistanceTimerTask(this, -1, siteLatLng, locationService);
-            checkingDistanceTimerTask.startTimerTask(1000, 1000);
+        if (locationService != null) {
+            locationService.addPropertyChangeListener(cs);
         }
-    }
-
-    @Override
-    public void updateDistanceTextViewAndOrModel(int position, long meters) {
-        cs.setDistance(meters);
-        distLabel.setText("Vzdálenost: " + String.valueOf(meters) + " m");
-    }
-
-    @Override
-    public void onLocationServiceConnected() {
-        super.onLocationServiceConnected();
-        checkingDistanceTimerTask  = new UpdateDistanceTimerTask(this, -1, siteLatLng, locationService);
-        checkingDistanceTimerTask.startTimerTask(1000, 1000);
+        cs.addPropertyChangeListener(distLabel);
+        distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);
+        super.onResume();
     }
 
     @Override

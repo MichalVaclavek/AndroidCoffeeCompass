@@ -48,12 +48,13 @@
             android:text="TextView"
             android:textColor="@color/colorPrimary" />
 
-        <TextView
+        <cz.fungisoft.coffeecompass.activity.support.DistanceChangeTextView
             android:id="@+id/csDistanceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/coffeeSortsTextView"
             android:text="TextView"
+            android:textStyle="bold"
             android:textColor="@color/colorPrimary" />
 
         <ImageView

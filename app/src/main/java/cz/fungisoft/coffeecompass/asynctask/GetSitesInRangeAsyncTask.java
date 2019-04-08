@@ -39,6 +39,7 @@ import cz.fungisoft.coffeecompass.activity.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass.activity.MainActivity;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass.entity.CoffeeSiteMovable;
 
 /**
  * Class to run AsyncTask to read CoffeeSites in specified distance from coffeecompass.cz server via JSON.
@@ -55,7 +56,8 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
     double latFrom, longFrom;
 
-    private List<CoffeeSite> coffeeSites;
+//    private List<CoffeeSite> coffeeSites;
+    private List<CoffeeSiteMovable> coffeeSites;
     private String searchCoffeeSort;
 
     public GetSitesInRangeAsyncTask(MainActivity parentActivity) {
@@ -157,9 +159,9 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
      * @param sJSON JSON string returned from server containing list of CoffeeSites
      * @return list of CoffeeSites parsed from sJSON string returned from server
      */
-    private List<CoffeeSite>  parseJSONWithFoundSitesResult(String sJSON) {
+    private List<CoffeeSiteMovable>  parseJSONWithFoundSitesResult(String sJSON) {
 
-        List<CoffeeSite> retSites = new ArrayList<>();
+        List<CoffeeSiteMovable> retSites = new ArrayList<>();
 
         if (sJSON != null) {
             JSONArray jsonCoffeeSiteArray;
@@ -171,7 +173,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                     for (int i = 0; i < jsonCoffeeSiteArray.length(); i++) {
 
                         JSONObject csObject = jsonCoffeeSiteArray.getJSONObject(i);
-                        CoffeeSite cs = new CoffeeSite(csObject.getInt("id"),
+                        CoffeeSiteMovable cs = new CoffeeSiteMovable(csObject.getInt("id"),
                                                         csObject.getString("siteName"),
                                                         csObject.getLong("distFromSearchPoint"));
 

@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass.R;
@@ -29,18 +31,32 @@ public class LocationService extends Service {
     private static final int LOCATION_REQUEST_CODE = 101;
     private String TAG = "Location service";
 
-//    private static final long VZORKOVANI = 1000 * 30;
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
     private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
     private static final float MIN_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
-    private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
-
+    private static final float MIN_VZDALENOST = 3.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
     private NotificationManager mNM;
 
+    /**
+     * Support for property change, location in this case.
+     */
+    private PropertyChangeSupport support;
+
     public LocationService() {
+        support = new PropertyChangeSupport(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+        Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
+        Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
     // Unique Identification Number for the Notification.
@@ -66,9 +82,6 @@ public class LocationService extends Service {
     public void onCreate() {
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
-        // Display a notification about us starting.  We put an icon in the status bar.
-//        showNotification();
-
         if ((locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE)) == null) {
             this.stopSelf();
         }
@@ -84,10 +97,10 @@ public class LocationService extends Service {
                         // and time period for observing location elapsed
                         ||
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
-                                && (loc.getAccuracy() < MIN_PRESNOST))
-                {
+                                && (loc.getAccuracy() < MIN_PRESNOST)) {
+                    Location oldLocation = location;
                     location = loc;
-//                    Log.d(TAG, "New location detected. Time: " + location.getTime() + " , Latitude: " + location.getLatitude() + " , Longitude: " + location.getLongitude());
+                    support.firePropertyChange("location", oldLocation, location);
                 }
             }
 
@@ -179,9 +192,6 @@ public class LocationService extends Service {
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION);
         locManager.removeUpdates(locListener);
-
-        // Tell the user we stopped.
-//        Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT).show();
     }
 
     // This is the object that receives interactions from clients.  See
@@ -228,32 +238,5 @@ public class LocationService extends Service {
 
         return distance;
     }
-
-    /**
-     * Show a notification while this service is running.
-     */
-    /*
-    private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.local_service_started);
-
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, LocalServiceActivities.Controller.class), 0);
-
-        // Set the info for the views that show in the notification panel.
-        Notification notification = new Notification.Builder(this)
-                .setSmallIcon(R.drawable.bean_48x48)  // the status icon
-                .setTicker(text)  // the status text
-                .setWhen(System.currentTimeMillis())  // the time stamp
-                .setContentTitle(getText(R.string.local_service_label))  // the label of the entry
-                .setContentText(text)  // the contents of the entry
-                .setContentIntent(contentIntent)  // The intent to send when the entry is clicked
-                .build();
-
-        // Send the notification.
-        mNM.notify(NOTIFICATION, notification);
-    }
-    */
 
 }

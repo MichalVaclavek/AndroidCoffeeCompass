@@ -14,25 +14,25 @@ public class CoffeeSiteListContent implements Serializable {
     /**
      * An array of CoffeeSite items.
      */
-    private List<CoffeeSite> items = new ArrayList<CoffeeSite>();
+    private List<CoffeeSiteMovable> items = new ArrayList<>();
 
-    public List<CoffeeSite> getItems() {
+    public List<CoffeeSiteMovable> getItems() {
         return items;
     }
 
     /**
      * A map of CoffeeSite items, by ID. Used by RecyclerView in the CoffeeSiteListActivity
      */
-    private Map<String, CoffeeSite> items_map = new HashMap<String, CoffeeSite>();
+    private Map<String, CoffeeSiteMovable> items_map = new HashMap<>();
 
-    public Map<String, CoffeeSite> getItemsMap() {
+    public Map<String, CoffeeSiteMovable> getItemsMap() {
         return items_map;
     }
 
-    public CoffeeSiteListContent(List<CoffeeSite> coffeeSiteList) {
+    public CoffeeSiteListContent(List<CoffeeSiteMovable> coffeeSiteList) {
         this.items = coffeeSiteList;
-        for (CoffeeSite cs : items) {
-            items_map.put(String.valueOf(cs.getId()), cs);
+        for (CoffeeSiteMovable csm : items) {
+            items_map.put(String.valueOf(csm.getId()), csm);
         }
     }
 

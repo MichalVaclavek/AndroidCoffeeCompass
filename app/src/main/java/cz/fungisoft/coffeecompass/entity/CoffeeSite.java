@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A CoffeeSite, main app. entity
  */
-public class CoffeeSite implements Serializable
+public class CoffeeSite implements Serializable , Comparable<CoffeeSite>
 {
     private int id;
     private String name;
@@ -248,12 +248,16 @@ public class CoffeeSite implements Serializable
         this.longitude = longitude;
     }
 
+    public CoffeeSite() {
+    }
+
     public CoffeeSite(int id, String name, long dist) {
         this.id = id;
         this.name = name;
         this.distance = dist;
     }
 
+    /*
     @Override
     public String toString() {
         StringBuilder details = new StringBuilder();
@@ -272,5 +276,11 @@ public class CoffeeSite implements Serializable
 
         return details.toString();
     }
+    */
 
+    @Override
+    public int compareTo(CoffeeSite o) {
+        int retVal = Long.compare(this.getDistance(), o.getDistance());
+        return retVal;
+    }
 }

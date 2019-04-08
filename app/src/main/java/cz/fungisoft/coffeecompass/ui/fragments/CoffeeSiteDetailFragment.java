@@ -5,17 +5,22 @@ import android.os.Bundle;
 
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.activity.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass.activity.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
-
+import cz.fungisoft.coffeecompass.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass.services.LocationService;
 
 /**
  * A fragment representing a single CoffeeSite detail screen.
@@ -24,6 +29,8 @@ import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
  * on handsets.
  */
 public class CoffeeSiteDetailFragment extends Fragment {
+
+    private static final String TAG = "CoffeeSiteDetailFrag";
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -33,11 +40,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
     /**
      * The object this fragment is presenting.
      */
-    private CoffeeSite mItem;
+    private CoffeeSiteMovable mItem;
+
+    private DistanceChangeTextView distanceTextView;
 
     private CoffeeSiteListContent content;
-
-    private TextView distanceTextView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -48,6 +55,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     public void setCoffeeSiteListContent(CoffeeSiteListContent content) {
         this.content = content;
+        mItem = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
     }
 
     @Override
@@ -64,6 +72,35 @@ public class CoffeeSiteDetailFragment extends Fragment {
             }
         }
     }
+
+
+    @Override
+    public void onStop() {
+        mItem.removePropertyChangeListener(distanceTextView);
+//        Log.d(TAG, ". Distance Text View " + distanceTextView.getTag() + " removed to listen distance change of " + mItem.getName() + ". Object id: " + mItem);
+        super.onStop();
+    }
+
+
+    @Override
+    public void onResume() {
+        if (distanceTextView != null) {
+            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
+        }
+        super.onResume();
+    }
+
+
+    @Override
+    public void onStart() {
+        if (distanceTextView != null && mItem != null) {
+            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
+            mItem.addPropertyChangeListener(distanceTextView);
+//            Log.d(TAG, ". Distance Text View " + distanceTextView.getTag() + " added to listen distance change of " + mItem.getName() + ". Object id: " + mItem);
+        }
+        super.onStart();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,8 +119,13 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
             ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
             ((TextView) rootView.findViewById(R.id.streetTextView)).setText(mItem.getUliceCP());
-            distanceTextView = ((TextView) rootView.findViewById(R.id.distanceTextView));
+
+            distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
             distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
+            distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
+            distanceTextView.setCoffeeSite(mItem);
+            mItem.addPropertyChangeListener(distanceTextView);
+
             ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
             ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
@@ -92,10 +134,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
         }
 
         return rootView;
-    }
-
-    public void updateDistanceTextView(long meters) {
-        distanceTextView.setText(String.valueOf(meters) + " m");
     }
 
 }

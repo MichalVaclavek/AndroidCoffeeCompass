@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,20 +16,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cz.fungisoft.coffeecompass.R;
 import cz.fungisoft.coffeecompass.Utils;
+import cz.fungisoft.coffeecompass.activity.support.CoffeeSiteItemRecyclerViewAdapterForCoffeeSites;
+import cz.fungisoft.coffeecompass.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass.services.LocationService;
-import cz.fungisoft.coffeecompass.services.UpdateDistanceTimerTask;
 import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
 
 
@@ -43,6 +42,8 @@ import cz.fungisoft.coffeecompass.ui.fragments.CoffeeSiteDetailFragment;
  */
 public class CoffeeSiteListActivity extends ActivityWithLocationService {
 
+    private static final String TAG = "CoffeeSiteListActivity";
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -55,7 +56,8 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
      */
     private CoffeeSiteListContent content;
 
-    private CoffeeSiteItemRecyclerViewAdapter recyclerViewAdapter;
+//    private CoffeeSiteItemRecyclerViewAdapter recyclerViewAdapter;
+    private CoffeeSiteItemRecyclerViewAdapterForCoffeeSites recyclerViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,22 +81,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
     }
 
     @Override
-    public void onPause() {
-        if (recyclerViewAdapter != null) {
-            recyclerViewAdapter.cancelDistanceUpdateTimers();
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (recyclerViewAdapter != null) {
-            recyclerViewAdapter.startDistanceUpdateTimers();
-        }
-    }
-
-    @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
 
@@ -104,12 +90,41 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
         if (extras != null) {
             setupRecyclerView((RecyclerView) recyclerView, content);
         }
+
+        for (CoffeeSiteMovable csm : content.getItems()) {
+            csm.setLocationService(locationService);
+            locationService.addPropertyChangeListener(csm);
+        }
+    }
+
+    /*
+    @Override
+    public void onPause() {
+        if (locationService != null) {
+            for (CoffeeSiteMovable csm : content.getItems()) {
+                locationService.removePropertyChangeListener(csm);
+            }
+        }
+        super.onPause();
+    }
+    */
+
+    @Override
+    public void onResume() {
+        if (recyclerViewAdapter != null) {
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
+        super.onResume();
     }
 
     @Override
-    public void updateDistanceTextViewAndOrModel(int position, long meters) {
-        content.getItems().get(position).setDistance(meters);
-        recyclerViewAdapter.updateDistanceTextView(position, meters);
+    public void onDestroy() {
+        if (locationService != null) {
+            for (CoffeeSiteMovable csm : content.getItems()) {
+                locationService.removePropertyChangeListener(csm);
+            }
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -145,171 +160,13 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteListContent listContent) {
-        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapter(this, listContent, locationService , mTwoPane);
+//        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapter(this, listContent, locationService , mTwoPane);
+//        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(this, listContent, locationService , mTwoPane);
+        for (CoffeeSiteMovable csm : content.getItems()) {
+            csm.addPropertyChangeListener(recyclerViewAdapter);
+        }
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerViewAdapter.startDistanceUpdateTimers();
     }
 
-        /* Inner class */
-        /* *********** RecyclerViewAdapter, needed for RecyclerView ************* */
-        public static class CoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<CoffeeSiteItemRecyclerViewAdapter.ViewHolder>
-        {
-            private final CoffeeSiteListActivity mParentActivity;
-            private final List<CoffeeSite> mValues;
-            private final CoffeeSiteListContent content;
-
-            private final boolean mTwoPane;
-
-            private View.OnClickListener mOnClickListener;
-
-            private static LocationService mLocationService;
-
-            private List<UpdateDistanceTimerTask> checkingDistanceTimerTasks;
-
-            private Map<Integer, TextView> distanceTextViews;
-
-
-            /**
-             * Inner ViewHolder class for CoffeeSiteItemRecyclerViewAdapter
-             */
-            class ViewHolder extends RecyclerView.ViewHolder {
-
-                final TextView csNameView; // to show name of CoffeeSite
-                final TextView locAndTypeView; // to show type of the CoffeeSite and location type
-                final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
-                final TextView distanceView; // to show distance attribute of the CoffeeSite
-
-                final ImageView siteFoto;
-
-                /**
-                 * Standard constructor for ViewHolder.
-                 *
-                 * @param view
-                 */
-                ViewHolder(View view) {
-                    super(view);
-                    csNameView = (TextView) view.findViewById(R.id.csNameTextView);
-                    locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
-                    coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
-                    distanceView = (TextView) view.findViewById(R.id.csDistanceTextView);
-                    siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
-                }
-            }
-
-            /**
-             * Standard constructor of the inner class CoffeeSiteItemRecyclerViewAdapter
-             *
-             * @param parent - parent Activity for the Adapter, in this case this CoffeeSiteListActivity
-             * @param content - instance of the CoffeeSiteListContent to be displayed by this activity
-             * @param twoPane
-             */
-            CoffeeSiteItemRecyclerViewAdapter(CoffeeSiteListActivity parent, CoffeeSiteListContent content,
-                                              LocationService locationService,
-                                              boolean twoPane) {
-                this.content = content;
-                mValues = this.content.getItems();
-                mParentActivity = parent;
-                mTwoPane = twoPane;
-                mLocationService = locationService;
-
-                mOnClickListener = createOnClickListener();
-
-                checkingDistanceTimerTasks = new ArrayList<>();
-                distanceTextViews = new HashMap<>();
-            }
-
-              private View.OnClickListener createOnClickListener() {
-                View.OnClickListener retVal;
-
-                retVal = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        CoffeeSite item = (CoffeeSite) view.getTag();
-                        if (mTwoPane) {
-                            Bundle arguments = new Bundle();
-                            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.getId()));
-                            CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
-                            fragment.setArguments(arguments);
-                            mParentActivity.getSupportFragmentManager().beginTransaction()
-                                    .addToBackStack(null)
-                                    .replace(R.id.coffeesite_detail_container, fragment)
-                                    .commit();
-                        } else {
-                            Context context = view.getContext();
-                            Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-
-                            intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
-                            intent.putExtra("listContent", content);
-                            intent.putExtra("latFrom", mLocationService.getCurrentLocation().latitude); // needed to be passed to MapsActivity if chosen in CoffeeSiteDetailActivity
-                            intent.putExtra("longFrom", mLocationService.getCurrentLocation().longitude);
-
-                            context.startActivity(intent);
-                        }
-                    }
-                };
-                return retVal;
-            }
-
-            @Override
-            public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.coffeesite_list_content, parent, false);
-
-                return new ViewHolder(view);
-            }
-
-            @Override
-            public void onBindViewHolder(final ViewHolder holder, int position) {
-
-                holder.csNameView.setText(mValues.get(position).getName());
-                holder.locAndTypeView.setText(mValues.get(position).getTypPodniku() + ", " +  mValues.get(position).getTypLokality());
-                holder.coffeeSortView.setText(mValues.get(position).getCoffeeSorts());
-                holder.distanceView.setText(mValues.get(position).getDistance() + " m");
-                distanceTextViews.put(position, holder.distanceView);
-
-                if (!mValues.get(position).getMainImageURL().isEmpty()) {
-                    Picasso.get().load(mValues.get(position).getMainImageURL()).rotate(90).into(holder.siteFoto);
-                }
-
-                holder.itemView.setTag(mValues.get(position));
-                holder.itemView.setOnClickListener(mOnClickListener);
-
-                LatLng siteLatLng = new LatLng(mValues.get(position).getLatitude(), mValues.get(position).getLongitude());
-                UpdateDistanceTimerTask checkingDistanceTimerTask  = new UpdateDistanceTimerTask(mParentActivity, position, siteLatLng, mLocationService);
-                checkingDistanceTimerTasks.add(checkingDistanceTimerTask);
-                checkingDistanceTimerTask.startTimerTask(1000, 1000);
-            }
-
-            public void cancelDistanceUpdateTimers() {
-                for (UpdateDistanceTimerTask task : checkingDistanceTimerTasks) {
-                    if (task != null && task.isRunning()) {
-                        task.stopTimerTask();
-                    }
-                }
-                checkingDistanceTimerTasks.clear();
-            }
-
-            public void startDistanceUpdateTimers() {
-                if (checkingDistanceTimerTasks.size() == 0) {
-                    for (Map.Entry<Integer, TextView> distTextView : distanceTextViews.entrySet()) {
-
-                        LatLng siteLatLng = new LatLng(mValues.get(distTextView.getKey()).getLatitude(), mValues.get(distTextView.getKey()).getLongitude());
-                        UpdateDistanceTimerTask checkingDistanceTimerTask = new UpdateDistanceTimerTask(mParentActivity, distTextView.getKey(), siteLatLng, mLocationService);
-                        checkingDistanceTimerTasks.add(checkingDistanceTimerTask);
-                        checkingDistanceTimerTask.startTimerTask(1000, 1000);
-                    }
-                }
-            }
-
-            @Override
-            public int getItemCount() {
-                return mValues.size();
-            }
-
-            public void updateDistanceTextView(int position, long distance) {
-                distanceTextViews.get(position).setText(distance + " m");
-            }
-        }
-
-        /* Adapter end */
 }

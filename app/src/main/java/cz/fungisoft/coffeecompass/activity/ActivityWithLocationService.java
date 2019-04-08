@@ -23,6 +23,9 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     private static final String TAG = "ActivityLocationService";
 
+    protected static final double CHECK_DISTANCE_TIMER_DELAY = 0.5d;
+    protected static final double CHECK_DISTANCE_TIMER_PERIOD = 1.0d;
+
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
     private boolean mShouldUnbind;
@@ -72,10 +75,10 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
      * A method to update a TextViews, which show the distance from current location.
      * Every "distance" TextView has its id=position
      *
-     * @param position - id of the TextView where the distance should be updated
-     * @param meters - distance in meters to be shown in a TextView with id=position
+//     * @param position - id of the TextView where the distance should be updated
+//     * @param meters - distance in meters to be shown in a TextView with id=position
      */
-    public abstract void updateDistanceTextViewAndOrModel(int position, long meters);
+//    public abstract void updateDistanceTextViewAndOrModel(int position, long meters);
 
     @Override
     protected void onDestroy() {
