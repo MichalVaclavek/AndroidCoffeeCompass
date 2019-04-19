@@ -61,5 +61,4 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         }
     }
 
-
 }

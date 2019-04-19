@@ -46,8 +46,9 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     private static LocationService mLocationService;
 
     /**
-     * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'
-     * caused by new distance detected withinf one of the CoffeeSiteMovable in the list.
+     * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
+     * caused by new distance detected within one of the CoffeeSiteMovable in the list.<br>
+     *
      *
      * @param evt - event of CoffeeSite's 'distance' property change
      */
@@ -60,8 +61,10 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
             boolean moveUp  = false;
             boolean moveDown = false;
             //1. Find an item which is not in right position
-            // only one item can be on a wrong position
+            // only one item can be on a wrong position ??
+            //TODO - to be sure, we should keep searching for wrong positions until end of list??
             // remember current/wrong pos.
+            //2. Find if it has to move up or down
             for (int i = 0; i < mValues.size() ; i++) {
                 // check if dist. of this csm is higher then previous csm
                 if (i != 0) {
@@ -80,10 +83,10 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                     }
                 }
             }
-            //2. Find if it has to move up or down
-            // find a new position
+
+            // 3. find a new position
             if (moveUp) {
-                for (int i = fromPosition-1; i > 0 ; i--) { // go through higher positions and remember the latest where the distance is higher then mValues.get(fromPosition)
+                for (int i = fromPosition - 1; i > 0 ; i--) { // go through higher positions and remember the latest where the distance is higher then mValues.get(fromPosition)
                     if (mValues.get(fromPosition).getDistance() < mValues.get(i).getDistance()) { // correct position found
                         toPosition = i;
                     }
@@ -97,7 +100,8 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                 }
             }
 
-            // update data array
+            // 4. update data array model
+            // 5. and notify RecyclerView to update items
             if ( moveUp || moveDown ) {
                 CoffeeSiteMovable item = mValues.get(fromPosition);
                 mValues.remove(fromPosition);
@@ -105,17 +109,6 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                 // notify adapter
                 this.notifyItemMoved(fromPosition, toPosition);
             }
-            // Find the changed item/CoffeeSite
-            // Move it to the new position, if changed
-            //  notifyItemMoved(fromPosition, toPosition);
-            // go through all items, compare with others and check if any
-            // of them is to be moved ...
-            // or
-            // Sort the list accordning new distance values of all items
-            // and notify
-
-//            Collections.sort(mValues);
-//            this.notifyDataSetChanged();
         }
     }
 

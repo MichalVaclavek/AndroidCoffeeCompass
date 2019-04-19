@@ -3,7 +3,9 @@ package cz.fungisoft.coffeecompass.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass.R;
@@ -50,14 +53,19 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
      */
     private boolean mTwoPane;
 
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
+
     /**
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
     private CoffeeSiteListContent content;
 
-//    private CoffeeSiteItemRecyclerViewAdapter recyclerViewAdapter;
     private CoffeeSiteItemRecyclerViewAdapterForCoffeeSites recyclerViewAdapter;
+    private Parcelable mListState;
+
+    private static final String LIST_STATE_KEY = "CoffeeSiteList";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,43 +86,77 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
         }
 
         content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
+        if (savedInstanceState != null) { // i.e. after orientation was changed
+            Collections.sort(content.getItems());
+        }
+
+        layoutManager = new LinearLayoutManager(this);
     }
 
+    /**
+     * Setup locationService listeners and RecyclerView which also
+     * requires locationService to be activated/connected.
+     */
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
 
-        Bundle extras = getIntent().getExtras();
-        View recyclerView = findViewById(R.id.coffeesite_list);
-        assert recyclerView != null;
-        if (extras != null) {
-            setupRecyclerView((RecyclerView) recyclerView, content);
-        }
-
-        for (CoffeeSiteMovable csm : content.getItems()) {
-            csm.setLocationService(locationService);
-            locationService.addPropertyChangeListener(csm);
-        }
-    }
-
-    /*
-    @Override
-    public void onPause() {
-        if (locationService != null) {
+        if (content != null) {
             for (CoffeeSiteMovable csm : content.getItems()) {
-                locationService.removePropertyChangeListener(csm);
+                csm.setLocationService(locationService);
+                locationService.addPropertyChangeListener(csm);
             }
         }
-        super.onPause();
+        prepareAndActivateRecyclerView();
     }
-    */
+
+    private void prepareAndActivateRecyclerView() {
+        Bundle extras = getIntent().getExtras();
+        recyclerView = findViewById(R.id.coffeesite_list);
+        assert recyclerView != null;
+
+        recyclerView.setLayoutManager(layoutManager);
+        if (extras != null) {
+            Collections.sort(content.getItems());
+            setupRecyclerView((RecyclerView) recyclerView, content);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+
+        // Save CoffeeSites list state
+        mListState = layoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, mListState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+
+        // Retrieve CoffeeSites list state and item positions
+        if(state != null)
+            mListState = state.getParcelable(LIST_STATE_KEY);
+    }
 
     @Override
     public void onResume() {
-        if (recyclerViewAdapter != null) {
-            recyclerViewAdapter.notifyDataSetChanged();
-        }
         super.onResume();
+
+        if (mListState != null) {
+            layoutManager.onRestoreInstanceState(mListState);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // save RecyclerView state
+        Bundle listState = new Bundle();
+        mListState = recyclerView.getLayoutManager().onSaveInstanceState();
+        listState.putParcelable(LIST_STATE_KEY, mListState);
     }
 
     @Override
@@ -160,8 +202,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteListContent listContent) {
-//        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapter(this, listContent, locationService , mTwoPane);
-//        recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(this, listContent, locationService , mTwoPane);
         for (CoffeeSiteMovable csm : content.getItems()) {
             csm.addPropertyChangeListener(recyclerViewAdapter);

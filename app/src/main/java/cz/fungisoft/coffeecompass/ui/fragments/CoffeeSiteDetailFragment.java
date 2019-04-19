@@ -73,14 +73,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onStop() {
         mItem.removePropertyChangeListener(distanceTextView);
-//        Log.d(TAG, ". Distance Text View " + distanceTextView.getTag() + " removed to listen distance change of " + mItem.getName() + ". Object id: " + mItem);
         super.onStop();
     }
-
 
     @Override
     public void onResume() {
@@ -90,17 +87,14 @@ public class CoffeeSiteDetailFragment extends Fragment {
         super.onResume();
     }
 
-
     @Override
     public void onStart() {
         if (distanceTextView != null && mItem != null) {
             distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
             mItem.addPropertyChangeListener(distanceTextView);
-//            Log.d(TAG, ". Distance Text View " + distanceTextView.getTag() + " added to listen distance change of " + mItem.getName() + ". Object id: " + mItem);
         }
         super.onStart();
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -113,24 +107,61 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(mItem.getStatusZarizeni());
             ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(mItem.getTypPodniku());
             ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(mItem.getTypLokality());
-            ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(mItem.getCupTypes());
+
+            if (mItem.getCupTypes().length() > 0) {
+                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(mItem.getCupTypes());
+            } else {
+                rootView.findViewById(R.id.cupTableRow).setVisibility(View.GONE);
+            }
+
             ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(mItem.getCena());
-            ((TextView) rootView.findViewById(R.id.nextToMachineOfferTextView)).setText(mItem.getNextToMachineTypes());
-            ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
-            ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
-            ((TextView) rootView.findViewById(R.id.streetTextView)).setText(mItem.getUliceCP());
+
+            if (mItem.getNextToMachineTypes().length() > 0) {
+                ((TextView) rootView.findViewById(R.id.nextToMachineOfferTextView)).setText(mItem.getNextToMachineTypes());
+            } else {
+                rootView.findViewById(R.id.nextToMachineTableRow).setVisibility(View.GONE);
+            }
+
+            if (mItem.getOtherOffers().length() > 0) {
+                ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
+            } else {
+                rootView.findViewById(R.id.nextOfferTableRow).setVisibility(View.GONE);
+            }
+
+            if (mItem.getCoffeeSorts().length() > 0) {
+                ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
+            } else {
+                rootView.findViewById(R.id.coffeeSortTableRow).setVisibility(View.GONE);
+            }
+
+            if (!mItem.getUliceCP().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.streetTextView)).setText(mItem.getUliceCP());
+            } else {
+                rootView.findViewById(R.id.streetTableRow).setVisibility(View.GONE);
+            }
+
+            if (!mItem.getOteviraciDobaHod().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
+            } else {
+                rootView.findViewById(R.id.openingTableRow).setVisibility(View.GONE);
+            }
+
+            ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
+
+            ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
+            ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
+
+            if (!mItem.getUvodniKoment().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(mItem.getUvodniKoment());
+            } else {
+                rootView.findViewById(R.id.authorCommentTableRow).setVisibility(View.GONE);
+            }
 
             distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
             distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
             distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
             distanceTextView.setCoffeeSite(mItem);
             mItem.addPropertyChangeListener(distanceTextView);
-
-            ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
-            ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
-            ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
-            ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
-            ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(mItem.getUvodniKoment());
         }
 
         return rootView;

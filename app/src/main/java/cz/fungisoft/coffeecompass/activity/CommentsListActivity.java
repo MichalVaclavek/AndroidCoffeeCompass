@@ -130,7 +130,6 @@ public class CommentsListActivity extends AppCompatActivity {
                         commentText = (TextView) view.findViewById(R.id.commentText);
                     }
                 }
-
         }
 
 }

@@ -96,26 +96,27 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
     @Override
     public void onPause() {
+        super.onPause();
+
         cs.removePropertyChangeListener(distLabel);
-        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " removed to listen distance change of " + cs.getName() + ". Object id: " + cs);
+//        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " removed to listen distance change of " + cs.getName() + ". Object id: " + cs);
 
         // Listener for Location service can be removed, as there is no 'follow' Activity, from which
         // the CoffeeSiteImageActivity could be called back
         if (locationService != null) {
             locationService.removePropertyChangeListener(cs);
         }
-        super.onPause();
     }
 
     @Override
     public void onResume() {
+        super.onResume();
         if (locationService != null) {
             locationService.addPropertyChangeListener(cs);
         }
         cs.addPropertyChangeListener(distLabel);
         distLabel.setText(String.valueOf(cs.getDistance()) + " m");
-        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);
-        super.onResume();
+//        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);
     }
 
     @Override

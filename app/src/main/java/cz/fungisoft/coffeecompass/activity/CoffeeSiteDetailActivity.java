@@ -86,10 +86,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             detailFragment.setArguments(arguments);
 //            detailFragment.setCoffeeSite(coffeeSite);
             detailFragment.setCoffeeSiteListContent(content);
-
-//            getSupportFragmentManager().beginTransaction()
-//                                       .add(R.id.coffeesite_detail_container, detailFragment)
-//                                       .commit();
         }
     }
 
@@ -105,24 +101,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
                 .add(R.id.coffeesite_detail_container, detailFragment)
                 .commit();
     }
-
-    /*
-    @Override
-    public void onPause() {
-//        if (locationService != null) {
-//            locationService.removePropertyChangeListener(coffeeSite);
-//        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-//        if (locationService != null) {
-//            locationService.addPropertyChangeListener(coffeeSite);
-//        }
-        super.onResume();
-    }
-    */
 
     @Override
     public void onDestroy() {
@@ -160,7 +138,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     public void onImageButtonClick(View v) {
         Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
-//        imageIntent.putExtra("site", coffeeSite);
+//        imageIntent.putExtra("site", coffeeSite); //TODO check if only one coffeeSite could be passed to CoffeeSiteImageActivity
         imageIntent.putExtra("listContent", content);
         imageIntent.putExtra(CoffeeSiteImageFragment.ARG_ITEM_ID, String.valueOf(coffeeSite.getId()));
         startActivity(imageIntent);
