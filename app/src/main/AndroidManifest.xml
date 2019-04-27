@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cz.fungisoft.coffeecompass">
+    package="cz.fungisoft.coffeecompass2">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -17,17 +17,17 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".activity.ActivityWithLocationService"></activity>
+        <activity android:name="cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService"></activity>
 
         <service
-            android:name=".services.LocationService"
+            android:name="cz.fungisoft.coffeecompass2.services.LocationService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".activity.CommentsListActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.CommentsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
+            />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -41,40 +41,40 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".activity.MapsActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_maps"
-            android:screenOrientation="portrait" />
+             />
         <activity
-            android:name=".activity.CoffeeSiteImageActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteImageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.AboutActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SelectSearchDistanceActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.SelectSearchDistanceActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.CoffeeSiteListActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".activity.CoffeeSiteDetailActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_coffeesite_detail"
-            android:parentActivityName=".activity.CoffeeSiteListActivity"
+            android:parentActivityName="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="cz.fungisoft.coffeecompass.activity.CoffeeSiteListActivity" />
+                android:value="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity" />
         </activity>
         <activity
-            android:name=".activity.MainActivity"
+            android:name="cz.fungisoft.coffeecompass2.activity.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

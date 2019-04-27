@@ -1,19 +1,33 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\Programming\\CoffeeCompas_Docs\\Android\\keys\\new_android_keystore.jks')
+            storePassword 'Sicilia.2'
+            keyAlias = 'key0'
+            keyPassword 'Sicilia.2'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
-        applicationId "cz.fungisoft.coffeecompass"
+        applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 26
+        versionCode 7
+        versionName "1.15"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+            signingConfig signingConfigs.debug
         }
     }
 }

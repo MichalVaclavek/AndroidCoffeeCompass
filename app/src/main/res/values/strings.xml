@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Coffee Compass</string>
+    <string name="app_name">Káva s sebou</string>
 
     <string name="title_coffeesite_detail">CoffeeSite Detail</string>
     <string name="num_all_sites_label">Počet všech lokací: </string>

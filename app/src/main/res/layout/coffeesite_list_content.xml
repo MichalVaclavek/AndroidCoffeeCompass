@@ -48,7 +48,7 @@
             android:text="TextView"
             android:textColor="@color/colorPrimary" />
 
-        <cz.fungisoft.coffeecompass.activity.support.DistanceChangeTextView
+        <cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView
             android:id="@+id/csDistanceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
