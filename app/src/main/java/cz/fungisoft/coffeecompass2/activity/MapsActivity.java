@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -10,6 +11,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -76,23 +78,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Markers for the list of CoffeeSites
         if (content != null) {
-            for (CoffeeSite cs : content.getItems()) {
-                LatLng siteLoc = new LatLng(cs.getLatitude(), cs.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(siteLoc).title(cs.getName())
-                        .snippet(cs.getTypPodniku()) // .snippet(cs.getTypPodniku()).snippet(cs.getHodnoceni())
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
-                builder.include(siteLoc);
+            for (final CoffeeSite cs : content.getItems()) {
+                addMarkerWithInfoListener(cs, mMap, builder);
             }
         }
 
         // Marker for one CoffeeSite
         if (site != null) {
-            LatLng siteLoc = new LatLng(site.getLatitude(), site.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(siteLoc)
-                    .title(site.getName())
-                    .snippet(site.getTypPodniku())
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
-            builder.include(siteLoc);
+            addMarkerWithInfoListener(site, mMap, builder);
         }
 
         LatLngBounds bounds = builder.build();
@@ -109,4 +102,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
         }
     }
+
+    private void addMarkerWithInfoListener(final CoffeeSite cs, GoogleMap map, LatLngBounds.Builder builder) {
+
+        LatLng siteLoc = new LatLng(cs.getLatitude(), cs.getLongitude());
+
+        GoogleMap.OnInfoWindowClickListener listener = new GoogleMap.OnInfoWindowClickListener() {
+
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent detailsIntent = new Intent(MapsActivity.this, CoffeeSiteDetailActivity.class);
+
+                CoffeeSite cs = (CoffeeSite) marker.getTag();
+                detailsIntent.putExtra("coffeeSite", cs);
+                startActivity(detailsIntent);
+            }
+        };
+
+        map.setOnInfoWindowClickListener(listener);
+
+        Marker marker = map.addMarker(new MarkerOptions()
+                .position(siteLoc)
+                .title(cs.getName())
+                .snippet(cs.getTypPodniku()) // .snippet(cs.getTypPodniku()).snippet(cs.getHodnoceni())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
+
+        marker.setTag(cs);
+
+        builder.include(siteLoc);
+    }
+
 }

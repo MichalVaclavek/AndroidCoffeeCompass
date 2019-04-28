@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A CoffeeSite, main app. entity
  */
-public class CoffeeSite implements Serializable , Comparable<CoffeeSite>
+public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
 {
     private int id;
     private String name;

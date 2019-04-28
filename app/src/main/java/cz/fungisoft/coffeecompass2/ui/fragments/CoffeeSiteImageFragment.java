@@ -20,10 +20,6 @@ public class CoffeeSiteImageFragment extends Fragment {
 
     private CoffeeSite site;
 
-    private CoffeeSiteListContent content;
-
-    public static final String ARG_ITEM_ID = "item_id";
-
     public static CoffeeSiteImageFragment newInstance() {
         return new CoffeeSiteImageFragment();
     }
@@ -36,23 +32,14 @@ public class CoffeeSiteImageFragment extends Fragment {
         View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            site = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
-
-            if (this.site != null && !site.getMainImageURL().isEmpty()) {
-                Picasso.get().load(site.getMainImageURL()).rotate(90).into(pictureImageView);
-            }
+        if (this.site != null && !site.getMainImageURL().isEmpty()) {
+            Picasso.get().load(site.getMainImageURL()).rotate(90).into(pictureImageView);
         }
         return view;
     }
-/*
+
     public void setCoffeeSite(CoffeeSite site) {
         this.site = site;
-    }
-*/
-    public void setCoffeeSiteListContent(CoffeeSiteListContent content) {
-        this.content = content;
-        site = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
     }
 
 }

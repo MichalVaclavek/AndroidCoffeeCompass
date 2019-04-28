@@ -28,9 +28,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
     private DistanceChangeTextView distLabel;
 
-    private String selectedItemID;
-    private CoffeeSiteListContent content;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -48,11 +45,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
-//        cs = (CoffeeSiteMovable) getIntent().getSerializableExtra("site");
-
-        content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
-        selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
-        cs = content.getItemsMap().get(selectedItemID);
+        cs = (CoffeeSiteMovable) getIntent().getSerializableExtra("coffeeSite");
 
         if (appBarLayout != null) {
             appBarLayout.setTitle(cs.getName());
@@ -65,12 +58,9 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
-        Bundle arguments = new Bundle();
+//        Bundle arguments = new Bundle();
 
-        arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
-        fragment.setArguments(arguments);
-        fragment.setCoffeeSiteListContent(content);
-//        fragment.setCoffeeSite(cs);
+        fragment.setCoffeeSite(cs);
 
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {

@@ -53,8 +53,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
         selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
         content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
+        if (content != null) { // When called from ListActivity
+            coffeeSite = content.getItemsMap().get(selectedItemID);
+        }
 
-        coffeeSite = content.getItemsMap().get(selectedItemID);
+        if (getIntent().getSerializableExtra("coffeeSite") != null) { // If called from mapsActivity
+            coffeeSite = (CoffeeSiteMovable) getIntent().getSerializableExtra("coffeeSite");
+        }
 
         boolean imageAvail = !coffeeSite.getMainImageURL().isEmpty();
 
@@ -79,13 +84,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-            Bundle arguments = new Bundle();
+//            Bundle arguments = new Bundle();
 
-            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
+//            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
             detailFragment = new CoffeeSiteDetailFragment();
-            detailFragment.setArguments(arguments);
-//            detailFragment.setCoffeeSite(coffeeSite);
-            detailFragment.setCoffeeSiteListContent(content);
+            detailFragment.setCoffeeSite(coffeeSite);
         }
     }
 
@@ -105,9 +108,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
     @Override
     public void onDestroy() {
         if (locationService != null) {
-            for (CoffeeSiteMovable csm : content.getItems()) {
-                locationService.removePropertyChangeListener(csm);
-            }
+            locationService.removePropertyChangeListener(coffeeSite);
         }
         super.onDestroy();
     }
@@ -138,9 +139,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     public void onImageButtonClick(View v) {
         Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
-//        imageIntent.putExtra("site", coffeeSite); //TODO check if only one coffeeSite could be passed to CoffeeSiteImageActivity
-        imageIntent.putExtra("listContent", content);
-        imageIntent.putExtra(CoffeeSiteImageFragment.ARG_ITEM_ID, String.valueOf(coffeeSite.getId()));
+        imageIntent.putExtra("coffeeSite", coffeeSite);
         startActivity(imageIntent);
     }
 

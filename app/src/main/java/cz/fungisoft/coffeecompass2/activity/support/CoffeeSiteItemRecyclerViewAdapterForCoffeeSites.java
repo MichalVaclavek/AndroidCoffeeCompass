@@ -46,7 +46,6 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
      * caused by new distance detected within one of the CoffeeSiteMovable in the list.<br>
      *
-     *
      * @param evt - event of CoffeeSite's 'distance' property change
      */
     @Override
@@ -178,9 +177,8 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
 
                     intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
                     intent.putExtra("listContent", content);
-                    intent.putExtra("latFrom", mLocationService.getCurrentLocation().latitude); // needed to be passed to MapsActivity if chosen in CoffeeSiteDetailActivity
-                    intent.putExtra("longFrom", mLocationService.getCurrentLocation().longitude);
-
+//                    intent.putExtra("latFrom", mLocationService.getCurrentLocation().latitude); // needed to be passed to MapsActivity if chosen in CoffeeSiteDetailActivity
+//                    intent.putExtra("longFrom", mLocationService.getCurrentLocation().longitude);
                     context.startActivity(intent);
                 }
             }

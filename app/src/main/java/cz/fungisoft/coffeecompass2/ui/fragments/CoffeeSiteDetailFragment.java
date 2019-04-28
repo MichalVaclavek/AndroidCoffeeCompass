@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.ui.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -39,8 +40,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     private DistanceChangeTextView distanceTextView;
 
-    private CoffeeSiteListContent content;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -48,24 +47,13 @@ public class CoffeeSiteDetailFragment extends Fragment {
     public CoffeeSiteDetailFragment() {
     }
 
-    public void setCoffeeSiteListContent(CoffeeSiteListContent content) {
-        this.content = content;
-        mItem = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
+    public void setCoffeeSite(CoffeeSiteMovable csm) {
+        mItem = csm;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mItem = content.getItemsMap().get(getArguments().getString(ARG_ITEM_ID));
-
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getName());
-            }
-        }
     }
 
     @Override
@@ -95,6 +83,12 @@ public class CoffeeSiteDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.coffeesite_detail_fragment, container, false);
+
+        Activity activity = this.getActivity();
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null && mItem != null) {
+            appBarLayout.setTitle(mItem.getName());
+        }
 
         // Show the CoffeeSite info in a TextViews.
         if (mItem != null) {
