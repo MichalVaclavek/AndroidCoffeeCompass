@@ -24,6 +24,11 @@
             android:enabled="true"
             android:exported="true" />
 
+        <service
+            android:name="cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService"
+            android:enabled="true"
+            android:exported="true" />
+
         <activity
             android:name="cz.fungisoft.coffeecompass2.activity.CommentsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

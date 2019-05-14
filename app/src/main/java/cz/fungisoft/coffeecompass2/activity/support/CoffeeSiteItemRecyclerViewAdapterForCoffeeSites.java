@@ -26,15 +26,15 @@ import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 
 /**
- * Adapter for the found list of CoffeeSitesMovable
+ * Adapter to show found list of CoffeeSitesMovable
  */
 public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerView.Adapter<CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder> implements PropertyChangeListener {
 
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final CoffeeSiteListActivity mParentActivity;
-    private final List<CoffeeSiteMovable> mValues;
-    private final CoffeeSiteListContent content;
+    private List<CoffeeSiteMovable> mValues = null;
+    private CoffeeSiteListContent content = null;
 
     private final boolean mTwoPane;
 
@@ -97,7 +97,7 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
             }
 
             // 4. update data array model
-            // 5. and notify RecyclerView to update items
+            // and notify RecyclerView to update items
             if ( moveUp || moveDown ) {
                 CoffeeSiteMovable item = mValues.get(fromPosition);
                 mValues.remove(fromPosition);
@@ -108,42 +108,52 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
         }
     }
 
-        /**
-         * Inner ViewHolder class for CoffeeSiteItemRecyclerViewAdapter
-         */
-        class ViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * Inserts newly detected sites.
+     *
+     * @param newSites
+     */
+    public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
-            final TextView csNameView; // to show name of CoffeeSite
-            final TextView locAndTypeView; // to show type of the CoffeeSite and location type
-            final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
-            //                final TextView distanceView; // to show distance attribute of the CoffeeSite
-            final DistanceChangeTextView distanceView;
-
-            final ImageView siteFoto;
-
-            /**
-             * Standard constructor for ViewHolder.
-             *
-             * @param view
-             */
-            ViewHolder(View view) {
-                super(view);
-                csNameView = (TextView) view.findViewById(R.id.csNameTextView);
-                locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
-                coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
-                distanceView = (DistanceChangeTextView) view.findViewById(R.id.csDistanceTextView);
-                siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+        for (CoffeeSiteMovable csmToInsert : newSites) { // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
+            for (int i = 0; i < mValues.size(); i++) {
+                if ((csmToInsert.getDistance() < mValues.get(i).getDistance()) ) {
+                    mValues.add(i, csmToInsert);
+                    this.notifyItemInserted(i);
+                    break;
+                }
             }
         }
+    }
 
     /**
-     * Standard constructor of the inner class CoffeeSiteItemRecyclerViewAdapter
+     * Removes coffeeSites which are no longer in the search range.
+     *
+     * @param oldSites
+     */
+    public void removeOldSites(List<CoffeeSiteMovable> oldSites) {
+        //Go through all curent sites and remove old sites
+        for (int i = 0; i < mValues.size() ; i++) {
+            for (CoffeeSiteMovable csmToRemove : oldSites) {
+                if (mValues.get(i).getId() == csmToRemove.getId()) {
+                    mValues.remove(i);
+                    this.notifyItemRemoved(i);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Standard constructor of the class CoffeeSiteItemRecyclerViewAdapter
      *
      * @param parent - parent Activity for the Adapter, in this case this CoffeeSiteListActivity
      * @param content - instance of the CoffeeSiteListContent to be displayed by this activity
      * @param twoPane
      */
-    public CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(CoffeeSiteListActivity parent, CoffeeSiteListContent content,
+    public CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(CoffeeSiteListActivity parent,
+                                                           CoffeeSiteListContent content,
                                                            LocationService locationService,
                                                            boolean twoPane) {
         this.content = content;
@@ -177,8 +187,6 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
 
                     intent.putExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
                     intent.putExtra("listContent", content);
-//                    intent.putExtra("latFrom", mLocationService.getCurrentLocation().latitude); // needed to be passed to MapsActivity if chosen in CoffeeSiteDetailActivity
-//                    intent.putExtra("longFrom", mLocationService.getCurrentLocation().longitude);
                     context.startActivity(intent);
                 }
             }
@@ -220,5 +228,33 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     public int getItemCount() {
         return mValues.size();
     }
+
+        /**
+         * Inner ViewHolder class for CoffeeSiteItemRecyclerViewAdapter
+         */
+        class ViewHolder extends RecyclerView.ViewHolder {
+
+            final TextView csNameView; // to show name of CoffeeSite
+            final TextView locAndTypeView; // to show type of the CoffeeSite and location type
+            final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
+            //                final TextView distanceView; // to show distance attribute of the CoffeeSite
+            final DistanceChangeTextView distanceView;
+
+            final ImageView siteFoto;
+
+            /**
+             * Standard constructor for ViewHolder.
+             *
+             * @param view
+             */
+            ViewHolder(View view) {
+                super(view);
+                csNameView = (TextView) view.findViewById(R.id.csNameTextView);
+                locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
+                coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
+                distanceView = (DistanceChangeTextView) view.findViewById(R.id.csDistanceTextView);
+                siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+            }
+        }
 
 }

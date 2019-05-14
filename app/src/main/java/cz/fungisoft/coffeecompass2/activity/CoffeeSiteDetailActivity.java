@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.asynctask.GetCommentsAsyncTask;
@@ -84,9 +86,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-//            Bundle arguments = new Bundle();
-
-//            arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, selectedItemID);
             detailFragment = new CoffeeSiteDetailFragment();
             detailFragment.setCoffeeSite(coffeeSite);
         }
@@ -123,7 +122,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-//            navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
+            // navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
 
             /*
             * The standard way, navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
@@ -152,7 +151,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
     public void onMapButtonClick(View v) {
         if (locationService != null) {
             Intent mapIntent = new Intent(this, MapsActivity.class);
-            mapIntent.putExtra("currentLocation", locationService.getCurrentLocation());
+            mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
             mapIntent.putExtra("site", coffeeSite);
             startActivity(mapIntent);
         }

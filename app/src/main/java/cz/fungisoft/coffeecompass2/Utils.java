@@ -17,6 +17,7 @@ public class Utils {
             Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8"); // 8.8.8.8 is google.com
             int     exitValue = ipProcess.waitFor();
             return (exitValue == 0);
+//            return true;
         }
         catch (IOException e)          { Log.e(TAG," Problem during internet connection check"); }
         catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check"); }

@@ -20,7 +20,7 @@ import cz.fungisoft.coffeecompass2.services.LocationServiceConnector;
  */
 public abstract class ActivityWithLocationService extends AppCompatActivity {
 
-    private static final String TAG = "ActivityLocationService";
+    private static final String TAG = "ActivityWithLocationSrv";
 
     protected static final double CHECK_DISTANCE_TIMER_DELAY = 0.5d;
     protected static final double CHECK_DISTANCE_TIMER_PERIOD = 1.0d;

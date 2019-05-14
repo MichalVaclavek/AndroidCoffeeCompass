@@ -1,8 +1,12 @@
 package cz.fungisoft.coffeecompass2.asynctask;
 
+import android.app.Activity;
+import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +28,7 @@ import cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
 
 /**
  * Class to run AsyncTask to read CoffeeSites in specified distance from coffeecompass.cz server via JSON.
@@ -36,17 +41,31 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
     private String sURL;
 
+    /**
+     * An Activity which invokes this async. task
+     */
     private MainActivity parentActivity;
 
-    double latFrom, longFrom;
+    /**
+     * A Service which invokes this asznc tsak
+     */
+    private CoffeeSitesInRangeUpdateService parentService;
 
-//    private List<CoffeeSite> coffeeSites;
+    private double latFrom, longFrom;
+
+    int searchRange = 500;
+
     private List<CoffeeSiteMovable> coffeeSites;
     private String searchCoffeeSort;
 
     public GetSitesInRangeAsyncTask(MainActivity parentActivity) {
         this.parentActivity = parentActivity;
     }
+
+    public GetSitesInRangeAsyncTask(CoffeeSitesInRangeUpdateService service) {
+        this.parentService = service;
+    }
+
 
     /**
      * Basic Constructor
@@ -57,16 +76,29 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
      * @param range - range of meters from searching point
      * @param coffeeSort - coffee sort (espresso, instant and so on) as filter for searched Coffee sites
      */
-    public GetSitesInRangeAsyncTask(MainActivity parentActivity, String latFrom, String longFrom, String range, String coffeeSort) {
+    public GetSitesInRangeAsyncTask(MainActivity parentActivity, Double latFrom, Double longFrom, Integer range, String coffeeSort) {
         this(parentActivity);
+        initSearchParameters(latFrom, longFrom, range, coffeeSort);
+    }
 
-        this.latFrom = Double.valueOf(latFrom);
-        this.longFrom = Double.valueOf(longFrom);
+    public GetSitesInRangeAsyncTask(CoffeeSitesInRangeUpdateService parentService, Double latFrom, Double longFrom, Integer range, String coffeeSort) {
+        this(parentService);
+        initSearchParameters(latFrom, longFrom, range, coffeeSort);
+    }
+
+    /**
+     * Method to perform initialization of search parameters before REST request is sent to
+     * server.
+     */
+    private void initSearchParameters(Double latFrom, Double longFrom, Integer range, String coffeeSort) {
+        this.latFrom = latFrom;
+        this.longFrom = longFrom;
+        this.searchRange = range;
 
         this.searchCoffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
 
         // Creates actual REST request for CoffeeSites
-        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + range + "&sort=" + this.searchCoffeeSort;
+        sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
     }
 
     @Override
@@ -233,19 +265,27 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     @Override
     protected void onPostExecute(String result) {
 
-        if (coffeeSites.size() > 0) {
+        if (parentActivity != null) {
+            if (coffeeSites.size() > 0) {
 
-            CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
+                CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
 
-            Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
+                Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
 
-            csListIntent.putExtra("listContent", content);
-            csListIntent.putExtra("latFrom", this.latFrom);
-            csListIntent.putExtra("longFrom", this.longFrom);
-            parentActivity.startActivity(csListIntent);
+                csListIntent.putExtra("listContent", content);
+                csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));
+                csListIntent.putExtra("searchRange", this.searchRange);
+                csListIntent.putExtra("coffeeSort", this.searchCoffeeSort);
 
-        } else
-            parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
+                parentActivity.startActivity(csListIntent);
+
+            } else
+                parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
+        }
+
+        if (parentService != null) {
+            parentService.onSitesInRangeReturnedFromServer(coffeeSites);
+        }
     }
 
 }

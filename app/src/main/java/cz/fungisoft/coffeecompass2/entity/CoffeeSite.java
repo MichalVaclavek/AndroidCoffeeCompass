@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A CoffeeSite, main app. entity
@@ -280,5 +281,18 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
     public int compareTo(CoffeeSite o) {
         int retVal = Long.compare(this.getDistance(), o.getDistance());
         return retVal;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CoffeeSite that = (CoffeeSite) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

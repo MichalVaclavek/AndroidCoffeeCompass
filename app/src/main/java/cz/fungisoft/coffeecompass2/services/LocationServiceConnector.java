@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -16,6 +17,12 @@ public class LocationServiceConnector implements ServiceConnection {
 
     public LocationServiceConnector(ActivityWithLocationService callingActivity) {
         this.callingActivity = callingActivity;
+    }
+
+    private CoffeeSitesInRangeUpdateService callingService;
+
+    public LocationServiceConnector(CoffeeSitesInRangeUpdateService callingService) {
+        this.callingService = callingService;
     }
 
     // To invoke the bound service, first make sure that this value
@@ -43,7 +50,13 @@ public class LocationServiceConnector implements ServiceConnection {
         // cast its IBinder to a concrete class and directly access it.
         mBoundService = ((LocationService.LocalBinder)service).getService();
 
-        this.callingActivity.onLocationServiceConnected();
+        if (this.callingActivity != null) {
+            this.callingActivity.onLocationServiceConnected();
+        }
+
+        if (this.callingService != null) {
+            this.callingService.onLocationServiceConnected();
+        }
     }
 
     @Override

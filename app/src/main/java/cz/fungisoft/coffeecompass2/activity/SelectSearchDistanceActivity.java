@@ -21,7 +21,7 @@ public class SelectSearchDistanceActivity extends AppCompatActivity implements  
     private Button selectOKButton;
     private Button selectCancelButton;
 
-    String[] vzdalenosti;
+    private String[] vzdalenosti;
     private String selectedDistance;
 
     private ArrayAdapter<String> adapter;
@@ -31,7 +31,7 @@ public class SelectSearchDistanceActivity extends AppCompatActivity implements  
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_search_distance);
 
-        this.selectedDistance = getIntent().getStringExtra("searchRange");
+        this.selectedDistance = Integer.toString(getIntent().getIntExtra("searchRange", 500));
 
         selectSearchDistanceListView = (ListView) findViewById(R.id.selectSearchDistListview);
         selectOKButton = (Button) findViewById(R.id.selectDistanceButtonOK);

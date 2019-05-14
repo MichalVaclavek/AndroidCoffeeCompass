@@ -22,13 +22,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 
 /**
  * Main activity to show:
@@ -39,15 +46,12 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  *  Calls standard Android service to detect location based on GPS or network info.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
-    private static final String TAG = "Main";
+    private static final String TAG = "MainActivity";
 
-    private static final long VZORKOVANI = 1000 * 30;
-    private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
-    private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
     private static final float MIN_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
     private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
@@ -59,15 +63,12 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView locationImageView;
 
-    private LocationManager locManager;
     private Location location;
-    private LocationListener locListener;
 
     private Button searchEspressoButton;
     private Button searchKafeButton;
 
-    private String searchRange = "500"; // range in meters for searching from current position - 500 m default value
-
+    private int searchRange = 500; // range in meters for searching from current position - 500 m default value
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.AllSitesTextView);
 
-        if (getIntent().getStringExtra("searchRange") != null) {
-            this.searchRange = getIntent().getStringExtra("searchRange");
+         if (getIntent().getStringExtra("searchRange") != null) {
+            this.searchRange = Integer.parseInt(getIntent().getStringExtra("searchRange"));
         }
 
         //Location info
@@ -100,60 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
         Drawable locBad = getResources().getDrawable(R.drawable.location_bad);
         locationImageView.setBackground(locBad);
-
-        if ((locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE)) == null) {
-            finish();
-        }
-
-        location = posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-
-        if (location != null) {
-            zobrazPolohu(location);
-        }
-
-        locListener = new LocationListener() {
-
-            @Override
-            public void onLocationChanged(Location loc) {
-
-                if (bPrvni) { // prvni platna detekce polohy
-                    barvyTextu(barva);
-                    bPrvni = false;
-                    searchEspressoButton.setEnabled(true);
-                    searchKafeButton.setEnabled(true);
-                    updateAccuracyIndicator(location);
-                }
-
-                if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
-                                     // and time period for observing location elapsed
-                        ||
-                        (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
-                                && ((loc.getAccuracy() < location.getAccuracy()) || (loc.getAccuracy() < MIN_PRESNOST)))
-                {
-                    location = loc;
-                    zobrazPolohu(loc);
-
-                    if (!searchEspressoButton.isEnabled()) {
-                        searchEspressoButton.setEnabled(true);
-                        searchKafeButton.setEnabled(true);
-                    }
-
-                    updateAccuracyIndicator(location);
-                }
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
-        };
 
         if (Utils.isOnline()) {
             new ReadStatsAsyncTask(this).execute();
@@ -179,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (loc.getAccuracy() <= MIN_PRESNOST) {
                 locIndic = getResources().getDrawable(R.drawable.location_good);
-
             }
             locationImageView.setBackground(locIndic);
         }
@@ -215,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     private void aktivujNastaveni() {
         Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
         selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        selectSearchDistIntent.putExtra("searchRange", searchRange);
+        selectSearchDistIntent.putExtra("searchRange", this.searchRange);
         this.startActivity(selectSearchDistIntent);
     }
 
@@ -266,9 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (Utils.isOnline()) {
             new GetSitesInRangeAsyncTask(this,
-                                         String.valueOf(location.getLatitude()),
-                                         String.valueOf(location.getLongitude()),
-                                         String.valueOf(searchRange),
+                                         location.getLatitude(),
+                                         location.getLongitude(),
+                                         searchRange,
                                          "espresso").execute();
         } else {
             showNoInternetToast();
@@ -279,9 +225,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (Utils.isOnline()) {
             new GetSitesInRangeAsyncTask(this,
-                    String.valueOf(location.getLatitude()),
-                    String.valueOf(location.getLongitude()),
-                    String.valueOf(searchRange),
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    searchRange,
                     "").execute();
         } else {
             showNoInternetToast();
@@ -303,53 +249,11 @@ public class MainActivity extends AppCompatActivity {
      */
     public void showNothingFoundStatus(String subject) {
 
-        int resource = (subject.equals("espresso")) ? R.string.no_espresso_found : R.string.no_site_found;
+        int resource = ("espresso".equals(subject)) ? R.string.no_espresso_found : R.string.no_site_found;
         Toast toast = Toast.makeText(getApplicationContext(),
                                     resource,
                                     Toast.LENGTH_SHORT);
         toast.show();
-    }
-
-
-    /**
-     * Zjisteni posledni zname pozice po spusteni MainActivity.
-     *
-     * @param minAccuracy
-     * @param cas
-     * @return
-     */
-    private Location posledniPozice(float minAccuracy, long cas) {
-
-        Location vysledek = null;
-        float topPresnost = Float.MAX_VALUE;
-        long topCas = Long.MIN_VALUE;
-
-        List<String> matchingProviders = locManager.getAllProviders();
-        for (String provider : matchingProviders) {
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                return null;
-            }
-            Location location = locManager.getLastKnownLocation(provider);
-            if (location != null) {
-                float accuracy = location.getAccuracy();
-                long time = location.getTime();
-
-                if (accuracy < topPresnost) {
-                    vysledek = location;
-                    topPresnost = accuracy;
-                    topCas = time;
-                }
-            }
-        }
-
-        if (topPresnost > minAccuracy
-                || (System.currentTimeMillis() - topCas) > cas)
-            return null;
-        else
-            return vysledek;
     }
 
     protected void requestPermission(String permissionType, int requestCode) {
@@ -386,8 +290,23 @@ public class MainActivity extends AppCompatActivity {
 
             return;
         }
-        locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
+    }
+
+    /**
+     * Setup locationService listeners and RecyclerView which also
+     * requires locationService to be activated/connected.
+     */
+    @Override
+    public void onLocationServiceConnected() {
+        super.onLocationServiceConnected();
+
+        location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+
+        if (location != null) {
+            zobrazPolohu(location);
+        }
+
+        locationService.addPropertyChangeListener(this);
     }
 
 
@@ -402,7 +321,37 @@ public class MainActivity extends AppCompatActivity {
 
             return;
         }
-        locManager.removeUpdates(locListener);
+    }
+
+    /**
+     * Change of location detected, update all what should be updated, i.e.
+     * accuracy indicator.
+     *
+     * @param evt
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        if (bPrvni) { // prvni platna detekce polohy
+            barvyTextu(barva);
+            bPrvni = false;
+            searchEspressoButton.setEnabled(true);
+            searchKafeButton.setEnabled(true);
+            updateAccuracyIndicator(location);
+        }
+
+        if (locationService != null) // Current change of location has better accuracy then previous or better that Min. accuracy
+        {
+            location = locationService.getCurrentLocation();
+            zobrazPolohu(location);
+
+            if (!searchEspressoButton.isEnabled()) {
+                searchEspressoButton.setEnabled(true);
+                searchKafeButton.setEnabled(true);
+            }
+
+            updateAccuracyIndicator(location);
+        }
     }
 
 }

@@ -25,13 +25,14 @@ import cz.fungisoft.coffeecompass2.R;
 
 public class LocationService extends Service {
 
-    private static final int LOCATION_REQUEST_CODE = 101;
+//    private static final int LOCATION_REQUEST_CODE = 101;
     private String TAG = "Location service";
 
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
     private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
     private static final float MIN_PRESNOST = 10.0f;
+//    private static final float MIN_PRESNOST = 100.0f;
     private static final float LAST_PRESNOST = 500.0f;
     private static final float MIN_VZDALENOST = 3.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
@@ -132,7 +133,7 @@ public class LocationService extends Service {
      * @param cas
      * @return
      */
-    private Location posledniPozice(float minAccuracy, long cas) {
+    public Location posledniPozice(float minAccuracy, long cas) {
 
         Location vysledek = null;
         float topPresnost = Float.MAX_VALUE;
@@ -191,8 +192,7 @@ public class LocationService extends Service {
         locManager.removeUpdates(locListener);
     }
 
-    // This is the object that receives interactions from clients.  See
-    // RemoteService for a more complete example.
+    // This is the object that receives interactions from clients.
     private final IBinder mBinder = new LocalBinder();
 
     @Override
@@ -201,10 +201,13 @@ public class LocationService extends Service {
         return mBinder;
     }
 
-    public LatLng getCurrentLocation() {
+    public LatLng getCurrentLatLng() {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
+    public Location getCurrentLocation() {
+        return location;
+    }
     /**
      *
      * @param lat1 - latitude of the point we want to find distnace from current location

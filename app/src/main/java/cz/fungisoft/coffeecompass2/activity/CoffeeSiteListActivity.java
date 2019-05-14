@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -7,17 +8,24 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Collections;
+import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.support.CoffeeSiteItemRecyclerViewAdapterForCoffeeSites;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
+import cz.fungisoft.coffeecompass2.services.SitesInRangeUpdateListener;
 
 
 /**
@@ -29,7 +37,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
  * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class CoffeeSiteListActivity extends ActivityWithLocationService {
+public class CoffeeSiteListActivity extends ActivityWithLocationService implements SitesInRangeUpdateListener {
 
     private static final String TAG = "CoffeeSiteListActivity";
 
@@ -51,7 +59,21 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
     private CoffeeSiteItemRecyclerViewAdapterForCoffeeSites recyclerViewAdapter;
     private Parcelable mListState;
 
+    /**
+     * Service which provides updates of CoffeeSites list in the current
+     * search Range
+     */
+    private CoffeeSitesInRangeUpdateService sitesInRangeUpdateService;
+    private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
+    private boolean mShouldUpdateSitesInRangeUnbind;
+    private Intent updateSitesServiceIntent;
+
+    private int searchRange;
+    private LatLng searchLocation;
+    private String searchCoffeeSort;
+
     private static final String LIST_STATE_KEY = "CoffeeSiteList";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +98,19 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
             Collections.sort(content.getItems());
         }
 
+        this.searchLocation = (LatLng) getIntent().getExtras().get("latLongFrom");
+        this.searchRange = (int) getIntent().getExtras().get("searchRange");
+        this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
+
         layoutManager = new LinearLayoutManager(this);
+
+        updateSitesServiceIntent = new Intent(this, CoffeeSitesInRangeUpdateService.class);
+
+        startService(updateSitesServiceIntent);
+
+        doBindSitesInRangeService();
     }
+
 
     /**
      * Setup locationService listeners and RecyclerView which also
@@ -94,6 +127,13 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
             }
         }
         prepareAndActivateRecyclerView();
+    }
+
+    @Override
+    public void onCoffeeSitesInRangeUpdateServiceConnected() {
+        sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
+        sitesInRangeUpdateService.addSitesInRangeUpdateListener(this);
+        sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(this.content.getItems(), this.searchLocation, this.searchRange, this.searchCoffeeSort);
     }
 
     private void prepareAndActivateRecyclerView() {
@@ -152,6 +192,13 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
                 locationService.removePropertyChangeListener(csm);
             }
         }
+
+        if (sitesInRangeUpdateService != null) {
+            sitesInRangeUpdateService.removePropertyChangeListener(this);
+            doUnBindSitesInRangeService();
+        }
+
+        stopService(updateSitesServiceIntent);
         super.onDestroy();
     }
 
@@ -182,7 +229,7 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
 
     private void openMap() {
         Intent mapIntent = new Intent(this, MapsActivity.class);
-        mapIntent.putExtra("currentLocation", locationService.getCurrentLocation());
+        mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
         mapIntent.putExtra("listContent", content);
         startActivity(mapIntent);
     }
@@ -193,6 +240,40 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService {
             csm.addPropertyChangeListener(recyclerViewAdapter);
         }
         recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    private void doBindSitesInRangeService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
+        if (bindService(updateSitesServiceIntent, sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUpdateSitesInRangeUnbind = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSitesInRangeUpdateService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnBindSitesInRangeService() {
+        if (mShouldUpdateSitesInRangeUnbind) {
+            // Release information about the service's state.
+            unbindService(sitesInRangeUpdateServiceConnector);
+            mShouldUpdateSitesInRangeUnbind = false;
+        }
+    }
+
+    @Override
+    public void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange) {
+        // Add all new sites into current list
+        recyclerViewAdapter.insertNewSites(newSitesInRange);
+    }
+
+    @Override
+    public void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange) {
+        recyclerViewAdapter.removeOldSites(goneSitesOutOfRange);
     }
 
 }
