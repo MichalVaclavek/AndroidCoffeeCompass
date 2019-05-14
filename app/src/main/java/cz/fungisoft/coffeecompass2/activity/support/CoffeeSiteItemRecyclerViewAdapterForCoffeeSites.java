@@ -116,13 +116,19 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
         for (CoffeeSiteMovable csmToInsert : newSites) { // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
+            int posToInsert = -1;
             for (int i = 0; i < mValues.size(); i++) {
                 if ((csmToInsert.getDistance() < mValues.get(i).getDistance()) ) {
-                    mValues.add(i, csmToInsert);
-                    this.notifyItemInserted(i);
+                    posToInsert = i;
                     break;
                 }
             }
+            if ( posToInsert == - 1) { // add to the end of current list
+                posToInsert = mValues.size();
+            }
+
+            mValues.add(posToInsert, csmToInsert);
+            this.notifyItemInserted(posToInsert);
         }
     }
 
@@ -133,8 +139,8 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
      */
     public void removeOldSites(List<CoffeeSiteMovable> oldSites) {
         //Go through all curent sites and remove old sites
-        for (int i = 0; i < mValues.size() ; i++) {
-            for (CoffeeSiteMovable csmToRemove : oldSites) {
+        for (CoffeeSiteMovable csmToRemove : oldSites) {
+            for (int i = mValues.size() - 1; i >= 0  ; i--) {
                 if (mValues.get(i).getId() == csmToRemove.getId()) {
                     mValues.remove(i);
                     this.notifyItemRemoved(i);

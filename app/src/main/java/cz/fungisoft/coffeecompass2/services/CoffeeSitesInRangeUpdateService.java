@@ -69,7 +69,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      * a pokud je tato zmenu vetsi jako moveToRangeNewSearchRatio * currentSearchRange
      * pak se posle novy dotaz na server.
      */
-    private double distanceToRangeNewSearchRatio = 0.2;
+    private double distanceToRangeNewSearchRatio = 0.15;
 
     /**
      * CoffeeSites, which have come into current Range.
