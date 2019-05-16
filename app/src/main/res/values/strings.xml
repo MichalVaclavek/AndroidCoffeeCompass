@@ -27,4 +27,9 @@
     <string name="local_service_label">Location service</string>
     <string name="local_service_connected">Connected to location service.</string>
     <string name="local_service_disconnected">Disconnected from location service.</string>
+
+    <string name="no_site_in_range">Žádná káva poblíž :-(</string>
+    <string name="current_range">Aktuální okruh vyhledávání </string>
+    <string name="still_searching">vyhledávám ... </string>
+
 </resources>

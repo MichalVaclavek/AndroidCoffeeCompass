@@ -115,6 +115,8 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
      */
     public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
+        // If there was 'Empty list card' shown, remove it
+
         for (CoffeeSiteMovable csmToInsert : newSites) { // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
             int posToInsert = -1;
             for (int i = 0; i < mValues.size(); i++) {
@@ -147,6 +149,10 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                     break;
                 }
             }
+        }
+        // If the current number of CoffeeSites visible is 0, show 'Empty list card'
+        if (mValues.size() == 0) {
+
         }
     }
 
@@ -256,8 +262,8 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
             ViewHolder(View view) {
                 super(view);
                 csNameView = (TextView) view.findViewById(R.id.csNameTextView);
-                locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
-                coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
+                locAndTypeView = (TextView) view.findViewById(R.id.currentRangeTextView);
+                coffeeSortView = (TextView) view.findViewById(R.id.stillSearchingTextView);
                 distanceView = (DistanceChangeTextView) view.findViewById(R.id.csDistanceTextView);
                 siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
             }

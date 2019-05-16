@@ -267,12 +267,19 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
 
     @Override
     public void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange) {
-        // Add all new sites into current list
+        // Add all new sites into current list, first add new CoffeeSites
+        // as locationService listeners
+        for (CoffeeSiteMovable csm : newSitesInRange) {
+            locationService.addPropertyChangeListener(csm);
+        }
         recyclerViewAdapter.insertNewSites(newSitesInRange);
     }
 
     @Override
     public void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange) {
+        for (CoffeeSiteMovable csm : goneSitesOutOfRange) {
+            locationService.removePropertyChangeListener(csm);
+        }
         recyclerViewAdapter.removeOldSites(goneSitesOutOfRange);
     }
 
