@@ -266,7 +266,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     protected void onPostExecute(String result) {
 
         if (parentActivity != null) {
-            if (coffeeSites.size() > 0) {
+//            if (coffeeSites.size() > 0) {
 
                 CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
 
@@ -279,8 +279,8 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
                 parentActivity.startActivity(csListIntent);
 
-            } else
-                parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
+//            } else
+//                parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
         }
 
         if (parentService != null) {

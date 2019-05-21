@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -49,6 +50,8 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
+
+//    private CardView emptyCardView;
 
     /**
      * The main attribute of activity containing all the CoffeeSites to show
@@ -105,7 +108,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         layoutManager = new LinearLayoutManager(this);
 
         updateSitesServiceIntent = new Intent(this, CoffeeSitesInRangeUpdateService.class);
-
         startService(updateSitesServiceIntent);
 
         doBindSitesInRangeService();
@@ -189,7 +191,9 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
     public void onDestroy() {
         if (locationService != null) {
             for (CoffeeSiteMovable csm : content.getItems()) {
-                locationService.removePropertyChangeListener(csm);
+                if (csm.isLocationServiceAssigned()) {
+                    locationService.removePropertyChangeListener(csm);
+                }
             }
         }
 
@@ -235,7 +239,7 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteListContent listContent) {
-        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(this, listContent, locationService , mTwoPane);
+        recyclerViewAdapter = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(this, listContent, this.searchRange, locationService , mTwoPane);
         for (CoffeeSiteMovable csm : content.getItems()) {
             csm.addPropertyChangeListener(recyclerViewAdapter);
         }
@@ -267,20 +271,26 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
 
     @Override
     public void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange) {
-        // Add all new sites into current list, first add new CoffeeSites
-        // as locationService listeners
+        // Add all new sites into current list
         for (CoffeeSiteMovable csm : newSitesInRange) {
+            // First add new CoffeeSites as locationService listeners
+            csm.setLocationService(locationService);
             locationService.addPropertyChangeListener(csm);
+            // Listen to location change to allow correct sorting according distance
+            csm.addPropertyChangeListener(recyclerViewAdapter);
         }
         recyclerViewAdapter.insertNewSites(newSitesInRange);
     }
 
     @Override
     public void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange) {
+        recyclerViewAdapter.removeOldSites(goneSitesOutOfRange);
+        // Remove CoffeeSiteMovable as a locationService listener
+        // as it will be removed from displaying in a list
         for (CoffeeSiteMovable csm : goneSitesOutOfRange) {
             locationService.removePropertyChangeListener(csm);
+            csm.removePropertyChangeListener(recyclerViewAdapter);
         }
-        recyclerViewAdapter.removeOldSites(goneSitesOutOfRange);
     }
 
 }

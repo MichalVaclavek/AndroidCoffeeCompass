@@ -3,6 +3,8 @@ package cz.fungisoft.coffeecompass2.activity.support;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,19 +30,23 @@ import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 /**
  * Adapter to show found list of CoffeeSitesMovable
  */
-public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerView.Adapter<CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder> implements PropertyChangeListener {
+public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PropertyChangeListener {
 
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final CoffeeSiteListActivity mParentActivity;
-    private List<CoffeeSiteMovable> mValues = null;
-    private CoffeeSiteListContent content = null;
+    private List<CoffeeSiteMovable> mValues;
+    private CoffeeSiteListContent content;
 
     private final boolean mTwoPane;
 
     private View.OnClickListener mOnClickListener;
-
     private static LocationService mLocationService;
+
+    private int currentSearchRange;
+
+    private static CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
+
 
     /**
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
@@ -116,6 +122,10 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
         // If there was 'Empty list card' shown, remove it
+        if (mValues.size() >= 1 && mValues.get(0).getName().equals("Dummy")) {
+            mValues.remove(0);
+            this.notifyItemRemoved(0);
+        }
 
         for (CoffeeSiteMovable csmToInsert : newSites) { // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
             int posToInsert = -1;
@@ -150,9 +160,10 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                 }
             }
         }
-        // If the current number of CoffeeSites visible is 0, show 'Empty list card'
-        if (mValues.size() == 0) {
 
+        if (mValues.size() == 0) {
+            mValues.add(0, dummyEmptyListCoffeeSite);
+            this.notifyItemInserted(0);
         }
     }
 
@@ -166,15 +177,22 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
      */
     public CoffeeSiteItemRecyclerViewAdapterForCoffeeSites(CoffeeSiteListActivity parent,
                                                            CoffeeSiteListContent content,
+                                                           int currentSearchRange,
                                                            LocationService locationService,
                                                            boolean twoPane) {
         this.content = content;
+        this.currentSearchRange = currentSearchRange;
         mValues = this.content.getItems();
         mParentActivity = parent;
         mTwoPane = twoPane;
         mLocationService = locationService;
 
         mOnClickListener = createOnClickListener();
+
+        if (mValues.size() == 0) {
+            mValues.add(0, dummyEmptyListCoffeeSite );
+            this.notifyItemInserted(0);
+        }
     }
 
     private View.OnClickListener createOnClickListener() {
@@ -207,33 +225,51 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     }
 
     @Override
-    public CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.coffeesite_list_content, parent, false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        return new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder(view);
+        RecyclerView.ViewHolder retVal = null;
+
+        switch (viewType) {
+            case 0:
+                View view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.coffeesite_list_content, parent, false);
+                retVal = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder1(view);
+                break;
+            case -1:
+                View view2 = LayoutInflater.from(parent.getContext())
+                             .inflate(R.layout.coffeesite_list_emptycard, parent, false);
+                retVal = new CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.EmptyCardViewHolder(view2);
+                break;
+        }
+        return retVal;
     }
 
     @Override
-    public void onBindViewHolder(final CoffeeSiteItemRecyclerViewAdapterForCoffeeSites.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
 
-        holder.csNameView.setText(mValues.get(position).getName());
-        holder.locAndTypeView.setText(mValues.get(position).getTypPodniku() + ", " +  mValues.get(position).getTypLokality());
-        holder.coffeeSortView.setText(mValues.get(position).getCoffeeSorts());
+        switch (viewHolder.getItemViewType()) {
+            case 0:
+                ViewHolder1 viewHolder1 = (ViewHolder1) viewHolder;
+                setupBasicViewHolder(position, viewHolder1);
+                break;
 
-        holder.distanceView.setText(mValues.get(position).getDistance() + " m");
-        holder.distanceView.setCoffeeSite(mValues.get(position));
-        holder.distanceView.setTag(TAG + ". DistanceTextView for " + mValues.get(position).getName());
+            case -1:
+                EmptyCardViewHolder emptyCardViewHolder = (EmptyCardViewHolder) viewHolder;
+                emptyCardViewHolder.currentDistanceEmptyCardView.setText(emptyCardViewHolder.currentDistanceEmptyCardView.getText() + Integer.toString(this.currentSearchRange) +  " m");
 
-        mValues.get(position).addPropertyChangeListener(holder.distanceView);
-        Log.d(TAG, ". Distance Text View " + holder.distanceView.getTag() + " added to listen distance change of " + mValues.get(position).getName() + ". Object id: " + mValues.get(position));
-
-        if (!mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(mValues.get(position).getMainImageURL()).rotate(90).into(holder.siteFoto);
+                break;
         }
+    }
 
-        holder.itemView.setTag(mValues.get(position));
-        holder.itemView.setOnClickListener(mOnClickListener);
+    @Override
+    public int getItemViewType(int position) {
+        // Just as an example, return 0 or 2 depending on position
+        // Note that unlike in ListView adapters, types don't have to be contiguous
+        int retViewType = 0;
+        if (mValues.size() == 1 && mValues.get(0).getName().equals("Dummy")) {
+            retViewType = -1;
+        }
+        return retViewType;
     }
 
     @Override
@@ -241,16 +277,35 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
         return mValues.size();
     }
 
+    private void setupBasicViewHolder(int position, ViewHolder1 viewHolder1) {
+        viewHolder1.csNameView.setText(this.mValues.get(position).getName());
+        viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
+        viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSorts());
+
+        viewHolder1.distanceView.setText(this.mValues.get(position).getDistance() + " m");
+        viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));
+        viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
+
+        this.mValues.get(position).addPropertyChangeListener(viewHolder1.distanceView);
+        Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
+
+        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
+            Picasso.get().load(this.mValues.get(position).getMainImageURL()).rotate(90).into(viewHolder1.siteFoto);
+        }
+
+        viewHolder1.itemView.setTag(this.mValues.get(position));
+        viewHolder1.itemView.setOnClickListener(this.mOnClickListener);
+    }
+
         /**
          * Inner ViewHolder class for CoffeeSiteItemRecyclerViewAdapter
          */
-        class ViewHolder extends RecyclerView.ViewHolder {
+        class ViewHolder1 extends RecyclerView.ViewHolder {
 
             final TextView csNameView; // to show name of CoffeeSite
             final TextView locAndTypeView; // to show type of the CoffeeSite and location type
             final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
-            //                final TextView distanceView; // to show distance attribute of the CoffeeSite
-            final DistanceChangeTextView distanceView;
+            final DistanceChangeTextView distanceView; // to show distance attribute of the CoffeeSite
 
             final ImageView siteFoto;
 
@@ -259,13 +314,35 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
              *
              * @param view
              */
-            ViewHolder(View view) {
+            ViewHolder1(View view) {
                 super(view);
                 csNameView = (TextView) view.findViewById(R.id.csNameTextView);
-                locAndTypeView = (TextView) view.findViewById(R.id.currentRangeTextView);
-                coffeeSortView = (TextView) view.findViewById(R.id.stillSearchingTextView);
+                locAndTypeView = (TextView) view.findViewById(R.id.locAndTypeTextView);
+                coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
                 distanceView = (DistanceChangeTextView) view.findViewById(R.id.csDistanceTextView);
                 siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+            }
+
+        }
+
+        /**
+         * Inner ViewHolder class for 'emptyCard'
+         */
+        class EmptyCardViewHolder extends RecyclerView.ViewHolder {
+
+            final TextView currentDistanceEmptyCardView;
+            final CardView emptyCardView;
+
+            /**
+             * Standard constructor for ViewHolder.
+             *
+             * @param view
+             */
+            EmptyCardViewHolder(View view) {
+                super(view);
+
+                emptyCardView = view.findViewById(R.id.list_empty_card);
+                currentDistanceEmptyCardView = view.findViewById(R.id.currentRangeTextView);
             }
         }
 

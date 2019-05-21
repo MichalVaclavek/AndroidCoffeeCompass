@@ -79,11 +79,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Markers for the list of CoffeeSites
         if (content != null) {
             for (final CoffeeSite cs : content.getItems()) {
-                addMarkerWithInfoListener(cs, mMap, builder);
+                if (!"Dummy".equals(cs.getName())) {
+                    addMarkerWithInfoListener(cs, mMap, builder);
+                }
             }
         }
 
-        // Marker for one CoffeeSite
+        // Marker for one CoffeeSite. Used when map is shown from Details Activity
         if (site != null) {
             addMarkerWithInfoListener(site, mMap, builder);
         }

@@ -51,12 +51,17 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        long newDistance = locService.getDistanceFromCurrentLocation(getLatitude(), getLongitude());
-        long currentDistance = getDistance();
-        if (Math.abs(newDistance - currentDistance) >= ((Location)evt.getNewValue()).getAccuracy()/2) { // distance change is at least twice higher then current location accuracy
-            setDistance(newDistance);
-            support.firePropertyChange("distance", currentDistance, newDistance);
+        if (locService != null) {
+            long newDistance = locService.getDistanceFromCurrentLocation(getLatitude(), getLongitude());
+            long currentDistance = getDistance();
+            if (Math.abs(newDistance - currentDistance) >= ((Location) evt.getNewValue()).getAccuracy() / 2) { // distance change is at least twice higher then current location accuracy
+                setDistance(newDistance);
+                support.firePropertyChange("distance", currentDistance, newDistance);
+            }
         }
     }
 
+    public boolean isLocationServiceAssigned() {
+        return locService != null;
+    }
 }
