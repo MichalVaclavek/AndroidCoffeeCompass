@@ -66,8 +66,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
+                    android:background="@drawable/roundedbutton"
                     android:onClick="onMapButtonClick"
-                    android:text="Mapa" />
+                    android:text="Mapa"
+                    android:textColor="#FFE0B2" />
 
                 <Button
                     android:id="@+id/imageButton"
@@ -75,9 +77,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
+                    android:background="@drawable/roundedbutton"
                     android:enabled="false"
                     android:onClick="onImageButtonClick"
-                    android:text="Foto" />
+                    android:text="Foto"
+                    android:textColor="#FFE0B2"
+                    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/commentsButton"
@@ -85,9 +91,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
+                    android:background="@drawable/roundedbutton"
                     android:enabled="false"
                     android:onClick="onCommentsButtonClick"
-                    android:text="komentáře" />
+                    android:text="komentáře"
+                    android:textColor="#FFE0B2"
+                    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
+                    android:visibility="gone" />
 
             </TableRow>
 

@@ -84,10 +84,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
-
         if (findViewById(R.id.coffeesite_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -102,8 +98,19 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         }
 
         this.searchLocation = (LatLng) getIntent().getExtras().get("latLongFrom");
-        this.searchRange = (int) getIntent().getExtras().get("searchRange");
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
+        this.searchRange = (int) getIntent().getExtras().get("searchRange");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
+        String searchRangeString;
+        // Prevod na km
+        if (searchRange >= 1000) {
+            searchRangeString = " (" + searchRange/1000 + " km)";
+        } else {
+            searchRangeString = " (" + searchRange + " m)";
+        }
+        toolbar.setTitle(getTitle() + searchRangeString);
+        setSupportActionBar(toolbar);
 
         layoutManager = new LinearLayoutManager(this);
 
@@ -164,8 +171,9 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         super.onRestoreInstanceState(state);
 
         // Retrieve CoffeeSites list state and item positions
-        if(state != null)
+        if(state != null) {
             mListState = state.getParcelable(LIST_STATE_KEY);
+        }
     }
 
     @Override

@@ -1,17 +1,13 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -22,20 +18,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 
 /**
  * Main activity to show:
@@ -54,7 +44,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
     private static final float MIN_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
-    private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
+//    private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
     private boolean bPrvni = true;
     private int barva = Color.BLACK;
@@ -195,8 +185,10 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
     }
 
-    private void zobrazPolohu(Location location) {
-        accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
+    private void zobrazPresnostPolohy(Location location) {
+        if (location != null) {
+            accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
+        }
     }
 
     private void openMap() {
@@ -283,6 +275,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         super.onResume();
 
         updateAccuracyIndicator(location);
+        zobrazPresnostPolohy(location);
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -301,12 +294,12 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         super.onLocationServiceConnected();
 
         location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        locationService.addPropertyChangeListener(this);
+//        location = locationService.getCurrentLocation();
 
         if (location != null) {
-            zobrazPolohu(location);
+            zobrazPresnostPolohy(location);
         }
-
-        locationService.addPropertyChangeListener(this);
     }
 
 
@@ -343,7 +336,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         if (locationService != null) // Current change of location has better accuracy then previous or better that Min. accuracy
         {
             location = locationService.getCurrentLocation();
-            zobrazPolohu(location);
+            zobrazPresnostPolohy(location);
 
             if (!searchEspressoButton.isEnabled()) {
                 searchEspressoButton.setEnabled(true);

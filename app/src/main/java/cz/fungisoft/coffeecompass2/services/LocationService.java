@@ -31,9 +31,9 @@ public class LocationService extends Service {
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
     private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
-    private static final float MIN_PRESNOST = 15.0f;
-//    private static final float MIN_PRESNOST = 50.0f;
-    private static final float LAST_PRESNOST = 500.0f;
+//    private static final float MIN_PRESNOST = 15.0f;
+    private static final float MIN_PRESNOST = 100.0f;
+    private static final float LAST_PRESNOST = 1000.0f;
     private static final float MIN_VZDALENOST = 3.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
     private NotificationManager mNM;
@@ -92,7 +92,7 @@ public class LocationService extends Service {
             public void onLocationChanged(Location loc) {
 
                 if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
-                        // and time period for observing location elapsed
+                                        // and time period for observing location elapsed
                         ||
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
                                 && (loc.getAccuracy() < MIN_PRESNOST)) {
@@ -161,7 +161,7 @@ public class LocationService extends Service {
         }
 
         if (topPresnost > minAccuracy
-                || (System.currentTimeMillis() - topCas) > cas)
+            || (System.currentTimeMillis() - topCas) > cas)
             return null;
         else
             return vysledek;

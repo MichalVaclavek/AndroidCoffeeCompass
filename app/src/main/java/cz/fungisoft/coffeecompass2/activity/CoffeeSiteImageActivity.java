@@ -58,8 +58,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
-//        Bundle arguments = new Bundle();
-
         fragment.setCoffeeSite(cs);
 
         if (savedInstanceState == null) { // is this enough?
@@ -91,17 +89,17 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         // Listener for Location service can be removed, as there is no 'follow' Activity, from which
         // the CoffeeSiteImageActivity could be called back
-        if (locationService != null) {
-            locationService.removePropertyChangeListener(cs);
-        }
+//        if (locationService != null) {
+//            locationService.removePropertyChangeListener(cs);
+//        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (locationService != null) {
-            locationService.addPropertyChangeListener(cs);
-        }
+//        if (locationService != null) {
+//            locationService.addPropertyChangeListener(cs);
+//        }
         cs.addPropertyChangeListener(distLabel);
         distLabel.setText(String.valueOf(cs.getDistance()) + " m");
 //        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);
@@ -111,7 +109,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-
             this.onBackPressed();
             return true;
         }

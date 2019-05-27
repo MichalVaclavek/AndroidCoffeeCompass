@@ -8,15 +8,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.asynctask.GetCommentsAsyncTask;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
-import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
@@ -25,10 +21,6 @@ import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
  * in a {@link CoffeeSiteListActivity}.
  */
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
-
-    private CoffeeSiteListContent content;
-
-    private String selectedItemID;
 
     private Button commentsButton;
 
@@ -53,12 +45,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        selectedItemID = getIntent().getStringExtra(CoffeeSiteDetailFragment.ARG_ITEM_ID);
-        content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
-        if (content != null) { // When called from ListActivity
-            coffeeSite = content.getItemsMap().get(selectedItemID);
-        }
-
         if (getIntent().getSerializableExtra("coffeeSite") != null) { // If called from mapsActivity
             coffeeSite = (CoffeeSiteMovable) getIntent().getSerializableExtra("coffeeSite");
         }
@@ -67,6 +53,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
         if (imageAvail) {
             Button imageButton = (Button) findViewById(R.id.imageButton);
+            imageButton.setVisibility(View.VISIBLE);
             imageButton.setEnabled(true);
         }
 
@@ -106,9 +93,9 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     @Override
     public void onDestroy() {
-        if (locationService != null) {
-            locationService.removePropertyChangeListener(coffeeSite);
-        }
+//        if (locationService != null) {
+//            locationService.removePropertyChangeListener(coffeeSite);
+//        }
         super.onDestroy();
     }
 
@@ -162,6 +149,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
      * found in GetCommentsAsyncTask
      */
     public void enableCommentsButton() {
+        commentsButton.setVisibility(View.VISIBLE);
         commentsButton.setEnabled(true);
     }
 
