@@ -17,10 +17,11 @@
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
     <string name="about_version">v. 0.2.0</string>
-    <string name="about_datum">21. 5. 2019</string>
+    <string name="about_datum">31. 5. 2019</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat "kávové lokace", které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní automaty na kávu, pekárny, cukrárny, bistra, občerstvení atp.</string>
-    <string name="about_sentence3">Pokud se vám aplikace líbí, prosím, zaregistrujte se na stránce coffeecompass.cz a pomozte evidovat další kávové lokace.</string>
+    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b> a pomozte evidovat další kávové lokace."</string>
+    <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
     <string name="local_service_stopped">Location service stoped.</string>

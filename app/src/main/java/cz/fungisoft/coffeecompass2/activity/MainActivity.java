@@ -42,9 +42,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private static final String TAG = "MainActivity";
 
     private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
-    private static final float MIN_PRESNOST = 10.0f;
+    private static final float GOOD_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
-//    private static final float MIN_VZDALENOST = 5.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
     private boolean bPrvni = true;
     private int barva = Color.BLACK;
@@ -104,20 +103,26 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      * current accuracy value.
      * <br>
      * If the accuracy is not known or too old, then it has default RED color
-     * if the accuracy is known, but higher than MIN_PRESNOST, then it has ORANGE (R.drawable.location_better) color
-     * if the accuracy is known, and lower than MIN_PRESNOST, then it has GREEN (R.drawable.location_good) color
+     * if the accuracy is known, but higher than GOOD_PRESNOST, then it has ORANGE (R.drawable.location_better) color
+     * if the accuracy is known, and lower than GOOD_PRESNOST, then it has GREEN (R.drawable.location_good) color
      *
-     * @param loc
+     * @param location
      */
-    private void updateAccuracyIndicator(Location loc) {
+    private void updateAccuracyIndicator(Location location) {
 
-        if (loc != null) {
+        if (location != null) {
             Drawable locIndic = getResources().getDrawable(R.drawable.location_better);
 
-            if (loc.getAccuracy() <= MIN_PRESNOST) {
+            if (location.getAccuracy() <= GOOD_PRESNOST) {
                 locIndic = getResources().getDrawable(R.drawable.location_good);
             }
             locationImageView.setBackground(locIndic);
+        }
+    }
+
+    private void zobrazPresnostPolohy(Location location) {
+        if (location != null) {
+            accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
         }
     }
 
@@ -160,8 +165,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         this.startActivity(i);
     }
 
-
-    private void barvyTextu(int barva) {
+    private void setAccuracyTextColor(int barva) {
         accuracy.setTextColor(barva);
     }
 
@@ -182,12 +186,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             sitesToday.setText(stats.numOfSitesToday);
             sites7View.setText(stats.numOfSitesLastWeek);
             usersView.setText(stats.numOfUsers);
-        }
-    }
-
-    private void zobrazPresnostPolohy(Location location) {
-        if (location != null) {
-            accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
         }
     }
 
@@ -274,14 +272,17 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     protected void onResume() {
         super.onResume();
 
-        updateAccuracyIndicator(location);
-        zobrazPresnostPolohy(location);
-
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             return;
+        }
+
+        if (locationService != null) {
+            location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            updateAccuracyIndicator(location);
+            zobrazPresnostPolohy(location);
         }
     }
 
@@ -295,11 +296,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         locationService.addPropertyChangeListener(this);
-//        location = locationService.getCurrentLocation();
 
-        if (location != null) {
-            zobrazPresnostPolohy(location);
-        }
+        zobrazPresnostPolohy(location);
     }
 
 
@@ -326,24 +324,22 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     public void propertyChange(PropertyChangeEvent evt) {
 
         if (bPrvni) { // prvni platna detekce polohy
-            barvyTextu(barva);
+            setAccuracyTextColor(barva);
             bPrvni = false;
             searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
-            updateAccuracyIndicator(location);
         }
 
-        if (locationService != null) // Current change of location has better accuracy then previous or better that Min. accuracy
+        if (locationService != null)
         {
             location = locationService.getCurrentLocation();
             zobrazPresnostPolohy(location);
+            updateAccuracyIndicator(location);
 
             if (!searchEspressoButton.isEnabled()) {
                 searchEspressoButton.setEnabled(true);
                 searchKafeButton.setEnabled(true);
             }
-
-            updateAccuracyIndicator(location);
         }
     }
 

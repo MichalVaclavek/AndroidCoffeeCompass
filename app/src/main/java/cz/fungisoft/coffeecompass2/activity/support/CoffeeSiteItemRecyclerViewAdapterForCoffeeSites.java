@@ -284,9 +284,9 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
 
     private void setupEmptyCardViewHolder(final EmptyCardViewHolder viewHolder) {
 
-        viewHolder.currentDistanceEmptyCardView.setText(searchingDistanceLabel + Integer.toString(this.currentSearchRange) +  " m");
+        viewHolder.currentDistanceEmptyCardView.setText(searchingDistanceLabel + this.currentSearchRange +  " m");
 
-        // Animation of the label indicating system is allive and searching for new locations
+        // Animation of the label indicating system is alive and searching for new locations
         animation1 = new AlphaAnimation(0.0f, 1.0f);
         animation1.setDuration(1600);
         animation1.setStartOffset(200);

@@ -25,14 +25,12 @@ import cz.fungisoft.coffeecompass2.R;
 
 public class LocationService extends Service {
 
-//    private static final int LOCATION_REQUEST_CODE = 101;
     private String TAG = "Location service";
 
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
     private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
-//    private static final float MIN_PRESNOST = 15.0f;
-    private static final float MIN_PRESNOST = 100.0f;
+    private static final float MIN_PRESNOST = 20.0f;
     private static final float LAST_PRESNOST = 1000.0f;
     private static final float MIN_VZDALENOST = 3.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
@@ -216,8 +214,8 @@ public class LocationService extends Service {
      */
     public long getDistanceFromCurrentLocation(double lat1, double lon1) {
 
-        double lat2 = 0;
-        double lon2 = 0;
+        double lat2;
+        double lon2;
 
         if (location != null) {
             lat2 = location.getLatitude();
