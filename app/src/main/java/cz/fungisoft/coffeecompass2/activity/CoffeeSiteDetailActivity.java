@@ -93,9 +93,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     @Override
     public void onDestroy() {
-//        if (locationService != null) {
-//            locationService.removePropertyChangeListener(coffeeSite);
-//        }
         super.onDestroy();
     }
 

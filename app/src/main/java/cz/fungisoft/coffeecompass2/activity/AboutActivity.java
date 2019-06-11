@@ -13,8 +13,6 @@ import cz.fungisoft.coffeecompass2.R;
  */
 public class AboutActivity extends AppCompatActivity {
 
-    private TextView sentence3withLink;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

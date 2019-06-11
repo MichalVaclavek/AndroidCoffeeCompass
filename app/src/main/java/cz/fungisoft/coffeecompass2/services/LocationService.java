@@ -23,6 +23,10 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 
+/**
+ * Location service to provide location to all other Activities.
+ * Basically used in conjuction with ActivityWithLocationService ancestors
+ */
 public class LocationService extends Service {
 
     private String TAG = "Location service";
@@ -30,7 +34,7 @@ public class LocationService extends Service {
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
     private static final long POLLING = 1000 * 2; // milisecond of GPS refresh ?
-    private static final float MIN_PRESNOST = 20.0f;
+    private static final float MIN_PRESNOST = 25.0f;
     private static final float LAST_PRESNOST = 1000.0f;
     private static final float MIN_VZDALENOST = 3.0f; // min. zmena GPS polohy, ktera vyvola onLocationChanged() ?
 
@@ -89,11 +93,17 @@ public class LocationService extends Service {
             @Override
             public void onLocationChanged(Location loc) {
 
-                if (location == null // Current change of location has better accuracy then previous or better that Min. accuracy
-                                        // and time period for observing location elapsed
+                if (location == null // Current location has better then Min. accuracy
+                                     // and time period for observing location elapsed
                         ||
-                        (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS))
-                                && (loc.getAccuracy() < MIN_PRESNOST)) {
+                        (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS) && (loc.hasAccuracy()) )
+                        && (
+                            (loc.getProvider().equals("gps") && (loc.getAccuracy() < MIN_PRESNOST))
+                            || // only available provider is network
+                            ((locManager.getProviders(true).size() == 1) && loc.getProvider().equals("network") && loc.getAccuracy() < MIN_PRESNOST * 5)
+                        )
+                )
+                {
                     Location oldLocation = location;
                     location = loc;
                     support.firePropertyChange("location", oldLocation, location);
@@ -135,7 +145,7 @@ public class LocationService extends Service {
 
         Location vysledek = null;
         float topPresnost = Float.MAX_VALUE;
-        long topCas = Long.MIN_VALUE;
+        long topCas = 0;
 
         List<String> matchingProviders = locManager.getAllProviders();
         for (String provider : matchingProviders) {
@@ -164,7 +174,6 @@ public class LocationService extends Service {
         else
             return vysledek;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

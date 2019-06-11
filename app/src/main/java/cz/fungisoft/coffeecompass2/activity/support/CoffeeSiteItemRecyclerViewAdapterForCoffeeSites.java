@@ -351,7 +351,7 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
         Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL()).rotate(90).into(viewHolder1.siteFoto);
+            Picasso.get().load(this.mValues.get(position).getMainImageURL()).into(viewHolder1.siteFoto);
         }
 
         viewHolder1.itemView.setTag(this.mValues.get(position));

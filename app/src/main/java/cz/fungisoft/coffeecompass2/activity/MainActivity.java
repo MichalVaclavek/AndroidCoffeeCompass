@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,19 +35,19 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
  *  - basic statistics info about CoffeeSites and Users
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
- *  Calls standard Android service to detect location based on GPS or network info.
  */
 public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
 
-    private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
+    private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove (po spusteni app.)
     private static final float GOOD_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
 
     private boolean bPrvni = true;
-    private int barva = Color.BLACK;
+    private int barvaBlack = Color.BLACK;
+    private int barvaRed = Color.RED;
 
     private TextView accuracy;
 
@@ -78,13 +79,22 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         accuracy = (TextView) findViewById(R.id.accuracy);
 
+        String searchRangeString;
+        // Prevod na km
+        if (searchRange >= 1000) {
+            searchRangeString = " (" + searchRange/1000 + " km)";
+        } else {
+            searchRangeString = " (" + searchRange + " m)";
+        }
+
+        //TODO - text from R.string. ...
         searchEspressoButton = (Button) findViewById(R.id.searchEspressoButton);
         searchEspressoButton.setTransformationMethod(null);
-        searchEspressoButton.setText("Hledej\n\r" + "ESPRESSO\n\r" + "(" + searchRange + " m)");
+        searchEspressoButton.setText(Html.fromHtml("ESPRESSO<br><small>" + searchRangeString + "</small>" ));
 
         searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
         searchKafeButton.setTransformationMethod(null);
-        searchKafeButton.setText("Hledej\n\r" + "KAFE\n\r" + "(" + searchRange + " m)");
+        searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
 
         locationImageView = (ImageView) findViewById(R.id.locationImageView);
 
@@ -110,19 +120,24 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      */
     private void updateAccuracyIndicator(Location location) {
 
+        Drawable  locIndic = getResources().getDrawable(R.drawable.location_bad);
         if (location != null) {
-            Drawable locIndic = getResources().getDrawable(R.drawable.location_better);
+            locIndic = getResources().getDrawable(R.drawable.location_better);
 
             if (location.getAccuracy() <= GOOD_PRESNOST) {
                 locIndic = getResources().getDrawable(R.drawable.location_good);
             }
-            locationImageView.setBackground(locIndic);
         }
+        locationImageView.setBackground(locIndic);
     }
 
     private void zobrazPresnostPolohy(Location location) {
-        if (location != null) {
+        if (location != null && location.hasAccuracy()) {
+            setAccuracyTextColor(barvaBlack);
             accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
+        } else {
+            setAccuracyTextColor(barvaRed);
+            accuracy.setText("");
         }
     }
 
@@ -200,12 +215,15 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     public void onHledejEspressoClick(View view) {
 
+        if (location == null) {
+            return;
+        }
         if (Utils.isOnline()) {
             new GetSitesInRangeAsyncTask(this,
                                          location.getLatitude(),
                                          location.getLongitude(),
                                          searchRange,
-                                         "espresso").execute();
+                                "espresso").execute();
         } else {
             showNoInternetToast();
         }
@@ -213,12 +231,15 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     public void onHledejKafeClick(View view) {
 
+        if (location == null) {
+            return;
+        }
         if (Utils.isOnline()) {
             new GetSitesInRangeAsyncTask(this,
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    searchRange,
-                    "").execute();
+                                        location.getLatitude(),
+                                        location.getLongitude(),
+                                        searchRange,
+                                "").execute();
         } else {
             showNoInternetToast();
         }
@@ -229,8 +250,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      */
     private void showNoInternetToast() {
         Toast toast = Toast.makeText(getApplicationContext(),
-                "No Internet connection.",
-                Toast.LENGTH_SHORT);
+                                "No Internet connection.",
+                                    Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -268,6 +289,25 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
     }
 
+    /**
+     * Setup locationService listeners and RecyclerView which also
+     * requires locationService to be activated/connected.
+     */
+    @Override
+    public void onLocationServiceConnected() {
+        super.onLocationServiceConnected();
+
+        location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        locationService.addPropertyChangeListener(this);
+
+        zobrazPresnostPolohy(location);
+        updateAccuracyIndicator(location);
+        if (location != null) {
+            searchEspressoButton.setEnabled(true);
+            searchKafeButton.setEnabled(true);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -281,30 +321,23 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         if (locationService != null) {
             location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-            updateAccuracyIndicator(location);
+
             zobrazPresnostPolohy(location);
+            updateAccuracyIndicator(location);
+            if (location != null) {
+                searchEspressoButton.setEnabled(true);
+                searchKafeButton.setEnabled(true);
+            } else {
+                searchEspressoButton.setEnabled(false);
+                searchKafeButton.setEnabled(false);
+            }
         }
     }
 
-    /**
-     * Setup locationService listeners and RecyclerView which also
-     * requires locationService to be activated/connected.
-     */
-    @Override
-    public void onLocationServiceConnected() {
-        super.onLocationServiceConnected();
-
-        location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-        locationService.addPropertyChangeListener(this);
-
-        zobrazPresnostPolohy(location);
-    }
-
-
     @Override
     protected void onPause() {
-        super.onPause();
-
+        searchEspressoButton.setEnabled(false);
+        searchKafeButton.setEnabled(false);
         // Kontrola opravneni
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -312,6 +345,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
             return;
         }
+
+        super.onPause();
     }
 
     /**
@@ -324,10 +359,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     public void propertyChange(PropertyChangeEvent evt) {
 
         if (bPrvni) { // prvni platna detekce polohy
-            setAccuracyTextColor(barva);
             bPrvni = false;
-            searchEspressoButton.setEnabled(true);
-            searchKafeButton.setEnabled(true);
+            setAccuracyTextColor(barvaBlack);
         }
 
         if (locationService != null)
@@ -335,11 +368,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             location = locationService.getCurrentLocation();
             zobrazPresnostPolohy(location);
             updateAccuracyIndicator(location);
-
-            if (!searchEspressoButton.isEnabled()) {
-                searchEspressoButton.setEnabled(true);
-                searchKafeButton.setEnabled(true);
-            }
+            searchEspressoButton.setEnabled(true);
+            searchKafeButton.setEnabled(true);
         }
     }
 

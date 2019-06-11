@@ -140,7 +140,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
             ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
 
-            if (!mItem.getUvodniKoment().isEmpty()) {
+            if (mItem.getUvodniKoment() != null && !mItem.getUvodniKoment().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(mItem.getUvodniKoment());
             } else {
                 rootView.findViewById(R.id.authorCommentTableRow).setVisibility(View.GONE);

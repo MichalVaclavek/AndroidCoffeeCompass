@@ -36,7 +36,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
  */
 public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> {
 
-    private static final String TAG = "Read CoffeeSite list ";
+    private static final String TAG = "Read CoffeeSite list";
 
     private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
     private String sURL;
@@ -266,21 +266,16 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     protected void onPostExecute(String result) {
 
         if (parentActivity != null) {
-//            if (coffeeSites.size() > 0) {
+            CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
 
-                CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
+            Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
 
-                Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
+            csListIntent.putExtra("listContent", content);
+            csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));
+            csListIntent.putExtra("searchRange", this.searchRange);
+            csListIntent.putExtra("coffeeSort", this.searchCoffeeSort);
 
-                csListIntent.putExtra("listContent", content);
-                csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));
-                csListIntent.putExtra("searchRange", this.searchRange);
-                csListIntent.putExtra("coffeeSort", this.searchCoffeeSort);
-
-                parentActivity.startActivity(csListIntent);
-
-//            } else
-//                parentActivity.showNothingFoundStatus(this.searchCoffeeSort);
+            parentActivity.startActivity(csListIntent);
         }
 
         if (parentService != null) {

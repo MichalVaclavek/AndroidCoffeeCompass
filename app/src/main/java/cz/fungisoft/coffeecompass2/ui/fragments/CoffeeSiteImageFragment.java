@@ -33,7 +33,7 @@ public class CoffeeSiteImageFragment extends Fragment {
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
 
         if (this.site != null && !site.getMainImageURL().isEmpty()) {
-            Picasso.get().load(site.getMainImageURL()).rotate(90).into(pictureImageView);
+            Picasso.get().load(site.getMainImageURL()).into(pictureImageView);
         }
         return view;
     }

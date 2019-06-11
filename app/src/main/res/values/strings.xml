@@ -2,6 +2,11 @@
     <string name="app_name">Káva s sebou</string>
 
     <string name="title_coffeesite_detail">CoffeeSite Detail</string>
+    <string name="main_button_search_espresso">"ESPRESSO"</string>
+    <string name="main_button_search_kafe">"KÁVA"</string>
+    <string name="main_button_search_nextline_start">"("</string>
+    <string name="main_button_search_nextline_end">" m)"</string>
+
     <string name="num_all_sites_label">Počet všech lokací: </string>
     <string name="num_all_sites7_label">Nové lokace za posledních 7 dnů: </string>
     <string name="num_all_users_label">Počet všech uživatelů: </string>
@@ -16,10 +21,10 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 0.2.0</string>
-    <string name="about_datum">31. 5. 2019</string>
-    <string name="about_sentence1">Tato aplikace umožňuje vyhledat "kávové lokace", které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
-    <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní automaty na kávu, pekárny, cukrárny, bistra, občerstvení atp.</string>
+    <string name="about_version">v. 0.2.1</string>
+    <string name="about_datum">2. 6. 2019</string>
+    <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
+    <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b> a pomozte evidovat další kávové lokace."</string>
     <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
