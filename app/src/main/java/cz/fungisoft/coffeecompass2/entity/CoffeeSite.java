@@ -1,8 +1,12 @@
 package cz.fungisoft.coffeecompass2.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -10,11 +14,11 @@ import java.util.Objects;
 /**
  * A CoffeeSite, main app. entity
  */
-public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
+public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcelable
 {
-    private int id;
-    private String name;
-    private long distance;
+    protected int id;
+    protected String name;
+    protected long distance;
 
     public int getId() {
         return id;
@@ -36,13 +40,101 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
         return distance;
     }
 
+    /* Parcelable implementation -- START -- */
+
+    protected CoffeeSite(Parcel in) {
+        id = in.readInt();
+        name = in.readString();
+        distance = in.readLong();
+
+        createdOn = (java.util.Date) in.readSerializable();
+        createdOnString = in.readString();
+        latitude = in.readDouble();
+        longitude = in.readDouble();
+
+        mainImageURL = in.readString();
+
+        statusZarizeni = in.readString();
+        uliceCP = in.readString();
+        typPodniku = in.readString();
+        typLokality = in.readString();
+        cena = in.readString();
+        hodnoceni = in.readString();
+
+        createdByUser = in.readString();
+        uvodniKoment = in.readString();
+
+        cupTypes = in.readString();
+        coffeeSorts = in.readString();
+        otherOffers = in.readString();
+        nextToMachineTypes = in.readString();
+
+        oteviraciDobaDny = in.readString();
+        oteviraciDobaHod = in.readString();
+
+        in.readList(comments, Comment.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeLong(distance);
+
+        dest.writeSerializable(createdOn);
+        dest.writeString(createdOnString);
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+
+        dest.writeString(mainImageURL);
+
+        dest.writeString(statusZarizeni);
+        dest.writeString(uliceCP);
+        dest.writeString(typPodniku);
+        dest.writeString(typLokality);
+        dest.writeString(cena);
+        dest.writeString(hodnoceni);
+
+        dest.writeString(createdByUser);
+        dest.writeString(uvodniKoment);
+
+        dest.writeString(cupTypes);
+        dest.writeString(coffeeSorts);
+        dest.writeString(otherOffers);
+        dest.writeString(nextToMachineTypes);
+
+        dest.writeString(oteviraciDobaDny);
+        dest.writeString(oteviraciDobaHod);
+
+        dest.writeList(comments);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<CoffeeSite> CREATOR = new Creator<CoffeeSite>() {
+        @Override
+        public CoffeeSite createFromParcel(Parcel in) {
+            return new CoffeeSite(in);
+        }
+
+        @Override
+        public CoffeeSite[] newArray(int size) {
+            return new CoffeeSite[size];
+        }
+    };
+
+    /* Parcelable implementation -- END -- */
+
     public void setDistance(long distance) {
         this.distance = distance;
     }
 
-    private final SimpleDateFormat format = new SimpleDateFormat("dd. MM. yyyy HH:mm");
+    private final SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
 
-    private Date createdOn;
+    protected Date createdOn;
 
     public Date getCreatedOn() {
         return createdOn;
@@ -53,7 +145,7 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
         this.createdOnString = format.format(this.createdOn);
     }
 
-    private String createdOnString;
+    protected String createdOnString;
 
     public String getCreatedOnString() {
         return createdOnString;
@@ -73,33 +165,33 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
     }
 
 
-    private double latitude;
-    private double longitude;
+    protected double latitude;
+    protected double longitude;
 
     /**
      * URL of the main image of this CoffeeSite
      */
-    private String mainImageURL = ""; // default empty, means image not available
+    protected String mainImageURL = ""; // default empty, means image not available
 
-    private String statusZarizeni;
-    private String uliceCP;
-    private String typPodniku;
-    private String typLokality;
-    private String cena;
-    private String hodnoceni;
+    protected String statusZarizeni;
+    protected String uliceCP;
+    protected String typPodniku;
+    protected String typLokality;
+    protected String cena;
+    protected String hodnoceni;
 
-    private String createdByUser;
-    private String uvodniKoment;
+    protected String createdByUser;
+    protected String uvodniKoment;
 
-    private String cupTypes;
-    private String coffeeSorts;
-    private String otherOffers;
-    private String nextToMachineTypes;
+    protected String cupTypes;
+    protected String coffeeSorts;
+    protected String otherOffers;
+    protected String nextToMachineTypes;
 
-    private String oteviraciDobaDny;
-    private String oteviraciDobaHod;
+    protected String oteviraciDobaDny;
+    protected String oteviraciDobaHod;
 
-    private List<Comment> comments;
+    protected List<Comment> comments;
 
     public List<Comment> getComments() {
         return comments;
@@ -295,4 +387,5 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

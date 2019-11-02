@@ -36,7 +36,7 @@ public class CommentsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
 
-        cs = (CoffeeSite) getIntent().getSerializableExtra("site");
+        cs = (CoffeeSite) getIntent().getParcelableExtra("site");
         comments = cs.getComments();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.comments_toolbar);

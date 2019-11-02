@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.activity.support;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -223,8 +224,7 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-
-                    intent.putExtra("coffeeSite", item);
+                    intent.putExtra("coffeeSite", (Parcelable) item);
                     context.startActivity(intent);
                 }
             }

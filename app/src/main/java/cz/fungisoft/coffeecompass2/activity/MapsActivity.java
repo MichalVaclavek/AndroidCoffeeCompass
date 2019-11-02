@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -46,8 +47,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps_fragment);
 
         currentLoc = (LatLng) getIntent().getExtras().get("currentLocation");
-        content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
-        site = (CoffeeSite) getIntent().getSerializableExtra("site");
+        content = getIntent().getParcelableExtra("listContent");
+        site = (CoffeeSite) getIntent().getParcelableExtra("site");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -99,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // because of problems with layout dimension, it was detected to be 0 size.
             int width = getResources().getDisplayMetrics().widthPixels;
             int height = getResources().getDisplayMetrics().heightPixels;
-            int padding = (int) (width * 0.12); // offset from edges of the map 12% of screen
+            int padding = (int) (width * 0.12); // offset from edges of the map - 12% of the screen
 
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
         }
@@ -116,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Intent detailsIntent = new Intent(MapsActivity.this, CoffeeSiteDetailActivity.class);
 
                 CoffeeSite cs = (CoffeeSite) marker.getTag();
-                detailsIntent.putExtra("coffeeSite", cs);
+                detailsIntent.putExtra("coffeeSite", (Parcelable) cs);
                 startActivity(detailsIntent);
             }
         };

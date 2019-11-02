@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -51,8 +50,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
-//    private CardView emptyCardView;
-
     /**
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
@@ -92,7 +89,7 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
             mTwoPane = true;
         }
 
-        content = (CoffeeSiteListContent) getIntent().getSerializableExtra("listContent");
+        content = getIntent().getParcelableExtra("listContent");
         if (savedInstanceState != null) { // i.e. after orientation was changed
             Collections.sort(content.getItems());
         }
@@ -120,7 +117,6 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         doBindSitesInRangeService();
     }
 
-
     /**
      * Setup locationService listeners and RecyclerView which also
      * requires locationService to be activated/connected.
@@ -142,7 +138,9 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
     public void onCoffeeSitesInRangeUpdateServiceConnected() {
         sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
         sitesInRangeUpdateService.addSitesInRangeUpdateListener(this);
-        sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(this.content.getItems(), this.searchLocation, this.searchRange, this.searchCoffeeSort);
+        if (this.content != null) {
+            sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(this.content.getItems(), this.searchLocation, this.searchRange, this.searchCoffeeSort);
+        }
     }
 
     private void prepareAndActivateRecyclerView() {
@@ -151,7 +149,7 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
         assert recyclerView != null;
 
         recyclerView.setLayoutManager(layoutManager);
-        if (extras != null) {
+        if (extras != null && content != null) {
             Collections.sort(content.getItems());
             setupRecyclerView((RecyclerView) recyclerView, content);
         }
@@ -242,7 +240,7 @@ public class CoffeeSiteListActivity extends ActivityWithLocationService implemen
     private void openMap() {
         Intent mapIntent = new Intent(this, MapsActivity.class);
         mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
-        mapIntent.putExtra("listContent", content);
+        mapIntent.putExtra("listContent", (Parcelable) content);
         startActivity(mapIntent);
     }
 

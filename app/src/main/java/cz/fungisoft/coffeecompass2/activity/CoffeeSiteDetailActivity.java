@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -45,23 +46,26 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (getIntent().getSerializableExtra("coffeeSite") != null) { // If called from mapsActivity
-            coffeeSite = (CoffeeSiteMovable) getIntent().getSerializableExtra("coffeeSite");
+        Intent intent = this.getIntent();
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            coffeeSite = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
         }
 
-        boolean imageAvail = !coffeeSite.getMainImageURL().isEmpty();
+        if (coffeeSite != null) {
+            boolean imageAvail = !coffeeSite.getMainImageURL().isEmpty();
 
-        if (imageAvail) {
-            Button imageButton = (Button) findViewById(R.id.imageButton);
-            imageButton.setVisibility(View.VISIBLE);
-            imageButton.setEnabled(true);
+            if (imageAvail) {
+                Button imageButton = (Button) findViewById(R.id.imageButton);
+                imageButton.setVisibility(View.VISIBLE);
+                imageButton.setEnabled(true);
+            }
+
+            // Async task to check if the Comments are available for the site
+            if (Utils.isOnline()) {
+                new GetCommentsAsyncTask(this, coffeeSite).execute();
+            }
         }
-
-        // Async task to check if the Comments are available for the site
-        if (Utils.isOnline()) {
-            new GetCommentsAsyncTask(this, coffeeSite).execute();
-        }
-
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
         // (e.g. when rotating the screen from portrait to landscape).
@@ -84,11 +88,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        coffeeSite.setLocationService(locationService);
-        locationService.addPropertyChangeListener(coffeeSite);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.coffeesite_detail_container, detailFragment)
-                .commit();
+        if (coffeeSite != null) {
+            coffeeSite.setLocationService(locationService);
+            locationService.addPropertyChangeListener(coffeeSite);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.coffeesite_detail_container, detailFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -122,13 +128,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     public void onImageButtonClick(View v) {
         Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
-        imageIntent.putExtra("coffeeSite", coffeeSite);
+        imageIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
         startActivity(imageIntent);
     }
 
     public void onCommentsButtonClick(View v) {
         Intent commentsIntent = new Intent(this, CommentsListActivity.class);
-        commentsIntent.putExtra("site", coffeeSite);
+        commentsIntent.putExtra("site", (Parcelable) coffeeSite);
         startActivity(commentsIntent);
     }
 
@@ -136,7 +142,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
         if (locationService != null) {
             Intent mapIntent = new Intent(this, MapsActivity.class);
             mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
-            mapIntent.putExtra("site", coffeeSite);
+            mapIntent.putExtra("site", (Parcelable) coffeeSite);
             startActivity(mapIntent);
         }
     }

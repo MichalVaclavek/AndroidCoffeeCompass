@@ -31,7 +31,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
     private static final String TAG = "Read comments async. ";
 
-    private static final String sURLCore = "http://coffeecompass.cz/rest/starsAndComments/comments/";
+    private static final String sURLCore = "https://coffeecompass.cz/rest/starsAndComments/comments/";
     private String sURL;
 
     private CoffeeSiteDetailActivity parentActivity;
@@ -109,10 +109,11 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
         List<Comment> comments = parseJSONWithFoundCommentsResult(sJSON);
 
-        this.coffeeSite.setComments(comments);
+        if (this.coffeeSite != null) {
+            this.coffeeSite.setComments(comments);
+        }
 
         return sJSON;
-
     }
 
     private List<Comment> parseJSONWithFoundCommentsResult(String sJSON) {

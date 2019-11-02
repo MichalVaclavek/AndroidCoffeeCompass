@@ -27,7 +27,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Read statistics";
 
-    private static final String bURL = "http://coffeecompass.cz/rest/home";
+    private static final String bURL = "https://coffeecompass.cz/rest/home";
 
     private MainActivity parentActivity;
 

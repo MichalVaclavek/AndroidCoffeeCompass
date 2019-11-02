@@ -1,9 +1,8 @@
 package cz.fungisoft.coffeecompass2.asynctask;
 
-import android.app.Activity;
-import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -38,7 +37,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
     private static final String TAG = "Read CoffeeSite list";
 
-    private static final String sURLCore = "http://coffeecompass.cz/rest/site/searchSites/";
+    private static final String sURLCore = "https://coffeecompass.cz/rest/site/searchSites/";
     private String sURL;
 
     /**
@@ -270,7 +269,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
             Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
 
-            csListIntent.putExtra("listContent", content);
+            csListIntent.putExtra("listContent", (Parcelable) content);
             csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));
             csListIntent.putExtra("searchRange", this.searchRange);
             csListIntent.putExtra("coffeeSort", this.searchCoffeeSort);

@@ -55,7 +55,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private Location location;
 
-    private Button searchEspressoButton;
+//    private Button searchEspressoButton;
     private Button searchKafeButton;
 
     private int searchRange = 500; // range in meters for searching from current position - 500 m default value
@@ -88,10 +88,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
 
         //TODO - text from R.string. ...
-        searchEspressoButton = (Button) findViewById(R.id.searchEspressoButton);
-        searchEspressoButton.setTransformationMethod(null);
-        searchEspressoButton.setText(Html.fromHtml("ESPRESSO<br><small>" + searchRangeString + "</small>" ));
-
         searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
         searchKafeButton.setTransformationMethod(null);
         searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
@@ -303,7 +299,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         zobrazPresnostPolohy(location);
         updateAccuracyIndicator(location);
         if (location != null) {
-            searchEspressoButton.setEnabled(true);
+//            searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
         }
     }
@@ -325,10 +321,10 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             zobrazPresnostPolohy(location);
             updateAccuracyIndicator(location);
             if (location != null) {
-                searchEspressoButton.setEnabled(true);
+//                searchEspressoButton.setEnabled(true);
                 searchKafeButton.setEnabled(true);
             } else {
-                searchEspressoButton.setEnabled(false);
+//                searchEspressoButton.setEnabled(false);
                 searchKafeButton.setEnabled(false);
             }
         }
@@ -336,7 +332,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     protected void onPause() {
-        searchEspressoButton.setEnabled(false);
+//        searchEspressoButton.setEnabled(false);
         searchKafeButton.setEnabled(false);
         // Kontrola opravneni
         if (ActivityCompat.checkSelfPermission(this,
@@ -368,7 +364,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             location = locationService.getCurrentLocation();
             zobrazPresnostPolohy(location);
             updateAccuracyIndicator(location);
-            searchEspressoButton.setEnabled(true);
+//            searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
         }
     }

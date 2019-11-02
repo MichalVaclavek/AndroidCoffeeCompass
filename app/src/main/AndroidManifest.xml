@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/> <!-- Needed to read Google maps over http in API 28-->
         <activity android:name="cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService"></activity>
 
         <service

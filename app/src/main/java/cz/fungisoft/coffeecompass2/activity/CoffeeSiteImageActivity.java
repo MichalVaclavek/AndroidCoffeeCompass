@@ -2,8 +2,6 @@ package cz.fungisoft.coffeecompass2.activity;
 
 import android.os.Bundle;
 
-//import android.support.design.widget.CollapsingToolbarLayout;
-//import android.support.design.widget.C
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -11,9 +9,7 @@ import android.view.MenuItem;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
 
 /**
@@ -45,7 +41,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
-        cs = (CoffeeSiteMovable) getIntent().getSerializableExtra("coffeeSite");
+        cs = (CoffeeSiteMovable) getIntent().getParcelableExtra("coffeeSite");
 
         if (appBarLayout != null) {
             appBarLayout.setTitle(cs.getName());

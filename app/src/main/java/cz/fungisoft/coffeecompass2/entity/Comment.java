@@ -1,5 +1,8 @@
 package cz.fungisoft.coffeecompass2.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,7 +11,7 @@ import java.util.Date;
 /**
  * A comment belonging to a CoffeeSite
  */
-public class Comment implements Serializable {
+public class Comment implements Serializable, Parcelable {
 
     private Integer id;
 
@@ -23,6 +26,61 @@ public class Comment implements Serializable {
     private String userName;
 
     private boolean canBeDeleted;
+
+    protected Comment(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readInt();
+        }
+        commentText = in.readString();
+        createdOnString = in.readString();
+        if (in.readByte() == 0) {
+            coffeeSiteId = null;
+        } else {
+            coffeeSiteId = in.readInt();
+        }
+        userName = in.readString();
+        canBeDeleted = in.readByte() != 0;
+    }
+
+    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+        @Override
+        public Comment createFromParcel(Parcel in) {
+            return new Comment(in);
+        }
+
+        @Override
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(id);
+        }
+        dest.writeString(commentText);
+        dest.writeString(createdOnString);
+        if (coffeeSiteId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(coffeeSiteId);
+        }
+        dest.writeString(userName);
+        dest.writeByte((byte) (canBeDeleted ? 1 : 0));
+    }
+
 
     public Integer getId() {
         return id;
@@ -83,5 +141,6 @@ public class Comment implements Serializable {
 
         this.createdOn = created;
     }
+
 
 }
