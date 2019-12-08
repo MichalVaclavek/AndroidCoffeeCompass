@@ -49,8 +49,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
             conn.setRequestMethod("GET");
 
             inpStream = new BufferedInputStream(conn.getInputStream());
-            BufferedReader reader = new BufferedReader(new
-                    InputStreamReader(inpStream, "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, "UTF-8"));
 
             StringBuilder sb = new StringBuilder();
             String radek = null;

@@ -18,12 +18,14 @@ import android.widget.TextView;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
 /**
  * Activity to show list of CoffeeSite's Comments
- * Later it should allow to add a Comment for logged-in User
+ * Later it should allow to add a Comment for {@link LoggedInUser}
  */
 public class CommentsListActivity extends AppCompatActivity {
 
@@ -36,7 +38,10 @@ public class CommentsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
 
-        cs = (CoffeeSite) getIntent().getParcelableExtra("site");
+        Bundle bundle = this.getIntent().getExtras();
+        if (bundle != null) {
+            cs = (CoffeeSiteMovable) bundle.getParcelable("site");
+        }
         comments = cs.getComments();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.comments_toolbar);

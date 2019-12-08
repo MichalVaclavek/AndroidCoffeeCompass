@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2;
 
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import java.io.IOException;
@@ -22,6 +24,11 @@ public class Utils {
         catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check"); }
 
         return false;
+    }
+
+    public static String getDeviceID(AppCompatActivity parentActivity) {
+        return Settings.Secure.getString(parentActivity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
     }
 
 }

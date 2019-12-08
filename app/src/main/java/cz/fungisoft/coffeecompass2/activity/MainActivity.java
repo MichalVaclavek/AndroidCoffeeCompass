@@ -24,6 +24,7 @@ import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
@@ -145,7 +146,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
+            case R.id.action_login:
+                openLoginActivity();
+                return true;
             case R.id.action_settings:
                 aktivujNastaveni();
                 return true;
@@ -162,6 +167,12 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void openLoginActivity() {
+        Intent activityIntent = new Intent(this, LoginActivity.class);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        this.startActivity(activityIntent);
     }
 
     private void aktivujNastaveni() {
@@ -359,8 +370,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             setAccuracyTextColor(barvaBlack);
         }
 
-        if (locationService != null)
-        {
+        if (locationService != null) {
             location = locationService.getCurrentLocation();
             zobrazPresnostPolohy(location);
             updateAccuracyIndicator(location);

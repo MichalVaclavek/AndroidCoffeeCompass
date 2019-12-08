@@ -38,4 +38,32 @@
     <string name="current_range">"Aktuální okruh vyhledávání: "</string>
     <string name="still_searching">vyhledávám ... </string>
 
+    <string name="title_activity_user_login">Káva s sebou</string>
+    <string name="title_activity_login">Přihlášení</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">heslo</string>
+    <string name="action_sign_in">Přihlásit nebo registrovat</string>
+    <string name="action_sign_in_short">Přihlásit</string>
+    <string name="no_account">Nemáte účet?</string>
+    <string name="action_no_account_signup">Vytvořit</string>
+    <string name="welcome">"Vítej "</string>
+    <string name="invalid_username">Neplatné uživatelské jméno nebo heslo</string>
+    <string name="invalid_password">Heslo musí mít alespoň 4 znaky</string>
+    <string name="login_failed">"Chyba přihlášení"</string>
+    <string name="username_or_email">jméno nebo email adresa</string>
+    <string name="action_favorite">Login</string>
+
+    <string name="title_activity_user_signup">Káva s sebou</string>
+    <string name="title_activity_signup">Registrace</string>
+    <string name="prompt_signup_username">Uživatelské jméno</string>
+    <string name="prompt_signup_email">Email</string>
+    <string name="prompt_signup_password">heslo</string>
+    <string name="action_signup">Přihlásit nebo registrovat</string>
+    <string name="action_signup_short">Registrovat</string>
+    <string name="signup_already_registered">Už máte účet?</string>
+    <string name="action_already_signup_login">Přihlásit</string>
+    <string name="signup_invalid_username">Neplatné uživatelské jméno nebo heslo</string>
+    <string name="signup_invalid_password">Heslo musí mít alespoň 5 znaků</string>
+    <string name="action_signup_favorite">Registrovat</string>
+
 </resources>

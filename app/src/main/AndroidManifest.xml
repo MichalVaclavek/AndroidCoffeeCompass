@@ -17,23 +17,29 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/> <!-- Needed to read Google maps over http in API 28-->
-        <activity android:name="cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService"></activity>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" /> <!-- Needed to read Google maps over http in API 28 -->
+        <activity android:name=".activity.ActivityWithLocationService" />
 
         <service
-            android:name="cz.fungisoft.coffeecompass2.services.LocationService"
+            android:name=".services.LocationService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSitesInRangeUpdateService"
             android:enabled="true"
             android:exported="true" />
 
-        <service
-            android:name="cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService"
-            android:enabled="true"
-            android:exported="true" />
+        <activity android:name=".activity.SignupActivity"></activity>
+        <activity
+            android:name=".activity.ui.login.LoginActivity"
+            android:label="@string/title_activity_login" />
 
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.CommentsListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            />
+            android:name=".activity.CommentsListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -47,32 +53,31 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.MapsActivity"
+            android:name=".activity.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_maps"
-             />
+            android:label="@string/title_activity_maps" />
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteImageActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.AboutActivity"
+            android:name=".activity.CoffeeSiteImageActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.SelectSearchDistanceActivity"
+            android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity"
+            android:name=".activity.SelectSearchDistanceActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CoffeeSiteListActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity"
+            android:name=".activity.CoffeeSiteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_coffeesite_detail"
-            android:parentActivityName="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity"
+            android:parentActivityName=".activity.CoffeeSiteListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -80,7 +85,7 @@
                 android:value="cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity" />
         </activity>
         <activity
-            android:name="cz.fungisoft.coffeecompass2.activity.MainActivity"
+            android:name=".activity.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

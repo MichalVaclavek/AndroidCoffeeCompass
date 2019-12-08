@@ -31,7 +31,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
     private static final String TAG = "Read comments async. ";
 
-    private static final String sURLCore = "https://coffeecompass.cz/rest/starsAndComments/comments/";
+    private static final String sURLCore = "https://coffeecompass.cz/rest/public/starsAndComments/comments/";
     private String sURL;
 
     private CoffeeSiteDetailActivity parentActivity;
@@ -67,8 +67,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
                 inpStream = new BufferedInputStream(conn.getInputStream());
 
                 if (inpStream != null) {
-                    BufferedReader reader = new BufferedReader(new
-                            InputStreamReader(inpStream, "UTF-8"));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, "UTF-8"));
 
                     StringBuilder sb = new StringBuilder();
                     String radek = null;

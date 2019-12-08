@@ -37,6 +37,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
     private static final String TAG = "Read CoffeeSite list";
 
+    // TODO vlozit do strings resources String url = getResources().getString(R.string.json_get_url);
     private static final String sURLCore = "https://coffeecompass.cz/rest/site/searchSites/";
     private String sURL;
 
@@ -122,8 +123,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                 inpStream = new BufferedInputStream(conn.getInputStream());
 
                 if (inpStream != null) {
-                    BufferedReader reader = new BufferedReader(new
-                            InputStreamReader(inpStream, "UTF-8"));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, "UTF-8"));
 
                     StringBuilder sb = new StringBuilder();
                     String radek = null;

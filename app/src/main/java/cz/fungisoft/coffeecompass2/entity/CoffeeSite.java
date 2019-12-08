@@ -72,7 +72,10 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         oteviraciDobaDny = in.readString();
         oteviraciDobaHod = in.readString();
 
-        in.readList(comments, Comment.class.getClassLoader());
+        if (in.dataAvail() > 0) {
+            comments = new ArrayList<>();
+            comments = in.readArrayList(Comment.class.getClassLoader());
+        }
     }
 
     @Override

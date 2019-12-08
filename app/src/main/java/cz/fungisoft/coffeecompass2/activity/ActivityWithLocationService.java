@@ -70,15 +70,6 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
         locationService = locationServiceConnector.getLocationService();
     }
 
-    /**
-     * A method to update a TextViews, which show the distance from current location.
-     * Every "distance" TextView has its id=position
-     *
-//     * @param position - id of the TextView where the distance should be updated
-//     * @param meters - distance in meters to be shown in a TextView with id=position
-     */
-//    public abstract void updateDistanceTextViewAndOrModel(int position, long meters);
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

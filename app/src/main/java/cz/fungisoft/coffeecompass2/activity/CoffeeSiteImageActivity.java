@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -41,8 +42,10 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
-        cs = (CoffeeSiteMovable) getIntent().getParcelableExtra("coffeeSite");
-
+        Bundle bundle = this.getIntent().getExtras();
+        if (bundle != null) {
+            cs = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
+        }
         if (appBarLayout != null) {
             appBarLayout.setTitle(cs.getName());
         }

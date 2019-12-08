@@ -44,7 +44,7 @@ public class Comment implements Serializable, Parcelable {
         canBeDeleted = in.readByte() != 0;
     }
 
-    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+    public static final Parcelable.Creator<Comment> CREATOR = new Creator<Comment>() {
         @Override
         public Comment createFromParcel(Parcel in) {
             return new Comment(in);
@@ -141,6 +141,5 @@ public class Comment implements Serializable, Parcelable {
 
         this.createdOn = created;
     }
-
 
 }
