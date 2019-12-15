@@ -16,7 +16,7 @@
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             app:cardBackgroundColor="@color/colorPrimary"
             app:cardCornerRadius="4dp"
             app:cardElevation="4dp">
@@ -114,7 +114,7 @@
                         android:padding="20dp"
                         android:text="@string/about_sentence1"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="14sp" />
+                        android:textSize="18sp" />
 
                 </TableRow>
 
@@ -128,7 +128,8 @@
                         android:layout_height="wrap_content"
                         android:padding="20dp"
                         android:text="@string/about_sentence2"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
                 </TableRow>
 
                 <TableRow
@@ -142,7 +143,8 @@
                         android:autoLink="web"
                         android:padding="20dp"
                         android:text="@string/about_sentence4"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
                 </TableRow>
 
             </TableLayout>

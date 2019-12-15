@@ -5,16 +5,14 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.LoginInterface;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModel;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserLoginAndRegisterInterface;
+import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -25,6 +23,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+/**
+ * Class to create, run and process REST request for obtaining current logged-in user profile
+ * from server.
+ */
 public class CurrentUserRESTRequest {
 
     // TODO vlozit do strings resources String url = getResources().getString(R.string.json_get_url);
@@ -34,13 +36,13 @@ public class CurrentUserRESTRequest {
 
     private final LoggedInUser currentUser;
 
-    private LoginViewModel loginViewModel;
+    private final UserLoginAndRegisterService userLoginAndRegisterService;
 
-    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, LoginViewModel loginViewModel) {
+    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserLoginAndRegisterService userLoginAndRegisterService) {
         super();
         this.userJwtToken = userLoginRESTResponse;
         currentUser = new LoggedInUser(userJwtToken);
-        this.loginViewModel = loginViewModel;
+        this.userLoginAndRegisterService = userLoginAndRegisterService;
     }
 
     public void performRequest() {
@@ -66,12 +68,12 @@ public class CurrentUserRESTRequest {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(LoginInterface.CURRENT_USER_URL)
+                .baseUrl(UserLoginAndRegisterInterface.CURRENT_USER_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        LoginInterface api = retrofit.create(LoginInterface.class);
+        UserLoginAndRegisterInterface api = retrofit.create(UserLoginAndRegisterInterface.class);
 
         Call<String> call = api.getCurrentUser();
 
@@ -82,50 +84,29 @@ public class CurrentUserRESTRequest {
                     if (response.body() != null) {
                         String jsonResponse = response.body();
                         Log.i("onSuccess", jsonResponse);
-                        parseCurrentUserResponse(jsonResponse);
+                        try {
+                            currentUser.setupUserDataFromJson(jsonResponse);
+                            userLoginAndRegisterService.evaluateLoginResult(new Result.Success<>(currentUser));
+                        } catch (JSONException e) {
+                            userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error JSON parsing current user data.", e)));
+                        }
+                        return;
                     } else {
                         Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Log.e(REQ_TAG, "Error waiting for CurrentUserRESTAsyncTask");
+                    Log.e(REQ_TAG, "Current user response failure.");
                 }
+                // Answer to login not correct
+                userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException(response.errorBody().toString())));
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.e(REQ_TAG, "Error waiting for CurrentUserRESTAsyncTask" + t.getMessage());
-                loginViewModel.evaluateLoginResult(new Result.Error(new IOException("Error reading current user: " +  "", t)));
+                userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error reading current user.", t)));
             }
         });
-    }
-
-
-    public void parseCurrentUserResponse(String response) {
-
-        try {
-            JSONObject jsonResponse = new JSONObject(response);
-            currentUser.setUserId(jsonResponse.getString("id"));
-            currentUser.setUserName(jsonResponse.getString("userName"));
-            currentUser.setFirstName(jsonResponse.getString("firstName"));
-            currentUser.setLastName(jsonResponse.getString("lastName"));
-            currentUser.setEmail(jsonResponse.getString("email"));
-            currentUser.setCreatedOn(jsonResponse.getString("createdOn"));
-            currentUser.setNumOfCreatedSites(jsonResponse.getInt("createdSites"));
-            currentUser.setNumOfDeletedSites(jsonResponse.getInt("deletedSites"));
-            currentUser.setNumOfUpdatedSites(jsonResponse.getInt("updatedSites"));
-
-            JSONArray userRoles = jsonResponse.getJSONArray("userProfiles");
-
-            for (int i = 0; i < userRoles.length(); i++) {
-                JSONObject role = userRoles.getJSONObject(i);
-                currentUser.getUserRoles().add(role.getString("type"));
-            }
-            loginViewModel.evaluateLoginResult(new Result.Success<>(currentUser));
-
-        } catch (JSONException e) {
-            Log.e(REQ_TAG, "Exception during parsing ... t: " + e.getMessage());
-            loginViewModel.evaluateLoginResult(new Result.Error(new IOException("Error reading current user: " +  "", e)));
-        }
     }
 
 }

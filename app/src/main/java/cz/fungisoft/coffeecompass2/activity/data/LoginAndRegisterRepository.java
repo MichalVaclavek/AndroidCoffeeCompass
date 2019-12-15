@@ -4,13 +4,13 @@ import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 
 /**
- * Class that requests authentication and user information from the remote data source LoginDataSource.
+ * Class that requests authentication and user information from the remote data source LoginAndRegisterDataSource.
  */
-public class LoginRepository {
+public class LoginAndRegisterRepository {
 
-    private static volatile LoginRepository instance;
+    private static volatile LoginAndRegisterRepository instance;
 
-    private LoginDataSource dataSource;
+    private LoginAndRegisterDataSource dataSource;
     private UserPreferenceHelper preferenceHelper;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
@@ -18,20 +18,24 @@ public class LoginRepository {
     private LoggedInUser user = null;
 
     // private constructor : singleton access
-    private LoginRepository(LoginDataSource dataSource, UserPreferenceHelper preferenceHelper) {
+    private LoginAndRegisterRepository(LoginAndRegisterDataSource dataSource, UserPreferenceHelper preferenceHelper) {
         this.dataSource = dataSource;
         this.preferenceHelper = preferenceHelper;
     }
 
-    public static LoginRepository getInstance(LoginDataSource dataSource, UserPreferenceHelper preferenceHelper) {
+    public static LoginAndRegisterRepository getInstance(LoginAndRegisterDataSource dataSource, UserPreferenceHelper preferenceHelper) {
         if (instance == null) {
-            instance = new LoginRepository(dataSource, preferenceHelper);
+            instance = new LoginAndRegisterRepository(dataSource, preferenceHelper);
         }
         return instance;
     }
 
     public boolean isLoggedIn() {
         return user != null;
+    }
+
+    public LoggedInUser getLoggedInUser() {
+        return user;
     }
 
     public void logout() {
@@ -57,5 +61,9 @@ public class LoginRepository {
      */
     public void login(String username, String password, String deviceID) {
         dataSource.login(username, password, deviceID);
+    }
+
+    public void register(String username, String password, String email, String deviceID) {
+        dataSource.register(username, password, email, deviceID);
     }
 }

@@ -22,8 +22,8 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     private static final String TAG = "ActivityWithLocationSrv";
 
-    protected static final double CHECK_DISTANCE_TIMER_DELAY = 0.5d;
-    protected static final double CHECK_DISTANCE_TIMER_PERIOD = 1.0d;
+    //protected static final double CHECK_DISTANCE_TIMER_DELAY = 0.5d;
+    //protected static final double CHECK_DISTANCE_TIMER_PERIOD = 1.0d;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.

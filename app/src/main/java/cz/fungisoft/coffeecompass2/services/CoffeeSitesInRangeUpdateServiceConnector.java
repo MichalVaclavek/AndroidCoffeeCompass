@@ -9,7 +9,6 @@ import android.os.IBinder;
  */
 public class CoffeeSitesInRangeUpdateServiceConnector implements ServiceConnection {
 
-//    private CoffeeSiteListActivity callingActivity;
     private SitesInRangeUpdateListener callingActivity;
 
     public CoffeeSitesInRangeUpdateServiceConnector(SitesInRangeUpdateListener callingActivity) {

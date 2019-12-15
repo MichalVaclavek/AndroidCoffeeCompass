@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#33691E</color>
-    <color name="colorPrimaryDark">#482100</color>
+    <color name="colorPrimaryDark">#3A1A00</color>
     <color name="colorAccent">#D55C00</color>
+    <color name="login_backround">#86BA4B</color>
+    <color name="card_backround">#F0F4C3</color>
 
 </resources>
 

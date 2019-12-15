@@ -1,6 +1,9 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest;
 
-public class UserLoginInputData {
+/**
+ * Class to hold information fields needed for user login or register
+ */
+public class UserLoginOrRegisterInputData {
 
     private String userName;
     private String deviceID;
@@ -39,7 +42,7 @@ public class UserLoginInputData {
         this.password = password;
     }
 
-    public UserLoginInputData(String userName, String deviceID, String email, String password) {
+    public UserLoginOrRegisterInputData(String userName, String deviceID, String email, String password) {
         this.userName = userName;
         this.deviceID = deviceID;
         this.password = password;

@@ -32,7 +32,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jméno:"
-                    android:textColor="@color/colorPrimaryDark" />
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/nameTextView"
@@ -41,6 +42,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -62,6 +64,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
             </TableRow>
@@ -84,6 +87,30 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/coffeeSortTableRow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/druhKavyLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Druhy kávy:"
+                    android:textColor="@color/colorPrimaryDark" />
+
+                <TextView
+                    android:id="@+id/coffeeSortTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -105,6 +132,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -126,6 +154,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -147,28 +176,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/coffeeSortTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/druhKavyLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Druhy kávy:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/coffeeSortTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="TextView"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -191,6 +199,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -213,6 +222,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -235,6 +245,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -257,6 +268,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -278,6 +290,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -299,6 +312,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
             </TableRow>
@@ -321,6 +335,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -342,6 +357,7 @@
                     android:text="TextView"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -356,7 +372,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Komentář zakladatele:"
-                    android:textColor="@color/colorPrimaryDark" />
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp" />
 
             </TableRow>
 
@@ -368,7 +385,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/detailsTable"
             android:textAlignment="viewEnd"
-            android:textColor="@color/colorAccent" />
+            android:textColor="@color/colorAccent"
+            android:textSize="14sp" />
 
     </RelativeLayout>
 

@@ -1,5 +1,12 @@
 package cz.fungisoft.coffeecompass2.activity.data.model;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,8 +16,9 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
 
 /**
- * Data class that captures user information for logged in users retrieved from LoginRepository.
+ * Data class that captures user information for logged in users retrieved from LoginAndRegisterRepository.
  * Based on server REST API available items for current logged-in user.
+ *
  * authProvider": "string",
  *   "createdOn": {
  *     "date": 0,
@@ -32,7 +40,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
  *     }
  *   ]
  */
-public class LoggedInUser {
+public class LoggedInUser implements Serializable {
 
     private String userId;
     private String displayName;
@@ -48,14 +56,27 @@ public class LoggedInUser {
     private String firstName;
     private String lastName;
 
+
+    private Date createdOn;
+
     public Date getCreatedOn() {
         return createdOn;
+    }
+
+    public String getCreatedOnFormated() {
+
+        String retVal;
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+        retVal = format.format(createdOn);
+        return retVal;
     }
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
+
     public void setCreatedOn(String createdOn) {
+
         SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
         try {
             this.createdOn = format.parse (createdOn);
@@ -64,7 +85,7 @@ public class LoggedInUser {
         }
     }
 
-    private Date createdOn;
+
 
     private List<String> userRoles;
     /**
@@ -225,5 +246,31 @@ public class LoggedInUser {
         setLoginToken(currentUser.getLoginToken());
         setNumOfDeletedSites(currentUser.getNumOfDeletedSites());
         setNumOfUpdatedSites(currentUser.getNumOfUpdatedSites());
+    }
+
+    public void setupUserDataFromJson(String jsonResponse) throws JSONException {
+
+        try {
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            this.setUserId(jsonObject.getString("id"));
+            this.setUserName(jsonObject.getString("userName"));
+            this.setFirstName(jsonObject.getString("firstName"));
+            this.setLastName(jsonObject.getString("lastName"));
+            this.setEmail(jsonObject.getString("email"));
+            this.setCreatedOn(jsonObject.getString("createdOn"));
+            this.setNumOfCreatedSites(jsonObject.getInt("createdSites"));
+            this.setNumOfDeletedSites(jsonObject.getInt("deletedSites"));
+            this.setNumOfUpdatedSites(jsonObject.getInt("updatedSites"));
+
+            JSONArray userRoles = jsonObject.getJSONArray("userProfiles");
+
+            for (int i = 0; i < userRoles.length(); i++) {
+                JSONObject role = userRoles.getJSONObject(i);
+                this.getUserRoles().add(role.getString("type"));
+            }
+        } catch (JSONException e) {
+            Log.e("Create user from JSON", "Exception during parsing: " + e.getMessage());
+            throw e;
+        }
     }
 }

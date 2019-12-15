@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,9 +27,13 @@ import java.beans.PropertyChangeListener;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
+import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
+import cz.fungisoft.coffeecompass2.services.UserLoginRegisterServiceConnector;
+import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
 
 /**
  * Main activity to show:
@@ -37,7 +43,7 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
-public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener {
+public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener, UserLoginServiceListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -59,15 +65,19 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 //    private Button searchEspressoButton;
     private Button searchKafeButton;
 
+    private Toolbar mainToolbar;
+
     private int searchRange = 500; // range in meters for searching from current position - 500 m default value
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(myToolbar);
+        //Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(mainToolbar);
 
         findViewById(R.id.AllSitesTextView);
 
@@ -103,6 +113,9 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         } else {
             showNoInternetToast();
         }
+
+        // UserLoginAndRegister service connection
+        doBindUserLoginService();
     }
 
     /**
@@ -141,6 +154,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+        } else {
+            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
+        }
         return true;
     }
 
@@ -149,7 +167,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                openLoginActivity();
+                if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+                    openUserProfileActivity();
+                } else {
+                    openLoginActivity();
+                }
                 return true;
             case R.id.action_settings:
                 aktivujNastaveni();
@@ -172,6 +194,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private void openLoginActivity() {
         Intent activityIntent = new Intent(this, LoginActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        this.startActivity(activityIntent);
+    }
+
+    private void openUserProfileActivity() {
+        Intent activityIntent = new Intent(this, UserDataViewActivity.class);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
 
@@ -339,6 +368,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 searchKafeButton.setEnabled(false);
             }
         }
+
+//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+//            MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
+//            if (userAccountMenuItem != null) {
+//                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+//            }
+//        }
     }
 
     @Override
@@ -376,6 +412,80 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             updateAccuracyIndicator(location);
 //            searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
+        }
+    }
+
+    // ** UserLogin Service connection/disconnection ** //
+
+    protected UserLoginAndRegisterService userLoginService;
+    private UserLoginRegisterServiceConnector userLoginServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindUserLoginService;
+
+    private void doBindUserLoginService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        userLoginServiceConnector = new UserLoginRegisterServiceConnector(this);
+        if (bindService(new Intent(this, UserLoginAndRegisterService.class),
+                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserLoginService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'UserLoginAndRegisterService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindUserLoginService() {
+        if (userLoginService != null) {
+            userLoginService.removeUserLoginServiceListener(this);
+        }
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            unbindService(userLoginServiceConnector);
+            mShouldUnbindUserLoginService = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        doUnbindUserLoginService();
+    }
+
+    @Override
+    public void onUserLoggedInSuccess(LoginOrRegisterResult loginResult) {
+        // no action needed
+//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+//            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+//        }
+    }
+
+    @Override
+    public void onUserLoggedInFailure(LoginOrRegisterResult loginResult) {
+        // no action needed
+    }
+
+    @Override
+    public void onUserLoggedOut() {
+//        if (userLoginService != null && !userLoginService.isUserLoggedIn()) {
+//            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
+//        }
+    }
+
+    @Override
+    public void onUserLoginServiceConnected() {
+        userLoginService = userLoginServiceConnector.getUserLoginService();
+        userLoginService.addUserLoginServiceListener(this);
+        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
+            if (userAccountMenuItem != null) {
+                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+            }
         }
     }
 

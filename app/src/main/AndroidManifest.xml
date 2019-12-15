@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".activity.UserDataViewActivity"></activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -31,12 +32,15 @@
             android:name=".services.CoffeeSitesInRangeUpdateService"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".services.UserLoginAndRegisterService"
+            android:enabled="true"
+            android:exported="true" />
 
-        <activity android:name=".activity.SignupActivity"></activity>
+        <activity android:name=".activity.ui.register.SignupActivity" />
         <activity
             android:name=".activity.ui.login.LoginActivity"
             android:label="@string/title_activity_login" />
-
         <activity
             android:name=".activity.CommentsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />

@@ -1,13 +1,14 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *  REST user login or register response to {@link UserLoginRESTRequest} from coffeecompass.cz server
+ *  REST user login or register response to {@link UserLoginOrRegisterRESTRequest} from coffeecompass.cz server
  */
-public class JwtUserToken {
+public class JwtUserToken implements Serializable {
 
     private String accessToken;
     private Date expiryDate;
