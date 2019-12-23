@@ -2,7 +2,7 @@ package cz.fungisoft.coffeecompass2.asynctask;
 
 import android.os.AsyncTask;
 
-import cz.fungisoft.coffeecompass2.activity.data.LoginAndRegisterRepository;
+import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 
 /**
  * Async task for new user registering REST request call
@@ -14,9 +14,9 @@ public class RegisterUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
     private String password;
     private String email;
 
-    private LoginAndRegisterRepository registerRepository;
+    private UserAccountRepository registerRepository;
 
-    public RegisterUserRESTAsyncTask(String username, String password, String email, String deviceID, LoginAndRegisterRepository registerRepository) {
+    public RegisterUserRESTAsyncTask(String username, String password, String email, String deviceID, UserAccountRepository registerRepository) {
         super();
         this.deviceID = deviceID;
         this.userName = username;

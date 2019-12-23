@@ -5,9 +5,10 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -17,7 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserLoginAndRegisterInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 
 /**
  * REST user login or register request to be sent to server coffeecompass.cz
@@ -30,7 +31,7 @@ public class UserLoginOrRegisterRESTRequest {
 
     private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
-    private UserLoginAndRegisterService userLoginAndRegisterService;
+    private UserAccountService userLoginAndRegisterService;
 
     private final LoggedInUser currentUser;
 
@@ -44,7 +45,7 @@ public class UserLoginOrRegisterRESTRequest {
      * @param userName
      * @param password
      */
-    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserLoginAndRegisterService userLoginAndRegisterService) {
+    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountService userLoginAndRegisterService) {
         super();
         this.userLoginAndRegisterService = userLoginAndRegisterService;
         userLoginOrRegisterInputData = new UserLoginOrRegisterInputData(userName, deviceID, email, password);
@@ -69,16 +70,16 @@ public class UserLoginOrRegisterRESTRequest {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                                        .baseUrl((requestType == PERFORM_LOGIN) ? UserLoginAndRegisterInterface.LOGIN_URL : UserLoginAndRegisterInterface.REGISTER_USER_URL)
+                                        .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL : UserAccountRESTInterface.REGISTER_USER_URL)
                                         .addConverterFactory(ScalarsConverterFactory.create())
                                         .addConverterFactory(GsonConverterFactory.create(gson))
                                         .build();
 
-        UserLoginAndRegisterInterface api = retrofit.create(UserLoginAndRegisterInterface.class);
+        UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
         Call<JwtUserToken> call;
         if ((requestType == PERFORM_LOGIN)) {
-            call = api.getUserLogin(userLoginOrRegisterInputData);
+            call = api.postUserLogin(userLoginOrRegisterInputData);
         } else {
             call = api.registerNewUser(userLoginOrRegisterInputData);
         }
@@ -91,21 +92,36 @@ public class UserLoginOrRegisterRESTRequest {
                         Log.i("onSuccess", response.body().toString());
 
                         CurrentUserRESTRequest currentUserRESTRequest = new CurrentUserRESTRequest(response.body(), userLoginAndRegisterService);
-                        currentUserRESTRequest.performRequest();
+                        if (requestType == PERFORM_LOGIN) {
+                            currentUserRESTRequest.performRequestAfterLogin();
+                        } else {
+                            currentUserRESTRequest.performRequestAfterRegister();
+                        }
                         return;
                     } else {
                         Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
                         if (requestType == PERFORM_LOGIN) {
                             userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user. Response empty.")));
                         } else {
-                            userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error registering user. Response failed.  Response empty.")));
+                            userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error registering user. Response failed. Response empty.")));
                         }
                     }
                 } else {
-                    if (requestType == PERFORM_LOGIN) {
-                        userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user. Response failed. Response: " + response.errorBody())));
-                    } else {
-                        userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error registering user. Response failed. Response: " + response.errorBody())));
+                    try {
+                        String errorBody = response.errorBody().string();
+                        if (requestType == PERFORM_LOGIN) {
+                            userLoginAndRegisterService.evaluateLoginResult(new Result.Error(Utils.getRestError(errorBody)));
+                        } else {
+                            userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(Utils.getRestError(errorBody)));
+                        }
+                    } catch (IOException e) {
+                        Log.e(REQ_TAG, "Error reading error body." + e.getMessage());
+                        if (requestType == PERFORM_LOGIN) {
+                            userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user.", e)));
+                        }
+                        else {
+                            userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error register user.", e)));
+                        }
                     }
                 }
             }
@@ -113,7 +129,7 @@ public class UserLoginOrRegisterRESTRequest {
             @Override
             public void onFailure(Call<JwtUserToken> call, Throwable t) {
                 Log.e(REQ_TAG, "Error executing Login user REST request." + t.getMessage());
-                userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user.", t)));
+                userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging/register user.", t)));
             }
         });
     }

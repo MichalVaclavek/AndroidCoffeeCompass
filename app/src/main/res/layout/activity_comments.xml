@@ -9,8 +9,8 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/comments_app_bar"
         android:layout_width="match_parent"
-        android:layout_height="128dp"
-        android:background="@color/colorPrimary"
+        android:layout_height="96dp"
+        android:background="@color/colorAccent"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -21,7 +21,7 @@
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:toolbarId="@+id/sitesListToolbar">
+            app:toolbarId="@+id/comments_toolbar">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/comments_toolbar"

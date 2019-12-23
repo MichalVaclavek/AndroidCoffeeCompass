@@ -50,9 +50,13 @@
     <string name="invalid_username">Neplatné uživatelské jméno nebo heslo</string>
     <string name="invalid_password">Heslo musí mít alespoň 4 znaky</string>
     <string name="invalid_email">Neplatná email adresa</string>
-    <string name="login_failed">"Chyba přihlášení"</string>
+    <string name="login_failed">Chyba přihlášení</string>
     <string name="username_or_email">jméno nebo email adresa</string>
     <string name="action_favorite">Login</string>
+    <string name="logout_success">Odhlášení úspěšné.</string>
+    <string name="delete_user_success">Uživatel úspěšně smazán.</string>
+    <string name="logout_failure">Odhlášení selhalo.</string>
+    <string name="delete_user_failure">Smazání uživatele selhalo.</string>
 
     <string name="title_activity_user_signup">Káva s sebou</string>
     <string name="title_activity_signup">Registrace</string>

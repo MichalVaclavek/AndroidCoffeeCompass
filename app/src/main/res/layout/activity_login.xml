@@ -5,7 +5,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/login_backround"
+    android:background="@color/card_backround"
     android:backgroundTintMode="screen"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -36,6 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/title_activity_user_login"
                 android:textAlignment="center"
+                android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:textStyle="italic" />
 
@@ -43,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_margin="24dp"
+                android:layout_margin="20dp"
                 android:layout_marginBottom="24dp"
                 android:src="@drawable/cup_basic" />
 
@@ -86,6 +87,14 @@
                     android:inputType="textPassword" />
             </android.support.design.widget.TextInputLayout>
 
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone" />
+
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_login"
                 android:layout_width="fill_parent"
@@ -123,13 +132,6 @@
                     android:textSize="16dip"
                     android:textStyle="bold" />
             </LinearLayout>
-
-            <ProgressBar
-                android:id="@+id/progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:visibility="gone" />
 
         </LinearLayout>
     </ScrollView>

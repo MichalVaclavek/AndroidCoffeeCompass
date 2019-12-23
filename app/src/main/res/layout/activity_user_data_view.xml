@@ -1,260 +1,301 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="cz.fungisoft.coffeecompass2.activity.UserDataViewActivity">
+    android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="@android:color/darker_gray"
-        android:fitsSystemWindows="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="24dp"
-            android:paddingTop="56dp"
-            android:paddingRight="24dp">
-
-            <TextView
-                android:id="@+id/LoginLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/title_activity_user_login"
-                android:textAlignment="center"
-                android:textSize="24sp"
-                android:textStyle="italic" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="24dp"
-                android:layout_marginBottom="24dp"
-                android:src="@drawable/cup_basic" />
-
-            <!-- Email Label -->
-            <TextView
-                android:id="@+id/userProfileLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="@string/user_profile_label"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="18sp" />
-
-            <!-- Password Label -->
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/card_backround"
+            android:fitsSystemWindows="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="10dp">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <android.support.design.widget.AppBarLayout
+                    android:id="@+id/user_profile_appbar"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
+                    android:background="@color/colorNiceYellow">
 
-                    <TextView
-                        android:id="@+id/userNameLabel"
-                        android:layout_width="wrap_content"
+                    <android.support.design.widget.CollapsingToolbarLayout
+                        android:id="@+id/user_profile_toolbarLayout"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_profile_username_label"
-                        android:textSize="14sp" />
+                        app:contentScrim="?attr/colorPrimary"
 
-                    <TextView
-                        android:id="@+id/userName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                        app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                        app:toolbarId="@+id/user_profile_toolbar">
 
-                <LinearLayout
+
+                        <android.support.v7.widget.Toolbar
+                            android:id="@+id/user_profile_toolbar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_collapseMode="pin"
+                            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                            app:title="@string/user_profile_label" />
+
+                    </android.support.design.widget.CollapsingToolbarLayout>
+                </android.support.design.widget.AppBarLayout>
+
+                <TextView
+                    android:id="@+id/LoginLabel"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/numberOfCreatedLocationsLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_profile_email_label"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/userProfileEmail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/userEmailLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_register_numOfCreatedSites_label"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/userProfileNumOfCreatedSites"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/userProfileFirstNameLinearLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/firstNameLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_profile_firstname_label"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/firstName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/userProfileLastNameLinearLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/lastNameLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_profile_lastname_label"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/lastName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="left"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/userCreatedOnLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:gravity="center"
-                        android:text="@string/user_profile_createdon_label"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/userCreatedOn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        android:gravity="center"
-                        android:textColor="@color/design_default_color_primary"
-                        android:textSize="16dip"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/btn_login"
-                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:layout_marginBottom="24dp"
-                    android:padding="12dp"
-                    android:text="@string/user_profile_logout" />
+                    android:text="@string/title_activity_user_login"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
 
-                <Button
-                    android:id="@+id/deleteUserAccountButton"
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="24dp"
+                    android:layout_marginBottom="24dp"
+                    android:src="@drawable/cup_basic" />
+
+                <!-- Email Label -->
+
+                <!-- Password Label -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingLeft="24dp"
+                    android:paddingTop="24dp"
+                    android:paddingEnd="24dp"
+                    android:paddingBottom="24dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/userNameLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_profile_username_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/userName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/emailLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_profile_email_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/userProfileEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/numOfCreatedSitesLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_register_numOfCreatedSites_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/userProfileNumOfCreatedSites"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/firstNameLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/firstNameLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_profile_firstname_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/firstName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lastNameLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/lastNameLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_profile_lastname_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/lastName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/userCreatedOnLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/user_profile_createdon_label"
+                            android:textAlignment="viewStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/userCreatedOn"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:clickable="false"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@android:color/black"
+                            android:textSize="16dip"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/user_profile_delete_button" />
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/btn_logout"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="4dp"
+                        android:padding="12dp"
+                        android:text="@string/user_profile_logout" />
+
+                    <Button
+                        android:id="@+id/btn_deleteUser"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/user_profile_delete_button" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
-    </ScrollView>
-</android.support.constraint.ConstraintLayout>
+        </ScrollView>
+    </android.support.constraint.ConstraintLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>

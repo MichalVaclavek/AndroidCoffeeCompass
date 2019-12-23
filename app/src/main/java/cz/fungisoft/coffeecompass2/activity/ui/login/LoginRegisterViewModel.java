@@ -6,12 +6,7 @@ import android.arch.lifecycle.ViewModel;
 import android.util.Patterns;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.LoginAndRegisterRepository;
-import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.ui.register.RegisterFormState;
-import cz.fungisoft.coffeecompass2.asynctask.LoginUserRESTAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.RegisterUserRESTAsyncTask;
 
 public class LoginRegisterViewModel extends ViewModel {
 
@@ -20,9 +15,9 @@ public class LoginRegisterViewModel extends ViewModel {
 
     //private MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
     //private MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
-   // private LoginAndRegisterRepository loginRepository;
+   // private UserAccountRepository loginRepository;
 
-//    LoginRegisterViewModel(LoginAndRegisterRepository loginRepository) {
+//    LoginRegisterViewModel(UserAccountRepository loginRepository) {
 //        this.loginRepository = loginRepository;
 //    }
 

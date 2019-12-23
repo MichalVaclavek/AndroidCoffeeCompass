@@ -16,7 +16,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
 
 /**
- * Data class that captures user information for logged in users retrieved from LoginAndRegisterRepository.
+ * Data class that captures user information for logged in users retrieved from UserAccountRepository.
  * Based on server REST API available items for current logged-in user.
  *
  * authProvider": "string",
@@ -47,14 +47,14 @@ public class LoggedInUser implements Serializable {
 
     private String userName;
 
-    private String email;
+    private String email= ""; // default value, email is optional
 
     private int numOfCreatedSites;
     private int numOfUpdatedSites;
     private int numOfDeletedSites;
 
-    private String firstName;
-    private String lastName;
+    private String firstName = ""; // default value, firstName is optional
+    private String lastName = ""; // default value, lastName is optional
 
 
     private Date createdOn;

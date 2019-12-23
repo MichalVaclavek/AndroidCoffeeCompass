@@ -2,21 +2,24 @@ package cz.fungisoft.coffeecompass2.activity.data;
 
 import android.util.Log;
 
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserDeleteRESTRequest;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLoginOrRegisterRESTRequest;
-import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLogoutRESTRequest;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
 
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
  *
  * Contacts server via REST to perform login
  */
-public class LoginAndRegisterDataSource {
+public class UserAccountDataSource {
 
-    private UserLoginAndRegisterService userLoginAndRegisterService;
+    private UserAccountService userLoginAndRegisterService;
 
-    private final String TAG = "LoginAndRegisterSource";
+    private final String TAG = "UserAccountDataSource";
 
-    public LoginAndRegisterDataSource(UserLoginAndRegisterService userLoginAndRegisterService) {
+    public UserAccountDataSource(UserAccountService userLoginAndRegisterService) {
         this.userLoginAndRegisterService = userLoginAndRegisterService;
     }
 
@@ -26,7 +29,6 @@ public class LoginAndRegisterDataSource {
             UserLoginOrRegisterRESTRequest userLoginRESTRequest = new UserLoginOrRegisterRESTRequest(deviceID,null, username, password, userLoginAndRegisterService);
             userLoginRESTRequest.performLoginRequest();
         } catch (Exception e) {
-           // return new Result.Error(new IOException("Error reading current user: " +  "", e));
             Log.e(TAG, "Current user response failure. " + e.getMessage());
         }
     }
@@ -37,12 +39,25 @@ public class LoginAndRegisterDataSource {
             UserLoginOrRegisterRESTRequest registerUserRESTRequest = new UserLoginOrRegisterRESTRequest(deviceID, email, username, password, userLoginAndRegisterService);
             registerUserRESTRequest.performRegisterRequest();
         } catch (Exception e) {
-            // return new Result.Error(new IOException("Error reading current user: " +  "", e));
             Log.e(TAG, "Register new user failure. " + e.getMessage());
         }
     }
 
-    public void logout() {
-        // TODO: revoke authentication
+    public void logout(LoggedInUser currentUser) {
+        try {
+            UserLogoutRESTRequest logoutUserRESTRequest = new UserLogoutRESTRequest(currentUser, userLoginAndRegisterService);
+            logoutUserRESTRequest.performLogoutRequest();
+        } catch (Exception e) {
+            Log.e(TAG, "User logout failure. " + e.getMessage());
+        }
+    }
+
+    public void delete(LoggedInUser user) {
+        try {
+            UserDeleteRESTRequest deleteUserRESTRequest = new UserDeleteRESTRequest(user, userLoginAndRegisterService);
+            deleteUserRESTRequest.performDeleteRequest();
+        } catch (Exception e) {
+            Log.e(TAG, "User delete failure. " + e.getMessage());
+        }
     }
 }

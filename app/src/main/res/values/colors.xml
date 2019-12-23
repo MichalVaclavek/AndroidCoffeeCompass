@@ -5,6 +5,7 @@
     <color name="colorAccent">#D55C00</color>
     <color name="login_backround">#86BA4B</color>
     <color name="card_backround">#F0F4C3</color>
+    <color name="colorNiceYellow">#FCCA03</color>
 
 </resources>
 

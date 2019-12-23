@@ -26,6 +26,14 @@ public class JwtUserToken implements Serializable {
         return expiryDate;
     }
 
+    public String getExpiryDateFormated() {
+
+        String retVal;
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+        retVal = format.format(expiryDate);
+        return retVal;
+    }
+
     public void setExpiryDate(String expiryDate) {
 
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
@@ -53,6 +61,12 @@ public class JwtUserToken implements Serializable {
     public JwtUserToken(String accessToken, Date expiryDate, String tokenType) {
         this.accessToken = accessToken;
         this.expiryDate = expiryDate;
+        this.tokenType = tokenType;
+    }
+
+    public JwtUserToken(String accessToken, String expiryDate, String tokenType) {
+        this.accessToken = accessToken;
+        setExpiryDate(expiryDate);
         this.tokenType = tokenType;
     }
 

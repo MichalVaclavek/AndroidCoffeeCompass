@@ -35,9 +35,8 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModelFactory;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
-import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
-import cz.fungisoft.coffeecompass2.services.UserLoginRegisterServiceConnector;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.UserRegisterServiceListener;
 
 /**
@@ -56,8 +55,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     @BindView(R.id.link_login) TextView loginLink;
 
     @BindView(R.id.progress_signup) ProgressBar registerProgressBar;
-
-    private Intent userRegisterServiceIntent;
 
 
     @Override
@@ -99,31 +96,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
             }
         });
 
-//        registerViewModel.getLoginResult().observe(this, new Observer<LoginOrRegisterResult>() {
-//            @Override
-//            public void onChanged(@Nullable LoginOrRegisterResult registerResult) {
-//
-//                registerProgressBar.setVisibility(View.GONE);
-//                if (registerResult == null) {
-//                    Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//
-//                if (registerResult.getError() != null) {
-//                    showRegisterFailed(registerResult.getError());
-//                }
-//                if (registerResult.getSuccess() != null) {
-//                    updateUiWithUser(registerResult.getSuccess());
-//                }
-//                setResult(Activity.RESULT_OK);
-//
-//                // go to MainActivity
-//                Intent i = new Intent(SignupActivity.this, MainActivity.class);
-//                startActivity(i);
-//                finish();
-//            }
-//        });
-
         TextWatcher afterTextChangedListener = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -149,32 +121,29 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         passwordEditText.addTextChangedListener(afterTextChangedListener);
         emailEditText.addTextChangedListener(afterTextChangedListener);
 
-
-        //userRegisterServiceIntent = new Intent(this, UserLoginAndRegisterService.class);
-        //startService(userRegisterServiceIntent);
         doBindUserRegisterService();
     }
 
     private void onClickLogin() {
         Intent loginIntent = new Intent(this, LoginActivity.class);
+        loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         this.startActivity(loginIntent);
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
     }
 
-    private void showRegisterFailed(@StringRes Integer errorString) {
+    private void showRegisterFailed(String errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
     }
 
 
     // ** UserLogin Service connection/disconnection ** //
 
-    protected UserLoginAndRegisterService userRegisterService;
-    private UserLoginRegisterServiceConnector userRegisterServiceConnector;
+    protected UserAccountService userRegisterService;
+    private UserAccountServiceConnector userRegisterServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -186,12 +155,12 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userRegisterServiceConnector = new UserLoginRegisterServiceConnector(this);
-        if (bindService(new Intent(this, UserLoginAndRegisterService.class),
+        userRegisterServiceConnector = new UserAccountServiceConnector(this);
+        if (bindService(new Intent(this, UserAccountService.class),
                 userRegisterServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
         } else {
-            Log.e(TAG, "Error: The requested 'UserLoginAndRegisterService' service doesn't " +
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
         }
     }
@@ -213,16 +182,22 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         doUnbindUserRegisterService();
     }
 
+    /**
+     * Common actions after registration result is received from Service
+     * @param loginResult
+     */
     private void evaluateRegisterResult(LoginOrRegisterResult loginResult) {
         registerProgressBar.setVisibility(View.GONE);
+        //signupButton.setEnabled(true);
         if (loginResult == null) {
-            Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
         }
     }
 
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(SignupActivity.this, MainActivity.class);
+        //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
         finish();
     }
@@ -246,9 +221,18 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         evaluateRegisterResult(registerResult);
 
         if (registerResult.getError() != null) {
-            showRegisterFailed(registerResult.getError());
+            showRegisterFailed(registerResult.getError().getDetail());
+            String errorParameter = registerResult.getError().getErrorParameter();
+            if (errorParameter != null) {
+                if (errorParameter.equals("userName")) {
+                    userNameEditText.setError(registerResult.getError().getErrorParameterValue());
+                }
+                if (errorParameter.equals("email")) {
+                    emailEditText.setError(registerResult.getError().getErrorParameterValue());
+                }
+            }
         }
-        goToMainActivity();
+        //goToMainActivity();
     }
 
     @Override
@@ -277,7 +261,7 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
             @Override
             public void onClick(View v) {
                 registerProgressBar.setVisibility(View.VISIBLE);
-
+                signupButton.setEnabled(false);
                 userRegisterService.register(userNameEditText.getText().toString(),
                         passwordEditText.getText().toString(),
                         emailEditText.getText().toString(),

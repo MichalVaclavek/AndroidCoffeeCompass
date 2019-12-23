@@ -3,6 +3,11 @@ package cz.fungisoft.coffeecompass2.activity.data.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
+
 /**
  * Saves loggged-in user data into "preferences" to use it
  * after application is closed and opened again
@@ -27,11 +32,13 @@ public class UserPreferenceHelper {
 
     private final String CREATED_ON = "createdOn";
 
-    private final String USER_ROLES = "userRoles";
+    private final String USER_ROLES = "userRole";
 
     private final String DEVICE_ID = "deviceID";
 
     private final String LOGIN_TOKEN = "loginToken";
+    private final String LOGIN_TOKEN_TYPE = "loginTokenType";
+    private final String LOGIN_TOKEN_EXPIRY = "loginTokenExpiry";
 
 
     private SharedPreferences app_prefs;
@@ -52,157 +59,202 @@ public class UserPreferenceHelper {
         return app_prefs.getBoolean(INTRO, false);
     }
 
-    public void putName(String loginorout) {
+    public void putUserId(String userId) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(USER_NAME, loginorout);
-        edit.commit();
-    }
-    public String getName() {
-        return app_prefs.getString(USER_NAME, "");
-    }
-
-    public void putUserId(String loginorout) {
-        SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(USER_ID, loginorout);
+        edit.putString(USER_ID, userId);
         edit.commit();
     }
     public String getUserId() {
         return app_prefs.getString(USER_ID, "");
     }
 
-    public void putDisplayName(String loginorout) {
+    public void putDisplayName(String displayName) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(DISPLAY_NAME, loginorout);
+        edit.putString(DISPLAY_NAME, displayName);
         edit.commit();
     }
     public String getUserName() {
-        return app_prefs.getString(USER_NAME, "");
+        return app_prefs.getString(USER_NAME, null);
     }
 
-    public void putUserName(String loginorout) {
+    public void putUserName(String userName) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(USER_NAME, loginorout);
+        edit.putString(USER_NAME, userName);
         edit.commit();
     }
     public String getDisplayName() {
         return app_prefs.getString(DISPLAY_NAME, "");
     }
 
-    public void putEmail(String loginorout) {
+    public void putEmail(String email) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(EMAIL, loginorout);
+        edit.putString(EMAIL, email);
         edit.commit();
     }
     public String getEmail() {
         return app_prefs.getString(EMAIL, "");
     }
 
-    public void putNumOfCreatedSites(String loginorout) {
+    public void putNumOfCreatedSites(int numOfCreatedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(NUM_OF_CREATED_SITES, loginorout);
+        edit.putInt(NUM_OF_CREATED_SITES, numOfCreatedSites);
         edit.commit();
     }
-    public String getNumOfCreatedSites() {
-        return app_prefs.getString(NUM_OF_CREATED_SITES, "");
+    public int getNumOfCreatedSites() {
+        return app_prefs.getInt(NUM_OF_CREATED_SITES, 0);
     }
 
-    public void putNumOfUpdatedSites(String loginorout) {
+    public void putNumOfUpdatedSites(int numOfUpdatedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(NUM_OF_UPDATED_SITES, loginorout);
+        edit.putInt(NUM_OF_UPDATED_SITES, numOfUpdatedSites);
         edit.commit();
     }
-    public String getNumOfUpdatedSites() {
-        return app_prefs.getString(NUM_OF_UPDATED_SITES, "");
+    public int getNumOfUpdatedSites() {
+        return app_prefs.getInt(NUM_OF_UPDATED_SITES, 0);
     }
 
-    public void putNumOfDeletedSites(String loginorout) {
+    public void putNumOfDeletedSites(int numOfDeletedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(NUM_OF_DELETED_SITES, loginorout);
+        edit.putInt(NUM_OF_DELETED_SITES, numOfDeletedSites);
         edit.commit();
     }
-    public String getNumOfDeletedSites() {
-        return app_prefs.getString(NUM_OF_DELETED_SITES, "");
+    public int getNumOfDeletedSites() {
+        return app_prefs.getInt(NUM_OF_DELETED_SITES, 0);
     }
 
-    public void putFirstName(String loginorout) {
+    public void putFirstName(String firstName) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(FIRST_NAME, loginorout);
+        edit.putString(FIRST_NAME, firstName);
         edit.commit();
     }
     public String getFirstName() {
         return app_prefs.getString(FIRST_NAME, "");
     }
 
-    public void putLastName(String loginorout) {
+    public void putLastName(String lastName) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(LAST_NAME, loginorout);
+        edit.putString(LAST_NAME, lastName);
         edit.commit();
     }
     public String getLastName() {
         return app_prefs.getString(LAST_NAME, "");
     }
 
-    public void putCreatedOn(String loginorout) {
+    public void putCreatedOn(String createdOn) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(CREATED_ON, loginorout);
+        edit.putString(CREATED_ON, createdOn);
         edit.commit();
     }
     public String getCreatedOn() {
         return app_prefs.getString(CREATED_ON, "");
     }
 
-    public void putUserRoles(String loginorout) {
+    public void putUserRoles(List<String> userRoles) {
+        String[] rolesArray = new String[userRoles.size()];
+        rolesArray = userRoles.toArray(rolesArray);
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(USER_ROLES, loginorout);
+        for (int i=0; i < rolesArray.length; i++) {
+            edit.putString(USER_ROLES + String.valueOf(i), rolesArray[i]);
+        }
         edit.commit();
     }
-    public String getUserRoles() {
-        return app_prefs.getString(USER_ROLES, "");
+    //TODO
+    public List<String> getUserRoles() {
+        List<String> retVal = new ArrayList<>();
+        int rolesCounter = 0;
+        while (!app_prefs.getString(USER_ROLES + String.valueOf(rolesCounter), "").isEmpty()) {
+            retVal.add(app_prefs.getString(USER_ROLES  + String.valueOf(rolesCounter), "USER"));
+            rolesCounter++;
+        }
+        return retVal;
     }
 
-    public void putDeviceId(String loginorout) {
+    public void putDeviceId(String deviceId) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(DEVICE_ID, loginorout);
+        edit.putString(DEVICE_ID, deviceId);
         edit.commit();
     }
     public String getDeviceId() {
         return app_prefs.getString(DEVICE_ID, "");
     }
 
-    public void putLoginToken(String loginorout) {
+    public void putLoginToken(JwtUserToken loginToken) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(LOGIN_TOKEN, loginorout);
+        edit.putString(LOGIN_TOKEN, loginToken.getAccessToken());
+        edit.putString(LOGIN_TOKEN_EXPIRY, loginToken.getExpiryDateFormated());
+        edit.putString(LOGIN_TOKEN_TYPE, loginToken.getTokenType());
+
         edit.commit();
     }
 
-    public String getLoginToken() {
-        return app_prefs.getString(LOGIN_TOKEN, "");
+    public JwtUserToken getLoginToken() {
+
+        JwtUserToken userToken = new JwtUserToken(app_prefs.getString(LOGIN_TOKEN, ""),
+                                                  getLoginTokenExpiry(),
+                                                  getLoginTokenType());
+
+        return userToken;
     }
+
+    public String getLoginTokenExpiry() {
+        return app_prefs.getString(LOGIN_TOKEN_EXPIRY, "");
+    }
+
+    public String getLoginTokenType() {
+        return app_prefs.getString(LOGIN_TOKEN_TYPE, "Bearer");
+    }
+
 
     public void saveUserData(LoggedInUser user) {
 
-        //TODO
-
+        putIsLogin(true);
+        putUserId(user.getUserId());
+        putUserName(user.getUserName());
+        putDeviceId(user.getDeviceID());
+        putDisplayName(user.getDisplayName());
+        putEmail(user.getEmail());
+        putFirstName(user.getFirstName());
+        putLastName(user.getLastName());
+        putLoginToken(user.getLoginToken());
+        putNumOfCreatedSites(user.getNumOfCreatedSites());
+        putNumOfUpdatedSites(user.getNumOfUpdatedSites());
+        putNumOfDeletedSites(user.getNumOfDeletedSites());
+        putCreatedOn(user.getCreatedOnFormated());
+        putUserRoles(user.getUserRoles());
     }
 
     public LoggedInUser getSavedUserData() {
-        LoggedInUser user = new LoggedInUser();
 
-        user.setUserName(getUserName());
-        user.setFirstName(getFirstName());
-        user.setLastName(getLastName());
+        LoggedInUser user = null;
+        // Check if data are saved
+        if (getUserName() != null) {
 
-        user.setCreatedOn(getCreatedOn());
-        //user.setLoginToken(getLoginToken());
-        user.setEmail(getEmail());
-        user.setDisplayName(getDisplayName());
-        user.setDeviceID(getDeviceId());
-        user.setUserId(getUserId());
-        //user.setUserRoles(getUserRoles());
-        user.setNumOfDeletedSites(Integer.parseInt(getNumOfDeletedSites()));
-        user.setNumOfCreatedSites(Integer.parseInt(getNumOfCreatedSites()));
-        user.setNumOfUpdatedSites(Integer.parseInt(getNumOfUpdatedSites()));
+            user = new LoggedInUser();
 
+            user.setUserName(getUserName());
+            user.setFirstName(getFirstName());
+            user.setLastName(getLastName());
+
+            user.setCreatedOn(getCreatedOn());
+            user.setLoginToken(getLoginToken());
+            user.setEmail(getEmail());
+            user.setDisplayName(getDisplayName());
+            user.setDeviceID(getDeviceId());
+            user.setUserId(getUserId());
+            user.setUserRoles(getUserRoles());
+            user.setNumOfDeletedSites(getNumOfDeletedSites());
+            user.setNumOfCreatedSites(getNumOfCreatedSites());
+            user.setNumOfUpdatedSites(getNumOfUpdatedSites());
+        }
         return user;
+    }
+
+    /**
+     * To delete/remove saved user data, if user loged-out
+     */
+    public void removeUserData() {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.clear();
+        edit.commit();
     }
 }

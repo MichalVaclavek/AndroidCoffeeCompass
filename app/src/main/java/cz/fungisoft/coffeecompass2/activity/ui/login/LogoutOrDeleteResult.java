@@ -5,26 +5,26 @@ import android.support.annotation.Nullable;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
- * Authentication result : success (user details) or error message.
+ * Logout or Delete result : success (user name) or error message.
  */
-public class LoginOrRegisterResult {
+public class LogoutOrDeleteResult {
 
     @Nullable
-    private LoggedInUserView success;
+    private String userName;
     @Nullable
     private RestError error;
 
-    public LoginOrRegisterResult(@Nullable RestError error) {
+    public LogoutOrDeleteResult(@Nullable RestError error) {
         this.error = error;
     }
 
-    public LoginOrRegisterResult(@Nullable LoggedInUserView success) {
-        this.success = success;
+    public LogoutOrDeleteResult(@Nullable String userName) {
+        this.userName = userName;
     }
 
     @Nullable
-    public LoggedInUserView getSuccess() {
-        return success;
+    public String getSuccess() {
+        return userName;
     }
 
     @Nullable

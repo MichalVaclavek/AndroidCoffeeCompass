@@ -25,13 +25,11 @@ import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.activity.data.LoginAndRegisterDataSource;
-import cz.fungisoft.coffeecompass2.activity.data.LoginAndRegisterRepository;
 import cz.fungisoft.coffeecompass2.activity.ui.register.SignupActivity;
 
 import butterknife.ButterKnife;
-import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
-import cz.fungisoft.coffeecompass2.services.UserLoginRegisterServiceConnector;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
 
 public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener {
@@ -39,16 +37,13 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     private LoginRegisterViewModel loginViewModel;
 
     private static final String TAG = "LoginActivity";
-    private static final int REQUEST_SIGNUP = 0;
+    //private static final int REQUEST_SIGNUP = 0;
 
     @BindView(R.id.input_email) EditText usernameEditText;
     @BindView(R.id.input_password) EditText passwordEditText;
     @BindView(R.id.btn_login) Button loginButton;
     @BindView(R.id.link_signup) TextView signupLink;
     @BindView(R.id.progress) ProgressBar loginProgressBar;
-
-
-    //private Intent userLoginServiceIntent;
 
     //private ProgressDialog loadingProgressDialog = null;
 
@@ -107,33 +102,29 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         usernameEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.addTextChangedListener(afterTextChangedListener);
 
-        //final String deviceID = Utils.getDeviceID(this);
-
         // UserLogin service connection
-        //userLoginServiceIntent = new Intent(this, UserLoginAndRegisterService.class);
-        //startService(userLoginServiceIntent);
         doBindUserLoginService();
     }
 
     private void onClickSignUp() {
         Intent signUpIntent = new Intent(this, SignupActivity.class);
+        signUpIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         this.startActivity(signUpIntent);
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
     }
 
-    private void showLoginFailed(@StringRes Integer errorString) {
-        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+    private void showLoginFailed(String errorString) {
+        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_LONG).show();
     }
 
     // ** UserLogin Service connection/disconnection ** //
 
-    protected UserLoginAndRegisterService userLoginService;
-    private UserLoginRegisterServiceConnector userLoginServiceConnector;
+    protected UserAccountService userLoginService;
+    private UserAccountServiceConnector userLoginServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -145,12 +136,12 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userLoginServiceConnector = new UserLoginRegisterServiceConnector(this);
-        if (bindService(new Intent(this, UserLoginAndRegisterService.class),
+        userLoginServiceConnector = new UserAccountServiceConnector(this);
+        if (bindService(new Intent(this, UserAccountService.class),
                 userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
         } else {
-            Log.e(TAG, "Error: The requested 'UserLoginAndRegisterService' service doesn't " +
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
         }
     }
@@ -172,10 +163,16 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         doUnbindUserLoginService();
     }
 
+    /**
+     * Common actions after login result received from service.
+     *
+     * @param loginResult
+     */
     private void evaluateLoginResult(LoginOrRegisterResult loginResult) {
         loginProgressBar.setVisibility(View.GONE);
+        //loginButton.setEnabled(true);
         if (loginResult == null) {
-            Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), getString(R.string.login_failed), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -188,34 +185,26 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     @Override
     public void onUserLoggedInSuccess(LoginOrRegisterResult loginResult) {
-        //loginViewModel.getLoginResult().observe(this, new Observer<LoginOrRegisterResult>() {
-            //@Override
-            //public void onChanged(@Nullable LoginOrRegisterResult loginResult) {
         evaluateLoginResult(loginResult);
 
         if (loginResult.getSuccess() != null) {
             updateUiWithUser(loginResult.getSuccess());
         }
         setResult(Activity.RESULT_OK);
-
         goToMainActivity();
-           // }
-      //  });
     }
 
     @Override
     public void onUserLoggedInFailure(LoginOrRegisterResult loginResult) {
         evaluateLoginResult(loginResult);
 
-        if (loginResult.getError() != null) {
-            showLoginFailed(loginResult.getError());
-        }
-        goToMainActivity();
-    }
+        String errorMessage = (loginResult.getError() != null
+                               && loginResult.getError().getDetail() != null
+                               && !loginResult.getError().getDetail().isEmpty() )
+                                ? loginResult.getError().getDetail()
+                                : getString(R.string.invalid_username);
 
-    @Override
-    public void onUserLoggedOut() {
-
+        showLoginFailed(errorMessage);
     }
 
     @Override
@@ -242,6 +231,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
             @Override
             public void onClick(View v) {
                 loginProgressBar.setVisibility(View.VISIBLE);
+                loginButton.setEnabled(false);
 
                 userLoginService.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString(), deviceID);

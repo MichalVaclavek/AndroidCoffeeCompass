@@ -28,11 +28,12 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
+import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
-import cz.fungisoft.coffeecompass2.services.UserLoginAndRegisterService;
-import cz.fungisoft.coffeecompass2.services.UserLoginRegisterServiceConnector;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
 
 /**
@@ -192,21 +193,25 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
     private void openLoginActivity() {
-        Intent activityIntent = new Intent(this, LoginActivity.class);
-        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        this.startActivity(activityIntent);
+        if (Utils.isOnline()) {
+            Intent activityIntent = new Intent(this, LoginActivity.class);
+            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            this.startActivity(activityIntent);
+        } else {
+            showNoInternetToast();
+        }
     }
 
     private void openUserProfileActivity() {
         Intent activityIntent = new Intent(this, UserDataViewActivity.class);
-        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
 
     private void aktivujNastaveni() {
         Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         selectSearchDistIntent.putExtra("searchRange", this.searchRange);
         this.startActivity(selectSearchDistIntent);
     }
@@ -368,13 +373,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 searchKafeButton.setEnabled(false);
             }
         }
-
-//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
-//            MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
-//            if (userAccountMenuItem != null) {
-//                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
-//            }
-//        }
     }
 
     @Override
@@ -417,8 +415,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     // ** UserLogin Service connection/disconnection ** //
 
-    protected UserLoginAndRegisterService userLoginService;
-    private UserLoginRegisterServiceConnector userLoginServiceConnector;
+    protected UserAccountService userLoginService;
+    private UserAccountServiceConnector userLoginServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -430,12 +428,12 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userLoginServiceConnector = new UserLoginRegisterServiceConnector(this);
-        if (bindService(new Intent(this, UserLoginAndRegisterService.class),
+        userLoginServiceConnector = new UserAccountServiceConnector(this);
+        if (bindService(new Intent(this, UserAccountService.class),
                 userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
         } else {
-            Log.e(TAG, "Error: The requested 'UserLoginAndRegisterService' service doesn't " +
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
         }
     }
@@ -460,9 +458,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     public void onUserLoggedInSuccess(LoginOrRegisterResult loginResult) {
         // no action needed
-//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
-//            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
-//        }
     }
 
     @Override
@@ -470,12 +465,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         // no action needed
     }
 
-    @Override
-    public void onUserLoggedOut() {
-//        if (userLoginService != null && !userLoginService.isUserLoggedIn()) {
-//            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
-//        }
-    }
 
     @Override
     public void onUserLoginServiceConnected() {

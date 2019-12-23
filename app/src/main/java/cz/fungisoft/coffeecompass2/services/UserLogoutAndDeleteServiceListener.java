@@ -7,10 +7,13 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
  * after new user registration and when the UserAccountService is connected to
  * calling activity.
  */
-public interface UserRegisterServiceListener {
+public interface UserLogoutAndDeleteServiceListener {
 
-    void onUserRegisterSuccess(LoginOrRegisterResult registerResult);
-    void onUserRegisterFailure(LoginOrRegisterResult registerResult);
+    void onUserLogoutSuccess();
+    void onUserLogoutFailure(String errorMessage);
 
-    void onUserRegisterServiceConnected();
+    void onUserDeleteSuccess();
+    void onUserDeleteFailure(String errorMessage);
+
+    void onLogoutAndDeleteServiceConnected();
 }
