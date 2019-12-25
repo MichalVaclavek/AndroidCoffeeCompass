@@ -1,5 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
+import android.content.res.Resources;
+
+import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLoginOrRegisterInputData;
 import retrofit2.Call;
@@ -17,6 +20,7 @@ import retrofit2.http.Url;
  * for user login and registration.
  */
 public interface UserAccountRESTInterface {
+    //Resources.getSystem().getString(R.strings.key);
 
     String LOGIN_URL = "https://coffeecompass.cz/rest/public/user/";
 

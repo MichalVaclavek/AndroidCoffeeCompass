@@ -1,8 +1,10 @@
 package cz.fungisoft.coffeecompass2;
 
+import android.content.Context;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +31,16 @@ public class Utils {
         catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check"); }
 
         return false;
+    }
+
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showNoInternetToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_no_internet,
+                Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     public static String getDeviceID(AppCompatActivity parentActivity) {

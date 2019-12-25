@@ -158,7 +158,7 @@ public class UserPreferenceHelper {
         }
         edit.commit();
     }
-    //TODO
+
     public List<String> getUserRoles() {
         List<String> retVal = new ArrayList<>();
         int rolesCounter = 0;

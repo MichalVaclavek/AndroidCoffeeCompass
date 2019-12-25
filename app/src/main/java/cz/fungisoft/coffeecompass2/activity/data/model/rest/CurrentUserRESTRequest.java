@@ -12,6 +12,7 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import okhttp3.Headers;
@@ -30,7 +31,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  */
 public class CurrentUserRESTRequest {
 
-    // TODO vlozit do strings resources String url = getResources().getString(R.string.json_get_url);
     static final String REQ_TAG = "CurrentUserRESTRequest";
 
     private static int PERFORM_LOGIN = 1;
@@ -40,9 +40,10 @@ public class CurrentUserRESTRequest {
 
     private final LoggedInUser currentUser;
 
-    private final UserAccountService userLoginAndRegisterService;
+    //private final UserAccountService userLoginAndRegisterService;
+    private UserAccountActionsEvaluator userLoginAndRegisterService;
 
-    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountService userLoginAndRegisterService) {
+    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsEvaluator userLoginAndRegisterService) {
         super();
         this.userJwtToken = userLoginRESTResponse;
         currentUser = new LoggedInUser(userJwtToken);
@@ -61,10 +62,10 @@ public class CurrentUserRESTRequest {
 
         Log.d(REQ_TAG, "CurrentUserRESTRequest initiated");
 
-        Gson gson = new GsonBuilder()
-                .setDateFormat("dd.MM. yyyy HH:mm")
-                .create();
+        GsonBuilder gb = new GsonBuilder();
+        Gson gson = gb.setDateFormat("dd.MM. yyyy HH:mm").create();
 
+        // Inserts user authorization token to Authorization header
         Interceptor headerAuthorizationInterceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -112,7 +113,7 @@ public class CurrentUserRESTRequest {
                         }
                         return;
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
+                        Log.i("onEmptyResponse", "Returned empty response");
                     }
                 } else {
                     Log.e(REQ_TAG, "Current user response failure.");
@@ -122,8 +123,6 @@ public class CurrentUserRESTRequest {
                         userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(Utils.getRestError(response.errorBody().toString())));
                     }
                 }
-                // Answer to login not correct
-                //userLoginAndRegisterService.evaluateLoginResult(new Result.Error(Utils.getRestError(response.errorBody().toString())));
             }
 
             @Override

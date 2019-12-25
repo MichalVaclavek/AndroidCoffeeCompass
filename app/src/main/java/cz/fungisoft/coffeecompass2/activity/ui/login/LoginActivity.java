@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +19,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.R;
@@ -46,6 +47,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     @BindView(R.id.progress) ProgressBar loginProgressBar;
 
     //private ProgressDialog loadingProgressDialog = null;
+    protected UserAccountService userAccountService;
+    private UserAccountServiceConnector userLoginServiceConnector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
                                            .get(LoginRegisterViewModel.class);
 
         ButterKnife.bind(this);
+
+        loginButton.setEnabled(false);
 
         signupLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +113,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     private void onClickSignUp() {
         Intent signUpIntent = new Intent(this, SignupActivity.class);
-        signUpIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //signUpIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         this.startActivity(signUpIntent);
     }
 
@@ -122,9 +127,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     }
 
     // ** UserLogin Service connection/disconnection ** //
-
-    protected UserAccountService userLoginService;
-    private UserAccountServiceConnector userLoginServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -140,6 +142,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         if (bindService(new Intent(this, UserAccountService.class),
                 userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
+            //userAccountService.addUserLoginServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -147,9 +150,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     }
 
     private void doUnbindUserLoginService() {
-        if (userLoginService != null) {
-            userLoginService.removeUserLoginServiceListener(this);
-        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userLoginServiceConnector);
@@ -160,8 +160,18 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //if (userAccountService != null) {
+          //  userAccountService.removeUserLoginServiceListener(this);
+        //}
         doUnbindUserLoginService();
     }
+    //@Override
+    //protected void onResume() {
+      //  super.onResume();
+       // if (userAccountService != null) {
+         //   userAccountService.addUserLoginServiceListener(this);
+       // }
+    //}
 
     /**
      * Common actions after login result received from service.
@@ -171,6 +181,10 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     private void evaluateLoginResult(LoginOrRegisterResult loginResult) {
         loginProgressBar.setVisibility(View.GONE);
         //loginButton.setEnabled(true);
+        if (!usernameEditText.getText().toString().isEmpty()
+                && !passwordEditText.getText().toString().isEmpty()) {
+            loginButton.setEnabled(true);
+        }
         if (loginResult == null) {
             Toast.makeText(getBaseContext(), getString(R.string.login_failed), Toast.LENGTH_LONG).show();
         }
@@ -179,6 +193,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
     }
@@ -210,8 +225,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     @Override
     public void onUserLoginServiceConnected() {
 
-        userLoginService = userLoginServiceConnector.getUserLoginService();
-        userLoginService.addUserLoginServiceListener(this);
+        userAccountService = userLoginServiceConnector.getUserLoginService();
+        userAccountService.addUserLoginServiceListener(this);
 
         final String deviceID = Utils.getDeviceID(this);
 
@@ -220,8 +235,13 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    userLoginService.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString(), deviceID);
+                    if (Utils.isOnline()) {
+                        userAccountService.login(usernameEditText.getText().toString(),
+                                               passwordEditText.getText().toString(),
+                                               deviceID);
+                    } else {
+                        Utils.showNoInternetToast(getApplicationContext());
+                    }
                 }
                 return false;
             }
@@ -230,12 +250,37 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginProgressBar.setVisibility(View.VISIBLE);
-                loginButton.setEnabled(false);
+                if (Utils.isOnline()) {
+                    loginProgressBar.setVisibility(View.VISIBLE);
+                    loginButton.setEnabled(false);
 
-                userLoginService.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString(), deviceID);
+                    userAccountService.login(usernameEditText.getText().toString(),
+                                           passwordEditText.getText().toString(),
+                                           deviceID);
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
             }
         });
+    }
+
+    /**
+     * Needed to adding this class to list of Listeners of the UserAccountService
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LoginActivity that = (LoginActivity) o;
+        return Objects.equals(usernameEditText, that.usernameEditText) &&
+                Objects.equals(passwordEditText, that.passwordEditText) &&
+                Objects.equals(loginButton, that.loginButton);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(usernameEditText, passwordEditText, loginButton);
     }
 }

@@ -112,7 +112,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         if (Utils.isOnline()) {
             new ReadStatsAsyncTask(this).execute();
         } else {
-            showNoInternetToast();
+            Utils.showNoInternetToast(getApplicationContext());
         }
 
         // UserLoginAndRegister service connection
@@ -184,7 +184,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 if (Utils.isOnline()) {
                     openMap();
                 } else {
-                    showNoInternetToast();
+                    Utils.showNoInternetToast(getApplicationContext());
                 }
                 return true;
             default:
@@ -195,10 +195,10 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private void openLoginActivity() {
         if (Utils.isOnline()) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
-            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             this.startActivity(activityIntent);
         } else {
-            showNoInternetToast();
+            Utils.showNoInternetToast(getApplicationContext());
         }
     }
 
@@ -266,7 +266,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                                          searchRange,
                                 "espresso").execute();
         } else {
-            showNoInternetToast();
+            Utils.showNoInternetToast(getApplicationContext());
         }
     }
 
@@ -282,18 +282,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                                         searchRange,
                                 "").execute();
         } else {
-            showNoInternetToast();
+            Utils.showNoInternetToast(getApplicationContext());
         }
-    }
-
-    /**
-     * Show info Toast message, that internet connection is not available
-     */
-    private void showNoInternetToast() {
-        Toast toast = Toast.makeText(getApplicationContext(),
-                                "No Internet connection.",
-                                    Toast.LENGTH_SHORT);
-        toast.show();
     }
 
     /**

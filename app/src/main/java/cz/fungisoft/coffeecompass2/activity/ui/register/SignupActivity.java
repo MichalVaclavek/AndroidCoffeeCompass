@@ -6,7 +6,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -25,11 +24,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import butterknife.ButterKnife;
 import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
@@ -56,6 +56,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
 
     @BindView(R.id.progress_signup) ProgressBar registerProgressBar;
 
+    protected UserAccountService userAccountService;
+    private UserAccountServiceConnector userRegisterServiceConnector;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,12 +66,12 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        UserPreferenceHelper preferenceHelper = new UserPreferenceHelper(this);
-
         registerViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginRegisterViewModel.class);
 
         ButterKnife.bind(this);
+
+        signupButton.setEnabled(false);
 
         loginLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,10 +127,16 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         doBindUserRegisterService();
     }
 
+    /**
+     * This Activity is accesible only from LoginActivity, and going back to LoginActivity
+     * can be done using back button. No need to start LoginActivity again.
+     */
     private void onClickLogin() {
-        Intent loginIntent = new Intent(this, LoginActivity.class);
-        loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        this.startActivity(loginIntent);
+//        Intent loginIntent = new Intent(this, LoginActivity.class);
+//        //loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        this.startActivity(loginIntent);
+
+        this.onBackPressed();
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
@@ -141,9 +150,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
 
 
     // ** UserLogin Service connection/disconnection ** //
-
-    protected UserAccountService userRegisterService;
-    private UserAccountServiceConnector userRegisterServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
@@ -159,6 +165,7 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         if (bindService(new Intent(this, UserAccountService.class),
                 userRegisterServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
+            //userAccountService.addUserRegisterServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -166,9 +173,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     }
 
     private void doUnbindUserRegisterService() {
-        if (userRegisterService != null) {
-            userRegisterService.removeUserRegisterServiceListener(this);
-        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userRegisterServiceConnector);
@@ -179,6 +183,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //if (userAccountService != null) {
+        //    userAccountService.removeUserRegisterServiceListener(this);
+        //}
         doUnbindUserRegisterService();
     }
 
@@ -189,8 +196,13 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     private void evaluateRegisterResult(LoginOrRegisterResult loginResult) {
         registerProgressBar.setVisibility(View.GONE);
         //signupButton.setEnabled(true);
+        if (!userNameEditText.getText().toString().isEmpty()
+            && !emailEditText.getText().toString().isEmpty()
+            && !passwordEditText.getText().toString().isEmpty()) {
+            signupButton.setEnabled(true);
+        }
         if (loginResult == null) {
-            Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), getString(R.string.user_register_failure), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -198,6 +210,7 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         // go to MainActivity
         Intent i = new Intent(SignupActivity.this, MainActivity.class);
         //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
     }
@@ -238,8 +251,8 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     @Override
     public void onUserRegisterServiceConnected() {
 
-        userRegisterService = userRegisterServiceConnector.getUserLoginService();
-        userRegisterService.addUserRegisterServiceListener(this);
+        userAccountService = userRegisterServiceConnector.getUserLoginService();
+        userAccountService.addUserRegisterServiceListener(this);
 
         final String deviceID = Utils.getDeviceID(this);
 
@@ -248,10 +261,14 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    userRegisterService.register(userNameEditText.getText().toString(),
-                            passwordEditText.getText().toString(),
-                            emailEditText.getText().toString(),
-                            deviceID);
+                    if (Utils.isOnline()) {
+                        userAccountService.register(userNameEditText.getText().toString(),
+                                                    passwordEditText.getText().toString(),
+                                                    emailEditText.getText().toString(),
+                                                    deviceID);
+                    } else {
+                        Utils.showNoInternetToast(getApplicationContext());
+                    }
                 }
                 return false;
             }
@@ -260,14 +277,37 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                registerProgressBar.setVisibility(View.VISIBLE);
-                signupButton.setEnabled(false);
-                userRegisterService.register(userNameEditText.getText().toString(),
-                        passwordEditText.getText().toString(),
-                        emailEditText.getText().toString(),
-                        deviceID);
+                if (Utils.isOnline()) {
+                    registerProgressBar.setVisibility(View.VISIBLE);
+                    signupButton.setEnabled(false);
+                    userAccountService.register(userNameEditText.getText().toString(),
+                                                passwordEditText.getText().toString(),
+                                                emailEditText.getText().toString(),
+                                                deviceID);
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
             }
         });
     }
 
+    /**
+     * Needed to adding this class to list of Listeners of the UserAccountService
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SignupActivity that = (SignupActivity) o;
+        return Objects.equals(userNameEditText, that.userNameEditText) &&
+                Objects.equals(emailEditText, that.emailEditText) &&
+                Objects.equals(passwordEditText, that.passwordEditText);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userNameEditText, emailEditText, passwordEditText);
+    }
 }

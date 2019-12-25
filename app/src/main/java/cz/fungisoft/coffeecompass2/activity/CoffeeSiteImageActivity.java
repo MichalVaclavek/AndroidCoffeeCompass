@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -84,21 +83,11 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         super.onPause();
 
         cs.removePropertyChangeListener(distLabel);
-//        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " removed to listen distance change of " + cs.getName() + ". Object id: " + cs);
-
-        // Listener for Location service can be removed, as there is no 'follow' Activity, from which
-        // the CoffeeSiteImageActivity could be called back
-//        if (locationService != null) {
-//            locationService.removePropertyChangeListener(cs);
-//        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        if (locationService != null) {
-//            locationService.addPropertyChangeListener(cs);
-//        }
         cs.addPropertyChangeListener(distLabel);
         distLabel.setText(String.valueOf(cs.getDistance()) + " m");
 //        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);

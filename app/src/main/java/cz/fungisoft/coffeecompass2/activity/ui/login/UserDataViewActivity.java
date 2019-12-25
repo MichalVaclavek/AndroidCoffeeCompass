@@ -18,9 +18,12 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -72,6 +75,9 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
+        logoutButton.setEnabled(true);
+        deleteUserButton.setEnabled(true);
+
 
         userProfileToShow = (LoggedInUser) this.getIntent().getExtras().get("currentUserProfile");
 
@@ -87,14 +93,16 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
             numOfCreatedSitesTextView.setText(String.valueOf(userProfileToShow.getNumOfCreatedSites()));
 
             if (userProfileToShow.getFirstName() != null && !userProfileToShow.getFirstName().isEmpty()) {
+                firstNameRow.setVisibility(View.VISIBLE);
                 firstNameTextView.setText(userProfileToShow.getFirstName());
             } else {
-                firstNameRow.setEnabled(false);
+                firstNameRow.setVisibility(View.GONE);
             }
             if (userProfileToShow.getLastName() != null && !userProfileToShow.getLastName().isEmpty()) {
+                lastNameRow.setVisibility(View.VISIBLE);
                 lastNameTextView.setText(userProfileToShow.getLastName());
             } else {
-                lastNameRow.setEnabled(false);
+                lastNameRow.setVisibility(View.GONE);
             }
 
             userCratedOnTextView.setText(userProfileToShow.getCreatedOnFormated());
@@ -107,8 +115,8 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            //this.onBackPressed();
-            goToMainActivityAndFinish();
+            this.onBackPressed();
+            //goToMainActivityAndFinish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -128,6 +136,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         if (bindService(new Intent(this, UserAccountService.class),
                 userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserDeleteAndRegisterService = true;
+            //userAccountService.addLogoutAndDeleteServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -135,9 +144,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     private void doUnbindUserLogoutAndDeleteService() {
-        if (userAccountService != null) {
-            userAccountService.removeLogoutAndDeleteServiceListener(this);
-        }
+//
         if (mShouldUnbindUserDeleteAndRegisterService) {
             // Release information about the service's state.
             unbindService(userAccountServiceConnector);
@@ -148,12 +155,25 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     @Override
     protected void onDestroy() {
         super.onDestroy();
+//        if (userAccountService != null) {
+//            userAccountService.removeLogoutAndDeleteServiceListener(this);
+//        }
         doUnbindUserLogoutAndDeleteService();
     }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (userAccountService != null) {
+//            userAccountService.addLogoutAndDeleteServiceListener(this);
+//        }
+//    }
+
 
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(UserDataViewActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
     }
 
@@ -215,21 +235,51 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logoutDeleteProgressBar.setVisibility(View.VISIBLE);
-                logoutButton.setEnabled(false);
-                deleteUserButton.setEnabled(false);
-                userAccountService.logout();
+                if (Utils.isOnline()) {
+                    logoutDeleteProgressBar.setVisibility(View.VISIBLE);
+                    logoutButton.setEnabled(false);
+                    deleteUserButton.setEnabled(false);
+                    userAccountService.logout();
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
             }
         });
         deleteUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logoutDeleteProgressBar.setVisibility(View.VISIBLE);
-                logoutButton.setEnabled(false);
-                deleteUserButton.setEnabled(false);
-                userAccountService.delete();
+                if (Utils.isOnline()) {
+                    logoutDeleteProgressBar.setVisibility(View.VISIBLE);
+                    logoutButton.setEnabled(false);
+                    deleteUserButton.setEnabled(false);
+                    userAccountService.delete();
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
             }
         });
     }
 
+    /**
+     * Needed to adding this class to list of Listeners of the UserAccountService
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDataViewActivity that = (UserDataViewActivity) o;
+        return Objects.equals(usernameTextView, that.usernameTextView) &&
+                Objects.equals(userEmailTextView, that.userEmailTextView) &&
+                Objects.equals(numOfCreatedSitesTextView, that.numOfCreatedSitesTextView) &&
+                Objects.equals(firstNameTextView, that.firstNameTextView) &&
+                Objects.equals(lastNameTextView, that.lastNameTextView) &&
+                Objects.equals(userCratedOnTextView, that.userCratedOnTextView);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(usernameTextView, userEmailTextView, numOfCreatedSitesTextView, firstNameTextView, lastNameTextView, userCratedOnTextView);
+    }
 }

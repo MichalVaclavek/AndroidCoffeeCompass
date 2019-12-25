@@ -127,7 +127,11 @@ public class LoggedInUser implements Serializable {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        if (firstName.equals("null")) {
+            this.firstName = "";
+        } else {
+            this.firstName = firstName;
+        }
     }
 
     public String getLastName() {
@@ -135,7 +139,12 @@ public class LoggedInUser implements Serializable {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+
+        if (lastName.equals("null")) {
+            this.lastName = "";
+        } else {
+            this.lastName = lastName;
+        }
     }
 
     public List<String> getUserRoles() {

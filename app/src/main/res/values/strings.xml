@@ -79,5 +79,9 @@
     <string name="user_profile_lastname_label">Příjmení:</string>
     <string name="user_profile_createdon_label">Vytvořen:</string>
     <string name="user_profile_delete_button">Smazat</string>
+    <string name="user_register_failure">Registrace neúspěšná.</string>
+    <string name="toast_no_internet">Připojení k internetu není k dispozici.</string>
+    <string name="rest_public_user_url">https://coffeecompass.cz/rest/public/user/</string>
+    <string name="rest_secured_user_url">https://coffeecompass.cz/rest/secured/user/</string>
 
 </resources>

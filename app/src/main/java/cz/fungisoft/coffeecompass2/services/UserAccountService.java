@@ -18,6 +18,7 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LogoutOrDeleteResult;
@@ -27,10 +28,10 @@ import cz.fungisoft.coffeecompass2.asynctask.LogoutUserRESTAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.RegisterUserRESTAsyncTask;
 
 /**
- * Service to run user login and register Async tasks and to
- * provide info about currently logged-in user to other Activities, if requested.
+ * Service to run user login and logout, and new user register and delete
+ * Async tasks and to provide info about currently logged-in user to other Activities, if requested.
  */
-public class UserAccountService extends Service {
+public class UserAccountService extends Service implements UserAccountActionsEvaluator {
 
     private String TAG = "UserAccount service";
 
@@ -59,31 +60,49 @@ public class UserAccountService extends Service {
         return deleteResult;
     }
 
+    /**
+     * List of listeneres for user login events.
+     */
     private List<UserLoginServiceListener> userLoginServiceListeners = new ArrayList<>();
 
     public void addUserLoginServiceListener(UserLoginServiceListener userLogindServiceListener) {
-        userLoginServiceListeners.add(userLogindServiceListener);
+        if (!userLoginServiceListeners.contains(userLogindServiceListener)) {
+            userLoginServiceListeners.add(userLogindServiceListener);
+        }
     }
 
     public void removeUserLoginServiceListener(UserLoginServiceListener userLogindServiceListener) {
         userLoginServiceListeners.remove(userLogindServiceListener);
     }
 
+    /**
+     * List of listeneres for new user register events.
+     */
     private List<UserRegisterServiceListener> userRegisterServiceListeners = new ArrayList<>();
 
+    /**
+     * Adds new listener, if it is not already in a list
+     * @param userRegisterServiceListener
+     */
     public void addUserRegisterServiceListener(UserRegisterServiceListener userRegisterServiceListener) {
-        userRegisterServiceListeners.add(userRegisterServiceListener);
+        if (!userRegisterServiceListeners.contains(userRegisterServiceListener)) {
+            userRegisterServiceListeners.add(userRegisterServiceListener);
+        }
     }
 
     public void removeUserRegisterServiceListener(UserRegisterServiceListener userRegisterServiceListener) {
         userRegisterServiceListeners.remove(userRegisterServiceListener);
     }
 
-
+    /**
+     * List of listeneres for logout and delete user account events.
+     */
     private List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
 
     public void addLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
-        userLogoutAndDeleteServiceListeners.add(logoutAndDeleteServiceListener);
+        if (!userLogoutAndDeleteServiceListeners.contains(logoutAndDeleteServiceListener)) {
+            userLogoutAndDeleteServiceListeners.add(logoutAndDeleteServiceListener);
+        }
     }
 
     public void removeLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
@@ -126,14 +145,23 @@ public class UserAccountService extends Service {
         new RegisterUserRESTAsyncTask(username, password, email, deviceID, userLoginAndRegisterRepository).execute();
     }
 
+    /**
+     * Starts user logout Async task.
+     * The Async task invokes REST call to perform logout, then.
+     * When the REST call is finished, it calls evaluation methods of
+     * this service (UserAccountService) to process further actions
+     * (update user account repository and UI of the calling Activity)
+     * within this service.
+     *
+     * Same flow happens during login, register and delete account actions.
+     */
     public void logout() {
         new LogoutUserRESTAsyncTask(userLoginAndRegisterRepository).execute();
     }
 
-//    public void delete(String userName) {
-//        new DeleteUserRESTAsyncTask(userName, userLoginAndRegisterRepository).execute();
-//    }
-
+    /**
+     * Starts user delete Async task
+     */
     public void delete() {
         new DeleteUserRESTAsyncTask(userLoginAndRegisterRepository).execute();
     }
@@ -143,6 +171,7 @@ public class UserAccountService extends Service {
      *
      * @param result
      */
+    @Override
     public void evaluateLoginResult(Result result) {
         if (result instanceof Result.Success) {
             LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
@@ -161,6 +190,7 @@ public class UserAccountService extends Service {
      *
      * @param result
      */
+    @Override
     public void evaluateRegisterResult(Result result) {
         if (result instanceof Result.Success) {
             LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
@@ -179,6 +209,7 @@ public class UserAccountService extends Service {
      *
      * @param result
      */
+    @Override
     public void evaluateLogoutResult(Result result) {
         if (result instanceof Result.Success) {
             String data = ((Result.Success<String>) result).getData();
@@ -197,6 +228,7 @@ public class UserAccountService extends Service {
      *
      * @param result
      */
+    @Override
     public void evaluateDeleteResult(Result result) {
         if (result instanceof Result.Success) {
             String data = ((Result.Success<String>) result).getData();

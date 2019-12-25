@@ -7,6 +7,7 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import okhttp3.Headers;
@@ -25,16 +26,17 @@ public class UserLogoutRESTRequest {
 
     static final String REQ_TAG = "UserLogoutREST";
 
-    private UserAccountService userAccountService;
+    //private UserAccountService userAccountService;
+    private UserAccountActionsEvaluator userAccountService;
 
     final LoggedInUser currentUser;
 
     /**
      *
      */
-    public UserLogoutRESTRequest(LoggedInUser currentUser, UserAccountService userLoginAndRegisterService) {
+    public UserLogoutRESTRequest(LoggedInUser currentUser, UserAccountService userLogoutService) {
         super();
-        this.userAccountService = userLoginAndRegisterService;
+        this.userAccountService = userLogoutService;
         this.currentUser = currentUser;
     }
 

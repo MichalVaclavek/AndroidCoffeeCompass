@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,12 +27,13 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInte
  */
 public class UserLoginOrRegisterRESTRequest {
 
-    static final int INTERNET_REQ = 23;
+    //static final int INTERNET_REQ = 23;
     static final String REQ_TAG = "UserLoginOrRegisterREST";
 
     private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
-    private UserAccountService userLoginAndRegisterService;
+    //private UserAccountService userLoginAndRegisterService;
+    private UserAccountActionsEvaluator userLoginAndRegisterService;
 
     private final LoggedInUser currentUser;
 
@@ -45,7 +47,7 @@ public class UserLoginOrRegisterRESTRequest {
      * @param userName
      * @param password
      */
-    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountService userLoginAndRegisterService) {
+    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsEvaluator userLoginAndRegisterService) {
         super();
         this.userLoginAndRegisterService = userLoginAndRegisterService;
         userLoginOrRegisterInputData = new UserLoginOrRegisterInputData(userName, deviceID, email, password);
@@ -65,9 +67,8 @@ public class UserLoginOrRegisterRESTRequest {
 
         Log.d(REQ_TAG, "UserLoginOrRegisterRESTRequest initiated");
 
-        Gson gson = new GsonBuilder()
-                .setDateFormat("dd.MM.yyyy HH:mm")
-                .create();
+        Gson gson = new GsonBuilder().setDateFormat("dd.MM.yyyy HH:mm")
+                                     .create();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL : UserAccountRESTInterface.REGISTER_USER_URL)
@@ -99,7 +100,7 @@ public class UserLoginOrRegisterRESTRequest {
                         }
                         return;
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
+                        Log.i("onEmptyResponse", "Returned empty response");
                         if (requestType == PERFORM_LOGIN) {
                             userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user. Response empty.")));
                         } else {

@@ -7,6 +7,7 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import okhttp3.Headers;
@@ -26,21 +27,18 @@ public class UserDeleteRESTRequest {
 
     static final String REQ_TAG = "UserDeleteREST";
 
-    // user name of the user profile to be deleted
-    //private String userName;
+    //private UserAccountService userAccountService;
+    private UserAccountActionsEvaluator userAccountService;
 
-    private UserAccountService userAccountService;
-
-    //private final LoggedInUser currentUser;
     final LoggedInUser user;
 
     /**
      *
      * @param user
      */
-    public UserDeleteRESTRequest(LoggedInUser user, UserAccountService userLoginAndRegisterService) {
+    public UserDeleteRESTRequest(LoggedInUser user, UserAccountActionsEvaluator userDeleteService) {
         super();
-        this.userAccountService = userLoginAndRegisterService;
+        this.userAccountService = userDeleteService;
         this.user = user;
     }
 
@@ -49,6 +47,7 @@ public class UserDeleteRESTRequest {
 
         Log.d(REQ_TAG, "UserDeleteRESTRequest initiated");
 
+        // Inserts user authorization token to Authorization header
         Interceptor headerAuthorizationInterceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -80,7 +79,7 @@ public class UserDeleteRESTRequest {
                         Log.i("onSuccess", response.body());
                         userAccountService.evaluateDeleteResult(new Result.Success<>(user.getUserName()));
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
+                        Log.i("onEmptyResponse", "Returned empty response for delete user account request.");
                         userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response empty.")));
                     }
                 } else {
@@ -96,7 +95,7 @@ public class UserDeleteRESTRequest {
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                Log.e(REQ_TAG, "Error executing Login user REST request." + t.getMessage());
+                Log.e(REQ_TAG, "Error executing delete user account REST request." + t.getMessage());
                 userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error deleting user.", t)));
             }
         });
