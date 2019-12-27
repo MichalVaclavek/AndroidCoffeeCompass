@@ -40,7 +40,6 @@ public class CurrentUserRESTRequest {
 
     private final LoggedInUser currentUser;
 
-    //private final UserAccountService userLoginAndRegisterService;
     private UserAccountActionsEvaluator userLoginAndRegisterService;
 
     public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsEvaluator userLoginAndRegisterService) {

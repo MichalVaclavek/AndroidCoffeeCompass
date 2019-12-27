@@ -31,9 +31,10 @@ import cz.fungisoft.coffeecompass2.activity.ui.register.SignupActivity;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 
-public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener {
+public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserLoginServiceConnectionListener {
 
     private LoginRegisterViewModel loginViewModel;
 
@@ -142,7 +143,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         if (bindService(new Intent(this, UserAccountService.class),
                 userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
-            //userAccountService.addUserLoginServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -150,6 +150,9 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     }
 
     private void doUnbindUserLoginService() {
+        if (userAccountService != null) {
+            userAccountService.removeUserLoginServiceListener(this);
+        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userLoginServiceConnector);
@@ -159,19 +162,10 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        //if (userAccountService != null) {
-          //  userAccountService.removeUserLoginServiceListener(this);
-        //}
+        //remove listeners
         doUnbindUserLoginService();
+        super.onDestroy();
     }
-    //@Override
-    //protected void onResume() {
-      //  super.onResume();
-       // if (userAccountService != null) {
-         //   userAccountService.addUserLoginServiceListener(this);
-       // }
-    //}
 
     /**
      * Common actions after login result received from service.
@@ -193,7 +187,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
         finish();
     }
@@ -227,7 +221,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
         userAccountService = userLoginServiceConnector.getUserLoginService();
         userAccountService.addUserLoginServiceListener(this);
-
+        Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
         final String deviceID = Utils.getDeviceID(this);
 
         passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {

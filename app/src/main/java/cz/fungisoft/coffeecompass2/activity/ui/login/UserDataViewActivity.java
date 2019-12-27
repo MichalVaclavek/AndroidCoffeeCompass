@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,9 +28,11 @@ import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.UserLogoutAndDeleteServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
 
-public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener {
+public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener, UserLogoutAndDeleteServiceConnectionListener,
+                                                                       DeleteUserAccountDialogFragment.DeleteUserAccountDialogListener {
 
     private static final String TAG = "UserDataViewActivity";
 
@@ -77,7 +79,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         }
         logoutButton.setEnabled(true);
         deleteUserButton.setEnabled(true);
-
 
         userProfileToShow = (LoggedInUser) this.getIntent().getExtras().get("currentUserProfile");
 
@@ -133,10 +134,10 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         // (and thus won't be supporting component replacement by other
         // applications).
         userAccountServiceConnector = new UserAccountServiceConnector(this);
+
         if (bindService(new Intent(this, UserAccountService.class),
                 userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserDeleteAndRegisterService = true;
-            //userAccountService.addLogoutAndDeleteServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -144,7 +145,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     private void doUnbindUserLogoutAndDeleteService() {
-//
         if (mShouldUnbindUserDeleteAndRegisterService) {
             // Release information about the service's state.
             unbindService(userAccountServiceConnector);
@@ -154,26 +154,17 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-//        if (userAccountService != null) {
-//            userAccountService.removeLogoutAndDeleteServiceListener(this);
-//        }
+        if (userAccountService != null) {
+            userAccountService.removeLogoutAndDeleteServiceListener(this);
+        }
         doUnbindUserLogoutAndDeleteService();
+        super.onDestroy();
     }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        if (userAccountService != null) {
-//            userAccountService.addLogoutAndDeleteServiceListener(this);
-//        }
-//    }
-
 
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(UserDataViewActivity.this, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
     }
 
@@ -231,7 +222,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     public void onLogoutAndDeleteServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         userAccountService.addLogoutAndDeleteServiceListener(this);
-
+        Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,20 +239,53 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         deleteUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
-                    logoutDeleteProgressBar.setVisibility(View.VISIBLE);
-                    logoutButton.setEnabled(false);
-                    deleteUserButton.setEnabled(false);
-                    userAccountService.delete();
-                } else {
-                    Utils.showNoInternetToast(getApplicationContext());
-                }
+                showConfirmDeleteAccountDialog();
             }
         });
     }
 
     /**
-     * Needed to adding this class to list of Listeners of the UserAccountService
+     * Handling of the result of the Confirmation dialog for User account delete action
+     */
+
+    /**
+     * Show the dialog
+     */
+    private void showConfirmDeleteAccountDialog() {
+        // Create an instance of the dialog fragment and show it
+        DeleteUserAccountDialogFragment dialog = new DeleteUserAccountDialogFragment();
+        dialog.show(getSupportFragmentManager(), "DeleteUserAccountDialogFragment");
+    }
+
+    /**
+     * Process positive response, i.e. try to delete account
+     * @param dialog
+     */
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (Utils.isOnline()) {
+            logoutDeleteProgressBar.setVisibility(View.VISIBLE);
+            logoutButton.setEnabled(false);
+            deleteUserButton.setEnabled(false);
+            userAccountService.delete();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    /**
+     * Process negative response. nothing to do here
+     * @param dialog
+     */
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+
+    /**
+     * Needed to adding this Activity to list of Listeners of the UserAccountService
+     * only once per this Activity instance.
+     *
      * @param o
      * @return
      */
@@ -282,4 +306,5 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     public int hashCode() {
         return Objects.hash(usernameTextView, userEmailTextView, numOfCreatedSitesTextView, firstNameTextView, lastNameTextView, userCratedOnTextView);
     }
+
 }

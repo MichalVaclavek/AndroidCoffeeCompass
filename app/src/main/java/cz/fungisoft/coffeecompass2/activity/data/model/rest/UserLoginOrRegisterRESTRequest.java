@@ -27,12 +27,10 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInte
  */
 public class UserLoginOrRegisterRESTRequest {
 
-    //static final int INTERNET_REQ = 23;
     static final String REQ_TAG = "UserLoginOrRegisterREST";
 
     private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
-    //private UserAccountService userLoginAndRegisterService;
     private UserAccountActionsEvaluator userLoginAndRegisterService;
 
     private final LoggedInUser currentUser;

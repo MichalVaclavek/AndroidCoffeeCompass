@@ -19,6 +19,7 @@ import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
 
 /**
  * Service to check, if there is a change of CoffeeSites int hte search range while equipment is

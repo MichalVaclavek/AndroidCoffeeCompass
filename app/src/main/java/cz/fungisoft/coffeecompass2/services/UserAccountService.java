@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,9 @@ import cz.fungisoft.coffeecompass2.asynctask.DeleteUserRESTAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.LoginUserRESTAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.LogoutUserRESTAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.RegisterUserRESTAsyncTask;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 
 /**
  * Service to run user login and logout, and new user register and delete
@@ -33,17 +37,17 @@ import cz.fungisoft.coffeecompass2.asynctask.RegisterUserRESTAsyncTask;
  */
 public class UserAccountService extends Service implements UserAccountActionsEvaluator {
 
-    private String TAG = "UserAccount service";
+    private String TAG = "UserAccountService";
 
     // Repository to check if a user is logen in
-    private UserAccountRepository userLoginAndRegisterRepository;
+    private static UserAccountRepository userLoginAndRegisterRepository;
 
-    private UserPreferenceHelper preferenceHelper;
+    private static UserPreferenceHelper preferenceHelper;
 
-    private MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
-    private MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
-    private MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<LogoutOrDeleteResult>();
-    private MutableLiveData<LogoutOrDeleteResult> deleteResult = new MutableLiveData<>();
+    private static MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
+    private static MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
+    private static MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<LogoutOrDeleteResult>();
+    private static MutableLiveData<LogoutOrDeleteResult> deleteResult = new MutableLiveData<>();
 
     public LiveData<LoginOrRegisterResult> getLoginResult() {
         return loginResult;
@@ -63,22 +67,26 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     /**
      * List of listeneres for user login events.
      */
-    private List<UserLoginServiceListener> userLoginServiceListeners = new ArrayList<>();
+    private static List<UserLoginServiceListener> userLoginServiceListeners = new ArrayList<>();
 
     public void addUserLoginServiceListener(UserLoginServiceListener userLogindServiceListener) {
         if (!userLoginServiceListeners.contains(userLogindServiceListener)) {
             userLoginServiceListeners.add(userLogindServiceListener);
         }
+        Log.i(TAG, "Počet posluchačů User login: " + userLoginServiceListeners.size());
+        Log.i(TAG, userLogindServiceListener.toString());
     }
 
     public void removeUserLoginServiceListener(UserLoginServiceListener userLogindServiceListener) {
         userLoginServiceListeners.remove(userLogindServiceListener);
+        Log.i(TAG, "Počet posluchačů User login: " + userLoginServiceListeners.size());
+        Log.i(TAG, userLogindServiceListener.toString());
     }
 
     /**
      * List of listeneres for new user register events.
      */
-    private List<UserRegisterServiceListener> userRegisterServiceListeners = new ArrayList<>();
+    private static List<UserRegisterServiceListener> userRegisterServiceListeners = new ArrayList<>();
 
     /**
      * Adds new listener, if it is not already in a list
@@ -88,25 +96,33 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         if (!userRegisterServiceListeners.contains(userRegisterServiceListener)) {
             userRegisterServiceListeners.add(userRegisterServiceListener);
         }
+        Log.i(TAG, "Počet posluchačů User register: " + userRegisterServiceListeners.size());
+        Log.i(TAG, userRegisterServiceListener.toString());
     }
 
     public void removeUserRegisterServiceListener(UserRegisterServiceListener userRegisterServiceListener) {
         userRegisterServiceListeners.remove(userRegisterServiceListener);
+        Log.i(TAG, "Počet posluchačů User register: " + userRegisterServiceListeners.size());
+        Log.i(TAG, userRegisterServiceListener.toString());
     }
 
     /**
      * List of listeneres for logout and delete user account events.
      */
-    private List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
+    private static List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
 
     public void addLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
         if (!userLogoutAndDeleteServiceListeners.contains(logoutAndDeleteServiceListener)) {
             userLogoutAndDeleteServiceListeners.add(logoutAndDeleteServiceListener);
         }
+        Log.i(TAG, "Počet posluchačů User logout and delete: " + userLogoutAndDeleteServiceListeners.size());
+        Log.i(TAG, logoutAndDeleteServiceListener.toString());
     }
 
     public void removeLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
         userLogoutAndDeleteServiceListeners.remove(logoutAndDeleteServiceListener);
+        Log.i(TAG, "Počet posluchačů User logout and delete: " + userLogoutAndDeleteServiceListeners.size());
+        Log.i(TAG, logoutAndDeleteServiceListener.toString());
     }
 
 
@@ -135,6 +151,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         super.onCreate();
         preferenceHelper = new UserPreferenceHelper(this);
         userLoginAndRegisterRepository = UserAccountRepository.getInstance(new UserAccountDataSource(this), preferenceHelper);
+        Log.d(TAG, "Service started.");
     }
 
     public void login(String username, String password,  String deviceID) {
@@ -149,6 +166,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
      * Starts user logout Async task.
      * The Async task invokes REST call to perform logout, then.
      * When the REST call is finished, it calls evaluation methods of
+     * {@link UserAccountActionsEvaluator} interface, which is implemented by
      * this service (UserAccountService) to process further actions
      * (update user account repository and UI of the calling Activity)
      * within this service.
@@ -253,39 +271,39 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         return userLoginAndRegisterRepository.isLoggedIn();
     }
 
+    // Fire-up methods for login/register/logout events to be processed by listeners
 
-    // Fire methods for login/register/logout events
-
-    // FireUp methods
-    public void onUserRegisterSuccess() {
+    /* ---- User Register ----  */
+    private void onUserRegisterSuccess() {
         for (UserRegisterServiceListener listener : userRegisterServiceListeners) {
             listener.onUserRegisterSuccess(registerResult.getValue());
         }
     }
-    public void onUserRegisterFailure() {
+    private void onUserRegisterFailure() {
         for (UserRegisterServiceListener listener : userRegisterServiceListeners) {
             listener.onUserRegisterFailure(registerResult.getValue());
         }
     }
 
-    public void onUserLoggedInSuccess() {
+    /* ---- User Log-in ----  */
+    private void onUserLoggedInSuccess() {
         for (UserLoginServiceListener listener : userLoginServiceListeners) {
             listener.onUserLoggedInSuccess(loginResult.getValue());
         }
     }
-    public void onUserLoggedInFailure() {
+    private void onUserLoggedInFailure() {
         for (UserLoginServiceListener listener : userLoginServiceListeners) {
             listener.onUserLoggedInFailure(loginResult.getValue());
         }
     }
 
-    public void onUserLogoutSuccess() {
+    /* ---- User Log-out ----  */
+    private void onUserLogoutSuccess() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             listener.onUserLogoutSuccess();
         }
     }
-
-    public void onUserLogoutFailure() {
+    private void onUserLogoutFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             String errorDetail = (logoutResult.getValue().getError() != null)
                                  ? logoutResult.getValue().getError().getDetail()
@@ -294,13 +312,13 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         }
     }
 
-    public void onUserDeleteSuccess() {
+    /* ---- User Delete ----  */
+    private void onUserDeleteSuccess() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             listener.onUserDeleteSuccess();
         }
     }
-
-    public void onUserDeleteFailure() {
+    private void onUserDeleteFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             String errorDetail = (logoutResult.getValue().getError() != null)
                                  ? logoutResult.getValue().getError().getDetail()

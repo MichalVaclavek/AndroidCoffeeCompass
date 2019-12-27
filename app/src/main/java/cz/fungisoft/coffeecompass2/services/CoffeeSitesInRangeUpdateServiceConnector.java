@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
+
 /**
  * Connector for CoffeeSitesInRangeUpdateService
  */

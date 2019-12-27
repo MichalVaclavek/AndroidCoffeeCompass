@@ -34,7 +34,8 @@ import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 
 /**
  * Main activity to show:
@@ -44,7 +45,7 @@ import cz.fungisoft.coffeecompass2.services.UserLoginServiceListener;
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
-public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener, UserLoginServiceListener {
+public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener, UserLoginServiceConnectionListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -196,6 +197,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         if (Utils.isOnline()) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(activityIntent);
         } else {
             Utils.showNoInternetToast(getApplicationContext());
@@ -204,7 +206,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private void openUserProfileActivity() {
         Intent activityIntent = new Intent(this, UserDataViewActivity.class);
-        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
@@ -429,9 +431,9 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
     private void doUnbindUserLoginService() {
-        if (userLoginService != null) {
-            userLoginService.removeUserLoginServiceListener(this);
-        }
+//        if (userLoginService != null) {
+//            userLoginService.removeUserLoginServiceListener(this);
+//        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userLoginServiceConnector);
@@ -441,25 +443,18 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         doUnbindUserLoginService();
+        super.onDestroy();
     }
 
-    @Override
-    public void onUserLoggedInSuccess(LoginOrRegisterResult loginResult) {
-        // no action needed
-    }
-
-    @Override
-    public void onUserLoggedInFailure(LoginOrRegisterResult loginResult) {
-        // no action needed
-    }
-
-
+    /**
+     * We need AccountService to check if a user is logged in,
+     * But it is not needed to listen for login event.
+     */
     @Override
     public void onUserLoginServiceConnected() {
         userLoginService = userLoginServiceConnector.getUserLoginService();
-        userLoginService.addUserLoginServiceListener(this);
+        //userLoginService.addUserLoginServiceListener(this);
         if (userLoginService != null && userLoginService.isUserLoggedIn()) {
             MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
             if (userAccountMenuItem != null) {

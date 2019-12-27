@@ -1,11 +1,9 @@
-package cz.fungisoft.coffeecompass2.services;
+package cz.fungisoft.coffeecompass2.services.interfaces;
 
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 
 /**
  * Listener Interface to define events, which are fired by UserAccountService
- * after new user registration and when the UserAccountService is connected to
- * calling activity.
+ * after new user registration.
  */
 public interface UserLogoutAndDeleteServiceListener {
 
@@ -14,6 +12,4 @@ public interface UserLogoutAndDeleteServiceListener {
 
     void onUserDeleteSuccess();
     void onUserDeleteFailure(String errorMessage);
-
-    void onLogoutAndDeleteServiceConnected();
 }

@@ -25,7 +25,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
-import cz.fungisoft.coffeecompass2.services.SitesInRangeUpdateListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
 
 
 /**

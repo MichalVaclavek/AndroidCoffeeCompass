@@ -84,7 +84,7 @@ public class UserLogoutRESTRequest {
                         userAccountService.evaluateLogoutResult(new Result.Error(Utils.getRestError(errorBody)));
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error logout user." + e.getMessage());
-                        userAccountService.evaluateLoginResult(new Result.Error(new IOException("Error logout user.", e)));
+                        userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user.", e)));
                     }
                 }
             }

@@ -83,5 +83,16 @@
     <string name="toast_no_internet">Připojení k internetu není k dispozici.</string>
     <string name="rest_public_user_url">https://coffeecompass.cz/rest/public/user/</string>
     <string name="rest_secured_user_url">https://coffeecompass.cz/rest/secured/user/</string>
+    <string name="cancel">Zrušit</string>
+    <string name="yes">Ano</string>
+    <string name="delete_user_acount_quiestion">Smazat uživatelský účet?</string>
+
+    <string name="rating1">1</string>
+    <string name="rating2">2</string>
+    <string name="rating3">3</string>
+    <string name="rating4">4</string>
+    <string name="rating5">5</string>
+    <string name="save">Ulož</string>
+    <string name="new_comment">Nové hodnocení a komentář</string>
 
 </resources>

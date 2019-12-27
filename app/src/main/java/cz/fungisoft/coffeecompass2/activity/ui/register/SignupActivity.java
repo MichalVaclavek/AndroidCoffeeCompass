@@ -31,18 +31,18 @@ import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModelFactory;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.UserRegisterServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 
 /**
  * Activity to register new user. Based on LoginActivity.
  */
-public class SignupActivity extends AppCompatActivity implements UserRegisterServiceListener {
+public class SignupActivity extends AppCompatActivity implements UserRegisterServiceListener, UserRegisterServiceConnectionListener {
 
     private static final String TAG = "SignupActivity";
 
@@ -165,7 +165,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         if (bindService(new Intent(this, UserAccountService.class),
                 userRegisterServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
-            //userAccountService.addUserRegisterServiceListener(this);
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -173,6 +172,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     }
 
     private void doUnbindUserRegisterService() {
+        if (userAccountService != null) {
+            userAccountService.removeUserRegisterServiceListener(this);
+        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userRegisterServiceConnector);
@@ -182,11 +184,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        //if (userAccountService != null) {
-        //    userAccountService.removeUserRegisterServiceListener(this);
-        //}
+
         doUnbindUserRegisterService();
+        super.onDestroy();
     }
 
     /**
@@ -253,7 +253,7 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
 
         userAccountService = userRegisterServiceConnector.getUserLoginService();
         userAccountService.addUserRegisterServiceListener(this);
-
+        Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
         final String deviceID = Utils.getDeviceID(this);
 
         passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {

@@ -1,18 +1,25 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.asynctask.GetCommentsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 
 /**
@@ -20,8 +27,12 @@ import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
  * in a {@link CoffeeSiteListActivity}.
+ * We need userLoginService to check if a user is loged-in to show him/her
+ * the Cooments button
  */
-public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
+public class CoffeeSiteDetailActivity extends ActivityWithLocationService implements UserLoginServiceConnectionListener {
+
+    private static final String TAG = "CoffeeSiteDetailAct";
 
     private Button commentsButton;
 
@@ -80,6 +91,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             detailFragment = new CoffeeSiteDetailFragment();
             detailFragment.setCoffeeSite(coffeeSite);
         }
+
+        doBindUserLoginService();
     }
 
     /**
@@ -99,6 +112,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     @Override
     public void onDestroy() {
+        doUnbindUserLoginService();
         super.onDestroy();
     }
 
@@ -144,6 +158,50 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
             mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
             mapIntent.putExtra("site", (Parcelable) coffeeSite);
             startActivity(mapIntent);
+        }
+    }
+
+    // ** UserLogin Service connection/disconnection ** //
+
+    protected UserAccountService userLoginService;
+    private UserAccountServiceConnector userLoginServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindUserLoginService;
+
+    @Override
+    public void onUserLoginServiceConnected() {
+        userLoginService = userLoginServiceConnector.getUserLoginService();
+        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            enableCommentsButton();
+        }
+    }
+
+    private void doBindUserLoginService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        userLoginServiceConnector = new UserAccountServiceConnector(this);
+        if (bindService(new Intent(this, UserAccountService.class),
+                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserLoginService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindUserLoginService() {
+//        if (userLoginService != null) {
+//            userLoginService.removeUserLoginServiceListener(this);
+//        }
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            unbindService(userLoginServiceConnector);
+            mShouldUnbindUserLoginService = false;
         }
     }
 

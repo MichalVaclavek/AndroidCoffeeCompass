@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.services;
+package cz.fungisoft.coffeecompass2.services.interfaces;
 
 import java.util.List;
 

@@ -1,7 +1,11 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,6 +13,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,16 +23,25 @@ import android.widget.TextView;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.ui.login.DeleteUserAccountDialogFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 
 /**
  * Activity to show list of CoffeeSite's Comments
  * Later it should allow to add a Comment for {@link LoggedInUser}
  */
-public class CommentsListActivity extends AppCompatActivity {
+public class CommentsListActivity extends AppCompatActivity implements UserLoginServiceConnectionListener, EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener {
+
+    private static final String TAG = "CommentsListActivity";
 
     private CoffeeSite cs;
     private List<Comment> comments;
@@ -74,6 +88,14 @@ public class CommentsListActivity extends AppCompatActivity {
         if (comments != null) {
             setupRecyclerView((RecyclerView) recyclerView, comments);
         }
+
+        doBindUserLoginService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        doUnbindUserLoginService();
+        super.onDestroy();
     }
 
     @Override
@@ -91,7 +113,92 @@ public class CommentsListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new CommentsListActivity.CommentItemRecyclerViewAdapter(comments ));
     }
 
-        /* *********** RecyclerViewAdapter ************* */
+    /**
+     * Show the dialog
+     */
+    private void showEnterCommentAndRatingDialog() {
+        // Create an instance of the dialog fragment and show it
+        EnterCommentAndRatingDialogFragment dialog = new EnterCommentAndRatingDialogFragment();
+        dialog.show(getSupportFragmentManager(), "EnterCommentAndRatingDialogFragment");
+    }
+
+    // ** UserLogin Service connection/disconnection ** //
+
+    protected UserAccountService userLoginService;
+    private UserAccountServiceConnector userLoginServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindUserLoginService;
+
+    @Override
+    public void onUserLoginServiceConnected() {
+        userLoginService = userLoginServiceConnector.getUserLoginService();
+
+        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            // Adds Floating Action Button if a user is loged-in
+            FloatingActionButton fab = findViewById(R.id.fab_new_comment);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showEnterCommentAndRatingDialog();
+                }
+            });
+        }
+    }
+
+    /**
+     * Process positive response, i.e. try to delete account
+     * @param dialog
+     */
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (Utils.isOnline()) {
+//            logoutDeleteProgressBar.setVisibility(View.VISIBLE);
+//            logoutButton.setEnabled(false);
+//            deleteUserButton.setEnabled(false);
+//            userAccountService.delete();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    /**
+     * Process negative response. nothing to do here
+     * @param dialog
+     */
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+    private void doBindUserLoginService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        userLoginServiceConnector = new UserAccountServiceConnector(this);
+        if (bindService(new Intent(this, UserAccountService.class),
+                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserLoginService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindUserLoginService() {
+//        if (userLoginService != null) {
+//            userLoginService.removeUserLoginServiceListener(this);
+//        }
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            unbindService(userLoginServiceConnector);
+            mShouldUnbindUserLoginService = false;
+        }
+    }
+
+    /* *********** RecyclerViewAdapter ************* */
 
         public static class CommentItemRecyclerViewAdapter extends RecyclerView.Adapter<CommentItemRecyclerViewAdapter.ViewHolder>
         {

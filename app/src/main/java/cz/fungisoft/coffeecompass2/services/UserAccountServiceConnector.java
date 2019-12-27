@@ -4,26 +4,33 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
+
 /**
  * Class to connect UserAccountService to calling activity
  */
 public class UserAccountServiceConnector implements ServiceConnection {
 
-    private UserLoginServiceListener callingLoginActivity;
+    private UserLoginServiceConnectionListener callingLoginActivity;
 
-    public UserAccountServiceConnector(UserLoginServiceListener callingActivity) {
+    public UserAccountServiceConnector(UserLoginServiceConnectionListener callingActivity) {
         this.callingLoginActivity = callingActivity;
     }
 
-    private UserRegisterServiceListener callingRegisterActivity;
+    private UserRegisterServiceConnectionListener callingRegisterActivity;
 
-    public UserAccountServiceConnector(UserRegisterServiceListener callingActivity) {
+    public UserAccountServiceConnector(UserRegisterServiceConnectionListener callingActivity) {
         this.callingRegisterActivity = callingActivity;
     }
 
-    private UserLogoutAndDeleteServiceListener callingUserDataViewActivity;
+    private UserLogoutAndDeleteServiceConnectionListener callingUserDataViewActivity;
 
-    public UserAccountServiceConnector(UserLogoutAndDeleteServiceListener callingUserDataViewActivity) {
+    public UserAccountServiceConnector(UserLogoutAndDeleteServiceConnectionListener callingUserDataViewActivity) {
         this.callingUserDataViewActivity = callingUserDataViewActivity;
     }
 
