@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.asynctask;
+package cz.fungisoft.coffeecompass2.asynctask.comment;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.activity.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
@@ -29,22 +30,29 @@ import cz.fungisoft.coffeecompass2.entity.Comment;
  */
 public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
-    private static final String TAG = "Read comments async. ";
+    private static final String TAG = "Read comments async.";
 
     private static final String sURLCore = "https://coffeecompass.cz/rest/public/starsAndComments/comments/";
     private String sURL;
 
-    private CoffeeSiteDetailActivity parentActivity;
+    private CommentsListActivity parentActivity;
 
-    private CoffeeSite coffeeSite;
+    private List<Comment> comments;
 
-    public GetCommentsAsyncTask(CoffeeSiteDetailActivity parentActivity, CoffeeSite cs) {
+    //private CoffeeSite coffeeSite;
+    private int coffeeSiteID;
+
+    //public GetCommentsAsyncTask(CommentsListActivity parentActivity, CoffeeSite cs) {
+    public GetCommentsAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
         this.parentActivity = parentActivity;
-        this.coffeeSite = cs;
+        //this.coffeeSite = cs;
+        this.coffeeSiteID = coffeeSiteID;
 
-        if (this.coffeeSite != null) {
-            sURL = sURLCore + this.coffeeSite.getId();
-        }
+        sURL = sURLCore + this.coffeeSiteID;
+
+//        if (this.coffeeSite != null) {
+//            sURL = sURLCore + this.coffeeSite.getId();
+//        }
     }
 
     @Override
@@ -106,11 +114,11 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
             }
         }
 
-        List<Comment> comments = parseJSONWithFoundCommentsResult(sJSON);
+        comments = parseJSONWithFoundCommentsResult(sJSON);
 
-        if (this.coffeeSite != null) {
-            this.coffeeSite.setComments(comments);
-        }
+//        if (this.coffeeSite != null) {
+//            this.coffeeSite.setComments(comments);
+//        }
 
         return sJSON;
     }
@@ -159,8 +167,8 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
     @Override
     protected void onPostExecute(String result) {
 
-        if (this.coffeeSite.getComments().size() > 0) {
-            parentActivity.enableCommentsButton();
+        if (comments != null && comments.size() > 0) {
+            parentActivity.processComments(comments);
         }
     }
 

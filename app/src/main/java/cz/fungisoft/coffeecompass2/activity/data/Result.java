@@ -3,7 +3,8 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
- * A generic class that holds a result success w/ data or an exception exception.
+ * A generic class that holds a result success w/ data or an exception error
+ * or an REST Error.
  */
 public class Result<T> {
     // hide the private constructor to limit subclass types (Success, Error)
@@ -40,18 +41,30 @@ public class Result<T> {
         private Exception exception;
         private RestError error;
 
+        private String detailToDisplay;
+
         public Error(Exception error) {
+
             this.exception = error;
+            this.detailToDisplay = error.getMessage();
         }
         public Error(RestError error) {
+
             this.error = error;
+            this.detailToDisplay = error.getDetail();
         }
 
         public Exception getException() {
+
             return this.exception;
         }
-        public RestError getError() {
+
+        public RestError getRestError() {
             return this.error;
+        }
+
+        public String getDetail() {
+            return detailToDisplay;
         }
     }
 }

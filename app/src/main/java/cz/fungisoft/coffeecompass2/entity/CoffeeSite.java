@@ -204,6 +204,10 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.comments = comments;
     }
 
+    public void clearComments() {
+        this.comments.clear();
+    }
+
     public String getMainImageURL() {
         return mainImageURL;
     }

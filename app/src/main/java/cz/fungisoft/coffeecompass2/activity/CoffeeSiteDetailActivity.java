@@ -10,16 +10,16 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
-import cz.fungisoft.coffeecompass2.asynctask.GetCommentsAsyncTask;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.asynctask.comment.GetNumberOfCommentsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 
 /**
@@ -27,7 +27,7 @@ import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
  * in a {@link CoffeeSiteListActivity}.
- * We need userLoginService to check if a user is loged-in to show him/her
+ * We need userAccountService to check if a user is loged-in to show him/her
  * the Cooments button
  */
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService implements UserLoginServiceConnectionListener {
@@ -74,7 +74,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
 
             // Async task to check if the Comments are available for the site
             if (Utils.isOnline()) {
-                new GetCommentsAsyncTask(this, coffeeSite).execute();
+                //new GetCommentsAsyncTask(this, coffeeSite).execute();
+                new GetNumberOfCommentsAsyncTask(coffeeSite.getId(), this).execute();
             }
         }
         // savedInstanceState is non-null when there is fragment state
@@ -161,6 +162,30 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
         }
     }
 
+    /**
+     * Method to be called from async task after call to obtain number of comments for
+     * the CoffeeSite within this Activity
+     * @param numberOfComments
+     */
+    public void processNumberOfComments(int numberOfComments) {
+        //this.comments = comments;
+        if (numberOfComments > 0) {
+            enableCommentsButton();
+        }
+    }
+
+    public void showRESTCallError(Result.Error error) {
+        if (error.getRestError() != null) {
+            Toast.makeText(getApplicationContext(),
+                    error.getRestError().getDetail(),
+                    Toast.LENGTH_SHORT);
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    "Server connection error.",
+                    Toast.LENGTH_SHORT);
+        }
+    }
+
     // ** UserLogin Service connection/disconnection ** //
 
     protected UserAccountService userLoginService;
@@ -195,8 +220,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
     }
 
     private void doUnbindUserLoginService() {
-//        if (userLoginService != null) {
-//            userLoginService.removeUserLoginServiceListener(this);
+//        if (userAccountService != null) {
+//            userAccountService.removeUserLoginServiceListener(this);
 //        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.

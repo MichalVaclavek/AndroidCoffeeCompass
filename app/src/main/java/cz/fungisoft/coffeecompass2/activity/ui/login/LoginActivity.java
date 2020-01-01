@@ -150,6 +150,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     }
 
     private void doUnbindUserLoginService() {
+        //remove listeners
         if (userAccountService != null) {
             userAccountService.removeUserLoginServiceListener(this);
         }
@@ -162,7 +163,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     @Override
     protected void onDestroy() {
-        //remove listeners
         doUnbindUserLoginService();
         super.onDestroy();
     }

@@ -16,50 +16,53 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:text="Vaše hodnocení"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/stars_linearlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingLeft="20dp">
 
             <RadioGroup
+                android:id="@+id/stars_radiogroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/radioButton6"
+                    android:id="@+id/radioButton1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/rating1" />
 
                 <RadioButton
-                    android:id="@+id/radioButton7"
+                    android:id="@+id/radioButton2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/rating2" />
 
                 <RadioButton
-                    android:id="@+id/radioButton8"
+                    android:id="@+id/radioButton3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/rating3" />
 
                 <RadioButton
-                    android:id="@+id/radioButton9"
+                    android:id="@+id/radioButton4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/rating4" />
 
                 <RadioButton
-                    android:id="@+id/radioButton10"
+                    android:id="@+id/radioButton5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -71,15 +74,18 @@
             android:id="@+id/textView7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:text="Váš komentář"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textStyle="bold" />
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/comment_inputlayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.design.widget.TextInputEditText
+            <EditText
+                android:id="@+id/commentTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="max. 160 znaků" />

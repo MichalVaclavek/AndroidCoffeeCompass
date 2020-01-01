@@ -184,7 +184,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
 
     @Override
     protected void onDestroy() {
-
         doUnbindUserRegisterService();
         super.onDestroy();
     }
@@ -210,7 +209,8 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         // go to MainActivity
         Intent i = new Intent(SignupActivity.this, MainActivity.class);
         //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
         finish();
     }

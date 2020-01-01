@@ -94,5 +94,8 @@
     <string name="rating5">5</string>
     <string name="save">Ulož</string>
     <string name="new_comment">Nové hodnocení a komentář</string>
+    <string name="comment_dialog_title">Hodnocení a komentář</string>
+    <string name="delete_comment">SMAZAT</string>
+    <string name="delete_comment_question">Smazat komentář?</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.asynctask;
+package cz.fungisoft.coffeecompass2.asynctask.user;
 
 import android.os.AsyncTask;
 

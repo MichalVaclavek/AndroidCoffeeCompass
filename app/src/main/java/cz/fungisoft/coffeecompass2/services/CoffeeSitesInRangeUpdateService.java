@@ -17,7 +17,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
 

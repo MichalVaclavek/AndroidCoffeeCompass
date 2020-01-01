@@ -23,10 +23,10 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsE
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LogoutOrDeleteResult;
-import cz.fungisoft.coffeecompass2.asynctask.DeleteUserRESTAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.LoginUserRESTAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.LogoutUserRESTAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.RegisterUserRESTAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.user.DeleteUserRESTAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.user.LoginUserRESTAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.user.LogoutUserRESTAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.user.RegisterUserRESTAsyncTask;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
@@ -197,7 +197,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(data);
             onUserLoggedInSuccess();
         } else {
-            RestError error = ((Result.Error) result).getError();
+            RestError error = ((Result.Error) result).getRestError();
             loginResult.setValue(new LoginOrRegisterResult(error));
             onUserLoggedInFailure();
         }
@@ -216,7 +216,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(data);
             onUserRegisterSuccess();
         } else {
-            RestError error = ((Result.Error) result).getError();
+            RestError error = ((Result.Error) result).getRestError();
             registerResult.setValue(new LoginOrRegisterResult(error));
             onUserRegisterFailure();
         }
@@ -235,7 +235,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(null);
             onUserLogoutSuccess();
         } else {
-            RestError error = ((Result.Error) result).getError();
+            RestError error = ((Result.Error) result).getRestError();
             logoutResult.setValue(new LogoutOrDeleteResult(error));
             onUserLogoutFailure();
         }
@@ -254,7 +254,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(null);
             onUserDeleteSuccess();
         } else {
-            RestError error = ((Result.Error) result).getError();
+            RestError error = ((Result.Error) result).getRestError();
             deleteResult.setValue(new LogoutOrDeleteResult(error));
             onUserDeleteFailure();
         }

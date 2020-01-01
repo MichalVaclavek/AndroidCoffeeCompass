@@ -10,7 +10,9 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
 
 /**
  * Saves loggged-in user data into "preferences" to use it
- * after application is closed and opened again
+ * after application is closed and opened again.
+ * <p>
+ * Also saves current selected search distance.
  */
 public class UserPreferenceHelper {
 
@@ -40,12 +42,11 @@ public class UserPreferenceHelper {
     private final String LOGIN_TOKEN_TYPE = "loginTokenType";
     private final String LOGIN_TOKEN_EXPIRY = "loginTokenExpiry";
 
-
     private SharedPreferences app_prefs;
     private Context context;
 
     public UserPreferenceHelper(Context context) {
-        app_prefs = context.getSharedPreferences("shared",
+        app_prefs = context.getSharedPreferences("sharedUser",
                 Context.MODE_PRIVATE);
         this.context = context;
     }

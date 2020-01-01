@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -22,5 +23,16 @@
         android:layout_below="@+id/userAndDateText"
         android:textAppearance="?attr/textAppearanceListItem"
         android:textColor="@color/colorPrimaryDark" />
+
+    <ImageView
+        android:id="@+id/deleteIconImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/userAndDateText"
+        android:layout_alignBottom="@id/userAndDateText"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="false"
+        android:visibility="gone"
+        app:srcCompat="@android:drawable/ic_delete" />
 
 </RelativeLayout>

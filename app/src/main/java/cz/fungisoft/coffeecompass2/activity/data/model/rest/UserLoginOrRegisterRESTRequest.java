@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest;
 
 import android.util.Log;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

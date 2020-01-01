@@ -29,7 +29,7 @@ public class UserDeleteRESTRequest {
 
     private UserAccountActionsEvaluator userAccountService;
 
-    final LoggedInUser user;
+    private final LoggedInUser user;
 
     /**
      *

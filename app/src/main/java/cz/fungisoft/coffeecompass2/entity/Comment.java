@@ -9,23 +9,26 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * A comment belonging to a CoffeeSite
+ * A Comment belonging to a CoffeeSite.
+ * Used for reading Comments from server.
  */
 public class Comment implements Serializable, Parcelable {
 
     private Integer id;
 
-    private String commentText;
+    private String text;
 
-    private Date createdOn;
+    private Date created;
 
     private String createdOnString;
 
-    private Integer coffeeSiteId;
+    private Integer coffeeSiteID;
 
     private String userName;
 
     private boolean canBeDeleted;
+
+    private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
 
     protected Comment(Parcel in) {
         if (in.readByte() == 0) {
@@ -33,12 +36,12 @@ public class Comment implements Serializable, Parcelable {
         } else {
             id = in.readInt();
         }
-        commentText = in.readString();
+        text = in.readString();
         createdOnString = in.readString();
         if (in.readByte() == 0) {
-            coffeeSiteId = null;
+            coffeeSiteID = null;
         } else {
-            coffeeSiteId = in.readInt();
+            coffeeSiteID = in.readInt();
         }
         userName = in.readString();
         canBeDeleted = in.readByte() != 0;
@@ -69,13 +72,13 @@ public class Comment implements Serializable, Parcelable {
             dest.writeByte((byte) 1);
             dest.writeInt(id);
         }
-        dest.writeString(commentText);
+        dest.writeString(text);
         dest.writeString(createdOnString);
-        if (coffeeSiteId == null) {
+        if (coffeeSiteID == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeInt(coffeeSiteId);
+            dest.writeInt(coffeeSiteID);
         }
         dest.writeString(userName);
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
@@ -86,16 +89,16 @@ public class Comment implements Serializable, Parcelable {
         return id;
     }
 
-    public String getCommentText() {
-        return commentText;
+    public String getText() {
+        return text;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreated() {
+        return created;
     }
 
-    public Integer getCoffeeSiteId() {
-        return coffeeSiteId;
+    public Integer getCoffeeSiteID() {
+        return coffeeSiteID;
     }
 
     public String getUserName() {
@@ -106,40 +109,51 @@ public class Comment implements Serializable, Parcelable {
         return canBeDeleted;
     }
 
+    public void setCreated(Date created) {
+        this.created = created;
+        this.createdOnString = dateFormater.format(this.created);
+    }
+
     public String getCreatedOnString() {
+        if (createdOnString == null) {
+            setCreated(created);
+        }
         return createdOnString;
     }
 
     public void setCreatedOnString(String createdOnString) {
+
         this.createdOnString = createdOnString;
+
+        Date created;
+        //SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+        try {
+            created  = dateFormater.parse( this.createdOnString);
+        } catch (ParseException e) {
+            created = new Date();
+        }
+
+        this.created = created;
     }
+
+    private Comment() {}
 
     private Comment(Integer id, String commentText, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
         this.id = id;
-        this.commentText = commentText;
-        this.coffeeSiteId = coffeeSiteId;
+        this.text = commentText;
+        this.coffeeSiteID = coffeeSiteId;
         this.userName = userName;
         this.canBeDeleted = canBeDeleted;
     }
 
     public Comment(Integer id, String commentText, Date createdOn, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
         this(id, commentText, coffeeSiteId, userName, canBeDeleted);
-        this.createdOn = createdOn;
+        setCreated(createdOn);
     }
 
     public Comment(Integer id, String commentText, String createdOnString, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
         this(id, commentText, coffeeSiteId, userName, canBeDeleted);
-        this.createdOnString = createdOnString;
-
-        Date created;
-        SimpleDateFormat format = new SimpleDateFormat("dd. MM. yyyy HH:mm");
-        try {
-            created  = format.parse ( this.createdOnString);
-        } catch (ParseException e) {
-            created = new Date();
-        }
-
-        this.createdOn = created;
+        setCreatedOnString(createdOnString);
     }
 
 }

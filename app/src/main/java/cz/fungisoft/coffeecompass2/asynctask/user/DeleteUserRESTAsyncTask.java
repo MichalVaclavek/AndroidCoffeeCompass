@@ -1,17 +1,17 @@
-package cz.fungisoft.coffeecompass2.asynctask;
+package cz.fungisoft.coffeecompass2.asynctask.user;
 
 import android.os.AsyncTask;
 
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 
 /**
- * Async task for new user registering REST request call
+ * Async task for delete user account
  */
-public class LogoutUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
+public class DeleteUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private UserAccountRepository registerRepository;
 
-    public LogoutUserRESTAsyncTask(UserAccountRepository registerRepository) {
+    public DeleteUserRESTAsyncTask(UserAccountRepository registerRepository) {
         super();
         this.registerRepository = registerRepository;
     }
@@ -19,7 +19,7 @@ public class LogoutUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        registerRepository.logout();
+        registerRepository.delete();
         return null;
     }
 

@@ -46,4 +46,5 @@ public interface UserAccountRESTInterface {
 
     @POST("register")
     Call<JwtUserToken> registerNewUser(@Body UserLoginOrRegisterInputData loginDataBody);
+
 }

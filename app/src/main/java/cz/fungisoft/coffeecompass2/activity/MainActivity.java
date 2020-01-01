@@ -26,16 +26,16 @@ import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
-import cz.fungisoft.coffeecompass2.asynctask.GetSitesInRangeAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 
 /**
  * Main activity to show:
@@ -71,6 +71,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private int searchRange = 500; // range in meters for searching from current position - 500 m default value
 
+    private static SearchDistancePreferenceHelper searchRangePreferenceHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +85,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         findViewById(R.id.AllSitesTextView);
 
-         if (getIntent().getStringExtra("searchRange") != null) {
+        searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
+        this.searchRange = searchRangePreferenceHelper.getSearchDistanc();
+
+        // Return from search range settings activity
+        if (getIntent().getStringExtra("searchRange") != null) {
             this.searchRange = Integer.parseInt(getIntent().getStringExtra("searchRange"));
+            searchRangePreferenceHelper.putSearchDistance(this.searchRange);
         }
 
         //Location info
@@ -213,7 +220,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private void aktivujNastaveni() {
         Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-        //selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         selectSearchDistIntent.putExtra("searchRange", this.searchRange);
         this.startActivity(selectSearchDistIntent);
     }
@@ -431,9 +438,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
     private void doUnbindUserLoginService() {
-//        if (userLoginService != null) {
-//            userLoginService.removeUserLoginServiceListener(this);
-//        }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userLoginServiceConnector);
@@ -454,7 +458,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     public void onUserLoginServiceConnected() {
         userLoginService = userLoginServiceConnector.getUserLoginService();
-        //userLoginService.addUserLoginServiceListener(this);
+        //userAccountService.addUserLoginServiceListener(this);
         if (userLoginService != null && userLoginService.isUserLoggedIn()) {
             MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
             if (userAccountMenuItem != null) {
