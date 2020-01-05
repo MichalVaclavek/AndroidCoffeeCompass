@@ -84,12 +84,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.coffeesite_detail_fragment, container, false);
 
-        Activity activity = this.getActivity();
-        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-        if (appBarLayout != null && mItem != null) {
-            appBarLayout.setTitle(mItem.getName());
-        }
-
         // Show the CoffeeSite info in a TextViews.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.nameTextView)).setText(mItem.getName());

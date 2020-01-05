@@ -51,6 +51,14 @@ public class RestError implements Serializable {
         this.instance = instance;
     }
 
+    public RestError() {
+        this.type = "Unknown";
+        this.title = "Not Available";
+        this.status = 0;
+        this.detail = "Not Available";
+        this.instance = "Not Available";
+    }
+
     public String getType() {
         return type;
     }

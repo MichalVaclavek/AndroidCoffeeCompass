@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -103,6 +105,13 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
 
+        if (Utils.isOnline()) {
+            commentActionsProgressBar.setVisibility(View.VISIBLE);
+            // Async task to load Comments for the site
+            // Comments are shown at the end of the Async task
+            new GetCommentsAsyncTask(this, cs.getId()).execute();
+        }
+
         doBindUserLoginService();
     }
 
@@ -162,22 +171,22 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         userAccountService = userLoginServiceConnector.getUserLoginService();
 
         if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-
-            if (Utils.isOnline()) {
-                commentActionsProgressBar.setVisibility(View.VISIBLE);
-                // Async task to load Comments for the site
-                // Comments are shown at the end of the Async task
-                new GetCommentsAsyncTask(this, cs.getId()).execute();
-                // Async task for loading current user rating for this CoffeeSite
-                new GetNumberOfStarsAsyncTask( Integer.parseInt(userAccountService.getLoggedInUser().getUserId()), cs.getId(), this).execute();
-            }
             // Adds Floating Action Button if a user is loged-in
             FloatingActionButton fab = findViewById(R.id.fab_new_comment);
+
+            // effective final this activity instance for annonymous onClick() handler
+            final CommentsListActivity callingActivity = this;
 
             fab.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    showEnterCommentAndRatingDialog();
+                    if (Utils.isOnline()) {
+                        commentActionsProgressBar.setVisibility(View.VISIBLE);
+                        // Async task for loading current user rating for this CoffeeSite
+                        new GetNumberOfStarsAsyncTask( Integer.parseInt(userAccountService.getLoggedInUser().getUserId()), cs.getId(), callingActivity).execute();
+                    } else { // Dialog can be opened as there might be only temporary connection problem
+                        showEnterCommentAndRatingDialog();
+                    }
                 }
             });
             fab.setVisibility(View.VISIBLE);
@@ -248,12 +257,33 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     }
 
     /**
-     * Method to be called from async task after the number of stars for this CoffeeSite and User is returned from server.
+     * Method to be called from async task after the number of stars for this CoffeeSite and User
+     * is returned from server.
+     * This method can be called only before a current user wants to open EnterCommentAndRatingDialogFragment
+     * to enter Comment and Stars for the CoffeeSite.
+     *
      * @param stars
      */
     public void processNumberOfStarsForSiteAndUser(int stars) {
         this.starsFromCurrentUser = stars;
         commentActionsProgressBar.setVisibility(View.GONE);
+        // Open EnterCommentAndRatingDialogFragment
+        showEnterCommentAndRatingDialog();
+
+    }
+
+    /**
+     * Method to be called from async task after failed request for the number of stars for this CoffeeSite
+     * and User is returned from server.<br>
+     * This method can be called only before a current user wants to open EnterCommentAndRatingDialogFragment
+     *      * to enter Comment and Stars for the CoffeeSite.
+     */
+    public void processFailedNumberOfStarsForSiteAndUser(Result.Error error) {
+        commentActionsProgressBar.setVisibility(View.GONE);
+        showRESTCallError(error);
+        // Open EnterCommentAndRatingDialogFragment
+        showEnterCommentAndRatingDialog();
+
     }
 
     /**
@@ -269,7 +299,13 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     private void showComments() {
         this.comments = cs.getComments();
         if (this.comments != null) {
-            setupRecyclerView((RecyclerView) this.recyclerView, this.comments);
+            if (this.comments.size() > 0) {
+                setupRecyclerView((RecyclerView) this.recyclerView, this.comments);
+            } else {
+                List<Comment> emptyComments = new ArrayList<Comment>();
+                emptyComments.add(new Comment("Žádné komentáře k dispozici"));
+                setupRecyclerView((RecyclerView) this.recyclerView, emptyComments);
+            }
         }
     }
 
@@ -333,13 +369,26 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
             @Override
             public void onBindViewHolder(final ViewHolder holder, int position) {
 
-                holder.userAndDateText.setText(mValues.get(position).getUserName() + ", " + mValues.get(position).getCreatedOnString());
-                holder.commentText.setText(mValues.get(position).getText());
-                holder.itemView.setTag(mValues.get(position));
-
                 final Comment item = mValues.get(position);
 
-                if ((item != null) && item.getUserName().equals(userAccountService.getLoggedInUser().getUserName())) {
+                // Empty comment to show no koment available
+                if (getItemCount() == 1 && item.getId() == 0) {
+                    //holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
+                    holder.commentText.setText(item.getText());
+                    holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.ITALIC);
+                    holder.commentText.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+                    //holder.itemView.setTag(item);
+                } else {
+
+                    holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
+                    holder.commentText.setText(item.getText());
+                    holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.NORMAL);
+                    holder.commentText.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
+                    holder.itemView.setTag(item);
+                }
+
+                LoggedInUser loggedInUser = userAccountService.getLoggedInUser();
+                if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
                     holder.deleteButtonIcon.setVisibility(VISIBLE);
                 }
 

@@ -14,7 +14,7 @@
         <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="@color/card_backround"
+            android:background="@color/activityBackround"
             android:fitsSystemWindows="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -31,10 +31,10 @@
 
                     android:layout_width="match_parent"
                     android:layout_height="96dp"
-                    android:fitsSystemWindows="true"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                    android:background="@color/colorPrimary2"
 
-                    android:background="@color/colorNiceYellow">
+                    android:fitsSystemWindows="true"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
                     <android.support.design.widget.CollapsingToolbarLayout
                         android:id="@+id/user_profile_toolbarLayout"
@@ -58,212 +58,227 @@
                     </android.support.design.widget.CollapsingToolbarLayout>
                 </android.support.design.widget.AppBarLayout>
 
-                <TextView
-                    android:id="@+id/LoginLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/title_activity_user_login"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="24sp"
-                    android:textStyle="italic" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_margin="24dp"
-                    android:layout_marginBottom="24dp"
-                    android:src="@drawable/cup_basic" />
-
                 <!-- Email Label -->
 
                 <!-- Password Label -->
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/kavaSebouLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="14dp"
+                    android:text="@string/title_activity_user_login"
+                    android:textAlignment="center"
+                    android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/cup_basic" />
+
+                <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingLeft="24dp"
-                    android:paddingTop="24dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="24dp">
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="5dp"
+                    app:cardCornerRadius="6dp"
+                    app:cardElevation="4dp"
+                    app:contentPadding="14dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal">
+                        android:background="@android:color/background_light"
+                        android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/userNameLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile_username_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/userName"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/userNameLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_profile_username_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
 
-                        <TextView
-                            android:id="@+id/emailLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile_email_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
+                            <TextView
+                                android:id="@+id/userName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/userProfileEmail"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/emailLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_profile_email_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
 
-                        <TextView
-                            android:id="@+id/numOfCreatedSitesLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_register_numOfCreatedSites_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
+                            <TextView
+                                android:id="@+id/userProfileEmail"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/userProfileNumOfCreatedSites"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/numOfCreatedSitesLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_register_numOfCreatedSites_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
 
-                    <LinearLayout
-                        android:id="@+id/firstNameLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:visibility="visible">
+                            <TextView
+                                android:id="@+id/userProfileNumOfCreatedSites"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/firstNameLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile_firstname_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/firstName"
+                        <LinearLayout
+                            android:id="@+id/firstNameLayout"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
 
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/firstNameLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_profile_firstname_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
 
-                    <LinearLayout
-                        android:id="@+id/lastNameLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/firstName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/lastNameLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile_lastname_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/lastName"
+                        <LinearLayout
+                            android:id="@+id/lastNameLayout"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/lastNameLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_profile_lastname_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
 
-                        <TextView
-                            android:id="@+id/userCreatedOnLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile_createdon_label"
-                            android:textAlignment="viewStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp" />
+                            <TextView
+                                android:id="@+id/lastName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/userCreatedOn"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:clickable="false"
-                            android:textAlignment="viewEnd"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dip"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
 
-                </LinearLayout>
+                            <TextView
+                                android:id="@+id/userCreatedOnLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/user_profile_createdon_label"
+                                android:textAlignment="viewStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
+
+                            <TextView
+                                android:id="@+id/userCreatedOn"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:clickable="false"
+                                android:textAlignment="viewEnd"
+                                android:textColor="@android:color/black"
+                                android:textSize="16dip"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
 
                 <ProgressBar
                     android:id="@+id/progress"
@@ -276,6 +291,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:orientation="vertical"
                     android:padding="10dp">
 
@@ -300,6 +316,7 @@
             </LinearLayout>
 
         </ScrollView>
+
     </android.support.constraint.ConstraintLayout>
 
 

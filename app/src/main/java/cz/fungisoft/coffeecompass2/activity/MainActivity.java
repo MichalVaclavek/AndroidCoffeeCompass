@@ -71,6 +71,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private int searchRange = 500; // range in meters for searching from current position - 500 m default value
 
+    // Saves selected search distance range
     private static SearchDistancePreferenceHelper searchRangePreferenceHelper;
 
 
@@ -79,7 +80,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
 
@@ -203,8 +203,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private void openLoginActivity() {
         if (Utils.isOnline()) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(activityIntent);
         } else {
             Utils.showNoInternetToast(getApplicationContext());
@@ -213,14 +213,15 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private void openUserProfileActivity() {
         Intent activityIntent = new Intent(this, UserDataViewActivity.class);
-        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
 
     private void aktivujNastaveni() {
         Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         selectSearchDistIntent.putExtra("searchRange", this.searchRange);
         this.startActivity(selectSearchDistIntent);
     }
@@ -263,6 +264,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
     }
 
+    // Currently not needed as only one Button i used to search for any type of coffee
     public void onHledejEspressoClick(View view) {
 
         if (location == null) {
@@ -296,7 +298,9 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
     /**
-     * Show info Toast message, that no CoffeeSite was found
+     * Show info Toast message, that no CoffeeSite was found.
+     * Currently not needed as a new Activity is shown for every search result
+     * including nothing found.
      */
     public void showNothingFoundStatus(String subject) {
 
@@ -370,6 +374,15 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             } else {
 //                searchEspressoButton.setEnabled(false);
                 searchKafeButton.setEnabled(false);
+            }
+        }
+
+        MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
+        if (userAccountMenuItem != null) {
+            if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+            } else {
+                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
             }
         }
     }
@@ -458,11 +471,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     public void onUserLoginServiceConnected() {
         userLoginService = userLoginServiceConnector.getUserLoginService();
-        //userAccountService.addUserLoginServiceListener(this);
-        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
-            MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
-            if (userAccountMenuItem != null) {
+
+        MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
+        if (userAccountMenuItem != null) {
+            if (userLoginService != null && userLoginService.isUserLoggedIn()) {
                 userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
+            } else {
+                userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
             }
         }
     }

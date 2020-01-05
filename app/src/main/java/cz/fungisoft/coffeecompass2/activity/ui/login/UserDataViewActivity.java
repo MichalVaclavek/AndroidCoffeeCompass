@@ -77,6 +77,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
+
         logoutButton.setEnabled(true);
         deleteUserButton.setEnabled(true);
 

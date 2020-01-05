@@ -39,20 +39,14 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
     private List<Comment> comments;
 
-    //private CoffeeSite coffeeSite;
     private int coffeeSiteID;
 
-    //public GetCommentsAsyncTask(CommentsListActivity parentActivity, CoffeeSite cs) {
     public GetCommentsAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
         this.parentActivity = parentActivity;
         //this.coffeeSite = cs;
         this.coffeeSiteID = coffeeSiteID;
 
         sURL = sURLCore + this.coffeeSiteID;
-
-//        if (this.coffeeSite != null) {
-//            sURL = sURLCore + this.coffeeSite.getId();
-//        }
     }
 
     @Override
@@ -116,10 +110,6 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
         comments = parseJSONWithFoundCommentsResult(sJSON);
 
-//        if (this.coffeeSite != null) {
-//            this.coffeeSite.setComments(comments);
-//        }
-
         return sJSON;
     }
 
@@ -167,7 +157,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
     @Override
     protected void onPostExecute(String result) {
 
-        if (comments != null && comments.size() > 0) {
+        if (comments != null) {
             parentActivity.processComments(comments);
         }
     }

@@ -55,7 +55,7 @@ public class Utils {
      */
     public static RestError getRestError(String restErrorBody) {
 
-        RestError retVal = null;
+        RestError retVal = new RestError();
         try {
             JSONObject jsonObject = new JSONObject(restErrorBody);
 

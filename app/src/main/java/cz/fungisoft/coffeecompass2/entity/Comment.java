@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * A Comment belonging to a CoffeeSite.
@@ -128,7 +129,7 @@ public class Comment implements Serializable, Parcelable {
         Date created;
         //SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
         try {
-            created  = dateFormater.parse( this.createdOnString);
+            created = dateFormater.parse( this.createdOnString);
         } catch (ParseException e) {
             created = new Date();
         }
@@ -136,7 +137,12 @@ public class Comment implements Serializable, Parcelable {
         this.created = created;
     }
 
-    private Comment() {}
+    public Comment() {}
+
+    public Comment(String emtpyText) {
+        this(0, emtpyText, 0, "", false);
+    }
+
 
     private Comment(Integer id, String commentText, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
         this.id = id;
@@ -144,6 +150,7 @@ public class Comment implements Serializable, Parcelable {
         this.coffeeSiteID = coffeeSiteId;
         this.userName = userName;
         this.canBeDeleted = canBeDeleted;
+        setCreated(new Date());
     }
 
     public Comment(Integer id, String commentText, Date createdOn, Integer coffeeSiteId, String userName, boolean canBeDeleted) {

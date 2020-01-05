@@ -21,11 +21,11 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 0.5.0</string>
-    <string name="about_datum">10. 12. 2019</string>
+    <string name="about_version">v. 0.7.0</string>
+    <string name="about_datum">6. 1. 2020</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
-    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b> a pomozte evidovat další kávové lokace."</string>
+    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b> a pomozte evidovat další kávové lokace."</string>
     <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
@@ -97,5 +97,6 @@
     <string name="comment_dialog_title">Hodnocení a komentář</string>
     <string name="delete_comment">SMAZAT</string>
     <string name="delete_comment_question">Smazat komentář?</string>
+    <string name="user_delete_confirm">SMAZAT</string>
 
 </resources>

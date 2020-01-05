@@ -15,7 +15,7 @@
             android:id="@+id/comments_app_bar"
             android:layout_width="match_parent"
             android:layout_height="96dp"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary2"
             android:fitsSystemWindows="true"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -58,9 +58,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/new_comment"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/baseline_add_black_18dp"
         android:visibility="gone"
-        app:backgroundTint="@color/colorAccent" />
+        app:backgroundTint="@color/colorPrimary" />
 
     <ProgressBar
         android:id="@+id/comments_progressBar"
