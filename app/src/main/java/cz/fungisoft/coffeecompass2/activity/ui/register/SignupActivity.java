@@ -208,8 +208,6 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(SignupActivity.this, MainActivity.class);
-        //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
         finish();

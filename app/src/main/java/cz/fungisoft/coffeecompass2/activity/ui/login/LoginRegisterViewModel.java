@@ -13,14 +13,6 @@ public class LoginRegisterViewModel extends ViewModel {
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
     private MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
 
-    //private MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
-    //private MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
-   // private UserAccountRepository loginRepository;
-
-//    LoginRegisterViewModel(UserAccountRepository loginRepository) {
-//        this.loginRepository = loginRepository;
-//    }
-
     LiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
@@ -28,42 +20,6 @@ public class LoginRegisterViewModel extends ViewModel {
     public LiveData<RegisterFormState> getRegisterFormState() {
         return registerFormState;
     }
-
-//    public LiveData<LoginOrRegisterResult> getLoginResult() {
-//        return loginResult;
-//    }
-
-//    public LiveData<LoginOrRegisterResult> getRegisterResult() {
-//        return registerResult;
-//    }
-
-//    public void login(String username, String password,  String deviceID) {
-//        new LoginUserRESTAsyncTask(username, password, deviceID, loginRepository).execute();
-//    }
-//
-//    public void register(String username, String password, String email, String deviceID) {
-//        new RegisterUserRESTAsyncTask(username, password, email, deviceID, loginRepository).execute();
-//    }
-
-//    public void evaluateLoginResult(Result<LoggedInUser> result) {
-//        if (result instanceof Result.Success) {
-//            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-//            loginResult.setValue(new LoginOrRegisterResult(new LoggedInUserView(data.getUserName())));
-//            loginRepository.setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
-//        } else {
-//            loginResult.setValue(new LoginOrRegisterResult(R.string.login_failed));
-//        }
-//    }
-
-//    public void evaluateRegisterResult(Result<LoggedInUser> result) {
-//        if (result instanceof Result.Success) {
-//            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-//            registerResult.setValue(new LoginOrRegisterResult(new LoggedInUserView(data.getUserName())));
-//            loginRepository.setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
-//        } else {
-//            registerResult.setValue(new LoginOrRegisterResult(R.string.login_failed));
-//        }
-//    }
 
     public void loginDataChanged(String username, String password) {
 

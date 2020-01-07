@@ -68,6 +68,7 @@ public class SelectSearchDistanceActivity extends AppCompatActivity implements  
         }
         // back to main activity
         i.putExtra("searchRange", this.selectedDistance);
+        //i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         this.startActivity(i);
         finish();
     }

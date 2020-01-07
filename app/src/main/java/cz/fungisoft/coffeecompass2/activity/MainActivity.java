@@ -221,7 +221,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private void aktivujNastaveni() {
         Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         selectSearchDistIntent.putExtra("searchRange", this.searchRange);
         this.startActivity(selectSearchDistIntent);
     }

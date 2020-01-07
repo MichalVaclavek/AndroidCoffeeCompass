@@ -230,6 +230,7 @@
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:gravity="center_horizontal"
+                android:scrollbarThumbHorizontal="@drawable/cup_basic"
                 android:textAlignment="center">
 
                 <android.support.v7.widget.CardView
@@ -254,6 +255,23 @@
                         android:textSize="22sp" />
 
                 </android.support.v7.widget.CardView>
+
+                <com.lukelorusso.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/searchDistanceSeekBar"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    app:vsb_bar_background="#eeeeee"
+                    app:vsb_bar_corner_radius="15dp"
+                    app:vsb_bar_progress_gradient_end="#4dd0e1"
+                    app:vsb_bar_progress_gradient_start="#03a2ba"
+                    app:vsb_bar_width="60dp"
+                    app:vsb_click_to_set_progress="false"
+                    app:vsb_max_placeholder_position="inside"
+                    app:vsb_min_placeholder_position="inside"
+                    app:vsb_progress="50"
+                    app:vsb_show_thumb="true"
+                    app:vsb_thumb_container_corner_radius="5dp"
+                    app:vsb_use_thumb_to_set_progress="true" />
 
             </TableRow>
 

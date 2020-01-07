@@ -31,6 +31,10 @@ import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
 
+/**
+ * Activity to show logged-in user profile details.
+ * Allows to log-out or delete user's account.
+ */
 public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener, UserLogoutAndDeleteServiceConnectionListener,
                                                                        DeleteUserAccountDialogFragment.DeleteUserAccountDialogListener {
 
@@ -68,7 +72,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
         ButterKnife.bind(this);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.userProfileToolbar);
         setSupportActionBar(toolbar);
 
         // Show the Up button in the action bar.
@@ -86,7 +89,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         if (userProfileToShow != null) {
 
             if (appBarLayout != null) {
-                //appBarLayout.setTitle(userProfileToShow.getUserName());
                 appBarLayout.setTitle(getString(R.string.user_profile_label));
             }
 
@@ -163,7 +165,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     private void goToMainActivity() {
-        // go to MainActivity
         Intent i = new Intent(UserDataViewActivity.this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
@@ -183,7 +184,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @Override
     public void onUserLogoutSuccess() {
-        //allowButtonAndGoneProgressBar();
         logoutDeleteProgressBar.setVisibility(View.GONE);
         Toast.makeText(getBaseContext(), getString(R.string.logout_success), Toast.LENGTH_LONG).show();
         setResult(Activity.RESULT_OK);
@@ -196,8 +196,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         //allowButtonAndGoneProgressBar();
         logoutDeleteProgressBar.setVisibility(View.GONE);
         Toast.makeText(getBaseContext(), errorMessage, Toast.LENGTH_LONG).show();
-        //setResult(Activity.RESULT_OK);
-        //goToMainActivityAndFinish();
     }
 
     @Override
@@ -215,8 +213,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         //allowButtonAndGoneProgressBar();
         logoutDeleteProgressBar.setVisibility(View.GONE);
         Toast.makeText(getBaseContext(), errorMessage, Toast.LENGTH_LONG).show();
-        //setResult(Activity.RESULT_OK);
-        //goToMainActivityAndFinish();
     }
 
     @Override
