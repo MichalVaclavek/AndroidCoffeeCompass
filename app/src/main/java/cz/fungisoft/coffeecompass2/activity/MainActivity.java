@@ -5,29 +5,38 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
+
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.lukelorusso.verticalseekbar.VerticalSeekBar;
+
+import org.w3c.dom.Text;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import cz.fungisoft.coffeecompass2.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
-import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
@@ -36,6 +45,8 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 /**
  * Main activity to show:
@@ -65,11 +76,17 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private Location location;
 
 //    private Button searchEspressoButton;
-    private Button searchKafeButton;
+    private static Button searchKafeButton;
+
 
     private Toolbar mainToolbar;
 
-    private int searchRange = 500; // range in meters for searching from current position - 500 m default value
+    private VerticalSeekBar searchDistanceSeekBar;
+
+    private LinearLayout  searchDistancesScaleLinearLayout;
+
+    private static int searchRange = 500; // range in meters for searching from current position - 500 m default value
+    private static  String searchRangeString;
 
     // Saves selected search distance range
     private static SearchDistancePreferenceHelper searchRangePreferenceHelper;
@@ -80,41 +97,88 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get serachDistance from Preferences
+        searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
+        searchRange = searchRangePreferenceHelper.getSearchDistanc();
+
+        searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
+
+        searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
+
+        //searchDistanceSeekBar.setThumbPlaceholderDrawable(getDrawable(R.drawable.cup_basic));
+        String[] vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
+        // Seek bar for selecting searching distance
+        searchDistanceSeekBar.setMaxValue(vzdalenosti.length-1);
+
+        searchDistancesScaleLinearLayout = findViewById(R.id.searchDistancesScaleLinearLayout);
+        // Text view for searchDistances to be accessible for changing its property when selected by seekbar
+        TextView[] searchDistanceTextViews = new TextView[vzdalenosti.length];
+
+        for (int i = vzdalenosti.length-1; i >= 0 ; i--) {
+            TextView searchDistTextView = new TextView(this);
+            searchDistTextView.setText(vzdalenosti[i]);
+            searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+            searchDistTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            searchDistanceTextViews[i] = searchDistTextView;
+            searchDistancesScaleLinearLayout.addView(searchDistTextView);
+        }
+        // find selected searchRangeTextView to be highlited
+        for (int i = vzdalenosti.length-1; i >= 0 ; i--) {
+            if (String.valueOf(searchRange).equals(vzdalenosti[i])) {
+                searchDistanceSeekBar.setProgress(i);
+                searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
+                searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+                searchDistanceTextViews[i].setBackgroundResource(R.color.selectedSearchDistanceBackround);
+                break;
+            }
+        }
+
+//       SeekBar onChangeListener()
+        searchDistanceSeekBar.setOnProgressChangeListener(FunctionalUtils.fromConsumer((progress) -> {
+            for (int i = searchDistanceTextViews.length-1; i >= 0 ; i--) {
+                if (i == progress) {
+                    searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
+                    searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+                    searchDistanceTextViews[i].setBackgroundResource(R.color.selectedSearchDistanceBackround);
+                } else {
+                    searchDistanceTextViews[i].setTypeface(null, Typeface.NORMAL);
+                    searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+                    searchDistanceTextViews[i].setBackgroundResource(R.color.listOfDistancesBackround);
+                }
+            }
+            searchRange = Integer.parseInt(vzdalenosti[progress]);
+            searchRangeString = Utils.converSearchDistance(searchRange);
+            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
+            searchRangePreferenceHelper.putSearchDistance(searchRange);
+
+        }));
+
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
 
         findViewById(R.id.AllSitesTextView);
 
-        searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
-        this.searchRange = searchRangePreferenceHelper.getSearchDistanc();
-
         // Return from search range settings activity
-        if (getIntent().getStringExtra("searchRange") != null) {
-            this.searchRange = Integer.parseInt(getIntent().getStringExtra("searchRange"));
-            searchRangePreferenceHelper.putSearchDistance(this.searchRange);
-        }
+//        if (getIntent().getStringExtra("searchRange") != null) {
+//            this.searchRange = Integer.parseInt(getIntent().getStringExtra("searchRange"));
+//            searchRangePreferenceHelper.putSearchDistance(this.searchRange);
+//        }
 
         //Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
         accuracy = (TextView) findViewById(R.id.accuracy);
 
-        String searchRangeString;
-        // Prevod na km
-        if (searchRange >= 1000) {
-            searchRangeString = " (" + searchRange/1000 + " km)";
-        } else {
-            searchRangeString = " (" + searchRange + " m)";
-        }
+        searchRangeString = Utils.converSearchDistance(searchRange);
 
         //TODO - text from R.string. ...
-        searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
         searchKafeButton.setTransformationMethod(null);
         searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
 
         locationImageView = (ImageView) findViewById(R.id.locationImageView);
 
-        Drawable locBad = getResources().getDrawable(R.drawable.location_bad);
+        //Drawable locBad = getResources().getDrawable(R.drawable.location_bad);
+        Drawable locBad = ResourcesCompat.getDrawable(getResources(), R.drawable.location_bad, null);
         locationImageView.setBackground(locBad);
 
         if (Utils.isOnline()) {
@@ -182,9 +246,9 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                     openLoginActivity();
                 }
                 return true;
-            case R.id.action_settings:
-                aktivujNastaveni();
-                return true;
+//            case R.id.action_settings:
+//                aktivujNastaveni();
+//                return true;
             case R.id.action_about:
                 showAbout();
                 return true;
@@ -219,12 +283,12 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         this.startActivity(activityIntent);
     }
 
-    private void aktivujNastaveni() {
-        Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        selectSearchDistIntent.putExtra("searchRange", this.searchRange);
-        this.startActivity(selectSearchDistIntent);
-    }
+//    private void aktivujNastaveni() {
+//        Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
+//        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        selectSearchDistIntent.putExtra("searchRange", this.searchRange);
+//        this.startActivity(selectSearchDistIntent);
+//    }
 
     private void showAbout() {
         Intent i = new Intent(this, AboutActivity.class);

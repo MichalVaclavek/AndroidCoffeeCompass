@@ -1,10 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
-import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
 
 import cz.fungisoft.coffeecompass2.R;
 

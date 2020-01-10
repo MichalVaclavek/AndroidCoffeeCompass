@@ -1,6 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.ui.login;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 

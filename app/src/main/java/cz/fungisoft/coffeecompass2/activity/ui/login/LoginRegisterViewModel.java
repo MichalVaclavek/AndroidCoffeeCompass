@@ -1,8 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.ui.login;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import android.util.Patterns;
 
 import cz.fungisoft.coffeecompass2.R;

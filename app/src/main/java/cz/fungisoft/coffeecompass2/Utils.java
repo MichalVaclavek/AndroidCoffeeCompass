@@ -2,7 +2,7 @@ package cz.fungisoft.coffeecompass2;
 
 import android.content.Context;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -10,8 +10,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 /**
  * Utility class. Up to now only one method checking if the internet connection is available.
@@ -77,5 +80,14 @@ public class Utils {
         }
         return retVal;
     }
+
+ public static  String converSearchDistance(int searchRange) {
+     // Prevod na km
+     if (searchRange >= 1000) {
+         return " (" + searchRange/1000 + " km)";
+     } else {
+         return  " (" + searchRange + " m)";
+     }
+ }
 
 }

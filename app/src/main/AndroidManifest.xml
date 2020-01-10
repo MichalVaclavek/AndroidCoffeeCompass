@@ -73,10 +73,7 @@
             android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.SelectSearchDistanceActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name=".activity.CoffeeSiteListActivity"
             android:label="@string/app_name"

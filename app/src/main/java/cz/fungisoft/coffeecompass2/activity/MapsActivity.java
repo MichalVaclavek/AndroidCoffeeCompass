@@ -2,7 +2,7 @@ package cz.fungisoft.coffeecompass2.activity;
 
 import android.content.Intent;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;

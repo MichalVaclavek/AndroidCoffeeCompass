@@ -1,8 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.ui.login;
 
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.annotation.NonNull;
 
 /**
  * ViewModel provider factory to instantiate LoginRegisterViewModel.
