@@ -171,6 +171,7 @@
                 </TableRow>
 
             </TableLayout>
+
         </androidx.cardview.widget.CardView>
 
         <TextView
@@ -178,6 +179,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="20dp"
+            android:paddingBottom="10dp"
             android:text="Vyhledávání"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
@@ -187,20 +189,18 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:paddingTop="2dp">
+            android:layout_gravity="center">
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_horizontal">
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp">
 
                 <TextView
                     android:id="@+id/textView17"
-                    android:layout_width="70dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="8dp"
                     android:text="max. vzdalenost [m]"
                     android:textAlignment="textEnd"
                     android:textColor="@color/colorPrimaryDark"
@@ -208,12 +208,12 @@
                     android:textStyle="italic" />
 
                 <TextView
-                    android:id="@+id/textView21"
+                    android:id="@+id/textView20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <TextView
-                    android:id="@+id/textView20"
+                    android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
@@ -222,7 +222,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:gravity="center_horizontal"
                 android:scrollbarThumbHorizontal="@drawable/cup_basic"
                 android:textAlignment="center">
 
@@ -232,7 +231,8 @@
                     android:layout_gravity="right"
                     android:layout_marginRight="10dp"
                     android:paddingRight="5dp"
-                    app:cardBackgroundColor="@color/listOfDistancesBackround"
+                    app:cardBackgroundColor="@color/activityBackround"
+                    app:cardCornerRadius="4dp"
                     app:cardElevation="1dp">
 
                     <LinearLayout
@@ -270,7 +270,7 @@
 
                 <com.lukelorusso.verticalseekbar.VerticalSeekBar
                     android:id="@+id/searchDistanceSeekBar"
-                    android:layout_width="30dp"
+                    android:layout_width="32dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     app:vsb_bar_background="@color/card_backround"
@@ -282,8 +282,10 @@
                     app:vsb_max_placeholder_position="inside"
                     app:vsb_min_placeholder_position="inside"
                     app:vsb_progress="3"
+                    app:vsb_show_thumb="true"
                     app:vsb_thumb_container_corner_radius="1dp"
-                    app:vsb_thumb_placeholder_src="@drawable/cup_basic"
+                    app:vsb_thumb_container_tint="@color/activityBackround"
+                    app:vsb_thumb_placeholder_src="@drawable/cup_basic_46"
                     app:vsb_use_thumb_to_set_progress="true" />
 
             </TableRow>

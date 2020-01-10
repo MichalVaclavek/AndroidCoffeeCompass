@@ -117,7 +117,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         for (int i = vzdalenosti.length-1; i >= 0 ; i--) {
             TextView searchDistTextView = new TextView(this);
             searchDistTextView.setText(vzdalenosti[i]);
-            searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+            searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             searchDistTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
             searchDistanceTextViews[i] = searchDistTextView;
             searchDistancesScaleLinearLayout.addView(searchDistTextView);
@@ -143,7 +143,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 } else {
                     searchDistanceTextViews[i].setTypeface(null, Typeface.NORMAL);
                     searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                    searchDistanceTextViews[i].setBackgroundResource(R.color.listOfDistancesBackround);
+                    searchDistanceTextViews[i].setBackgroundResource(R.color.activityBackround);
                 }
             }
             searchRange = Integer.parseInt(vzdalenosti[progress]);
