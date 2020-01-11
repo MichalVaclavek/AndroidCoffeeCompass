@@ -15,7 +15,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="66dp"
+        android:layout_marginTop="46dp"
         android:layout_marginBottom="15dp"
         android:text="@string/about_author"
         android:textAlignment="center"
@@ -66,7 +66,7 @@
                 android:id="@+id/textView12"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:padding="6dp"
                 android:text="@string/about_sentence1"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
@@ -81,8 +81,22 @@
                 android:id="@+id/textView13"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:padding="6dp"
                 android:text="@string/about_sentence2"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:text="@string/about_sentence3"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
         </TableRow>
@@ -96,7 +110,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
-                android:padding="10dp"
+                android:padding="6dp"
                 android:text="@string/about_sentence4"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
