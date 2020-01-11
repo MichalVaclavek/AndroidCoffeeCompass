@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import androidx.annotation.NonNull;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,6 +44,7 @@ import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
 
 import static android.view.View.*;
+import static com.google.android.material.snackbar.Snackbar.LENGTH_SHORT;
 
 /**
  * Activity to show list of CoffeeSite's Comments
@@ -112,6 +115,32 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
             new GetCommentsAsyncTask(this, cs.getId()).execute();
         }
 
+        // Adds Floating Action Button if a user is loged-in
+        FloatingActionButton fab = findViewById(R.id.fab_new_comment);
+
+        // effective final this activity instance for annonymous onClick() handler
+        final CommentsListActivity callingActivity = this;
+
+        fab.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (userAccountService != null && userAccountService.isUserLoggedIn()) {
+                    if (Utils.isOnline()) {
+                        commentActionsProgressBar.setVisibility(View.VISIBLE);
+                        // Async task for loading current user rating for this CoffeeSite
+                        // The dialog is open after the Async task finishes
+                        new GetNumberOfStarsAsyncTask(Integer.parseInt(userAccountService.getLoggedInUser().getUserId()), cs.getId(), callingActivity).execute();
+                    } else { // Dialog can be opened as there might be only temporary connection problem
+                        showEnterCommentAndRatingDialog();
+                    }
+                } else {
+                    Snackbar mySnackbar = Snackbar.make(view, R.string.comments_only_for_registered_user, Snackbar.LENGTH_LONG);
+                    mySnackbar.show();
+                }
+            }
+        });
+        fab.setVisibility(View.VISIBLE);
+
         doBindUserLoginService();
     }
 
@@ -171,25 +200,7 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         userAccountService = userLoginServiceConnector.getUserLoginService();
 
         if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-            // Adds Floating Action Button if a user is loged-in
-            FloatingActionButton fab = findViewById(R.id.fab_new_comment);
 
-            // effective final this activity instance for annonymous onClick() handler
-            final CommentsListActivity callingActivity = this;
-
-            fab.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (Utils.isOnline()) {
-                        commentActionsProgressBar.setVisibility(View.VISIBLE);
-                        // Async task for loading current user rating for this CoffeeSite
-                        new GetNumberOfStarsAsyncTask( Integer.parseInt(userAccountService.getLoggedInUser().getUserId()), cs.getId(), callingActivity).execute();
-                    } else { // Dialog can be opened as there might be only temporary connection problem
-                        showEnterCommentAndRatingDialog();
-                    }
-                }
-            });
-            fab.setVisibility(View.VISIBLE);
         }
     }
 

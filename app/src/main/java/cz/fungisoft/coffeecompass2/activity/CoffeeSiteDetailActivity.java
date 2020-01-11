@@ -59,6 +59,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
 //            actionBar.setDisplayShowHomeEnabled(true);
 //        }
 
+        // Read coffee site data from calling activity
         Intent intent = this.getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
@@ -80,10 +81,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
             }
 
             // Async task to check if the Comments are available for the site
-            if (Utils.isOnline()) {
-                //new GetCommentsAsyncTask(this, coffeeSite).execute();
-                new GetNumberOfCommentsAsyncTask(coffeeSite.getId(), this).execute();
-            }
+//            if (Utils.isOnline()) {
+//                //new GetCommentsAsyncTask(this, coffeeSite).execute();
+//                new GetNumberOfCommentsAsyncTask(coffeeSite.getId(), this).execute();
+//            }
         }
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -174,11 +175,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
      * the CoffeeSite within this Activity
      * @param numberOfComments
      */
+    // Not needed in current implementation as the Comments button is still visible
     public void processNumberOfComments(int numberOfComments) {
-        //this.comments = comments;
-        if (numberOfComments > 0) {
-            enableCommentsButton();
-        }
+//        this.comments = comments;
+//         Comments button is still available, even there is no comment or user is not logged in
+//        if (numberOfComments > 0) {
+//            enableCommentsButton();
+//        }
     }
 
     public void showRESTCallError(Result.Error error) {
@@ -205,9 +208,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
     @Override
     public void onUserLoginServiceConnected() {
         userLoginService = userLoginServiceConnector.getUserLoginService();
-        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
-            enableCommentsButton();
-        }
+        // Comments button still available, even the user is not logged in
+//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+//            enableCommentsButton();
+//        }
     }
 
     private void doBindUserLoginService() {

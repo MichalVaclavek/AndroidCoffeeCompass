@@ -32,7 +32,7 @@ android {
     }
 }
 
-// For minSdkVersion=22 support
+// For minSdkVersion=21 support ?
 android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
