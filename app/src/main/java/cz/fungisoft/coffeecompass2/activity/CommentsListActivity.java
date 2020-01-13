@@ -127,8 +127,8 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
                 if (userAccountService != null && userAccountService.isUserLoggedIn()) {
                     if (Utils.isOnline()) {
                         commentActionsProgressBar.setVisibility(View.VISIBLE);
-                        // Async task for loading current user rating for this CoffeeSite
-                        // The dialog is open after the Async task finishes
+                        // Async task for loading current user's rating for this CoffeeSite
+                        // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes
                         new GetNumberOfStarsAsyncTask(Integer.parseInt(userAccountService.getLoggedInUser().getUserId()), cs.getId(), callingActivity).execute();
                     } else { // Dialog can be opened as there might be only temporary connection problem
                         showEnterCommentAndRatingDialog();

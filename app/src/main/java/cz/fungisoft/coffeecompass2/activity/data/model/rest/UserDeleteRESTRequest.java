@@ -68,7 +68,8 @@ public class UserDeleteRESTRequest {
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
-        Call<String> call = api.deleteUser(this.user.getUserName());
+        //Call<String> call = api.deleteUser(this.user.getUserName());
+        Call<String> call = api.deleteUserById(Long.parseLong(user.getUserId()));
 
         call.enqueue(new Callback<String>() {
             @Override
@@ -76,7 +77,12 @@ public class UserDeleteRESTRequest {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.i("onSuccess", response.body());
-                        userAccountService.evaluateDeleteResult(new Result.Success<>(user.getUserName()));
+                        //TODO overeni, ze v odpovedi se vratilo ID, ktere bylo pozadovano ke smazani
+                        if (response.body().equals(user.getUserId())) {
+                            userAccountService.evaluateDeleteResult(new Result.Success<>(user.getUserName()));
+                        } else {
+                            userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response user ID doesn't equal to requested ID.")));
+                        }
                     } else {
                         Log.i("onEmptyResponse", "Returned empty response for delete user account request.");
                         userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response empty.")));

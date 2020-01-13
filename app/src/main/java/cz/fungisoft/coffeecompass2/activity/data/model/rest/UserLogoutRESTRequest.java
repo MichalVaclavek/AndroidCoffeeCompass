@@ -65,7 +65,8 @@ public class UserLogoutRESTRequest {
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
-        Call<Boolean> call = api.logoutCurrentUser();
+        //Call<Boolean> call = api.logoutCurrentUser();
+        Call<Boolean> call = api.logoutCurrentUserWithId(Long.parseLong(currentUser.getUserId()));
 
         call.enqueue(new Callback<Boolean>() {
             @Override
@@ -73,7 +74,12 @@ public class UserLogoutRESTRequest {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.i("onSuccess", response.body().toString());
-                        userAccountService.evaluateLogoutResult(new Result.Success<>(currentUser.getUserName()));
+                        //TODO overeni, ze v odpovedi je Boolean=true
+                        if ("true".equals(response.body().toString())) {
+                            userAccountService.evaluateLogoutResult(new Result.Success<>(currentUser.getUserName()));
+                        } else {
+                            userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user. Response FALSE.")));
+                        }
                     } else {
                         Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
                         userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user. Response empty.")));

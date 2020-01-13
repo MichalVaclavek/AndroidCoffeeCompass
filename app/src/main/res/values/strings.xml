@@ -62,7 +62,7 @@
     <string name="title_activity_user_signup">Káva s sebou</string>
     <string name="title_activity_signup">Registrace</string>
     <string name="prompt_signup_username">Uživatelské jméno</string>
-    <string name="prompt_signup_email">Email</string>
+    <string name="prompt_signup_email">Email (nepovinné)</string>
     <string name="prompt_signup_password">heslo</string>
     <string name="action_signup">Přihlásit nebo registrovat</string>
     <string name="action_signup_short">Registrovat</string>

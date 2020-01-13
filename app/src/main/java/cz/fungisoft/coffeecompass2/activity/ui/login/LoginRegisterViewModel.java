@@ -64,7 +64,9 @@ public class LoginRegisterViewModel extends ViewModel {
 
     // A placeholder email validation check
     private boolean isEmailValid(String email) {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        if (!email.isEmpty()) {
+            return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        } else return true;
     }
 
 }

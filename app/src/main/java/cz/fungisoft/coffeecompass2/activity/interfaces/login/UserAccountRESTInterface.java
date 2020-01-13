@@ -41,8 +41,14 @@ public interface UserAccountRESTInterface {
     @GET("logout")
     Call<Boolean> logoutCurrentUser();
 
+    @GET("logout/{userId}")
+    Call<Boolean> logoutCurrentUserWithId(@Path("userId") Long userId);
+
     @DELETE("delete/{userName}")
     Call<String> deleteUser(@Path("userName") String userName);
+
+    @DELETE("delete/id/{userId}")
+    Call<String> deleteUserById(@Path("userId") Long userId);
 
     @POST("register")
     Call<JwtUserToken> registerNewUser(@Body UserLoginOrRegisterInputData loginDataBody);

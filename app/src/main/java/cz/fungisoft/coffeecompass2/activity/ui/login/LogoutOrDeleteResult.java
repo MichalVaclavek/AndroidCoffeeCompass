@@ -12,13 +12,10 @@ public class LogoutOrDeleteResult {
     @Nullable
     private String userName;
     @Nullable
-    private RestError error;
+    private String error;
 
-    public LogoutOrDeleteResult(@Nullable RestError error) {
+    public LogoutOrDeleteResult(@Nullable String userName, @Nullable String error) {
         this.error = error;
-    }
-
-    public LogoutOrDeleteResult(@Nullable String userName) {
         this.userName = userName;
     }
 
@@ -28,7 +25,7 @@ public class LogoutOrDeleteResult {
     }
 
     @Nullable
-    public RestError getError() {
+    public String getError() {
         return error;
     }
 }

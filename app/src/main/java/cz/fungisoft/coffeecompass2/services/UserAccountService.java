@@ -46,7 +46,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
 
     private static MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
     private static MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
-    private static MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<LogoutOrDeleteResult>();
+    private static MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<>();
     private static MutableLiveData<LogoutOrDeleteResult> deleteResult = new MutableLiveData<>();
 
     public LiveData<LoginOrRegisterResult> getLoginResult() {
@@ -231,12 +231,12 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     public void evaluateLogoutResult(Result result) {
         if (result instanceof Result.Success) {
             String data = ((Result.Success<String>) result).getData();
-            logoutResult.setValue(new LogoutOrDeleteResult(data));
+            logoutResult.setValue(new LogoutOrDeleteResult(data, ""));
             userLoginAndRegisterRepository.setLoggedInUser(null);
             onUserLogoutSuccess();
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            logoutResult.setValue(new LogoutOrDeleteResult(error));
+            String error = ((Result.Error) result).getDetail();
+            logoutResult.setValue(new LogoutOrDeleteResult("", error));
             onUserLogoutFailure();
         }
     }
@@ -250,12 +250,12 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     public void evaluateDeleteResult(Result result) {
         if (result instanceof Result.Success) {
             String data = ((Result.Success<String>) result).getData();
-            deleteResult.setValue(new LogoutOrDeleteResult(data));
+            deleteResult.setValue(new LogoutOrDeleteResult(data, ""));
             userLoginAndRegisterRepository.setLoggedInUser(null);
             onUserDeleteSuccess();
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            deleteResult.setValue(new LogoutOrDeleteResult(error));
+            String error = ((Result.Error) result).getDetail();
+            deleteResult.setValue(new LogoutOrDeleteResult("", error));
             onUserDeleteFailure();
         }
     }
@@ -306,7 +306,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     private void onUserLogoutFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             String errorDetail = (logoutResult.getValue().getError() != null)
-                                 ? logoutResult.getValue().getError().getDetail()
+                                 ? logoutResult.getValue().getError()
                                  : getString(R.string.logout_failure);
             listener.onUserLogoutFailure(errorDetail);
         }
@@ -320,8 +320,8 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     }
     private void onUserDeleteFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
-            String errorDetail = (logoutResult.getValue().getError() != null)
-                                 ? logoutResult.getValue().getError().getDetail()
+            String errorDetail = (deleteResult.getValue().getError() != null)
+                                 ? deleteResult.getValue().getError()
                                  : getString(R.string.delete_user_failure);
             listener.onUserDeleteFailure(errorDetail);
         }

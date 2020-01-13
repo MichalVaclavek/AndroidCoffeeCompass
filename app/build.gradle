@@ -14,8 +14,8 @@ android {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 17
-        versionName "2.02"
+        versionCode 18
+        versionName "2.03"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

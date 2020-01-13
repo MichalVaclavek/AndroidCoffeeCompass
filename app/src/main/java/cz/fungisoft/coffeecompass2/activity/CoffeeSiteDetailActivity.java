@@ -175,7 +175,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
      * the CoffeeSite within this Activity
      * @param numberOfComments
      */
-    // Not needed in current implementation as the Comments button is still visible
+    // Not needed in current implementation as the Comments button is still visible/enabled
     public void processNumberOfComments(int numberOfComments) {
 //        this.comments = comments;
 //         Comments button is still available, even there is no comment or user is not logged in
@@ -208,7 +208,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
     @Override
     public void onUserLoginServiceConnected() {
         userLoginService = userLoginServiceConnector.getUserLoginService();
-        // Comments button still available, even the user is not logged in
+
+        // Any further processing is not needed in current implementation as the Comments button is still visible/enabled
 //        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
 //            enableCommentsButton();
 //        }
