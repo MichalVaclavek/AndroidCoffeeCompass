@@ -133,7 +133,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             }
         }
 
-//       SeekBar onChangeListener()
+        //S eekBar onChangeListener()
         searchDistanceSeekBar.setOnProgressChangeListener(FunctionalUtils.fromConsumer((progress) -> {
             for (int i = searchDistanceTextViews.length-1; i >= 0 ; i--) {
                 if (i == progress) {
@@ -158,12 +158,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         findViewById(R.id.AllSitesTextView);
 
-        // Return from search range settings activity
-//        if (getIntent().getStringExtra("searchRange") != null) {
-//            this.searchRange = Integer.parseInt(getIntent().getStringExtra("searchRange"));
-//            searchRangePreferenceHelper.putSearchDistance(this.searchRange);
-//        }
-
         //Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
@@ -181,15 +175,10 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         Drawable locBad = ResourcesCompat.getDrawable(getResources(), R.drawable.location_bad, null);
         locationImageView.setBackground(locBad);
 
-        if (Utils.isOnline()) {
-            new ReadStatsAsyncTask(this).execute();
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
-        }
-
         // UserLoginAndRegister service connection
         doBindUserLoginService();
     }
+
 
     /**
      * Method to update color of location Accuracy indicator image according
@@ -282,13 +271,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
-
-//    private void aktivujNastaveni() {
-//        Intent selectSearchDistIntent = new Intent(this, SelectSearchDistanceActivity.class);
-//        selectSearchDistIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        selectSearchDistIntent.putExtra("searchRange", this.searchRange);
-//        this.startActivity(selectSearchDistIntent);
-//    }
 
     private void showAbout() {
         Intent i = new Intent(this, AboutActivity.class);
@@ -419,6 +401,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Read stats
+        if (Utils.isOnline()) {
+            new ReadStatsAsyncTask(this).execute();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

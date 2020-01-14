@@ -305,6 +305,9 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     }
     private void onUserLogoutFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
+            //TODO - pokud je chybou, ze Resource not found, userID, pak provest logout
+            // protoze slo o pokus smazat uzivatele, ktery jiz byl smazan
+            // webovou aplikaci nebo jinou instanci mobilni aplikace
             String errorDetail = (logoutResult.getValue().getError() != null)
                                  ? logoutResult.getValue().getError()
                                  : getString(R.string.logout_failure);

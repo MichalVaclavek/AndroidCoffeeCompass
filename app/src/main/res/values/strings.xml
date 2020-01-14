@@ -21,8 +21,8 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 0.7.1</string>
-    <string name="about_datum">11. 1. 2020</string>
+    <string name="about_version">v. 0.7.3</string>
+    <string name="about_datum">15. 1. 2020</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. V budoucnu umožní i zadávání nových lokací přímo z mobilu.</string>
@@ -55,9 +55,9 @@
     <string name="username_or_email">jméno nebo email adresa</string>
     <string name="action_favorite">Login</string>
     <string name="logout_success">Odhlášení úspěšné.</string>
-    <string name="delete_user_success">Uživatel úspěšně smazán.</string>
+    <string name="delete_user_success">Uživatelský účet úspěšně smazán.</string>
     <string name="logout_failure">Odhlášení selhalo.</string>
-    <string name="delete_user_failure">Smazání uživatele selhalo.</string>
+    <string name="delete_user_failure">Smazání uživatelského účtu selhalo.</string>
 
     <string name="title_activity_user_signup">Káva s sebou</string>
     <string name="title_activity_signup">Registrace</string>
@@ -69,7 +69,7 @@
     <string name="signup_already_registered">Už máte účet?</string>
     <string name="action_already_signup_login">Přihlásit</string>
     <string name="signup_invalid_username">Neplatné uživatelské jméno nebo heslo</string>
-    <string name="signup_invalid_password">Heslo musí mít alespoň 5 znaků</string>
+    <string name="signup_invalid_password">Heslo musí mít alespoň 4 znaky</string>
     <string name="action_signup_favorite">Registrovat</string>
     <string name="user_profile_label">Profil uživatele</string>
     <string name="user_profile_logout">Odhlásit</string>
@@ -99,6 +99,6 @@
     <string name="delete_comment">SMAZAT</string>
     <string name="delete_comment_question">Smazat komentář?</string>
     <string name="user_delete_confirm">SMAZAT</string>
-    <string name="comments_only_for_registered_user">Komentovat může jen přihlášený uživatel.</string>
+    <string name="comments_only_for_registered_user">Komentovat a hodnotit může jen přihlášený uživatel.</string>
 
 </resources>
