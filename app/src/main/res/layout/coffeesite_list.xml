@@ -9,5 +9,5 @@
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-    tools:context=".activity.CoffeeSiteListActivity"
+    tools:context=".activity.ui.coffeesite.CoffeeSiteListActivity"
     tools:listitem="@layout/coffeesite_list_content" />

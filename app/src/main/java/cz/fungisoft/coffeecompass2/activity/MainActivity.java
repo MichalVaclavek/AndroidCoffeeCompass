@@ -26,9 +26,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
-
-import org.w3c.dom.Text;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -37,6 +37,7 @@ import cz.fungisoft.coffeecompass2.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
@@ -45,8 +46,6 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
  * Main activity to show:
@@ -175,6 +174,24 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         Drawable locBad = ResourcesCompat.getDrawable(getResources(), R.drawable.location_bad, null);
         locationImageView.setBackground(locBad);
 
+        // Floating action button to open Activity for creating new CoffeeSite
+        FloatingActionButton fab = findViewById(R.id.add_site_floatingActionButton);
+
+        // effective final this activity instance for annonymous onClick() handler
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (userAccountService != null && userAccountService.isUserLoggedIn()) {
+                    openNewCoffeeSiteActivity();
+                } else {
+                    Snackbar mySnackbar = Snackbar.make(view, R.string.new_site_only_for_registered_user, Snackbar.LENGTH_LONG);
+                    mySnackbar.show();
+                }
+            }
+        });
+        fab.setVisibility(View.VISIBLE);
+
+
         // UserLoginAndRegister service connection
         doBindUserLoginService();
     }
@@ -206,7 +223,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private void zobrazPresnostPolohy(Location location) {
         if (location != null && location.hasAccuracy()) {
             setAccuracyTextColor(barvaBlack);
-            accuracy.setText("(přesnost: " + location.getAccuracy() + " m)");
+            accuracy.setText("(\u00B1 "  + location.getAccuracy() + " m)");
         } else {
             setAccuracyTextColor(barvaRed);
             accuracy.setText("");
@@ -216,7 +233,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+        if (userAccountService != null && userAccountService.isUserLoggedIn()) {
             menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
         } else {
             menu.getItem(0).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
@@ -229,7 +246,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+                if (userAccountService != null && userAccountService.isUserLoggedIn()) {
                     openUserProfileActivity();
                 } else {
                     openLoginActivity();
@@ -253,6 +270,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
     }
 
+    private void openNewCoffeeSiteActivity() {
+            Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
+            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            this.startActivity(activityIntent);
+    }
+
     private void openLoginActivity() {
         if (Utils.isOnline()) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
@@ -268,7 +292,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         Intent activityIntent = new Intent(this, UserDataViewActivity.class);
         //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        activityIntent.putExtra("currentUserProfile", userLoginService.getLoggedInUser());
+        activityIntent.putExtra("currentUserProfile", userAccountService.getLoggedInUser());
         this.startActivity(activityIntent);
     }
 
@@ -432,7 +456,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
         if (userAccountMenuItem != null) {
-            if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            if (userAccountService != null && userAccountService.isUserLoggedIn()) {
                 userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
             } else {
                 userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
@@ -480,7 +504,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     // ** UserLogin Service connection/disconnection ** //
 
-    protected UserAccountService userLoginService;
+    protected UserAccountService userAccountService;
     private UserAccountServiceConnector userLoginServiceConnector;
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -523,11 +547,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      */
     @Override
     public void onUserLoginServiceConnected() {
-        userLoginService = userLoginServiceConnector.getUserLoginService();
+        userAccountService = userLoginServiceConnector.getUserLoginService();
 
         MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().getItem(0) : null;
         if (userAccountMenuItem != null) {
-            if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+            if (userAccountService != null && userAccountService.isUserLoggedIn()) {
                 userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_color_24px));
             } else {
                 userAccountMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));

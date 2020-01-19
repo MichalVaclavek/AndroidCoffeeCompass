@@ -19,9 +19,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.CommentsListActivity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
 /**

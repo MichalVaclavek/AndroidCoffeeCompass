@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.Utils;
-import cz.fungisoft.coffeecompass2.activity.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.CommentAndStarsToSave;

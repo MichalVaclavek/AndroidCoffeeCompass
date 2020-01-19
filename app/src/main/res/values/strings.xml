@@ -100,5 +100,25 @@
     <string name="delete_comment_question">Smazat komentář?</string>
     <string name="user_delete_confirm">SMAZAT</string>
     <string name="comments_only_for_registered_user">Komentovat a hodnotit může jen přihlášený uživatel.</string>
+    <string name="new_site_only_for_registered_user">Novou lokaci může vytvořit pouze přihlášený uživatel.</string>
+    <string name="new_coffee_site">Nová coffee lokace</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="site_type">typ zdroje</string>
+    <string name="location_type">typ lokality</string>
+    <string name="price_range">cenový rozsah</string>
+    <string name="espresso_coffee_type_chip">espresso</string>
+    <string name="instant_coffee_type_chip">instantní</string>
+    <string name="turek_coffee_type_chip">turek</string>
+    <string name="filtered_coffee_type_chip">překapávaná</string>
+    <string name="zrnkova_coffee_type_chip">zrnková</string>
+    <string name="tee_next_offer_chip">čaj</string>
+    <string name="cokolada_next_offer_chip">čokoláda</string>
+    <string name="pivo_next_offer_chip">pivo</string>
+    <string name="limonada_next_offer_chip">limo</string>
+    <string name="polivka_next_offer_chip">polévka</string>
+    <string name="napoje_other_machines_chip">nápoje</string>
+    <string name="sladkosti_other_machines_chip">sladkosti</string>
+    <string name="bagety_other_machines_chip">bagety</string>
+    <string name="other_other_machines_chip">ostatní</string>
 
 </resources>

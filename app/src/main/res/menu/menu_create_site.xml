@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_ulozit"
+        android:icon="@drawable/baseline_save_white_18dp"
+        android:title="Ulozit" />
+    <item
+        android:id="@+id/navigation_aktivovat"
+        android:icon="@drawable/baseline_play_arrow_white_18dp"
+        android:title="Aktivovat" />
+
+    <item
+        android:id="@+id/navigation_delete"
+        android:icon="@drawable/baseline_delete_white_18dp"
+        android:title="Smazat" />
+
+    <item
+        android:id="@+id/navigation_foto"
+        android:icon="@drawable/baseline_add_a_photo_white_18dp"
+        android:title="Foto" />
+
+</menu>

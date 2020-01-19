@@ -10,6 +10,7 @@
     <color name="activityBackround">#FFE0B2</color>
     <color name="selectedSearchDistanceBackround">#C1F1CC8A</color>
     <color name="listOfDistancesBackround">#FCD8A6</color>
+    <color name="chip_gray">#DDDDDD</color>
 
 </resources>
 

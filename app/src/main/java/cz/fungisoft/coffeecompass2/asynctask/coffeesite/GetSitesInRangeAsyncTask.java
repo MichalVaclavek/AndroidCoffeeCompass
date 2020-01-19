@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;

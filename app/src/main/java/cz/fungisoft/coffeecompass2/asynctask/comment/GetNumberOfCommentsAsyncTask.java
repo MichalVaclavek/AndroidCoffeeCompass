@@ -3,27 +3,16 @@ package cz.fungisoft.coffeecompass2.asynctask.comment;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.Utils;
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.CommentsAndStarsRESTInterface;
-import cz.fungisoft.coffeecompass2.entity.Comment;
-import okhttp3.Headers;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**

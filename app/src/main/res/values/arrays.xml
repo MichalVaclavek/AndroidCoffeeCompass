@@ -20,4 +20,43 @@
     <item>10000</item>
 </integer-array> -->
 
+    <string-array name="coffee_site_type">
+        <item>automat</item>
+        <item>bistro</item>
+        <item>kavárna</item>
+        <item>pekárna</item>
+        <item>občerstvení</item>
+        <item>stánek</item>
+        <item>cukrárna</item>
+        <item>novinový stánek</item>
+    </string-array>
+
+    <string-array name="location_type">
+        <item>nádraží</item>
+        <item>obchodní centrum</item>
+        <item>zastávka MHD</item>
+        <item>podchod MHD</item>
+        <item>podchod</item>
+        <item>benzinka</item>
+        <item>prodejna</item>
+        <item>turisticky zajímavé místo</item>
+        <item>škola</item>
+        <item>státní úřad</item>
+        <item>ulice</item>
+    </string-array>
+
+    <string-array name="cena_range">
+        <item>&lt; 15Kč</item>
+        <item>15 - 25 Kč</item>
+        <item>25 - 35 Kč</item>
+        <item>35 - 50 Kč</item>
+        <item>> 50 Kč</item>
+    </string-array>
+
+    <string-array name="otviracka_dny">
+        <item>Po-Ne</item>
+        <item>Po-So</item>
+        <item>Po-Pá</item>
+    </string-array>
+
 </resources>

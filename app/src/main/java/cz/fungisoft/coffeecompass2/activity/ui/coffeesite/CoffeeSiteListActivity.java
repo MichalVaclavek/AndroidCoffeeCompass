@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +20,8 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
+import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.support.CoffeeSiteItemRecyclerViewAdapterForCoffeeSites;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;

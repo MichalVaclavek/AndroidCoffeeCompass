@@ -1,11 +1,11 @@
-package cz.fungisoft.coffeecompass2.activity;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import androidx.appcompat.app.ActionBar;
+
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -14,9 +14,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
+import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.asynctask.comment.GetNumberOfCommentsAsyncTask;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
@@ -210,7 +213,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
         userLoginService = userLoginServiceConnector.getUserLoginService();
 
         // Any further processing is not needed in current implementation as the Comments button is still visible/enabled
-//        if (userLoginService != null && userLoginService.isUserLoggedIn()) {
+//        if (userAccountService != null && userAccountService.isUserLoggedIn()) {
 //            enableCommentsButton();
 //        }
     }

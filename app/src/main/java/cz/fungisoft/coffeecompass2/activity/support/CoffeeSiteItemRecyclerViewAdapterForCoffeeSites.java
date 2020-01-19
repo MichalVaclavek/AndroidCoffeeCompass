@@ -23,8 +23,8 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.LocationService;

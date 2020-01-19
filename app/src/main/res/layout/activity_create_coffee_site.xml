@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_menu_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/site_name_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:hint="Jméno lokace"
+                android:theme="@style/SiteInput.HintAppearance"
+
+                app:boxStrokeColor="@color/colorPrimary2"
+                app:counterEnabled="true"
+                app:counterMaxLength="25"
+                app:errorEnabled="true"
+                app:helperText="* povinné"
+                app:helperTextEnabled="true"
+                app:hintAnimationEnabled="false"
+                app:hintEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textSize="18sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/site_latitude_input"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:hint="Zem. šířka"
+                    android:theme="@style/SiteInput.HintAppearance"
+                    app:boxStrokeColor="@color/colorPrimary2"
+                    app:helperText="* povinné"
+                    app:hintEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned|numberDecimal"
+                        android:textSize="18sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/site_longitude_input"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:hint=" Zem. délka"
+                    android:theme="@style/SiteInput.HintAppearance"
+                    app:boxStrokeColor="@color/colorPrimary2"
+                    app:helperText="* povinné"
+                    app:hintEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned|numberDecimal"
+                        android:textSize="18sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/site_city_input"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:hint="Město"
+                    android:theme="@style/SiteInput.HintAppearance">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:textSize="18sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/site_ulice_input"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:hint="Ulice"
+                    android:theme="@style/SiteInput.HintAppearance">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:textSize="18sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:hint="@string/site_type"
+                    android:theme="@style/SiteInput.HintAppearance"
+                    app:endIconMode="dropdown_menu">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/site_type_dropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:lines="1"
+                        android:textSize="18sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:hint="@string/location_type"
+                android:paddingBottom="5dp"
+                android:theme="@style/SiteInput.HintAppearance"
+                app:endIconMode="dropdown_menu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/location_type_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:lines="1"
+                    android:textSize="18sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <TextView
+                android:id="@+id/textView21"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="typ kávy"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/druhy_kavy_chip_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="6"
+                    android:clickable="false"
+                    app:singleLine="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/espresso_coffee_type_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list"
+                        app:chipIconVisible="false" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/instant_coffee_type_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list"
+                        app:chipIconVisible="false" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/turek_coffee_type_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list"
+                        app:chipIconVisible="false" />
+
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip40"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/zrnkova_coffee_type_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list"
+                        app:chipIconVisible="false" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <TextView
+                android:id="@+id/textView22"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="další nabídka"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/dalsi_nabidka_chip_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="false"
+                    app:singleLine="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip9"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/tee_next_offer_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list"
+                        app:chipIconVisible="false" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip10"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/cokolada_next_offer_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip11"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/pivo_next_offer_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip120"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/limonada_next_offer_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip121"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/polivka_next_offer_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/druhy_automatu_vedle_chip_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="false"
+                    app:singleLine="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip5"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/napoje_other_machines_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip6"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/sladkosti_other_machines_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip7"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/bagety_other_machines_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip8"
+                        style="Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:clickable="true"
+                        android:text="@string/other_other_machines_chip"
+                        android:textColor="@color/text_color_chip_state_list"
+                        app:checkedIconVisible="false"
+                        app:chipBackgroundColor="@color/background_color_chip_state_list" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="5dp"
+                android:background="?android:attr/listDivider"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:orientation="vertical"
+                    android:paddingRight="5dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:hint="@string/price_range"
+                        android:paddingBottom="2dp"
+                        android:theme="@style/SiteInput.HintAppearance"
+                        app:endIconMode="dropdown_menu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/price_range_dropdown"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/otviracka_dny_input"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Otevírací doba (dny)"
+                        android:paddingBottom="2dp"
+                        android:theme="@style/SiteInput.HintAppearance"
+                        app:endIconMode="dropdown_menu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/otviracka_dny_dropdown"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/otviracka_hod_od_input"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="od"
+                            app:hintEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/time_od_input_editText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:textAlignment="center"
+                                android:textSize="18sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/otviracka_hod_do_input"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="do"
+                            app:hintEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/time_do_input_editText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:textAlignment="center"
+                                android:textSize="18sp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5"
+                    android:paddingLeft="5dp"
+                    app:srcCompat="@drawable/button_espresso_unfocused" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <FrameLayout
+        android:id="@+id/bottom_menu_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary2"
+            app:itemIconTint="@color/card_backround"
+            app:itemTextColor="@color/colorPrimaryDark"
+            app:menu="@menu/menu_create_site">
+
+        </com.google.android.material.bottomnavigation.BottomNavigationView>
+    </FrameLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

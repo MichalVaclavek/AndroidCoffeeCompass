@@ -34,5 +34,32 @@
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="SelectedChipCustomStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:backgroundTint">@color/background_color_chip_state_list</item>
+        <item name="android:textColor">@color/text_color_chip_state_list</item>
+    </style>
+
+    <!--
+        <style name="MyCoffeeSiteInputHintAppearance" parent="@android:style/TextAppearance">
+            <item name="android:textColor">@color/colorPrimary2</item>
+        </style>
+        -->
+
+    <!-- <style name="MyCoffeeSiteInputHintAppearance" parent="ThemeOverlay.AppCompat.Light"> -->
+    <style name="SiteInput.HintAppearance" parent="ThemeOverlay.AppCompat.Light">
+            <!-- Hint color and label color in FALSE state -->
+        <!-- <item name="android:textColorHint">@color/colorPrimary2</item> -->
+        <item name="hintTextColor">@color/colorPrimary2</item>
+
+        <item name="colorPrimary">@color/colorPrimary2</item>
+        <item name="colorSecondary">@color/colorPrimary</item>
+
+        <!-- Label color in TRUE state and bar color FALSE and TRUE State -->
+        <item name="colorAccent">@color/colorPrimary2</item>
+        <item name="colorControlNormal">@color/colorPrimary2</item>
+        <item name="colorControlActivated">@color/colorPrimary2</item>
+
+
+    </style>
 
 </resources>

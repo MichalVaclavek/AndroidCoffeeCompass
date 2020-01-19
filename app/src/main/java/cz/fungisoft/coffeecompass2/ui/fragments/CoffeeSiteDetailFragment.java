@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 

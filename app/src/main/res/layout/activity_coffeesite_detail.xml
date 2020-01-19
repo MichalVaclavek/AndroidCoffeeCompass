@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="activity.CoffeeSiteDetailActivity"
+    tools:context=".activity.ui.coffeesite.CoffeeSiteDetailActivity"
     tools:ignore="MergeRootFrame">
 
     <LinearLayout

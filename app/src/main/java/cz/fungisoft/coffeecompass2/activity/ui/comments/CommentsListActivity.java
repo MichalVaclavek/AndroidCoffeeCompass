@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity;
+package cz.fungisoft.coffeecompass2.activity.ui.comments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +44,6 @@ import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
 
 import static android.view.View.*;
-import static com.google.android.material.snackbar.Snackbar.LENGTH_SHORT;
 
 /**
  * Activity to show list of CoffeeSite's Comments

@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity;
+package cz.fungisoft.coffeecompass2.activity.ui.comments;
 
 import android.app.Dialog;
 import android.content.Context;

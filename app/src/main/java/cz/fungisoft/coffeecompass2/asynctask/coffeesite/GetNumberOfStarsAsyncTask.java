@@ -6,7 +6,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.Utils;
-import cz.fungisoft.coffeecompass2.activity.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.CoffeeSiteRESTInterface;
 import retrofit2.Call;

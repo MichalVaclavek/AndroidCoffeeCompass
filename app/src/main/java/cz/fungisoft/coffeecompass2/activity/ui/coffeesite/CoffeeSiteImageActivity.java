@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.os.Bundle;
 
@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
