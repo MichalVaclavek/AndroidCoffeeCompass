@@ -3,9 +3,9 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import android.util.Log;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserDeleteRESTRequest;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLoginOrRegisterRESTRequest;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLogoutRESTRequest;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserDeleteRESTRequest;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLoginOrRegisterRESTRequest;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLogoutRESTRequest;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 
 /**

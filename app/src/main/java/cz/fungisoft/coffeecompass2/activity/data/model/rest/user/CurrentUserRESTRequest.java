@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 import android.util.Log;
 
@@ -14,7 +14,6 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
-import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;

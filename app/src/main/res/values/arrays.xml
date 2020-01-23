@@ -35,14 +35,18 @@
         <item>nádraží</item>
         <item>obchodní centrum</item>
         <item>zastávka MHD</item>
+        <item>zastávka autobusu</item>
+        <item>zastávka vlaku</item>
         <item>podchod MHD</item>
         <item>podchod</item>
         <item>benzinka</item>
         <item>prodejna</item>
+        <item>občerstvení/restaurace</item>
         <item>turisticky zajímavé místo</item>
         <item>škola</item>
         <item>státní úřad</item>
         <item>ulice</item>
+        <item>sportoviště</item>
     </string-array>
 
     <string-array name="cena_range">

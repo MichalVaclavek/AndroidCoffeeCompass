@@ -1,9 +1,11 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLoginOrRegisterRESTRequest;
 
 /**
  *  REST user login or register response to {@link UserLoginOrRegisterRESTRequest} from coffeecompass.cz server

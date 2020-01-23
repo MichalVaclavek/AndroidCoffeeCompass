@@ -1,8 +1,7 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 import android.util.Log;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -10,7 +9,6 @@ import cz.fungisoft.coffeecompass2.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
-import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

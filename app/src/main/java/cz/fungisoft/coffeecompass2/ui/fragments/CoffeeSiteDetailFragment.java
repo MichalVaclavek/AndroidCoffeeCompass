@@ -83,32 +83,32 @@ public class CoffeeSiteDetailFragment extends Fragment {
         // Show the CoffeeSite info in a TextViews.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.nameTextView)).setText(mItem.getName());
-            ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(mItem.getStatusZarizeni());
-            ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(mItem.getTypPodniku());
-            ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(mItem.getTypLokality());
+            ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(mItem.getStatusZarizeni().toString());
+            ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(mItem.getTypPodniku().toString());
+            ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(mItem.getTypLokality().toString());
 
-            if (mItem.getCupTypes().length() > 0) {
-                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(mItem.getCupTypes());
+            if (mItem.getCupTypes().size() > 0) {
+                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(mItem.getCupTypesOneString());
             } else {
                 rootView.findViewById(R.id.cupTableRow).setVisibility(View.GONE);
             }
 
-            ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(mItem.getCena());
+            ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(mItem.getCena().toString());
 
-            if (mItem.getNextToMachineTypes().length() > 0) {
-                ((TextView) rootView.findViewById(R.id.nextToMachineOfferTextView)).setText(mItem.getNextToMachineTypes());
+            if (mItem.getNextToMachineTypes().size() > 0) {
+                ((TextView) rootView.findViewById(R.id.nextToMachineOfferTextView)).setText(mItem.getNextToMachineTypesOneString());
             } else {
                 rootView.findViewById(R.id.nextToMachineTableRow).setVisibility(View.GONE);
             }
 
-            if (mItem.getOtherOffers().length() > 0) {
-                ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffers());
+            if (mItem.getOtherOffers().size() > 0) {
+                ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(mItem.getOtherOffersOneString());
             } else {
                 rootView.findViewById(R.id.nextOfferTableRow).setVisibility(View.GONE);
             }
 
-            if (mItem.getCoffeeSorts().length() > 0) {
-                ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSorts());
+            if (mItem.getCoffeeSorts().size() > 0) {
+                ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(mItem.getCoffeeSortsOneString());
             } else {
                 rootView.findViewById(R.id.coffeeSortTableRow).setVisibility(View.GONE);
             }
@@ -127,7 +127,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
             ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
 
-            ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUser());
+            ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUserName());
             ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
 
             if (mItem.getUvodniKoment() != null && !mItem.getUvodniKoment().isEmpty()) {

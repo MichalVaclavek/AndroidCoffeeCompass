@@ -82,12 +82,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
                 imageButton.setVisibility(View.VISIBLE);
                 imageButton.setEnabled(true);
             }
-
-            // Async task to check if the Comments are available for the site
-//            if (Utils.isOnline()) {
-//                //new GetCommentsAsyncTask(this, coffeeSite).execute();
-//                new GetNumberOfCommentsAsyncTask(coffeeSite.getId(), this).execute();
-//            }
         }
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity

@@ -2,15 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_ulozit"
+        android:enabled="false"
         android:icon="@drawable/baseline_save_white_18dp"
         android:title="Ulozit" />
     <item
         android:id="@+id/navigation_aktivovat"
+        android:enabled="false"
         android:icon="@drawable/baseline_play_arrow_white_18dp"
         android:title="Aktivovat" />
 
     <item
         android:id="@+id/navigation_delete"
+        android:enabled="false"
         android:icon="@drawable/baseline_delete_white_18dp"
         android:title="Smazat" />
 

@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 import android.util.Log;
 

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 
 /**
  * Data class that captures user information for logged in users retrieved from UserAccountRepository.

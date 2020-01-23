@@ -1,19 +1,13 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
-import android.content.res.Resources;
-
-import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.JwtUserToken;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.UserLoginOrRegisterInputData;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLoginOrRegisterInputData;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
-import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
-import retrofit2.http.Url;
 
 /**
  * Interface for Retrofit framework to define REST endpoints

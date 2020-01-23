@@ -2,7 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.CommentAndStarsToSave;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsToSave;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import retrofit2.Call;

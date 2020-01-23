@@ -128,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Marker marker = map.addMarker(new MarkerOptions()
                 .position(siteLoc)
                 .title(cs.getName())
-                .snippet(cs.getTypPodniku()) // .snippet(cs.getTypPodniku()).snippet(cs.getHodnoceni())
+                .snippet(cs.getTypPodniku().toString()) // .snippet(cs.getTypPodniku()).snippet(cs.getHodnoceni())
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.coffee_bean)));
 
         marker.setTag(cs);

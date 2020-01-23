@@ -15,6 +15,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+/**
+ * Runs async task for REST call to get rating for one site ID from one user
+ */
 public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
 
     static final String REQ_TAG = "GetNumberOfStarsAsyncT";

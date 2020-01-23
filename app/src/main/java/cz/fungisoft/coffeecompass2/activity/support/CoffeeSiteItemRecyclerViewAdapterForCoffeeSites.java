@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -341,7 +342,7 @@ public class CoffeeSiteItemRecyclerViewAdapterForCoffeeSites extends RecyclerVie
     private void setupBasicViewHolder(int position, ViewHolder1 viewHolder1) {
         viewHolder1.csNameView.setText(this.mValues.get(position).getName());
         viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
-        viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSorts());
+        viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
 
         viewHolder1.distanceView.setText(this.mValues.get(position).getDistance() + " m");
         viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));

@@ -13,7 +13,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.CommentAndStarsToSave;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsToSave;
 
 /**
  * Dialog to enter Comment for CoffeeSite and the rating (stars) of the CoffeeSite

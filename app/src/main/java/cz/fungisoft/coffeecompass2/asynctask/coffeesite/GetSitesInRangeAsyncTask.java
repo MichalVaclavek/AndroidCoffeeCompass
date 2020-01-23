@@ -27,6 +27,15 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
+import cz.fungisoft.coffeecompass2.entity.CupType;
+import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
+import cz.fungisoft.coffeecompass2.entity.OtherOffer;
+import cz.fungisoft.coffeecompass2.entity.PriceRange;
+import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesFactory;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
 
 /**
@@ -197,13 +206,19 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
                         cs.setMainImageURL(csObject.getString("mainImageURL"));
 
-                        cs.setCena(csObject.getJSONObject("cena").getString("priceRange"));
+                        //cs.setCena(csObject.getJSONObject("cena").getString("priceRange"));
+                        cs.setCena((PriceRange) CoffeeSiteEntitiesFactory.getEntity("priceRange", csObject.getJSONObject("cena")));
+
                         cs.setUliceCP(csObject.getString("uliceCP"));
-                        cs.setTypPodniku(csObject.getJSONObject("typPodniku").getString("coffeeSiteType"));
-                        cs.setTypLokality(csObject.getJSONObject("typLokality").getString("locationType"));
-                        cs.setStatusZarizeni(csObject.getJSONObject("statusZarizeni").getString("status"));
+                        cs.setMesto(csObject.getString("mesto"));
+                        //cs.setTypPodniku(csObject.getJSONObject("typPodniku").getString("coffeeSiteType"));
+                        cs.setTypPodniku((CoffeeSiteType) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteType", csObject.getJSONObject("typPodniku")));
+                        //cs.setTypLokality(csObject.getJSONObject("typLokality").getString("locationType"));
+                        cs.setTypLokality((SiteLocationType) CoffeeSiteEntitiesFactory.getEntity("SiteLocationType", csObject.getJSONObject("typLokality")));
+                        //cs.setStatusZarizeni(csObject.getJSONObject("statusZarizeni").getString("status"));
+                        cs.setStatusZarizeni((CoffeeSiteStatus) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteStatus", csObject.getJSONObject("statusZarizeni")));
                         cs.setHodnoceni(csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common"));
-                        cs.setCreatedByUser(csObject.getString("originalUserName"));
+                        cs.setCreatedByUserName(csObject.getString("originalUserName"));
                         cs.setCreatedOnString(csObject.getString("createdOn"));
 
                         cs.setUvodniKoment(csObject.getString("initialComment"));
@@ -211,37 +226,84 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         cs.setOteviraciDobaDny(csObject.getString("pristupnostDny"));
                         cs.setOteviraciDobaHod(csObject.getString("pristupnostHod"));
 
+                        //JSONArray jsonCupTypesArray = csObject.getJSONArray("cupTypes");
+                        //StringBuilder cupTypes = new StringBuilder();
+//                        String[] cupTypes = new String[jsonCupTypesArray.length()];
+//                        for (int n = 0; n < jsonCupTypesArray.length(); n++) {
+//                            JSONObject sortObject = jsonCupTypesArray.getJSONObject(n);
+//                            //cupTypes.append(sortObject.getString("cupType") + ", ");
+//                            cupTypes[n] = sortObject.getString("cupType");
+//                        }
+                        //cs.setCupTypes(cupTypes.toString());
                         JSONArray jsonCupTypesArray = csObject.getJSONArray("cupTypes");
-                        StringBuilder cupTypes = new StringBuilder();
-                        for (int n = 0; n < jsonCupTypesArray .length(); n++) {
-                            JSONObject sortObject = jsonCupTypesArray.getJSONObject(n);
-                            cupTypes.append(sortObject.getString("cupType") + ", ");
+                        List<CupType> cupTypes = new ArrayList<>();
+                        for (int n = 0; n < jsonCupTypesArray.length(); n++) {
+                            JSONObject cupJsonObject = jsonCupTypesArray.getJSONObject(n);
+                            CupType cupType = (CupType) CoffeeSiteEntitiesFactory.getEntity("CupType", cupJsonObject);
+                            cupTypes.add(cupType);
                         }
-                        cs.setCupTypes(cupTypes.toString());
+                        cs.setCupTypes(cupTypes);
+
+//                        JSONArray jsonNextToMachineTypesArray = csObject.getJSONArray("nextToMachineTypes");
+//                        //StringBuilder ntmTypes = new StringBuilder();
+//                        String[] ntmTypes = new String[jsonNextToMachineTypesArray.length()];
+//                        for (int m = 0; m < jsonNextToMachineTypesArray.length(); m++) {
+//                            JSONObject sortObject = jsonNextToMachineTypesArray.getJSONObject(m);
+//                            //ntmTypes.append(sortObject.getString("type") + ", ");
+//                            ntmTypes[m] = sortObject.getString("type");
+//                        }
+//                        //cs.setNextToMachineTypes(ntmTypes.toString());
+//                        cs.setNextToMachineTypes(ntmTypes);
 
                         JSONArray jsonNextToMachineTypesArray = csObject.getJSONArray("nextToMachineTypes");
-                        StringBuilder ntmTypes = new StringBuilder();
+                        List<NextToMachineType> ntmTypes = new ArrayList<>();
                         for (int m = 0; m < jsonNextToMachineTypesArray.length(); m++) {
-                            JSONObject sortObject = jsonNextToMachineTypesArray.getJSONObject(m);
-                            ntmTypes.append(sortObject.getString("type") + ", ");
+                            JSONObject ntmtJsonObject = jsonNextToMachineTypesArray.getJSONObject(m);
+                            NextToMachineType ntmt = (NextToMachineType) CoffeeSiteEntitiesFactory.getEntity("NextToMachineType", ntmtJsonObject);
+                            ntmTypes.add(ntmt);
                         }
-                        cs.setNextToMachineTypes(ntmTypes.toString());
+                        cs.setNextToMachineTypes(ntmTypes);
+
+//                        JSONArray jsonCoffeeSortsArray = csObject.getJSONArray("coffeeSorts");
+//                        //StringBuilder sorts = new StringBuilder();
+//                        String[] sorts = new String[jsonCoffeeSortsArray.length()];
+//                        for (int j = 0; j < jsonCoffeeSortsArray.length(); j++) {
+//                            JSONObject sortObject = jsonCoffeeSortsArray.getJSONObject(j);
+//                            //sorts.append(sortObject.getString("coffeeSort") + ", ");
+//                            sorts[j] = sortObject.getString("coffeeSort");
+//                        }
+//                        //cs.setCoffeeSorts(sorts.toString());
+//                        cs.setCoffeeSorts(sorts);
 
                         JSONArray jsonCoffeeSortsArray = csObject.getJSONArray("coffeeSorts");
-                        StringBuilder sorts = new StringBuilder();
+                        List<CoffeeSort> coffeeSorts = new ArrayList<>();
                         for (int j = 0; j < jsonCoffeeSortsArray.length(); j++) {
                             JSONObject sortObject = jsonCoffeeSortsArray.getJSONObject(j);
-                            sorts.append(sortObject.getString("coffeeSort") + ", ");
+                            CoffeeSort coffeeSort = (CoffeeSort) CoffeeSiteEntitiesFactory.getEntity("CoffeeSort", sortObject);
+                            coffeeSorts.add(coffeeSort );
                         }
-                        cs.setCoffeeSorts(sorts.toString());
+                        cs.setCoffeeSorts(coffeeSorts);
+
+//                        JSONArray jsonOtherOffersArray = csObject.getJSONArray("otherOffers");
+//                        //StringBuilder offers = new StringBuilder();
+//                        String[] otherOffers = new String[jsonOtherOffersArray.length()];
+//                        for (int k = 0; k < jsonOtherOffersArray.length(); k++) {
+//                            JSONObject offerObject = jsonOtherOffersArray.getJSONObject(k);
+//                            //offers.append(offerObject.getString("offer") + ", ");
+//                            otherOffers[k] = offerObject.getString("offer");
+//                        }
+//                        //cs.setOtherOffers(offers.toString());
+//                        cs.setOtherOffers(otherOffers);
 
                         JSONArray jsonOtherOffersArray = csObject.getJSONArray("otherOffers");
-                        StringBuilder offers = new StringBuilder();
+                        List<OtherOffer> otherOffers = new ArrayList<>();
                         for (int k = 0; k < jsonOtherOffersArray.length(); k++) {
-                            JSONObject offerObject = jsonOtherOffersArray.getJSONObject(k);
-                            offers.append(offerObject.getString("offer") + ", ");
+                            JSONObject otherOfferJsonObject = jsonOtherOffersArray.getJSONObject(k);
+                            OtherOffer otherOffer = (OtherOffer) CoffeeSiteEntitiesFactory.getEntity("OtherOffer", otherOfferJsonObject);
+                            otherOffers.add(otherOffer);
                         }
-                        cs.setOtherOffers(offers.toString());
+                        //cs.setOtherOffers(offers.toString());
+                        cs.setOtherOffers(otherOffers);
 
                         retSites.add(cs);
                     }

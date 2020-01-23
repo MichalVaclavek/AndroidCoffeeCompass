@@ -120,5 +120,8 @@
     <string name="sladkosti_other_machines_chip">sladkosti</string>
     <string name="bagety_other_machines_chip">bagety</string>
     <string name="other_other_machines_chip">ostatní</string>
+    <string name="invalid_coffeesitename">Jméno lokace musí mít alespoň 4 znaky.</string>
+    <string name="invalid_longitude">Nesprávná hodnota zem. délky</string>
+    <string name="invalid_latitude">Nesprávná hodnota zem. šířky</string>
 
 </resources>

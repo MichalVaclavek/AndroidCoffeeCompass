@@ -54,20 +54,48 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         mainImageURL = in.readString();
 
-        statusZarizeni = in.readString();
+        statusZarizeni = in.readParcelable(CoffeeSiteStatus.class.getClassLoader());
+        typPodniku = in.readParcelable(CoffeeSiteType.class.getClassLoader());
+        typLokality = in.readParcelable(SiteLocationType.class.getClassLoader());
+        cena = in.readParcelable(PriceRange.class.getClassLoader());
+
+        mesto = in.readString();
         uliceCP = in.readString();
-        typPodniku = in.readString();
-        typLokality = in.readString();
-        cena = in.readString();
         hodnoceni = in.readString();
 
-        createdByUser = in.readString();
+        createdByUserName = in.readString();
         uvodniKoment = in.readString();
 
-        cupTypes = in.readString();
-        coffeeSorts = in.readString();
-        otherOffers = in.readString();
-        nextToMachineTypes = in.readString();
+        // In case of empty array was written, it is read by split as array with one empty string element
+        // transform to array with zero elements - needed for later display of such arrays
+//        cupTypes = in.readString().split(",");
+//        if (cupTypes.length == 1 && cupTypes[0].isEmpty()) {
+//            cupTypes = new String[0];
+//        }
+//        coffeeSorts = in.readString().split(",");
+//        if (coffeeSorts.length == 1 && coffeeSorts[0].isEmpty()) {
+//            coffeeSorts = new String[0];
+//        }
+//        otherOffers = in.readString().split(",");
+//        if (otherOffers.length == 1 && otherOffers[0].isEmpty()) {
+//            otherOffers = new String[0];
+//        }
+//        nextToMachineTypes = in.readString().split(",");
+//        if (nextToMachineTypes.length == 1 && nextToMachineTypes[0].isEmpty()) {
+//            nextToMachineTypes = new String[0];
+//        }
+
+        cupTypes = new ArrayList<>();
+        in.readTypedList(cupTypes, CupType.CREATOR);
+
+        coffeeSorts = new ArrayList<>();
+        in.readTypedList(coffeeSorts, CoffeeSort.CREATOR);
+
+        otherOffers = new ArrayList<>();
+        in.readTypedList(otherOffers, OtherOffer.CREATOR);
+
+        nextToMachineTypes = new ArrayList<>();
+        in.readTypedList(nextToMachineTypes, NextToMachineType.CREATOR);
 
         oteviraciDobaDny = in.readString();
         oteviraciDobaHod = in.readString();
@@ -91,20 +119,31 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         dest.writeString(mainImageURL);
 
-        dest.writeString(statusZarizeni);
+        dest.writeParcelable(statusZarizeni, flags);
+        //dest.writeString(statusZarizeni.getStatus());
+        //dest.writeInt(typPodniku.getId());
+        dest.writeParcelable(typPodniku, flags);
+        //dest.writeInt(typLokality.getId());
+        dest.writeParcelable(typLokality, flags);
+        //dest.writeInt(cena.getId());
+        dest.writeParcelable(cena, flags);
+
+        dest.writeString(mesto);
         dest.writeString(uliceCP);
-        dest.writeString(typPodniku);
-        dest.writeString(typLokality);
-        dest.writeString(cena);
         dest.writeString(hodnoceni);
 
-        dest.writeString(createdByUser);
+        dest.writeString(createdByUserName);
         dest.writeString(uvodniKoment);
 
-        dest.writeString(cupTypes);
-        dest.writeString(coffeeSorts);
-        dest.writeString(otherOffers);
-        dest.writeString(nextToMachineTypes);
+//        dest.writeString(convertListToOneStringWithDelimiter(cupTypes, ','));
+//        dest.writeString(convertListToOneStringWithDelimiter(coffeeSorts, ','));
+//        dest.writeString(convertListToOneStringWithDelimiter(otherOffers, ','));
+//        dest.writeString(convertListToOneStringWithDelimiter(nextToMachineTypes, ','));
+
+        dest.writeTypedList(cupTypes);
+        dest.writeTypedList(coffeeSorts);
+        dest.writeTypedList(otherOffers);
+        dest.writeTypedList(nextToMachineTypes);
 
         dest.writeString(oteviraciDobaDny);
         dest.writeString(oteviraciDobaHod);
@@ -176,20 +215,30 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
      */
     protected String mainImageURL = ""; // default empty, means image not available
 
-    protected String statusZarizeni;
+    //protected String statusZarizeni;
+    protected CoffeeSiteStatus statusZarizeni;
     protected String uliceCP;
-    protected String typPodniku;
-    protected String typLokality;
-    protected String cena;
+    protected String mesto;
+    //protected String typPodniku;
+    protected CoffeeSiteType typPodniku;
+    //protected String typLokality;
+    protected SiteLocationType typLokality;
+//    protected String cena;
+    protected PriceRange cena;
     protected String hodnoceni;
 
-    protected String createdByUser;
+    protected String createdByUserName;
     protected String uvodniKoment;
 
-    protected String cupTypes;
-    protected String coffeeSorts;
-    protected String otherOffers;
-    protected String nextToMachineTypes;
+//    protected String[] cupTypes;
+//    protected String[] coffeeSorts;
+//    protected String[] otherOffers;
+//    protected String[] nextToMachineTypes;
+
+    protected List<CupType> cupTypes;
+    protected List<CoffeeSort> coffeeSorts;
+    protected List<OtherOffer> otherOffers;
+    protected List<NextToMachineType> nextToMachineTypes;
 
     protected String oteviraciDobaDny;
     protected String oteviraciDobaHod;
@@ -216,12 +265,12 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.mainImageURL = mainImageURL;
     }
 
-    public String getCreatedByUser() {
-        return createdByUser;
+    public String getCreatedByUserName() {
+        return createdByUserName;
     }
 
-    public void setCreatedByUser(String createdByUser) {
-        this.createdByUser = createdByUser;
+    public void setCreatedByUserName(String createdByUserName) {
+        this.createdByUserName = createdByUserName;
     }
 
     public String getHodnoceni() {
@@ -242,19 +291,23 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     /* Getters and Setrs */
 
-    public String getCupTypes() {
+    public List<CupType> getCupTypes() {
         return cupTypes;
     }
 
-    public void setCupTypes(String cupTypes) {
+    public String getCupTypesOneString() {
+        return convertListToOneStringWithDelimiter(this.cupTypes, ',');
+    }
+
+    public void setCupTypes(List<CupType> cupTypes) {
         this.cupTypes = cupTypes;
     }
 
-    public String getStatusZarizeni() {
+    public CoffeeSiteStatus getStatusZarizeni() {
         return statusZarizeni;
     }
 
-    public void setStatusZarizeni(String statusZarizeni) {
+    public void setStatusZarizeni(CoffeeSiteStatus statusZarizeni) {
         this.statusZarizeni = statusZarizeni;
     }
 
@@ -274,11 +327,15 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.oteviraciDobaHod = oteviraciDobaHod;
     }
 
-    public String getNextToMachineTypes() {
+    public List<NextToMachineType> getNextToMachineTypes() {
         return nextToMachineTypes;
     }
 
-    public void setNextToMachineTypes(String nextToMachineTypes) {
+    public String getNextToMachineTypesOneString() {
+        return convertListToOneStringWithDelimiter(this.nextToMachineTypes, ',');
+    }
+
+    public void setNextToMachineTypes(List<NextToMachineType> nextToMachineTypes) {
         this.nextToMachineTypes = nextToMachineTypes;
     }
 
@@ -290,43 +347,59 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.uliceCP = uliceCP;
     }
 
-    public String getTypPodniku() {
+    public String getMesto() {
+        return mesto;
+    }
+
+    public void setMesto(String mesto) {
+        this.mesto = mesto;
+    }
+
+    public CoffeeSiteType getTypPodniku() {
         return typPodniku;
     }
 
-    public void setTypPodniku(String typPodniku) {
+    public void setTypPodniku(CoffeeSiteType typPodniku) {
         this.typPodniku = typPodniku;
     }
 
-    public String getTypLokality() {
+    public SiteLocationType getTypLokality() {
         return typLokality;
     }
 
-    public void setTypLokality(String typLokality) {
+    public void setTypLokality(SiteLocationType typLokality) {
         this.typLokality = typLokality;
     }
 
-    public String getCena() {
+    public PriceRange getCena() {
         return cena;
     }
 
-    public void setCena(String cena) {
+    public void setCena(PriceRange  cena) {
         this.cena = cena;
     }
 
-    public String getCoffeeSorts() {
+    public List<CoffeeSort> getCoffeeSorts() {
         return coffeeSorts;
     }
 
-    public void setCoffeeSorts(String coffeeSorts) {
+    public String getCoffeeSortsOneString() {
+        return convertListToOneStringWithDelimiter(this.coffeeSorts, ',');
+    }
+
+    public void setCoffeeSorts(List<CoffeeSort> coffeeSorts) {
         this.coffeeSorts = coffeeSorts;
     }
 
-    public String getOtherOffers() {
+    public List<OtherOffer> getOtherOffers() {
         return otherOffers;
     }
 
-    public void setOtherOffers(String otherOffers) {
+    public String getOtherOffersOneString() {
+        return convertListToOneStringWithDelimiter(this.otherOffers, ',');
+    }
+
+    public void setOtherOffers(List<OtherOffer> otherOffers) {
         this.otherOffers = otherOffers;
     }
 
@@ -393,6 +466,24 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    /**
+     * Objects of the List has to implement toString()
+     *
+     * @param list
+     * @param delimiter
+     * @return
+     */
+    private String convertListToOneStringWithDelimiter(List<?> list, char delimiter) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < list.size(); i++) {
+            sb.append(list.get(i).toString().trim());
+            if (i != list.size() - 1) { // not a last item in the array
+                sb.append(delimiter + " ");
+            }
+        }
+        return sb.toString();
     }
 
 }

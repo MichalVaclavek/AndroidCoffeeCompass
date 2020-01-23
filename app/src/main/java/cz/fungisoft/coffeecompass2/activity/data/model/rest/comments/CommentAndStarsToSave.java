@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.comments;
 
 /**
  * Class for holding Comment and Stars for CoffeeSite entered by user

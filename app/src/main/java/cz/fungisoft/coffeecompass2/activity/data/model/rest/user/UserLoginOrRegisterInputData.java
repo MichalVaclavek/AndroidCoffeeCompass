@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.data.model.rest;
+package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 /**
  * Class to hold information fields needed for user login or register

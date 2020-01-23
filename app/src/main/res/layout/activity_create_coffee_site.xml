@@ -17,6 +17,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/activityBackround"
             android:orientation="vertical"
             android:padding="10dp">
 
@@ -39,6 +40,7 @@
                 app:hintEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/coffeesitename_input_edittext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
@@ -66,6 +68,7 @@
                     app:hintEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/latitude_input_edittext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberSigned|numberDecimal"
@@ -88,6 +91,7 @@
                     app:hintEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/longitude_input_edittext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberSigned|numberDecimal"
@@ -114,6 +118,7 @@
                     android:theme="@style/SiteInput.HintAppearance">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/city_edittext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
@@ -133,6 +138,7 @@
                     android:theme="@style/SiteInput.HintAppearance">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/street_edittext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
@@ -214,12 +220,11 @@
                     android:id="@+id/druhy_kavy_chip_group"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="6"
                     android:clickable="false"
                     app:singleLine="true">
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip1"
+                        android:id="@+id/espresso_chip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checkable="true"
@@ -231,7 +236,7 @@
                         app:chipIconVisible="false" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip2"
+                        android:id="@+id/instant_chip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checkable="true"
@@ -243,7 +248,7 @@
                         app:chipIconVisible="false" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip3"
+                        android:id="@+id/turek_chip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checkable="true"
@@ -256,7 +261,7 @@
 
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip40"
+                        android:id="@+id/zrnkova_chip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checkable="true"
@@ -296,7 +301,7 @@
                     app:singleLine="true">
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip9"
+                        android:id="@+id/caj_chip"
                         style="Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -309,7 +314,7 @@
                         app:chipIconVisible="false" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip10"
+                        android:id="@+id/cokolada_chip"
                         style="Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -321,7 +326,7 @@
                         app:chipBackgroundColor="@color/background_color_chip_state_list" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip11"
+                        android:id="@+id/pivo_chip"
                         style="Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -333,7 +338,7 @@
                         app:chipBackgroundColor="@color/background_color_chip_state_list" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip120"
+                        android:id="@+id/limo_chip"
                         style="Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -345,7 +350,7 @@
                         app:chipBackgroundColor="@color/background_color_chip_state_list" />
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/chip121"
+                        android:id="@+id/polivka_chip"
                         style="Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
