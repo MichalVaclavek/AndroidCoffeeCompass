@@ -60,13 +60,13 @@ public class UserPreferenceHelper {
         return app_prefs.getBoolean(INTRO, false);
     }
 
-    public void putUserId(String userId) {
+    public void putUserId(long userId) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(USER_ID, userId);
+        edit.putLong(USER_ID, userId);
         edit.commit();
     }
-    public String getUserId() {
-        return app_prefs.getString(USER_ID, "");
+    public long getUserId() {
+        return app_prefs.getInt(USER_ID, 0);
     }
 
     public void putDisplayName(String displayName) {

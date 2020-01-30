@@ -68,7 +68,7 @@ public class UserDeleteRESTRequest {
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
         //Call<String> call = api.deleteUser(this.user.getUserName());
-        Call<String> call = api.deleteUserById(Long.parseLong(user.getUserId()));
+        Call<String> call = api.deleteUserById(user.getUserId());
 
         call.enqueue(new Callback<String>() {
             @Override

@@ -3,23 +3,39 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Not used in mobile app, yet
  */
-public class NextToMachineType extends CoffeeSiteEntityParcelable {
+public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
 
     public NextToMachineType(int id, String entityValue) {
-        super(id, entityValue);
+
+        super(id);
+        this.type = entityValue;
     }
 
-    protected NextToMachineType(Parcel in) {
-        super(in);
-    }
 
     public NextToMachineType() {
         super();
+    }
+
+    protected NextToMachineType(Parcel in) {
+        this.id = in.readInt();
+        type = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(type);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<NextToMachineType> CREATOR = new Creator<NextToMachineType>() {
@@ -34,15 +50,21 @@ public class NextToMachineType extends CoffeeSiteEntityParcelable {
         }
     };
 
-    @Override
-    @SerializedName("type")
-    public String getEntityValue() {
-        return entityValue;
+    public String getType() {
+        return type;
     }
 
-    @Override
-    @SerializedName("type")
-    public void setEntityValue(String value) {
-        this.entityValue = value;
+    public void setType(String type) {
+        this.type = type;
     }
+
+    @Expose
+    @SerializedName("type")
+    private String type;
+
+    @Override
+    public String toString() {
+        return type;
+    }
+
 }

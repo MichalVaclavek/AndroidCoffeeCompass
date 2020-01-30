@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.services;
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;

@@ -1,21 +1,47 @@
 package cz.fungisoft.coffeecompass2.entity;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class StarsQualityDescription extends CoffeeSiteEntityParcelable {
+public class StarsQualityDescription extends CoffeeSiteEntity implements Parcelable {
 
-    public StarsQualityDescription(int id, String entityValue) {
-        super(id, entityValue);
-    }
-
-    protected StarsQualityDescription(Parcel in) {
-        super(in);
+    public StarsQualityDescription(int id, String entityValue, int numOfStars) {
+        super(id);
+        this.quality = entityValue;
+        this.setNumOfStars(numOfStars);
     }
 
     public StarsQualityDescription() {
         super();
+    }
+
+    @Expose(serialize = false)
+    @SerializedName("quality")
+    private String quality;
+
+    @Expose(serialize = false)
+    @SerializedName("numOfStars")
+    private int numOfStars;
+
+    protected StarsQualityDescription(Parcel in) {
+        this.id = in.readInt();
+        quality = in.readString();
+        numOfStars = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(quality);
+        dest.writeInt(numOfStars);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<StarsQualityDescription> CREATOR = new Creator<StarsQualityDescription>() {
@@ -30,28 +56,19 @@ public class StarsQualityDescription extends CoffeeSiteEntityParcelable {
         }
     };
 
-    @Override
-    @SerializedName("quality")
-    public String getEntityValue() {
-        return entityValue;
+    public String getQuality() {
+        return quality;
     }
 
-    @Override
-    @SerializedName("quality")
-    public void setEntityValue(String value) {
-        this.entityValue = value;
+    public void setQuality(String quality) {
+        this.quality = quality;
     }
 
-    @Override
-    @SerializedName("numOfStars")
-    public int getId() {
-        return id;
+    public int getNumOfStars() {
+        return numOfStars;
     }
 
-    @Override
-    @SerializedName("numOfStars")
-    public void setId(int id) {
-        this.id = id;
+    public void setNumOfStars(int numOfStars) {
+        this.numOfStars = numOfStars;
     }
-
 }

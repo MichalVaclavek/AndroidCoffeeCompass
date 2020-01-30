@@ -22,12 +22,12 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
 
     static final String REQ_TAG = "GetNumberOfStarsAsyncT";
 
-    private int userID;
+    private long userID;
     private int coffeeSiteId;
 
     private CommentsListActivity parentActivity;
 
-    public GetNumberOfStarsAsyncTask(int userID, int coffeeSiteId, CommentsListActivity parentActivity) {
+    public GetNumberOfStarsAsyncTask(long userID, int coffeeSiteId, CommentsListActivity parentActivity) {
         this.userID = userID;
         this.coffeeSiteId = coffeeSiteId;
         this.parentActivity = parentActivity;

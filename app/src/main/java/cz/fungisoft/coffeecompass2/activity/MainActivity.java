@@ -1,8 +1,10 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -13,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.text.Html;
 import android.util.Log;
@@ -43,6 +46,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
@@ -90,6 +94,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     // Saves selected search distance range
     private static SearchDistancePreferenceHelper searchRangePreferenceHelper;
 
+    /**
+     * Service to perform operations with CoffeeSite.
+     * Saves, updates, deletes CoffeeSite and related
+     * CoffeeSiteEntities
+     */
+    private CoffeeSiteService coffeeSiteService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +143,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             }
         }
 
-        //S eekBar onChangeListener()
+        // SeekBar onChangeListener()
         searchDistanceSeekBar.setOnProgressChangeListener(FunctionalUtils.fromConsumer((progress) -> {
             for (int i = searchDistanceTextViews.length-1; i >= 0 ; i--) {
                 if (i == progress) {
@@ -146,7 +157,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 }
             }
             searchRange = Integer.parseInt(vzdalenosti[progress]);
-            searchRangeString = Utils.converSearchDistance(searchRange);
+            searchRangeString = Utils.convertSearchDistance(searchRange);
             searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
             searchRangePreferenceHelper.putSearchDistance(searchRange);
 
@@ -162,7 +173,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         accuracy = (TextView) findViewById(R.id.accuracy);
 
-        searchRangeString = Utils.converSearchDistance(searchRange);
+        searchRangeString = Utils.convertSearchDistance(searchRange);
 
         //TODO - text from R.string. ...
         searchKafeButton.setTransformationMethod(null);
@@ -191,10 +202,57 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         });
         fab.setVisibility(View.VISIBLE);
 
-
         // UserLoginAndRegister service connection
         doBindUserLoginService();
+
+        loadCoffeeSiteEntitiesFromServer();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReciever);
+    }
+
+
+    /**
+     * Start service operation loading all CoffeeSiteEntity instancies
+     * from server.
+     */
+    private void loadCoffeeSiteEntitiesFromServer() {
+        registerCoffeeSiteEntitiesLoadReceiver();
+        startCoffeeSiteService();
+    }
+
+    private CoffeeSiteServiceReciever coffeeSiteServiceReciever;
+
+    public void startCoffeeSiteService() {
+
+        if (Utils.isOnline()) {
+            Intent cfServiceIntent = new Intent();
+            cfServiceIntent.setClass(this, CoffeeSiteService.class);
+            cfServiceIntent.putExtra("operation_type", CoffeeSiteService.COFFEE_SITE_ENTITIES_LOAD);
+            startService(cfServiceIntent);
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    private void registerCoffeeSiteEntitiesLoadReceiver() {
+        coffeeSiteServiceReciever = new CoffeeSiteServiceReciever();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_ENTITY );
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReciever, intentFilter);
+    }
+
+        private class CoffeeSiteServiceReciever extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String result = intent.getStringExtra("operationResult");
+                Log.i(TAG, "Load CoffeeSiteEntities operation result: " + result);
+            }
+        }
 
 
     /**
@@ -271,10 +329,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
     private void openNewCoffeeSiteActivity() {
-            Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
-            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            this.startActivity(activityIntent);
+        Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
+        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activityIntent.putExtra("currentUserName", userAccountService.getLoggedInUser().getUserName());
+        this.startActivity(activityIntent);
     }
 
     private void openLoginActivity() {
@@ -427,6 +486,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         super.onResume();
 
         // Read stats
+        // Load CoffeeSiteEntities
         if (Utils.isOnline()) {
             new ReadStatsAsyncTask(this).execute();
         } else {

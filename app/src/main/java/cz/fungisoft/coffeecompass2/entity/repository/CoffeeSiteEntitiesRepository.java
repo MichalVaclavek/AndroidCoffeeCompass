@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
+import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
+import retrofit2.Response;
 
 /**
  * Class to hold instancies of CoffeeSite entities readed from server
@@ -23,61 +27,132 @@ import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
  */
 public class CoffeeSiteEntitiesRepository {
 
-    private static List<CoffeeSiteType> allCoffeeSiteTypes;
 
-    private static List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses;
+    private static List<CoffeeSiteType> allCoffeeSiteTypes = new ArrayList<>();
 
-    private static List<CoffeeSiteStatus> allCoffeeSiteStatuses;
+    private static List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses = new ArrayList<>();
 
-    private static List<CoffeeSort> allCoffeeSorts;
+    private static List<CoffeeSiteStatus> allCoffeeSiteStatuses = new ArrayList<>();
 
-    private static List<CupType> allCupTypes;
+    private static List<CoffeeSort> allCoffeeSorts = new ArrayList<>();
 
-    private static List<NextToMachineType> allNextToMachineTypes;
+    private static List<CupType> allCupTypes = new ArrayList<>();
 
-    private static List<OtherOffer> allOtherOffers;
+    private static List<NextToMachineType> allNextToMachineTypes = new ArrayList<>();
 
-    private static List<PriceRange> allPriceRanges;
+    private static List<OtherOffer> allOtherOffers = new ArrayList<>();
 
-    private static List<SiteLocationType> allSiteLocationTypes;
+    private static List<PriceRange> allPriceRanges = new ArrayList<>();
+
+    private static List<SiteLocationType> allSiteLocationTypes = new ArrayList<>();
+
+    private static List<StarsQualityDescription> allStarsQualityDescriptions = new ArrayList<>();
+
+
+    public static boolean isDataReadedFromServer() {
+        return dataReadedFromServer;
+    }
+
+    public void setDataReadedFromServer(boolean dataReadedFromServer) {
+        this.dataReadedFromServer = dataReadedFromServer;
+    }
+
+    // Indication that data are available in the repository i.e. where readed from server
+    private static boolean dataReadedFromServer = false;
+
+
+
+    private static CoffeeSiteEntitiesRepository instance;
+
+    private CoffeeSiteEntitiesRepository() {
+    }
+
+    public static CoffeeSiteEntitiesRepository getInstance() {
+        if (instance == null) {
+            instance = new CoffeeSiteEntitiesRepository();
+        }
+        return instance;
+    }
 
 
     /** SETTERS **/
 
-    public static void setAllCoffeeSiteTypes(List<CoffeeSiteType> allCoffeeSiteTypes) {
-        CoffeeSiteEntitiesRepository.allCoffeeSiteTypes = allCoffeeSiteTypes;
+    public void setAllCoffeeSiteTypes(List<CoffeeSiteType> allCoffeeSiteTypes) {
+        this.allCoffeeSiteTypes = allCoffeeSiteTypes;
     }
 
-    public static void setAllCoffeeSiteRecordStatuses(List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses) {
-        CoffeeSiteEntitiesRepository.allCoffeeSiteRecordStatuses = allCoffeeSiteRecordStatuses;
+    public void setAllCoffeeSiteRecordStatuses(List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses) {
+        this.allCoffeeSiteRecordStatuses = allCoffeeSiteRecordStatuses;
     }
 
-    public static void setAllCoffeeSiteStatuses(List<CoffeeSiteStatus> allCoffeeSiteStatuses) {
-        CoffeeSiteEntitiesRepository.allCoffeeSiteStatuses = allCoffeeSiteStatuses;
+    public void setAllCoffeeSiteStatuses(List<CoffeeSiteStatus> allCoffeeSiteStatuses) {
+        this.allCoffeeSiteStatuses = allCoffeeSiteStatuses;
     }
 
-    public static void setAllCoffeeSorts(List<CoffeeSort> allCoffeeSorts) {
-        CoffeeSiteEntitiesRepository.allCoffeeSorts = allCoffeeSorts;
+    public void setAllCoffeeSorts(List<CoffeeSort> allCoffeeSorts) {
+        this.allCoffeeSorts = allCoffeeSorts;
     }
 
-    public static void setAllCupTypes(List<CupType> allCupTypes) {
-        CoffeeSiteEntitiesRepository.allCupTypes = allCupTypes;
+    public void setAllCupTypes(List<CupType> allCupTypes) {
+        this.allCupTypes = allCupTypes;
     }
 
-    public static void setAllNextToMachineTypes(List<NextToMachineType> allNextToMachineTypes) {
-        CoffeeSiteEntitiesRepository.allNextToMachineTypes = allNextToMachineTypes;
+    public void setAllNextToMachineTypes(List<NextToMachineType> allNextToMachineTypes) {
+        this.allNextToMachineTypes = allNextToMachineTypes;
     }
 
-    public static void setAllOtherOffers(List<OtherOffer> allOtherOffers) {
-        CoffeeSiteEntitiesRepository.allOtherOffers = allOtherOffers;
+    public void setAllOtherOffers(List<OtherOffer> allOtherOffers) {
+        this.allOtherOffers = allOtherOffers;
     }
 
-    public static void setAllPriceRanges(List<PriceRange> allPriceRanges) {
-        CoffeeSiteEntitiesRepository.allPriceRanges = allPriceRanges;
+    public void setAllPriceRanges(List<PriceRange> allPriceRanges) {
+        this.allPriceRanges = allPriceRanges;
     }
 
-    public static void setAllSiteLocationTypes(List<SiteLocationType> allSiteLocationTypes) {
-        CoffeeSiteEntitiesRepository.allSiteLocationTypes = allSiteLocationTypes;
+    public void setAllSiteLocationTypes(List<SiteLocationType> allSiteLocationTypes) {
+        this.allSiteLocationTypes = allSiteLocationTypes;
+    }
+
+    public static void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
+        CoffeeSiteEntitiesRepository.allStarsQualityDescriptions = allStarsQualityDescriptions;
+    }
+
+
+    public <T extends List<? extends CoffeeSiteEntity>> void setEntities(T response) {
+        if (response.size() > 0) {
+            if (response.get(0) instanceof CoffeeSiteType) {
+                setAllCoffeeSiteTypes((List<CoffeeSiteType>) response);
+            }
+            if (response.get(0) instanceof CoffeeSiteRecordStatus) {
+                setAllCoffeeSiteRecordStatuses((List<CoffeeSiteRecordStatus>) response);
+            }
+            if (response.get(0) instanceof CoffeeSiteStatus) {
+                setAllCoffeeSiteStatuses((List<CoffeeSiteStatus>) response);
+            }
+            if (response.get(0) instanceof CoffeeSort) {
+                setAllCoffeeSorts((List<CoffeeSort>) response);
+            }
+            if (response.get(0) instanceof CupType) {
+                setAllCupTypes((List<CupType>) response);
+            }
+
+            if (response.get(0) instanceof NextToMachineType) {
+                setAllNextToMachineTypes((List<NextToMachineType>) response);
+            }
+            if (response.get(0) instanceof OtherOffer) {
+                setAllOtherOffers((List<OtherOffer>) response);
+            }
+            if (response.get(0) instanceof PriceRange) {
+                setAllPriceRanges((List<PriceRange>) response);
+            }
+            if (response.get(0) instanceof SiteLocationType) {
+                setAllSiteLocationTypes((List<SiteLocationType>) response);
+            }
+            if (response.get(0) instanceof StarsQualityDescription) {
+                setAllStarsQualityDescriptions((List<StarsQualityDescription>) response);
+            }
+
+        }
     }
 
    /** Methods to return one instance of the selected type from this repository's list of available values of selected type **/
@@ -156,7 +231,8 @@ public class CoffeeSiteEntitiesRepository {
     /**
      * Helper method to find instance of the CoffeeSiteEntity from this
      * repository internal lists of CoffeeSiteEntities of selected CoffeeSiteEntity type.
-     * If not found returns null
+     * If not found returns null.
+     * Expects that values in input entityInstances List<T> sre unique
      *
      * @param value
      * @param entityInstances
@@ -164,9 +240,11 @@ public class CoffeeSiteEntitiesRepository {
      * @return
      */
     private static <T extends CoffeeSiteEntity> T getEntityInstance(String value, List<T> entityInstances) {
-        for (T entity : entityInstances) {
-            if (entity.getEntityValue().equalsIgnoreCase(value)) {
-                return entity;
+        if (entityInstances != null) {
+            for (T entity : entityInstances) {
+                if (entity.toString().equalsIgnoreCase(value)) {
+                    return entity;
+                }
             }
         }
         return null;
@@ -179,7 +257,7 @@ public class CoffeeSiteEntitiesRepository {
         return allCoffeeSiteStatuses;
     }
 
-    public static  List<CoffeeSiteType> getAllCoffeeSiteTypes() {
+    public static List<CoffeeSiteType> getAllCoffeeSiteTypes() {
         return allCoffeeSiteTypes;
     }
 
@@ -191,29 +269,28 @@ public class CoffeeSiteEntitiesRepository {
         return allCoffeeSorts;
     }
 
-
     public static List<CupType> getAllCupTypes() {
         return allCupTypes;
     }
-
 
     public static List<NextToMachineType> getAllNextToMachineTypes() {
         return allNextToMachineTypes;
     }
 
-
     public static List<OtherOffer> getAllOtherOffers() {
         return allOtherOffers;
     }
-
 
     public static List<PriceRange> getAllPriceRanges() {
         return allPriceRanges;
     }
 
-
     public static List<SiteLocationType> getAllSiteLocationTypes() {
         return allSiteLocationTypes;
+    }
+
+    public static List<StarsQualityDescription> getAllStarsQualityDescriptions() {
+        return allStarsQualityDescriptions;
     }
 
 }

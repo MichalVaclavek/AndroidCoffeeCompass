@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -21,6 +22,13 @@ public class UserAccountServiceConnector implements ServiceConnection {
     public UserAccountServiceConnector(UserLoginServiceConnectionListener callingActivity) {
         this.callingLoginActivity = callingActivity;
     }
+
+    private CoffeeSiteService callingService;
+
+    public UserAccountServiceConnector(CoffeeSiteService callingService) {
+        this.callingService = callingService;
+    }
+
 
     private UserRegisterServiceConnectionListener callingRegisterActivity;
 
@@ -59,6 +67,10 @@ public class UserAccountServiceConnector implements ServiceConnection {
         }
         if (this.callingUserDataViewActivity != null) {
             this.callingUserDataViewActivity.onLogoutAndDeleteServiceConnected();
+        }
+
+        if (this.callingService != null) {
+            this.callingService.onUserLoginServiceConnected();
         }
     }
 

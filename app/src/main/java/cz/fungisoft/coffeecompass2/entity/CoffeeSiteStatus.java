@@ -3,33 +3,63 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class CoffeeSiteStatus extends CoffeeSiteEntityParcelable {
+public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
 
     public CoffeeSiteStatus() {
         super();
     }
 
     public CoffeeSiteStatus(int id, String entityValue) {
-        super(id, entityValue);
+        super(id);
+        this.status = entityValue;
     }
 
     protected CoffeeSiteStatus(Parcel in) {
-        super(in);
+        this.id = in.readInt();
+        status = in.readString();
+    }
+
+    public static final Creator<CoffeeSiteStatus> CREATOR = new Creator<CoffeeSiteStatus>() {
+        @Override
+        public CoffeeSiteStatus createFromParcel(Parcel in) {
+            return new CoffeeSiteStatus(in);
+        }
+
+        @Override
+        public CoffeeSiteStatus[] newArray(int size) {
+            return new CoffeeSiteStatus[size];
+        }
+    };
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Expose
+    @SerializedName("status")
+    private String status;
+
+
+    @Override
+    public String toString() {
+        return  status;
     }
 
     @Override
-    @SerializedName("status")
-    public String getEntityValue() {
-        return entityValue;
+    public int describeContents() {
+        return 0;
     }
 
     @Override
-    @SerializedName("status")
-    public void setEntityValue(String value) {
-        this.entityValue = value;
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(status);
     }
-
-
 }

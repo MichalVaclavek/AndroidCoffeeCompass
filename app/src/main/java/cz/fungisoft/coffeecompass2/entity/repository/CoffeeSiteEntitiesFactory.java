@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntityParcelable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
@@ -21,7 +20,7 @@ public class CoffeeSiteEntitiesFactory {
 
     private static final String TAG = "CoffeeSiteEntitiesFact";
 
-    public static CoffeeSiteEntityParcelable getEntity(String entityType, int id, String value) {
+    public static CoffeeSiteEntity getEntity(String entityType, int id, String value) {
         if (entityType == null) {
             return null;
         }
@@ -57,51 +56,50 @@ public class CoffeeSiteEntitiesFactory {
         return null;
     }
 
-    public static CoffeeSiteEntityParcelable getEntity(String entityType, JSONObject jsonObject) {
+    public static CoffeeSiteEntity getEntity(String entityType, JSONObject jsonObject) {
 
-        CoffeeSiteEntityParcelable retVal = null;
+        CoffeeSiteEntity retVal = null;
 
         if (entityType == null || jsonObject == null) {
             return null;
         }
 
         try {
-
             if (entityType.equalsIgnoreCase("CoffeeSiteRecordStatus")) {
                 retVal = new CoffeeSiteRecordStatus();
-                retVal.setEntityValue(jsonObject.getString("status"));
+                ((CoffeeSiteRecordStatus) retVal).setStatus(jsonObject.getString("status"));
             }
             if (entityType.equalsIgnoreCase("CoffeeSiteStatus")) {
                 retVal = new CoffeeSiteStatus();
-                retVal.setEntityValue(jsonObject.getString("status"));
+                ((CoffeeSiteStatus) retVal).setStatus(jsonObject.getString("status"));
             }
             if (entityType.equalsIgnoreCase("CoffeeSiteType")) {
                 retVal = new CoffeeSiteType();
-                retVal.setEntityValue(jsonObject.getString("coffeeSiteType"));
+                ((CoffeeSiteType) retVal).setCoffeeSiteType(jsonObject.getString("coffeeSiteType"));
             }
             if (entityType.equalsIgnoreCase("CoffeeSort")) {
                 retVal = new CoffeeSort();
-                retVal.setEntityValue(jsonObject.getString("coffeeSort"));
+                ((CoffeeSort) retVal).setCoffeeSort(jsonObject.getString("coffeeSort"));
             }
             if (entityType.equalsIgnoreCase("CupType")) {
                 retVal = new CupType();
-                retVal.setEntityValue(jsonObject.getString("cupType"));
+                ((CupType) retVal).setCupType(jsonObject.getString("cupType"));
             }
             if (entityType.equalsIgnoreCase("NextToMachineType")) {
                 retVal = new NextToMachineType();
-                retVal.setEntityValue(jsonObject.getString("type"));
+                ((NextToMachineType) retVal).setType(jsonObject.getString("type"));
             }
             if (entityType.equalsIgnoreCase("OtherOffer")) {
                 retVal = new OtherOffer();
-                retVal.setEntityValue(jsonObject.getString("offer"));
+                ((OtherOffer) retVal).setOffer(jsonObject.getString("offer"));
             }
             if (entityType.equalsIgnoreCase("PriceRange")) {
                 retVal = new PriceRange();
-                retVal.setEntityValue(jsonObject.getString("priceRange"));
+                ((PriceRange) retVal).setPriceRange(jsonObject.getString("priceRange"));
             }
             if (entityType.equalsIgnoreCase("SiteLocationType")) {
                 retVal = new SiteLocationType();
-                retVal.setEntityValue(jsonObject.getString("locationType"));
+                ((SiteLocationType) retVal).setLocationType(jsonObject.getString("locationType"));
             }
 
             if (retVal != null) {
@@ -110,6 +108,7 @@ public class CoffeeSiteEntitiesFactory {
         } catch (JSONException e) {
             Log.e(TAG, "Exception during parsing JSON : " + e.getMessage());
         }
+
         return retVal;
     }
 

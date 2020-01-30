@@ -3,23 +3,32 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Not used yet in mobile app
  */
-public class CupType extends CoffeeSiteEntityParcelable {
+public class CupType extends CoffeeSiteEntity implements Parcelable {
 
     public CupType(int id, String entityValue) {
-        super(id, entityValue);
+
+        super(id);
+        this.cupType = entityValue;
     }
 
-    protected CupType(Parcel in) {
-        super(in);
-    }
 
     public CupType() {
         super();
+    }
+
+    @Expose
+    @SerializedName("cupType")
+    private String cupType;
+
+    protected CupType(Parcel in) {
+        this.id = in.readInt();
+        cupType = in.readString();
     }
 
     public static final Creator<CupType> CREATOR = new Creator<CupType>() {
@@ -34,15 +43,27 @@ public class CupType extends CoffeeSiteEntityParcelable {
         }
     };
 
-    @Override
-    @SerializedName("cupType")
-    public String getEntityValue() {
-        return entityValue;
+    public String getCupType() {
+        return cupType;
+    }
+
+    public void setCupType(String cupType) {
+        this.cupType = cupType;
     }
 
     @Override
-    @SerializedName("cupType")
-    public void setEntityValue(String value) {
-        this.entityValue = value;
+    public String toString() {
+        return  cupType;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(cupType);
     }
 }

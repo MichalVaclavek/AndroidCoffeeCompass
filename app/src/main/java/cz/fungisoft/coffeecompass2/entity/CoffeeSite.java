@@ -3,6 +3,9 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,8 +19,16 @@ import java.util.Objects;
  */
 public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcelable
 {
+    @Expose
+    @SerializedName("id")
     protected int id;
+
+    @Expose
+    @SerializedName("siteName")
     protected String name;
+
+    @Expose(serialize = false)
+    @SerializedName("distFromSearchPoint")
     protected long distance;
 
     public int getId() {
@@ -64,26 +75,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         hodnoceni = in.readString();
 
         createdByUserName = in.readString();
+        lastEditUserName = in.readString();
         uvodniKoment = in.readString();
-
-        // In case of empty array was written, it is read by split as array with one empty string element
-        // transform to array with zero elements - needed for later display of such arrays
-//        cupTypes = in.readString().split(",");
-//        if (cupTypes.length == 1 && cupTypes[0].isEmpty()) {
-//            cupTypes = new String[0];
-//        }
-//        coffeeSorts = in.readString().split(",");
-//        if (coffeeSorts.length == 1 && coffeeSorts[0].isEmpty()) {
-//            coffeeSorts = new String[0];
-//        }
-//        otherOffers = in.readString().split(",");
-//        if (otherOffers.length == 1 && otherOffers[0].isEmpty()) {
-//            otherOffers = new String[0];
-//        }
-//        nextToMachineTypes = in.readString().split(",");
-//        if (nextToMachineTypes.length == 1 && nextToMachineTypes[0].isEmpty()) {
-//            nextToMachineTypes = new String[0];
-//        }
 
         cupTypes = new ArrayList<>();
         in.readTypedList(cupTypes, CupType.CREATOR);
@@ -104,6 +97,14 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
             comments = new ArrayList<>();
             comments = in.readArrayList(Comment.class.getClassLoader());
         }
+
+        canBeModified = in.readByte() != 0;
+        canBeActivated  = in.readByte() != 0;
+        canBeDeactivated = in.readByte() != 0;
+        canBeCanceled = in.readByte() != 0;
+        canBeCommented = in.readByte() != 0;
+        canBeDeleted = in.readByte() != 0;
+        canBeRatedByStars = in.readByte() != 0;
     }
 
     @Override
@@ -120,12 +121,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         dest.writeString(mainImageURL);
 
         dest.writeParcelable(statusZarizeni, flags);
-        //dest.writeString(statusZarizeni.getStatus());
-        //dest.writeInt(typPodniku.getId());
         dest.writeParcelable(typPodniku, flags);
-        //dest.writeInt(typLokality.getId());
         dest.writeParcelable(typLokality, flags);
-        //dest.writeInt(cena.getId());
         dest.writeParcelable(cena, flags);
 
         dest.writeString(mesto);
@@ -133,12 +130,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         dest.writeString(hodnoceni);
 
         dest.writeString(createdByUserName);
+        dest.writeString(lastEditUserName);
         dest.writeString(uvodniKoment);
-
-//        dest.writeString(convertListToOneStringWithDelimiter(cupTypes, ','));
-//        dest.writeString(convertListToOneStringWithDelimiter(coffeeSorts, ','));
-//        dest.writeString(convertListToOneStringWithDelimiter(otherOffers, ','));
-//        dest.writeString(convertListToOneStringWithDelimiter(nextToMachineTypes, ','));
 
         dest.writeTypedList(cupTypes);
         dest.writeTypedList(coffeeSorts);
@@ -149,6 +142,14 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         dest.writeString(oteviraciDobaHod);
 
         dest.writeList(comments);
+
+        dest.writeByte((byte) (canBeModified ? 1 : 0));
+        dest.writeByte((byte) (canBeActivated  ? 1 : 0));
+        dest.writeByte((byte) (canBeDeactivated ? 1 : 0));
+        dest.writeByte((byte) (canBeCanceled ? 1 : 0));
+        dest.writeByte((byte) (canBeCommented ? 1 : 0));
+        dest.writeByte((byte) (canBeDeleted ? 1 : 0));
+        dest.writeByte((byte) (canBeRatedByStars ? 1 : 0));
     }
 
     @Override
@@ -176,6 +177,9 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     private final SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
 
+    //@SerializedName("createdOn")
+    @Expose
+    @SerializedName("createdOn")
     protected Date createdOn;
 
     public Date getCreatedOn() {
@@ -187,6 +191,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.createdOnString = format.format(this.createdOn);
     }
 
+    //@Expose(serialize = false)
+    //@SerializedName("createdOn")
     protected String createdOnString;
 
     public String getCreatedOnString() {
@@ -206,8 +212,15 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.createdOn = created;
     }
 
+    @Expose
+    @SerializedName("numOfCoffeeAutomatyVedleSebe")
+    protected int numOfCoffeeAutomatyVedleSebe = 0;
 
+    @Expose
+    @SerializedName("zemSirka")
     protected double latitude;
+    @Expose
+    @SerializedName("zemDelka")
     protected double longitude;
 
     /**
@@ -216,33 +229,94 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     protected String mainImageURL = ""; // default empty, means image not available
 
     //protected String statusZarizeni;
+    @Expose
+    @SerializedName("statusZarizeni")
     protected CoffeeSiteStatus statusZarizeni;
+
+    @Expose
+    @SerializedName("uliceCP")
     protected String uliceCP;
+
+    @Expose
+    @SerializedName("mesto")
     protected String mesto;
-    //protected String typPodniku;
+
+    @Expose
+    @SerializedName("typPodniku")
     protected CoffeeSiteType typPodniku;
-    //protected String typLokality;
+
+    @Expose
+    @SerializedName("typLokality")
     protected SiteLocationType typLokality;
-//    protected String cena;
+
+    @Expose
+    @SerializedName("cena")
     protected PriceRange cena;
+
     protected String hodnoceni;
 
+    @Expose
+    @SerializedName("originalUserName")
     protected String createdByUserName;
+
+    @Expose
+    @SerializedName("lastEditUserName")
+    protected String lastEditUserName;
+
+    @Expose
+    @SerializedName("initialComment")
     protected String uvodniKoment;
 
-//    protected String[] cupTypes;
-//    protected String[] coffeeSorts;
-//    protected String[] otherOffers;
-//    protected String[] nextToMachineTypes;
-
+    @Expose
+    @SerializedName("cupTypes")
     protected List<CupType> cupTypes;
+
+    @Expose
+    @SerializedName("coffeeSorts")
     protected List<CoffeeSort> coffeeSorts;
+
+    @Expose
+    @SerializedName("otherOffers")
     protected List<OtherOffer> otherOffers;
+
+    @Expose
+    @SerializedName("nextToMachineTypes")
     protected List<NextToMachineType> nextToMachineTypes;
 
+    @Expose
+    @SerializedName("pristupnostDny")
     protected String oteviraciDobaDny;
+
+    @Expose
+    @SerializedName("pristupnostHod")
     protected String oteviraciDobaHod;
 
+    /** Properties of CoffeeSiteDTO which describes allowed operations **/
+    /** with CoffeeSite **/
+
+    @Expose(serialize = false)
+    @SerializedName("canBeModified")
+    protected boolean canBeModified = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeActivated")
+    protected boolean canBeActivated = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeDeactivated")
+    protected boolean canBeDeactivated = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeCanceled")
+    protected boolean canBeCanceled = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeDeleted")
+    protected boolean canBeDeleted = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeCommented")
+    protected boolean canBeCommented = false;
+    @Expose(serialize = false)
+    @SerializedName("canBeRatedByStars")
+    protected boolean canBeRatedByStars = false;
+
+    //@Expose(serialize = false , deserialize = false)
     protected List<Comment> comments;
 
     public List<Comment> getComments() {
@@ -271,6 +345,14 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     public void setCreatedByUserName(String createdByUserName) {
         this.createdByUserName = createdByUserName;
+    }
+
+    public String getLastEditUserName() {
+        return lastEditUserName;
+    }
+
+    public void setLastEditUserName(String lastEditUserName) {
+        this.lastEditUserName = lastEditUserName;
     }
 
     public String getHodnoceni() {
@@ -417,6 +499,14 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getNumOfCoffeeAutomatyVedleSebe() {
+        return numOfCoffeeAutomatyVedleSebe;
+    }
+
+    public void setNumOfCoffeeAutomatyVedleSebe(int numOfCoffeeAutomatyVedleSebe) {
+        this.numOfCoffeeAutomatyVedleSebe = numOfCoffeeAutomatyVedleSebe;
     }
 
     public CoffeeSite() {

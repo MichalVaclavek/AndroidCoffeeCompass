@@ -56,7 +56,7 @@ public class Utils {
      * @param restErrorBody
      * @return
      */
-    public static RestError getRestError(String restErrorBody) {
+    public static synchronized RestError getRestError(String restErrorBody) {
 
         RestError retVal = new RestError();
         try {
@@ -66,7 +66,8 @@ public class Utils {
                                     jsonObject.getString("title"),
                                     jsonObject.getInt("status"),
                                     !jsonObject.getString("detail").equals("null")
-                                    ? jsonObject.getString("detail") : "",
+                                        ? jsonObject.getString("detail")
+                                        : "",
                                     jsonObject.getString("instance"));
 
             if (jsonObject.getString("errorParameter") != null) {
@@ -81,13 +82,10 @@ public class Utils {
         return retVal;
     }
 
- public static  String converSearchDistance(int searchRange) {
-     // Prevod na km
-     if (searchRange >= 1000) {
-         return " (" + searchRange/1000 + " km)";
-     } else {
-         return  " (" + searchRange + " m)";
-     }
- }
+    public static  String convertSearchDistance(int searchRange) {
+        // Prevod na km
+        return (searchRange >= 1000) ? " (" + searchRange/1000 + " km)"
+                                  : " (" + searchRange + " m)";
+    }
 
 }

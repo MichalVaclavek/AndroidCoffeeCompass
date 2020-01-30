@@ -38,6 +38,9 @@ import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListene
  * item details.
  * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
+ * <p><p/>
+ * Used to show list of found CoffeeSites based on location.
+ * Another activity is used to show CoffeeSites created by user.
  */
 public class CoffeeSiteListActivity extends ActivityWithLocationService implements SitesInRangeUpdateListener {
 

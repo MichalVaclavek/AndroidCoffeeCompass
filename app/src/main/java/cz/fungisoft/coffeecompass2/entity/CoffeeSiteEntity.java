@@ -1,9 +1,14 @@
 package cz.fungisoft.coffeecompass2.entity;
 
-import android.os.Parcelable;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 public abstract class CoffeeSiteEntity {
 
+
+    @Expose
+    @SerializedName("id")
     protected int id;
 
     public int getId() {
@@ -14,24 +19,19 @@ public abstract class CoffeeSiteEntity {
         this.id = id;
     }
 
+//    protected String entityValue;
+//
+//    public abstract String getEntityValue();
+//
+//    public abstract void setEntityValue(String entityValue);
 
-    protected String entityValue;
-
-    public String getEntityValue() {
-        return entityValue;
-    }
-
-    public void setEntityValue(String entityValue) {
-        this.entityValue = entityValue;
-    }
-
-    public CoffeeSiteEntity(int id, String entityValue) {
+    public CoffeeSiteEntity(int id) {
         this.id = id;
-        this.entityValue = entityValue;
+        //this.entityValue = entityValue;
     }
 
     public CoffeeSiteEntity() {
         this.id = 0;
-        this.entityValue = "";
+        //this.entityValue = "";
     }
 }

@@ -42,7 +42,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
  */
 public class LoggedInUser implements Serializable {
 
-    private String userId;
+    private long userId;
     private String displayName;
 
     private String userName;
@@ -156,11 +156,11 @@ public class LoggedInUser implements Serializable {
     }
 
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
@@ -261,7 +261,7 @@ public class LoggedInUser implements Serializable {
 
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            this.setUserId(jsonObject.getString("id"));
+            this.setUserId(jsonObject.getInt("id"));
             this.setUserName(jsonObject.getString("userName"));
             this.setFirstName(jsonObject.getString("firstName"));
             this.setLastName(jsonObject.getString("lastName"));

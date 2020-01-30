@@ -65,8 +65,7 @@ public class UserLogoutRESTRequest {
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
-        //Call<Boolean> call = api.logoutCurrentUser();
-        Call<Boolean> call = api.logoutCurrentUserWithId(Long.parseLong(currentUser.getUserId()));
+        Call<Boolean> call = api.logoutCurrentUserWithId(currentUser.getUserId());
 
         call.enqueue(new Callback<Boolean>() {
             @Override

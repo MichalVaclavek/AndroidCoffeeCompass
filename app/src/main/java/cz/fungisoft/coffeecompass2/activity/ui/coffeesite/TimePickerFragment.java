@@ -13,6 +13,8 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
 
+import cz.fungisoft.coffeecompass2.R;
+
 
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
 
@@ -48,15 +50,13 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-
-
         // Use the current time as the default values for the picker
         final Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
 
         //Dialog timePickerDialog = new TimePickerDialog(getActivity(), android.R.style.Theme_Holo_Light_Dialog_NoActionBar, this, hour, minute,
-        Dialog timePickerDialog = new TimePickerDialog(getActivity(), this, hour, minute,
+        Dialog timePickerDialog = new TimePickerDialog(getActivity(), R.style.TimePickerDialogTheme, this, hour, minute,
                 DateFormat.is24HourFormat(getActivity()));
 
         // Create a new instance of TimePickerDialog and return it

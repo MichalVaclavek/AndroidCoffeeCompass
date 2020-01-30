@@ -42,19 +42,12 @@ public class UserAccountRepository {
         return user;
     }
 
-//    public void logout(String userName) {
-//        if (userName.equals(user.getUserName())) {
-//            logout();
-//        }
-//    }
 
     /**
      * Calls logou functionality of the dataSource,
      * if the user is logged-in
      */
     public void logout() {
-        //user = null;
-        //preferenceHelper.removeUserData();
         if (getLoggedInUser() != null) {
             dataSource.logout(user);
         }
@@ -86,16 +79,9 @@ public class UserAccountRepository {
         dataSource.register(username, password, email, deviceID);
     }
 
-//    public void delete(String userName) {
-//        logout(userName);
-//        dataSource.delete(user);
-//    }
-
     public void delete() {
         if (getLoggedInUser() != null) {
             dataSource.delete(getLoggedInUser());
-            //preferenceHelper.removeUserData();
         }
-        //logout();
     }
 }

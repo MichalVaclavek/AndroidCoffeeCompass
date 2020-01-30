@@ -123,5 +123,12 @@
     <string name="invalid_coffeesitename">Jméno lokace musí mít alespoň 4 znaky.</string>
     <string name="invalid_longitude">Nesprávná hodnota zem. délky</string>
     <string name="invalid_latitude">Nesprávná hodnota zem. šířky</string>
+    <string name="coffee_site_create_failure">Nepodařilo se vytvořit lokaci. Na tomto místě je pravděpodobně již jiná lokace.</string>
+    <string name="coffee_site_update_failure">Modifikace lokace se nezdařila. Pozice pravděpodobně již obsazena.</string>
+    <string name="coffeesite_created_successfuly">Lokace vytvořena úspěšně.</string>
+    <string name="coffeesite_updated_successfuly">Lokace modifikována úspěšně.</string>
+    <string name="coffeesiteservice_error_message_not_available">Chyba komunikace se serverem.</string>
+    <string name="coffee_site_cancel_failure">Zrušení lokace ne)spěšné. Zkuste prosím později nebo ze stránek coffeecompass.cz</string>
+    <string name="coffeesite_canceled_successfuly">Lokace zrušena úspěšně.</string>
 
 </resources>

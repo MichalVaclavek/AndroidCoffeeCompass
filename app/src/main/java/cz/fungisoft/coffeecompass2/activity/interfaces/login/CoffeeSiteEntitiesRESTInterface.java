@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
+import java.util.List;
+
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
@@ -23,33 +25,33 @@ public interface CoffeeSiteEntitiesRESTInterface {
      * @return
      */
     @GET("allOtherOffers")
-    Call<OtherOffer> getAllOtherOffers();
+    Call<List<OtherOffer>> getAllOtherOffers();
 
     @GET("allSiteStatuses")
-    Call<CoffeeSiteStatus> getAllCoffeeSiteSiteStatuses();
+    Call<List<CoffeeSiteStatus>> getAllCoffeeSiteSiteStatuses();
 
     @GET("allSiteRecordStatuses")
-    Call<CoffeeSiteRecordStatus> getAllCoffeeSiteRecordStatuses();
+    Call<List<CoffeeSiteRecordStatus>> getAllCoffeeSiteRecordStatuses();
 
     @GET("allHodnoceniKavyStars")
-    Call<StarsQualityDescription> getAllStarsQualityDescriptions();
+    Call<List<StarsQualityDescription>> getAllStarsQualityDescriptions();
 
     @GET("allPriceRanges")
-    Call<PriceRange> getAllPriceRanges();
+    Call<List<PriceRange>> getAllPriceRanges();
 
     @GET("allLocationTypes")
-    Call<SiteLocationType> getAllSiteLocationTypes();
+    Call<List<SiteLocationType>> getAllSiteLocationTypes();
 
     @GET("allCupTypes")
-    Call<CupType> getAllCupTypes();
+    Call<List<CupType>> getAllCupTypes();
 
     @GET("allCoffeeSorts")
-    Call<CoffeeSort> getAllCoffeeSorts();
+    Call<List<CoffeeSort>> getAllCoffeeSorts();
 
     @GET("allNextToMachineTypes")
-    Call<NextToMachineType> getAllNextToMachineTypes();
+    Call<List<NextToMachineType>> getAllNextToMachineTypes();
 
     @GET("allCoffeeSiteTypes")
-    Call<CoffeeSiteType> getAllCoffeeSiteTypes();
+    Call<List<CoffeeSiteType>> getAllCoffeeSiteTypes();
 
 }

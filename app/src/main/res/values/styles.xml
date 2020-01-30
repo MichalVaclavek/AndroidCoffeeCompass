@@ -62,4 +62,9 @@
 
     </style>
 
+    <style name="TimePickerDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@color/activityBackround</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
 </resources>
