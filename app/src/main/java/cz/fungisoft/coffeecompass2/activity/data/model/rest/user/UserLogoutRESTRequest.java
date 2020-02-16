@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;

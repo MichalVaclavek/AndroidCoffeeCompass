@@ -15,7 +15,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 20
-        versionName "2.05"
+        versionName "3.00"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -65,7 +65,7 @@ dependencies {
     implementation 'org.jetbrains:annotations-java5:15.0'
 
     implementation 'com.jakewharton:butterknife:10.2.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterKnifeVersion"
 
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.5.0'
@@ -76,5 +76,14 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
     implementation 'org.conscrypt:conscrypt-android:2.2.1'
+
+    // reactive
+    implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjava2Version"
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidVersion"
+
+    /**
+     * For managing request permission
+     */
+    implementation 'com.karumi:dexter:4.2.0'
 
 }

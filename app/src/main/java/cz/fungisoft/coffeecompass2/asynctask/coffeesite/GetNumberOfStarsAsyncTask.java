@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.CoffeeSiteRESTInterface;
@@ -52,10 +52,10 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        //Log.i("onSuccess", response.body());
+                        Log.i(REQ_TAG, "onResponse()");
                         parentActivity.processNumberOfStarsForSiteAndUser((Integer.parseInt(response.body().toString())));
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response for obtaining number of Stars for CoffeeSite and User request.");
+                        Log.i(REQ_TAG, "Returned empty response for obtaining number of Stars for CoffeeSite and User request.");
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User. Response empty."));
                         //parentActivity.showRESTCallError(error);
                         parentActivity.processFailedNumberOfStarsForSiteAndUser(error);

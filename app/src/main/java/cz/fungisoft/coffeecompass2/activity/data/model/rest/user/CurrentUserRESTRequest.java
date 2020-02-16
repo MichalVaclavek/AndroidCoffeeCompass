@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
@@ -26,7 +26,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Class to create, run and process REST request for obtaining current logged-in user profile
- * from server.
+ * from server using Retrofit library.
  */
 public class CurrentUserRESTRequest {
 

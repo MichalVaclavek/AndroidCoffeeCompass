@@ -6,17 +6,19 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 
 /**
  * A fragment representing a single CoffeeSite detail screen.
- * This fragment is either contained in a {@link CoffeeSiteListActivity}
+ * This fragment is either contained in a {@link FoundCoffeeSitesListActivity}
  * in two-pane mode (on tablets) or a {@link CoffeeSiteDetailActivity}
  * on handsets.
  */
@@ -32,7 +34,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
     /**
      * The object this fragment is presenting.
      */
-    private CoffeeSiteMovable mItem;
+    //private CoffeeSiteMovable mItem;
+    private CoffeeSite mItem;
 
     private DistanceChangeTextView distanceTextView;
 
@@ -43,8 +46,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
     public CoffeeSiteDetailFragment() {
     }
 
-    public void setCoffeeSite(CoffeeSiteMovable csm) {
-        mItem = csm;
+    public void setCoffeeSite(CoffeeSite csm) {
+       mItem = csm;
     }
 
     @Override
@@ -54,7 +57,9 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     @Override
     public void onStop() {
-        mItem.removePropertyChangeListener(distanceTextView);
+        if (mItem instanceof  CoffeeSiteMovable) {
+            ((CoffeeSiteMovable)mItem).removePropertyChangeListener(distanceTextView);
+        }
         super.onStop();
     }
 
@@ -68,9 +73,10 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     @Override
     public void onStart() {
-        if (distanceTextView != null && mItem != null) {
+        if (distanceTextView != null && mItem != null
+        && mItem instanceof  CoffeeSiteMovable) {
             distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
-            mItem.addPropertyChangeListener(distanceTextView);
+            ((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
         }
         super.onStart();
     }
@@ -93,7 +99,9 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 rootView.findViewById(R.id.cupTableRow).setVisibility(View.GONE);
             }
 
-            ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(mItem.getCena().toString());
+            if (mItem.getCena() != null) {
+                ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(mItem.getCena().toString());
+            }
 
             if (mItem.getNextToMachineTypes().size() > 0) {
                 ((TextView) rootView.findViewById(R.id.nextToMachineOfferTextView)).setText(mItem.getNextToMachineTypesOneString());
@@ -119,13 +127,23 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 rootView.findViewById(R.id.streetTableRow).setVisibility(View.GONE);
             }
 
+            if (!mItem.getOteviraciDobaDny().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny());
+            }
             if (!mItem.getOteviraciDobaHod().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaHod());
+            }
+            if (!mItem.getOteviraciDobaHod().isEmpty() && !mItem.getOteviraciDobaDny().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.openingTextView)).setText(mItem.getOteviraciDobaDny() + ", " + mItem.getOteviraciDobaHod());
             } else {
                 rootView.findViewById(R.id.openingTableRow).setVisibility(View.GONE);
             }
 
-            ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
+            if (mItem.getHodnoceni() != null && !mItem.getHodnoceni().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
+            }  else {
+                rootView.findViewById(R.id.hodnoceni_tablerow).setVisibility(View.GONE);
+            }
 
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(mItem.getCreatedByUserName());
             ((TextView) rootView.findViewById(R.id.createdOnTextView)).setText(mItem.getCreatedOnString());
@@ -136,11 +154,20 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 rootView.findViewById(R.id.authorCommentTableRow).setVisibility(View.GONE);
             }
 
-            distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
-            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
-            distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
-            distanceTextView.setCoffeeSite(mItem);
-            mItem.addPropertyChangeListener(distanceTextView);
+            TableRow distanceTableRow = rootView.findViewById(R.id.cs_detail_distance_row);
+
+            if (mItem instanceof  CoffeeSiteMovable) {
+                distanceTableRow.setVisibility(View.VISIBLE);
+
+                distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
+                distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
+                distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
+
+                distanceTextView.setCoffeeSite((CoffeeSiteMovable) mItem);
+                ((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
+            } else {
+                distanceTableRow.setVisibility(View.GONE);
+            }
         }
 
         return rootView;

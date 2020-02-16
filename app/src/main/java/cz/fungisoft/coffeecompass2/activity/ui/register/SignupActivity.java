@@ -28,7 +28,7 @@ import java.util.Objects;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
@@ -36,13 +36,16 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModelFactory;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
+//import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 
 /**
  * Activity to register new user. Based on LoginActivity.
+ * UserAccountServiceConnectionListener
  */
-public class SignupActivity extends AppCompatActivity implements UserRegisterServiceListener, UserRegisterServiceConnectionListener {
+public class SignupActivity extends AppCompatActivity
+                            implements UserRegisterServiceListener, UserAccountServiceConnectionListener {
 
     private static final String TAG = "SignupActivity";
 
@@ -161,7 +164,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userRegisterServiceConnector = new UserAccountServiceConnector(this);
+        userRegisterServiceConnector = new UserAccountServiceConnector();
+        userRegisterServiceConnector.addUserAccountServiceConnectionListener(this);
+
         if (bindService(new Intent(this, UserAccountService.class),
                 userRegisterServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
@@ -177,6 +182,7 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
         }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
+            userRegisterServiceConnector.removeUserAccountServiceConnectionListener(this);
             unbindService(userRegisterServiceConnector);
             mShouldUnbindUserLoginService = false;
         }
@@ -243,12 +249,10 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
                 }
             }
         }
-        //goToMainActivity();
     }
 
     @Override
-    public void onUserRegisterServiceConnected() {
-
+    public void onUserAccountServiceConnected() {
         userAccountService = userRegisterServiceConnector.getUserLoginService();
         userAccountService.addUserRegisterServiceListener(this);
         Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
@@ -261,9 +265,9 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (Utils.isOnline()) {
                         userAccountService.register(userNameEditText.getText().toString(),
-                                                    passwordEditText.getText().toString(),
-                                                    emailEditText.getText().toString(),
-                                                    deviceID);
+                                passwordEditText.getText().toString(),
+                                emailEditText.getText().toString(),
+                                deviceID);
                     } else {
                         Utils.showNoInternetToast(getApplicationContext());
                     }
@@ -279,15 +283,16 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
                     registerProgressBar.setVisibility(View.VISIBLE);
                     signupButton.setEnabled(false);
                     userAccountService.register(userNameEditText.getText().toString(),
-                                                passwordEditText.getText().toString(),
-                                                emailEditText.getText().toString(),
-                                                deviceID);
+                            passwordEditText.getText().toString(),
+                            emailEditText.getText().toString(),
+                            deviceID);
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }
             }
         });
     }
+
 
     /**
      * Needed to adding this class to list of Listeners of the UserAccountService
@@ -308,4 +313,5 @@ public class SignupActivity extends AppCompatActivity implements UserRegisterSer
     public int hashCode() {
         return Objects.hash(userNameEditText, emailEditText, passwordEditText);
     }
+
 }

@@ -27,6 +27,15 @@ import retrofit2.Response;
  */
 public class CoffeeSiteEntitiesRepository {
 
+    /**
+     *  Array of all CoffeeSiteEntity Classes to be loaded from server to repository
+     *  needed to correct function of creating/updating CoffeeSite instancies
+     */
+    public static final Class<? extends CoffeeSiteEntity>[] COFFEE_SITE_ENTITY_CLASSES
+            = new Class[]{CoffeeSiteRecordStatus.class, CoffeeSiteStatus.class, CoffeeSiteType.class,
+            CoffeeSort.class, CupType.class, NextToMachineType.class, OtherOffer.class, PriceRange.class,
+            SiteLocationType.class, StarsQualityDescription.class};
+
 
     private static List<CoffeeSiteType> allCoffeeSiteTypes = new ArrayList<>();
 

@@ -120,6 +120,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/comment_inputlayout"
+            android:theme="@style/SiteInput.HintAppearance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

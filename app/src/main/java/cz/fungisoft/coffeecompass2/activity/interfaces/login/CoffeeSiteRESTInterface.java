@@ -46,8 +46,32 @@ public interface CoffeeSiteRESTInterface {
      * @param userId
      * @return
      */
-    @GET("site/{siteId}")
+    @GET("site/byUser/{userId}")
     Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") long userId);
+
+    /**
+     * REST call for obtaining all CoffeeSites created by userId
+     * https://coffeecompass.cz/rest/site/mySites
+     * @return
+     */
+    @GET("mySites")
+    Call<List<CoffeeSite>> getAllCoffeeSitesByCurrentUser();
+
+    /**
+     * REST call for obtaining number of CoffeeSites created by current User
+     * https://coffeecompass.cz/rest/site/mySitesNumber
+     * @return
+     */
+    @GET("mySitesNotCanceledNumber")
+    Call<Integer> getNumberOfSitesNotCanceledFromCurrentUser();
+
+    /**
+     * REST call for obtaining number of CoffeeSites created by current User
+     * https://coffeecompass.cz/rest/site/mySitesNumber
+     * @return
+     */
+    @GET("mySitesNumber")
+    Call<Integer> getNumberOfAllCoffeeSitesFromCurrentUser();
 
     /**
      * Calls saving of CoffeeSite instance. Expects CoffeeSite's new id
@@ -57,7 +81,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @POST("create")
-    Call<Integer> createCoffeeSite(@Body CoffeeSite coffeeSite);
+    Call<CoffeeSite> createCoffeeSite(@Body CoffeeSite coffeeSite);
 
     /**
      * Calls update of CoffeeSite instance. Expects same siteId returned as positive response.
@@ -67,7 +91,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @PUT("update/{siteId}")
-    Call<Integer> updateCoffeeSite(@Path("siteId") int siteId, @Body CoffeeSite coffeeSite);
+    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") int siteId, @Body CoffeeSite coffeeSite);
 
     /**
      * Calls update of CoffeeSite instance. Expects same siteId returned as positive response.
@@ -82,23 +106,12 @@ public interface CoffeeSiteRESTInterface {
     /** STATUS change operations **/
 
     @PUT("{siteId}/activate")
-    Call<Boolean> activateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") int siteId);
 
     @PUT("{siteId}/deactivate")
-    Call<Boolean> deactivateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") int siteId);
 
     @PUT("{siteId}/cancel")
-    Call<Boolean> cancelCoffeeSite(@Path("siteId") int siteId);
-
-
-    /**
-     * Deletes comment of commentID. Return commentID back or 0? if the delete request failed
-     * Requires Authorization header.
-     *
-     * @param commentID
-     * @return
-     */
-//    @DELETE("deleteComment/{commentID}")
-//    Call<Integer> deleteComment(@Path("commentID") int commentID);
+    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") int siteId);
 
 }

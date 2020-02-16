@@ -9,7 +9,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.CoffeeSiteRESTInterface;
@@ -39,7 +39,7 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
 
     private final SITE_ASYNC_REST_OPERATION requestedOperation;
 
-    private final CoffeeSite coffeeSite;
+    private final CoffeeSite newOrModifiedCoffeeSite;
 
     /**
      * Current logged-in user
@@ -54,7 +54,7 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
     private final String tag;
 
     public CoffeeSiteCUDOperationsAsyncTask(SITE_ASYNC_REST_OPERATION operation, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
-        this.coffeeSite = coffeeSite;
+        this.newOrModifiedCoffeeSite = coffeeSite;
         this.currentUser = currentUser;
         this.callingService = callingService;
         this.requestedOperation = operation;
@@ -91,7 +91,7 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                    //.setDateFormat("dd. MM. yyyy HH:mm")
+                    .setDateFormat("dd. MM. yyyy HH:mm")
                     .create();
 
             Retrofit retrofit = new Retrofit.Builder()
@@ -103,36 +103,36 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
 
             CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-            Call<Integer> call = null;
+            Call<CoffeeSite> call = null;
 
             switch (this.requestedOperation) {
                 case CREATE:
-                    call = api.createCoffeeSite(coffeeSite);
+                    call = api.createCoffeeSite(newOrModifiedCoffeeSite);
                     break;
                 case UPDATE:
-                    call = api.updateCoffeeSite(coffeeSite.getId(), coffeeSite);
+                    call = api.updateCoffeeSite(newOrModifiedCoffeeSite.getId(), newOrModifiedCoffeeSite);
                     break;
-                case DELETE:
-                    call = api.deleteCoffeeSite(coffeeSite.getId());
+                case DELETE: // TODO to be implemented returning Long
+                    //call = api.deleteCoffeeSite(newOrModifiedCoffeeSite.getId());
                     break;
             }
 
             Log.i(tag, "start call");
 
-            call.enqueue(new Callback<Integer>() {
+            call.enqueue(new Callback<CoffeeSite>() {
                 @Override
-                public void onResponse(Call<Integer> call, Response<Integer> response) {
+                public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(tag, "onSuccess()");
-                            //Log.i("onSuccess", response.body());
-                            operationResult = response.body().toString();
-                            callingService.sendCoffeeSiteCUDOperationResultToClient(requestedOperation, operationResult, "");
+                            operationResult = "OK";
+                            CoffeeSite coffeeSite = response.body();
+                            callingService.sendCoffeeSiteCUDOperationResultToClient(coffeeSite, requestedOperation, operationResult, "");
                         } else {
                             Log.i(tag, "Returned empty response for saving CoffeeSite request.");
                             Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
                             operationError = error.toString();
-                            callingService.sendCoffeeSiteCUDOperationResultToClient(requestedOperation,"", operationError);
+                            callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
                         }
                     } else {
                         try {
@@ -141,16 +141,16 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
                             Log.e(tag, e.getMessage());
                             operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
                         }
-                        callingService.sendCoffeeSiteCUDOperationResultToClient(requestedOperation,"", operationError);
+                        callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
                     }
                 }
 
                 @Override
-                public void onFailure(Call<Integer> call, Throwable t) {
+                public void onFailure(Call<CoffeeSite> call, Throwable t) {
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
-                    callingService.sendCoffeeSiteCUDOperationResultToClient(requestedOperation,"", operationError);
+                    callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
                 }
             });
         }

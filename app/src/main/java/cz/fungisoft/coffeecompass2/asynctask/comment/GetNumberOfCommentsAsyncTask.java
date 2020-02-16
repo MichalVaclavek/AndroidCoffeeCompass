@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.CommentsAndStarsRESTInterface;
@@ -52,10 +52,10 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        //Log.i("onSuccess", response.body());
+                       Log.i(REQ_TAG, "onResponse() success");
                         coffeeSiteDetailActivity.processNumberOfComments(Integer.parseInt(response.body().toString()));
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response for obtaining number of Comments request.");
+                        Log.i(REQ_TAG, "Returned empty response for obtaining number of Comments request.");
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Comments."));
                         coffeeSiteDetailActivity.showRESTCallError(error);
                     }

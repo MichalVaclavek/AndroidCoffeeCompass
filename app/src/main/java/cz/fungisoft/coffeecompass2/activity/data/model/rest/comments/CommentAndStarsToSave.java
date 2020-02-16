@@ -35,6 +35,13 @@ public class CommentAndStarsToSave {
         this.stars = stars;
     }
 
+
+    /**
+     * Inner class for holding number of stars. Needed
+     * for automatic parsing within Retrofit when reading
+     * from server.
+     *
+     */
     public static class Stars {
 
         private int numOfStars = 3;

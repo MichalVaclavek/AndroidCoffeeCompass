@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -33,7 +34,7 @@
 
                 app:boxStrokeColor="@color/colorPrimary2"
                 app:counterEnabled="true"
-                app:counterMaxLength="25"
+                app:counterMaxLength="30"
                 app:errorEnabled="true"
                 app:helperText="* povinné"
                 app:helperTextEnabled="true"
@@ -45,6 +46,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
+                    android:maxLength="30"
                     android:textSize="18sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -155,47 +157,51 @@
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:hint="@string/site_type"
-                    android:theme="@style/SiteInput.HintAppearance"
-                    app:endIconMode="dropdown_menu"
-                    app:helperText="* povinné">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/site_type_dropdown"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:lines="1"
-                        android:textSize="18sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/site_type_input_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:hint="@string/site_type"
+                android:theme="@style/SiteInput.HintAppearance"
+                app:endIconMode="dropdown_menu"
+                app:errorEnabled="true"
+                app:errorIconTintMode="src_over"
+                app:helperText="* povinné">
+
+                <AutoCompleteTextView
+                    android:id="@+id/site_type_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:cursorVisible="false"
+                    android:editable="false"
+                    android:inputType="none"
+                    android:lines="1"
+                    android:textSize="18sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/location_type_input_layout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:hint="@string/location_type"
-                android:paddingBottom="5dp"
                 android:theme="@style/SiteInput.HintAppearance"
                 app:endIconMode="dropdown_menu"
+                app:errorIconTintMode="src_over"
                 app:helperText="* povinné">
 
                 <AutoCompleteTextView
                     android:id="@+id/location_type_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:cursorVisible="false"
+                    android:editable="false"
+                    android:inputType="none"
                     android:lines="1"
                     android:textSize="18sp" />
 
@@ -205,7 +211,8 @@
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
+                android:background="?android:attr/listDivider"
+                android:paddingTop="5dp" />
 
             <TextView
                 android:id="@+id/textView21"
@@ -470,6 +477,8 @@
                             android:id="@+id/price_range_dropdown"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:cursorVisible="false"
+                            android:editable="false"
                             android:textSize="18sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -489,6 +498,9 @@
                             android:id="@+id/otviracka_dny_dropdown"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:cursorVisible="false"
+                            android:editable="false"
+                            android:inputType="none"
                             android:textSize="18sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -512,7 +524,7 @@
                                 android:id="@+id/time_od_input_editText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
+                                android:inputType="time"
                                 android:textAlignment="center"
                                 android:textSize="18sp" />
                         </com.google.android.material.textfield.TextInputLayout>
@@ -530,7 +542,7 @@
                                 android:id="@+id/time_do_input_editText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
+                                android:inputType="time"
                                 android:textAlignment="center"
                                 android:textSize="18sp" />
 
@@ -540,12 +552,12 @@
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/coffeeSite_imageView"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="5"
                     android:paddingLeft="5dp"
-                    app:srcCompat="@drawable/button_espresso_unfocused" />
+                    app:srcCompat="@drawable/outline_add_photo_alternate_white_24" />
 
             </LinearLayout>
 
@@ -570,6 +582,24 @@
             app:menu="@menu/menu_create_site">
 
         </com.google.android.material.bottomnavigation.BottomNavigationView>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:longClickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/create_modify_progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </FrameLayout>
 
 

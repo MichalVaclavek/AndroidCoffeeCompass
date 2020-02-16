@@ -8,19 +8,32 @@
     android:background="@color/card_backround"
     android:gravity="center_horizontal"
     android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingTop="20dp"
+    android:paddingRight="10dp"
     tools:context="activity.AboutActivity">
 
+
+    <TextView
+        android:id="@+id/loginLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title_activity_user_login"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="italic" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="46dp"
+        android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp"
         android:text="@string/about_author"
         android:textAlignment="center"
         android:textColor="@color/colorPrimaryDark"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:textStyle="italic" />
 
     <ImageView
@@ -49,74 +62,69 @@
         android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold|italic" />
 
-    <TableLayout
-        android:id="@+id/tableLayout2"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginRight="5dp"
-        android:background="@drawable/border">
+        android:layout_marginTop="15dp"
+        android:background="@color/design_default_color_surface"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:scrollbarStyle="outsideOverlay">
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView12"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="6dp"
                 android:text="@string/about_sentence1"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
 
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
             <TextView
                 android:id="@+id/textView13"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="6dp"
+                android:paddingTop="5dp"
                 android:text="@string/about_sentence2"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/textView18"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="6dp"
+                android:paddingTop="5dp"
                 android:text="@string/about_sentence3"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
-        </TableRow>
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/permissions_textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="@string/about_permissions_needed"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/aboutLinkTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
-                android:padding="6dp"
+                android:paddingTop="5dp"
                 android:text="@string/about_sentence4"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
-        </TableRow>
 
-    </TableLayout>
+        </LinearLayout>
+    </ScrollView>
 
 
 </LinearLayout>

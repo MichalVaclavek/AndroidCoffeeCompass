@@ -23,19 +23,19 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
 
 /**
  * Activity to show logged-in user profile details.
  * Allows to log-out or delete user's account.
  */
-public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener, UserLogoutAndDeleteServiceConnectionListener,
+public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener, UserAccountServiceConnectionListener,
                                                                        DeleteUserAccountDialogFragment.DeleteUserAccountDialogListener {
 
     private static final String TAG = "UserDataViewActivity";
@@ -54,7 +54,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @BindView(R.id.userCreatedOn) TextView userCratedOnTextView;
 
-    @BindView(R.id.progress) ProgressBar logoutDeleteProgressBar;
+    @BindView(R.id.progress_login) ProgressBar logoutDeleteProgressBar;
 
     @BindView(R.id.btn_logout) Button logoutButton;
     @BindView(R.id.btn_deleteUser) Button deleteUserButton;
@@ -136,7 +136,9 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userAccountServiceConnector = new UserAccountServiceConnector(this);
+        //userAccountServiceConnector = new UserAccountServiceConnector(this);
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
 
         if (bindService(new Intent(this, UserAccountService.class),
                 userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
@@ -148,8 +150,12 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     private void doUnbindUserLogoutAndDeleteService() {
+        if (userAccountService != null) {
+            userAccountService.removeLogoutAndDeleteServiceListener(this);
+        }
         if (mShouldUnbindUserDeleteAndRegisterService) {
             // Release information about the service's state.
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
             unbindService(userAccountServiceConnector);
             mShouldUnbindUserDeleteAndRegisterService = false;
         }
@@ -157,9 +163,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @Override
     protected void onDestroy() {
-        if (userAccountService != null) {
-            userAccountService.removeLogoutAndDeleteServiceListener(this);
-        }
         doUnbindUserLogoutAndDeleteService();
         super.onDestroy();
     }
@@ -216,7 +219,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     @Override
-    public void onLogoutAndDeleteServiceConnected() {
+    public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         userAccountService.addLogoutAndDeleteServiceListener(this);
         Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
@@ -240,6 +243,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
             }
         });
     }
+
 
     /**
      * Handling of the result of the Confirmation dialog for User account delete action

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="cz.fungisoft.coffeecompass2">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -10,19 +11,47 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="cz.fungisoft.coffeecompass2.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" /> <!-- Needed to read Google maps over http in API 28 -->
+
         <activity android:name=".activity.ActivityWithLocationService" />
-        <activity android:name=".activity.ui.coffeesite.CreateCoffeeSiteActivity" />
+
+        <activity android:name=".activity.ui.coffeesite.CreateCoffeeSiteActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait">
+
+        </activity>
 
         <service
             android:name=".services.LocationService"
@@ -34,6 +63,10 @@
             android:exported="true" />
         <service
             android:name=".services.UserAccountService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSiteImageService"
             android:enabled="true"
             android:exported="true" />
         <service
@@ -79,7 +112,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ui.coffeesite.CoffeeSiteListActivity"
+            android:name=".activity.ui.coffeesite.FoundCoffeeSitesListActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -94,11 +127,11 @@
         <activity
             android:name=".activity.ui.coffeesite.CoffeeSiteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".activity.ui.coffeesite.CoffeeSiteListActivity"
+            android:parentActivityName=".activity.ui.coffeesite.FoundCoffeeSitesListActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity" />
+                android:value="cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity" />
         </activity>
         <activity
             android:name=".activity.MainActivity"
@@ -106,10 +139,10 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

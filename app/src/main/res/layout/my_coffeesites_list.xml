@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_coffeesite_list"
+    android:name="cz.fungisoft.coffeecompass.activity.MyCoffeeSiteListFragment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:scrollbarSize="8dp"
+    android:scrollbarStyle="outsideInset"
+    android:scrollbars="vertical"
+    android:theme="@style/Theme.MaterialComponents.Light.Bridge"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    tools:context=".activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity"
+    tools:listitem="@layout/mycoffeesite_list_content" />

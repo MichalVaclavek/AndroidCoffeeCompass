@@ -29,7 +29,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
 
     // A placeholder CoffeeSite name validation check
     private boolean isCoffeeSiteNameValid(String coffeeSiteName) {
-        return coffeeSiteName != null && coffeeSiteName.trim().length() >= 4;
+        return coffeeSiteName != null && coffeeSiteName.trim().length() >= 4 && coffeeSiteName.trim().length() <= 30;
     }
 
     // A placeholder longitude validation check
@@ -51,6 +51,5 @@ public class CoffeeSiteCreateModel extends ViewModel {
             return false;
         }
     }
-
 
 }

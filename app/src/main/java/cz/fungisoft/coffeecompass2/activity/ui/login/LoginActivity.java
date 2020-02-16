@@ -24,32 +24,30 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.register.SignupActivity;
 
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 
-public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserLoginServiceConnectionListener {
+public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserAccountServiceConnectionListener {
 
     private LoginRegisterViewModel loginViewModel;
 
     private static final String TAG = "LoginActivity";
-    //private static final int REQUEST_SIGNUP = 0;
 
     @BindView(R.id.input_email) EditText usernameEditText;
     @BindView(R.id.input_password) EditText passwordEditText;
     @BindView(R.id.btn_login) Button loginButton;
     @BindView(R.id.link_signup) TextView signupLink;
-    @BindView(R.id.progress) ProgressBar loginProgressBar;
+    @BindView(R.id.progress_login) ProgressBar loginProgressBar;
 
-    //private ProgressDialog loadingProgressDialog = null;
     protected UserAccountService userAccountService;
-    private UserAccountServiceConnector userLoginServiceConnector;
+    private UserAccountServiceConnector userAccountServiceConnector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -139,9 +137,13 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userLoginServiceConnector = new UserAccountServiceConnector(this);
+
+        //userAccountServiceConnector = new UserAccountServiceConnector(this);
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
+
         if (bindService(new Intent(this, UserAccountService.class),
-                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
+                userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
@@ -156,7 +158,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         }
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
-            unbindService(userLoginServiceConnector);
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
+            unbindService(userAccountServiceConnector);
             mShouldUnbindUserLoginService = false;
         }
     }
@@ -174,7 +177,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
      */
     private void evaluateLoginResult(LoginOrRegisterResult loginResult) {
         loginProgressBar.setVisibility(View.GONE);
-        //loginButton.setEnabled(true);
         if (!usernameEditText.getText().toString().isEmpty()
                 && !passwordEditText.getText().toString().isEmpty()) {
             loginButton.setEnabled(true);
@@ -217,9 +219,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     }
 
     @Override
-    public void onUserLoginServiceConnected() {
-
-        userAccountService = userLoginServiceConnector.getUserLoginService();
+    public void onUserAccountServiceConnected() {
+        userAccountService = userAccountServiceConnector.getUserLoginService();
         userAccountService.addUserLoginServiceListener(this);
         Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
         final String deviceID = Utils.getDeviceID(this);
@@ -231,8 +232,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (Utils.isOnline()) {
                         userAccountService.login(usernameEditText.getText().toString(),
-                                               passwordEditText.getText().toString(),
-                                               deviceID);
+                                passwordEditText.getText().toString(),
+                                deviceID);
                     } else {
                         Utils.showNoInternetToast(getApplicationContext());
                     }
@@ -249,14 +250,15 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
                     loginButton.setEnabled(false);
 
                     userAccountService.login(usernameEditText.getText().toString(),
-                                           passwordEditText.getText().toString(),
-                                           deviceID);
+                            passwordEditText.getText().toString(),
+                            deviceID);
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }
             }
         });
     }
+
 
     /**
      * Needed to adding this class to list of Listeners of the UserAccountService
@@ -277,4 +279,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
     public int hashCode() {
         return Objects.hash(usernameEditText, passwordEditText, loginButton);
     }
+
+
 }

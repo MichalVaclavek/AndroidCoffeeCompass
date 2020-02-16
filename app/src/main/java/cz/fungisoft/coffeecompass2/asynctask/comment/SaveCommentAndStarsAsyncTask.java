@@ -9,7 +9,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
@@ -89,10 +89,10 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
-                            //Log.i("onSuccess", response.body());
+                            Log.i(REQ_TAG, "onResponse() success");
                             commentsActivity.processComments(response.body());
                         } else {
-                            Log.i("onEmptyResponse", "Returned empty response for saving comment request.");
+                            Log.i(REQ_TAG, "Returned empty response for saving comment request.");
                             Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
                             commentsActivity.showRESTCallError(error);
                         }

@@ -33,8 +33,8 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface CommentAndRatingDialogListener {
 
-        public void onSaveCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog);
-        public void onSaveCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog);
+        void onSaveCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog);
+        void onSaveCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
@@ -62,14 +62,6 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
                     + " must implement CommentAndRatingDialogListener");
         }
     }
-
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        // R.layout.my_layout - that's the layout where your textview is placed
-//        View view = inflater.inflate(R.layout.comment_and_rating_dialog, container, false);
-//
-//        return view;
-//    }
 
 
     @Override

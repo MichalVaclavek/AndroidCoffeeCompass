@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activity.ui.coffeesite.CoffeeSiteListActivity">
+    tools:context=".activity.ui.coffeesite.FoundCoffeeSitesListActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/coffee_site_detail_app_bar"
@@ -23,7 +23,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
-        android:id="@+id/frameLayout"
+        android:id="@+id/my_coffeesite_frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#FFE0B2"

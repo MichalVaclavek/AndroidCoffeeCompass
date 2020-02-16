@@ -1,13 +1,12 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import androidx.appcompat.widget.Toolbar;
-import android.util.Log;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -17,24 +16,20 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.UserAccountService;
-import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link CoffeeSiteListActivity}.
+ * in a {@link FoundCoffeeSitesListActivity}.
  * We need userAccountService to check if a user is loged-in to show him/her
  * the Cooments button
  */
-public class CoffeeSiteDetailActivity extends ActivityWithLocationService implements UserLoginServiceConnectionListener {
+public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
@@ -42,7 +37,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
 
     private CoffeeSiteDetailFragment detailFragment;
 
-    private CoffeeSiteMovable coffeeSite;
+    //private CoffeeSiteMovable coffeeSite;
+    private CoffeeSite coffeeSite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +62,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
         Intent intent = this.getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
-            coffeeSite = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
+            if (coffeeSite instanceof CoffeeSiteMovable) {
+                coffeeSite = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
+            } else {
+                coffeeSite = (CoffeeSite) bundle.getParcelable("coffeeSite");
+            }
         }
 
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.detail_toolbar_layout);
@@ -95,10 +95,15 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             detailFragment = new CoffeeSiteDetailFragment();
+//            if (coffeeSite instanceof CoffeeSiteMovable) {
+//                detailFragment.setCoffeeSite((CoffeeSiteMovable) coffeeSite);
+//            } else {
+//                detailFragment.setCoffeeSite(coffeeSite);
+//            }
             detailFragment.setCoffeeSite(coffeeSite);
         }
 
-        doBindUserLoginService();
+        //doBindUserLoginService();
     }
 
     /**
@@ -107,9 +112,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        if (coffeeSite != null) {
-            coffeeSite.setLocationService(locationService);
-            locationService.addPropertyChangeListener(coffeeSite);
+        if (coffeeSite != null ) {
+            if (coffeeSite instanceof CoffeeSiteMovable) {
+                ((CoffeeSiteMovable)coffeeSite).setLocationService(locationService);
+                locationService.addPropertyChangeListener(((CoffeeSiteMovable)coffeeSite));
+            }
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.coffeesite_detail_container, detailFragment)
                     .commit();
@@ -118,7 +125,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
 
     @Override
     public void onDestroy() {
-        doUnbindUserLoginService();
+        //doUnbindUserLoginService();
         super.onDestroy();
     }
 
@@ -132,10 +139,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            // navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
+            // navigateUpTo(new Intent(this, FoundCoffeeSitesListActivity.class));
 
             /*
-            * The standard way, navigateUpTo(new Intent(this, CoffeeSiteListActivity.class));
+            * The standard way, navigateUpTo(new Intent(this, FoundCoffeeSitesListActivity.class));
             * did not work for me. I have implemented this hint based on
             * internet advice. It transforms the Back button click from Navigation bar
             * to "main" Back button of Android click
@@ -190,52 +197,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService implem
             Toast.makeText(getApplicationContext(),
                     "Server connection error.",
                     Toast.LENGTH_SHORT);
-        }
-    }
-
-    // ** UserLogin Service connection/disconnection ** //
-
-    protected UserAccountService userLoginService;
-    private UserAccountServiceConnector userLoginServiceConnector;
-
-    // Don't attempt to unbind from the service unless the client has received some
-    // information about the service's state.
-    private boolean mShouldUnbindUserLoginService;
-
-    @Override
-    public void onUserLoginServiceConnected() {
-        userLoginService = userLoginServiceConnector.getUserLoginService();
-
-        // Any further processing is not needed in current implementation as the Comments button is still visible/enabled
-//        if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-//            enableCommentsButton();
-//        }
-    }
-
-    private void doBindUserLoginService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
-        userLoginServiceConnector = new UserAccountServiceConnector(this);
-        if (bindService(new Intent(this, UserAccountService.class),
-                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUnbindUserLoginService = true;
-        } else {
-            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
-                    "exist, or this client isn't allowed access to it.");
-        }
-    }
-
-    private void doUnbindUserLoginService() {
-//        if (userAccountService != null) {
-//            userAccountService.removeUserLoginServiceListener(this);
-//        }
-        if (mShouldUnbindUserLoginService) {
-            // Release information about the service's state.
-            unbindService(userLoginServiceConnector);
-            mShouldUnbindUserLoginService = false;
         }
     }
 

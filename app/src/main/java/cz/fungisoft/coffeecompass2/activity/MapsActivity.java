@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 
 /**
  * Activity to show CoffeeSite's location on the map
@@ -40,7 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * List of found CoffeeSites to show
      */
-    private CoffeeSiteListContent content;
+    private CoffeeSiteMovableListContent content;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * and
      * one CoffeeSite if passed from CoffeeSiteDetailActivity
      * or
-     * list of CoffeeSites if passed from CoffeeSiteListActivity
+     * list of CoffeeSites if passed from FoundCoffeeSitesListActivity
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {

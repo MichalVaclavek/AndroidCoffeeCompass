@@ -10,10 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
  */
 public interface SitesInRangeUpdateListener {
 
-    public void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange);
+    void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange);
 
-    public void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange);
+    void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange);
 
-    public void onCoffeeSitesInRangeUpdateServiceConnected();
+    void onCoffeeSitesInRangeUpdateServiceConnected();
 
 }

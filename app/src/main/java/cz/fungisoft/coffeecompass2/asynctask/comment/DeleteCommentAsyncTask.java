@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
@@ -71,10 +71,10 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        //Log.i("onSuccess", response.body());
+                        Log.i(REQ_TAG, "onResponse() success");
                         commentsActivity.processNumberOfComments(Integer.parseInt(response.body().toString()));
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response for delete comment request.");
+                        Log.i(REQ_TAG, "Returned empty response for delete comment request.");
                         Result.Error error = new Result.Error(new IOException("Error deleting comment. Response empty."));
                         commentsActivity.showRESTCallError(error);
                     }

@@ -9,11 +9,20 @@
         app:showAsAction="ifRoom"/>
         -->
     <!-- "Mark Favorite", should appear as action button if possible -->
+
+    <item
+        android:id="@+id/action_my_coffeesites"
+        android:icon="@drawable/solo_cup_orange_24"
+        android:title="Moje lokace"
+        app:showAsAction="always"></item>
+
     <item
         android:id="@+id/action_login"
         android:icon="@drawable/ic_account_circle_24px"
         android:title="@string/action_favorite"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always">
+        <!--app:showAsAction="ifRoom"/> -->
+    </item>
 
     <!-- Settings, should always be in the overflow -->
 

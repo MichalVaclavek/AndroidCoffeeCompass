@@ -45,8 +45,10 @@ public class UserPreferenceHelper {
     private SharedPreferences app_prefs;
     private Context context;
 
+    private final String nameOfSharedPreferences = "sharedUser2";
+
     public UserPreferenceHelper(Context context) {
-        app_prefs = context.getSharedPreferences("sharedUser",
+        app_prefs = context.getSharedPreferences(nameOfSharedPreferences,
                 Context.MODE_PRIVATE);
         this.context = context;
     }
@@ -66,7 +68,7 @@ public class UserPreferenceHelper {
         edit.commit();
     }
     public long getUserId() {
-        return app_prefs.getInt(USER_ID, 0);
+        return app_prefs.getLong(USER_ID, 0);
     }
 
     public void putDisplayName(String displayName) {

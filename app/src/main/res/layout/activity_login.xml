@@ -63,32 +63,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:theme="@style/SiteInput.HintAppearance"
+                android:hint="@string/username_or_email"
                 android:layout_marginBottom="8dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/username_or_email" />
+                     />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password Label -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:theme="@style/SiteInput.HintAppearance"
+                android:hint="@string/prompt_password"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_password"
+
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <ProgressBar
-                android:id="@+id/progress"
+                android:id="@+id/progress_login"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"

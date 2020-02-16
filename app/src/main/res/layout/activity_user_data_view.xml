@@ -281,7 +281,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <ProgressBar
-                    android:id="@+id/progress"
+                    android:id="@+id/progress_login"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"

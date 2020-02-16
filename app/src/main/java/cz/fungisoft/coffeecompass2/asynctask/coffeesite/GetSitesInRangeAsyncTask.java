@@ -23,9 +23,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
@@ -206,16 +206,12 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
 
                         cs.setMainImageURL(csObject.getString("mainImageURL"));
 
-                        //cs.setCena(csObject.getJSONObject("cena").getString("priceRange"));
                         cs.setCena((PriceRange) CoffeeSiteEntitiesFactory.getEntity("priceRange", csObject.getJSONObject("cena")));
 
                         cs.setUliceCP(csObject.getString("uliceCP"));
                         cs.setMesto(csObject.getString("mesto"));
-                        //cs.setTypPodniku(csObject.getJSONObject("typPodniku").getString("coffeeSiteType"));
                         cs.setTypPodniku((CoffeeSiteType) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteType", csObject.getJSONObject("typPodniku")));
-                        //cs.setTypLokality(csObject.getJSONObject("typLokality").getString("locationType"));
                         cs.setTypLokality((SiteLocationType) CoffeeSiteEntitiesFactory.getEntity("SiteLocationType", csObject.getJSONObject("typLokality")));
-                        //cs.setStatusZarizeni(csObject.getJSONObject("statusZarizeni").getString("status"));
                         cs.setStatusZarizeni((CoffeeSiteStatus) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteStatus", csObject.getJSONObject("statusZarizeni")));
                         cs.setHodnoceni(csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common"));
                         cs.setCreatedByUserName(csObject.getString("originalUserName"));
@@ -226,15 +222,6 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         cs.setOteviraciDobaDny(csObject.getString("pristupnostDny"));
                         cs.setOteviraciDobaHod(csObject.getString("pristupnostHod"));
 
-                        //JSONArray jsonCupTypesArray = csObject.getJSONArray("cupTypes");
-                        //StringBuilder cupTypes = new StringBuilder();
-//                        String[] cupTypes = new String[jsonCupTypesArray.length()];
-//                        for (int n = 0; n < jsonCupTypesArray.length(); n++) {
-//                            JSONObject sortObject = jsonCupTypesArray.getJSONObject(n);
-//                            //cupTypes.append(sortObject.getString("cupType") + ", ");
-//                            cupTypes[n] = sortObject.getString("cupType");
-//                        }
-                        //cs.setCupTypes(cupTypes.toString());
                         JSONArray jsonCupTypesArray = csObject.getJSONArray("cupTypes");
                         List<CupType> cupTypes = new ArrayList<>();
                         for (int n = 0; n < jsonCupTypesArray.length(); n++) {
@@ -243,17 +230,6 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                             cupTypes.add(cupType);
                         }
                         cs.setCupTypes(cupTypes);
-
-//                        JSONArray jsonNextToMachineTypesArray = csObject.getJSONArray("nextToMachineTypes");
-//                        //StringBuilder ntmTypes = new StringBuilder();
-//                        String[] ntmTypes = new String[jsonNextToMachineTypesArray.length()];
-//                        for (int m = 0; m < jsonNextToMachineTypesArray.length(); m++) {
-//                            JSONObject sortObject = jsonNextToMachineTypesArray.getJSONObject(m);
-//                            //ntmTypes.append(sortObject.getString("type") + ", ");
-//                            ntmTypes[m] = sortObject.getString("type");
-//                        }
-//                        //cs.setNextToMachineTypes(ntmTypes.toString());
-//                        cs.setNextToMachineTypes(ntmTypes);
 
                         JSONArray jsonNextToMachineTypesArray = csObject.getJSONArray("nextToMachineTypes");
                         List<NextToMachineType> ntmTypes = new ArrayList<>();
@@ -264,17 +240,6 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         }
                         cs.setNextToMachineTypes(ntmTypes);
 
-//                        JSONArray jsonCoffeeSortsArray = csObject.getJSONArray("coffeeSorts");
-//                        //StringBuilder sorts = new StringBuilder();
-//                        String[] sorts = new String[jsonCoffeeSortsArray.length()];
-//                        for (int j = 0; j < jsonCoffeeSortsArray.length(); j++) {
-//                            JSONObject sortObject = jsonCoffeeSortsArray.getJSONObject(j);
-//                            //sorts.append(sortObject.getString("coffeeSort") + ", ");
-//                            sorts[j] = sortObject.getString("coffeeSort");
-//                        }
-//                        //cs.setCoffeeSorts(sorts.toString());
-//                        cs.setCoffeeSorts(sorts);
-
                         JSONArray jsonCoffeeSortsArray = csObject.getJSONArray("coffeeSorts");
                         List<CoffeeSort> coffeeSorts = new ArrayList<>();
                         for (int j = 0; j < jsonCoffeeSortsArray.length(); j++) {
@@ -284,17 +249,6 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         }
                         cs.setCoffeeSorts(coffeeSorts);
 
-//                        JSONArray jsonOtherOffersArray = csObject.getJSONArray("otherOffers");
-//                        //StringBuilder offers = new StringBuilder();
-//                        String[] otherOffers = new String[jsonOtherOffersArray.length()];
-//                        for (int k = 0; k < jsonOtherOffersArray.length(); k++) {
-//                            JSONObject offerObject = jsonOtherOffersArray.getJSONObject(k);
-//                            //offers.append(offerObject.getString("offer") + ", ");
-//                            otherOffers[k] = offerObject.getString("offer");
-//                        }
-//                        //cs.setOtherOffers(offers.toString());
-//                        cs.setOtherOffers(otherOffers);
-
                         JSONArray jsonOtherOffersArray = csObject.getJSONArray("otherOffers");
                         List<OtherOffer> otherOffers = new ArrayList<>();
                         for (int k = 0; k < jsonOtherOffersArray.length(); k++) {
@@ -302,7 +256,6 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                             OtherOffer otherOffer = (OtherOffer) CoffeeSiteEntitiesFactory.getEntity("OtherOffer", otherOfferJsonObject);
                             otherOffers.add(otherOffer);
                         }
-                        //cs.setOtherOffers(offers.toString());
                         cs.setOtherOffers(otherOffers);
 
                         retSites.add(cs);
@@ -317,7 +270,7 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     }
 
     /**
-     * If some CoffeeSites are returned from server, go to CoffeeSiteListActivity,
+     * If some CoffeeSites are returned from server, go to FoundCoffeeSitesListActivity,
      * which shows the basic info about CoffeeSites in a list.
      * If no CoffeeSite found, then go back to parent activity (MainActivity)
      *
@@ -327,9 +280,9 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     protected void onPostExecute(String result) {
 
         if (parentActivity != null) {
-            CoffeeSiteListContent content = new CoffeeSiteListContent(coffeeSites);
+            CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent(coffeeSites);
 
-            Intent csListIntent = new Intent(parentActivity, CoffeeSiteListActivity.class);
+            Intent csListIntent = new Intent(parentActivity, FoundCoffeeSitesListActivity.class);
 
             csListIntent.putExtra("listContent", (Parcelable) content);
             csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));

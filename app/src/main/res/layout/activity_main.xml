@@ -74,7 +74,7 @@
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/AllSitesTextView"
+                        android:id="@+id/all_sites_TextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
 
@@ -362,8 +362,9 @@
                         android:layout_marginBottom="16dp"
                         android:backgroundTint="@color/colorPrimary2"
                         android:contentDescription="@string/new_coffee_site"
-                        android:src="@drawable/baseline_add_white_18dp"
-                        android:visibility="visible" />
+                        android:src="@drawable/baseline_add_white_24"
+                        android:visibility="visible"
+                        app:backgroundTint="@color/colorAccent" />
                 </FrameLayout>
 
             </RelativeLayout>
@@ -371,5 +372,19 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ProgressBar
+            android:id="@+id/progress_main_activity"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

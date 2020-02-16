@@ -1,45 +1,45 @@
 package cz.fungisoft.coffeecompass2.services;
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
+import java.util.ArrayList;
+import java.util.List;
+
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
 /**
- * Class to connect UserAccountService to calling activity
+ * Class to connect UserAccountService to calling activity or service
  */
 public class UserAccountServiceConnector implements ServiceConnection {
 
-    private UserLoginServiceConnectionListener callingLoginActivity;
-
-    public UserAccountServiceConnector(UserLoginServiceConnectionListener callingActivity) {
-        this.callingLoginActivity = callingActivity;
-    }
-
-    private CoffeeSiteService callingService;
+    private CoffeeSiteService callingCoffeeSiteService;
 
     public UserAccountServiceConnector(CoffeeSiteService callingService) {
-        this.callingService = callingService;
+        this.callingCoffeeSiteService = callingService;
     }
 
+    /**
+     * Another service listeniong to connect to UserAccountService
+     * //TODO should be done using Listener ...
+     */
+    private CoffeeSiteImageService callingCoffeeSiteImageService;
 
-    private UserRegisterServiceConnectionListener callingRegisterActivity;
-
-    public UserAccountServiceConnector(UserRegisterServiceConnectionListener callingActivity) {
-        this.callingRegisterActivity = callingActivity;
+    public UserAccountServiceConnector(CoffeeSiteImageService callingCoffeeSiteImageService) {
+        this.callingCoffeeSiteImageService = callingCoffeeSiteImageService;
     }
 
-    private UserLogoutAndDeleteServiceConnectionListener callingUserDataViewActivity;
+    private List<UserAccountServiceConnectionListener> connectionListenerList = new ArrayList<>();
 
-    public UserAccountServiceConnector(UserLogoutAndDeleteServiceConnectionListener callingUserDataViewActivity) {
-        this.callingUserDataViewActivity = callingUserDataViewActivity;
+    public void addUserAccountServiceConnectionListener( UserAccountServiceConnectionListener listener) {
+        this.connectionListenerList.add(listener);
+    }
+    public void removeUserAccountServiceConnectionListener(UserAccountServiceConnectionListener listener) {
+        this.connectionListenerList.remove(listener);
+    }
+
+    public UserAccountServiceConnector() {
     }
 
     // To invoke the bound service, first make sure that this value
@@ -59,22 +59,20 @@ public class UserAccountServiceConnector implements ServiceConnection {
         // cast its IBinder to a concrete class and directly access it.
         mBoundService = ((UserAccountService.LocalBinder)service).getService();
 
-        if (this.callingLoginActivity != null) {
-            this.callingLoginActivity.onUserLoginServiceConnected();
-        }
-        if (this.callingRegisterActivity != null) {
-            this.callingRegisterActivity.onUserRegisterServiceConnected();
-        }
-        if (this.callingUserDataViewActivity != null) {
-            this.callingUserDataViewActivity.onLogoutAndDeleteServiceConnected();
+        for (UserAccountServiceConnectionListener listener : connectionListenerList) {
+            listener.onUserAccountServiceConnected();
         }
 
-        if (this.callingService != null) {
-            this.callingService.onUserLoginServiceConnected();
+        if (this.callingCoffeeSiteService != null) {
+            this.callingCoffeeSiteService.onUserAccountServiceConnected();
+        }
+        if (this.callingCoffeeSiteImageService != null) {
+            this.callingCoffeeSiteImageService.onUserAccountServiceConnected();
         }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
     }
+
 }

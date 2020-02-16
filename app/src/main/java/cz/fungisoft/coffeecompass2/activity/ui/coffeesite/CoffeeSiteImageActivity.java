@@ -6,10 +6,14 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+
+import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
 
@@ -21,7 +25,8 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 {
     private static final String TAG = "CoffeeSiteImageAct";
 
-    private CoffeeSiteMovable cs;
+    //private CoffeeSiteMovable cs;
+    private CoffeeSite cs;
 
     private DistanceChangeTextView distLabel;
 
@@ -44,16 +49,25 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
-            cs = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
+            if (cs instanceof  CoffeeSiteMovable) {
+                cs = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
+            } else {
+                cs = bundle.getParcelable("coffeeSite");
+            }
         }
         if (appBarLayout != null && cs != null) {
             appBarLayout.setTitle(cs.getName());
         }
 
         distLabel = (DistanceChangeTextView) findViewById(R.id.distTextView);
-        distLabel.setText(String.valueOf(cs.getDistance()) + " m");
-        distLabel.setTag(TAG + ". DistanceTextView for " + cs.getName());
-        distLabel.setCoffeeSite(cs);
+        if (cs instanceof CoffeeSiteMovable) {
+            distLabel.setVisibility(View.VISIBLE);
+            distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+            distLabel.setTag(TAG + ". DistanceTextView for " + cs.getName());
+            distLabel.setCoffeeSite((CoffeeSiteMovable) cs);
+        } else {
+            distLabel.setVisibility(View.GONE);
+        }
 
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
@@ -73,25 +87,27 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        if (cs != null) {
-            cs.setLocationService(locationService);
-            locationService.addPropertyChangeListener(cs);
+        if (cs != null && cs instanceof  CoffeeSiteMovable) {
+            ((CoffeeSiteMovable)cs).setLocationService(locationService);
+            locationService.addPropertyChangeListener((CoffeeSiteMovable) cs);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        cs.removePropertyChangeListener(distLabel);
+        if (cs instanceof  CoffeeSiteMovable) {
+            ((CoffeeSiteMovable) cs).removePropertyChangeListener(distLabel);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        cs.addPropertyChangeListener(distLabel);
-        distLabel.setText(String.valueOf(cs.getDistance()) + " m");
-//        Log.d(TAG, ". Distance Text View " + distLabel.getTag() + " added to listen distance change of " + cs.getName() + ". Object id: " + cs);
+        if (cs instanceof  CoffeeSiteMovable) {
+            ((CoffeeSiteMovable) cs).addPropertyChangeListener(distLabel);
+            distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+        }
     }
 
     @Override

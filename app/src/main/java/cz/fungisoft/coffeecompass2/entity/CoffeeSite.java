@@ -51,6 +51,15 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         return distance;
     }
 
+    public CoffeeSite() {
+    }
+
+    public CoffeeSite(int id, String name, long dist) {
+        this.id = id;
+        this.name = name;
+        this.distance = dist;
+    }
+
     /* Parcelable implementation -- START -- */
 
     protected CoffeeSite(Parcel in) {
@@ -105,6 +114,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         canBeCommented = in.readByte() != 0;
         canBeDeleted = in.readByte() != 0;
         canBeRatedByStars = in.readByte() != 0;
+
+        statusZaznamu = in.readParcelable(CoffeeSiteRecordStatus.class.getClassLoader());
     }
 
     @Override
@@ -150,6 +161,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         dest.writeByte((byte) (canBeCommented ? 1 : 0));
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
         dest.writeByte((byte) (canBeRatedByStars ? 1 : 0));
+
+        dest.writeParcelable(statusZaznamu, flags);
     }
 
     @Override
@@ -188,14 +201,15 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
-        this.createdOnString = format.format(this.createdOn);
+        //this.createdOnString = format.format(this.createdOn);
     }
 
-    //@Expose(serialize = false)
-    //@SerializedName("createdOn")
     protected String createdOnString;
 
     public String getCreatedOnString() {
+        if (createdOn != null) {
+            this.createdOnString = format.format(this.createdOn);
+        }
         return createdOnString;
     }
 
@@ -226,12 +240,18 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     /**
      * URL of the main image of this CoffeeSite
      */
+    @Expose(serialize = false)
+    @SerializedName("mainImageURL")
     protected String mainImageURL = ""; // default empty, means image not available
 
     //protected String statusZarizeni;
     @Expose
     @SerializedName("statusZarizeni")
     protected CoffeeSiteStatus statusZarizeni;
+
+    @Expose
+    @SerializedName("recordStatus")
+    protected CoffeeSiteRecordStatus statusZaznamu;
 
     @Expose
     @SerializedName("uliceCP")
@@ -297,6 +317,7 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @Expose(serialize = false)
     @SerializedName("canBeModified")
     protected boolean canBeModified = false;
+
     @Expose(serialize = false)
     @SerializedName("canBeActivated")
     protected boolean canBeActivated = false;
@@ -315,6 +336,10 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @Expose(serialize = false)
     @SerializedName("canBeRatedByStars")
     protected boolean canBeRatedByStars = false;
+
+    @Expose(serialize = false)
+    @SerializedName("isAnyOtherSiteActiveOnSamePosition")
+    protected boolean isAnyOtherSiteActiveOnSamePosition = false;
 
     //@Expose(serialize = false , deserialize = false)
     protected List<Comment> comments;
@@ -509,14 +534,78 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.numOfCoffeeAutomatyVedleSebe = numOfCoffeeAutomatyVedleSebe;
     }
 
-    public CoffeeSite() {
+    public CoffeeSiteRecordStatus getStatusZaznamu() {
+        return statusZaznamu;
     }
 
-    public CoffeeSite(int id, String name, long dist) {
-        this.id = id;
-        this.name = name;
-        this.distance = dist;
+    public void setStatusZaznamu(CoffeeSiteRecordStatus statusZaznamu) {
+        this.statusZaznamu = statusZaznamu;
     }
+
+    public boolean canBeModified() {
+        return canBeModified;
+    }
+
+    public void setCanBeModified(boolean canBeModified) {
+        this.canBeModified = canBeModified;
+    }
+
+    public boolean canBeActivated() {
+        return canBeActivated;
+    }
+
+    public void setCanBeActivated(boolean canBeActivated) {
+        this.canBeActivated = canBeActivated;
+    }
+
+    public boolean canBeDeactivated() {
+        return canBeDeactivated;
+    }
+
+    public void setCanBeDeactivated(boolean canBeDeactivated) {
+        this.canBeDeactivated = canBeDeactivated;
+    }
+
+    public boolean canBeCanceled() {
+        return canBeCanceled;
+    }
+
+    public void setCanBeCanceled(boolean canBeCanceled) {
+        this.canBeCanceled = canBeCanceled;
+    }
+
+    public boolean canBeDeleted() {
+        return canBeDeleted;
+    }
+
+    public void setCanBeDeleted(boolean canBeDeleted) {
+        this.canBeDeleted = canBeDeleted;
+    }
+
+    public boolean canBeCommented() {
+        return canBeCommented;
+    }
+
+    public void setCanBeCommented(boolean canBeCommented) {
+        this.canBeCommented = canBeCommented;
+    }
+
+    public boolean canBeRatedByStars() {
+        return canBeRatedByStars;
+    }
+
+    public void setCanBeRatedByStars(boolean canBeRatedByStars) {
+        this.canBeRatedByStars = canBeRatedByStars;
+    }
+
+    public boolean isAnyOtherSiteActiveOnSamePosition() {
+        return isAnyOtherSiteActiveOnSamePosition;
+    }
+
+    public void setAnyOtherSiteActiveOnSamePosition(boolean anyOtherSiteActiveOnSamePosition) {
+        isAnyOtherSiteActiveOnSamePosition = anyOtherSiteActiveOnSamePosition;
+    }
+
 
     /*
     @Override

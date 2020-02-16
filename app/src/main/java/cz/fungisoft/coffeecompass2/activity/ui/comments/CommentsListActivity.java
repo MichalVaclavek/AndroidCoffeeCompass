@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.Utils;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfStarsAsyncTask;
@@ -37,11 +37,10 @@ import cz.fungisoft.coffeecompass2.asynctask.comment.DeleteCommentAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.GetCommentsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
 import static android.view.View.*;
 
@@ -49,9 +48,10 @@ import static android.view.View.*;
  * Activity to show list of CoffeeSite's Comments
  * Later it should allow to add a Comment for {@link LoggedInUser}
  */
-public class CommentsListActivity extends AppCompatActivity implements UserLoginServiceConnectionListener,
-                                                                       EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
-                                                                       DeleteCommentDialogFragment.DeleteCommentDialogListener {
+public class CommentsListActivity extends AppCompatActivity
+                                  implements UserAccountServiceConnectionListener,
+                                             EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
+                                             DeleteCommentDialogFragment.DeleteCommentDialogListener {
 
     private static final String TAG = "CommentsListActivity";
 
@@ -66,7 +66,7 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     private ProgressBar commentActionsProgressBar;
 
     protected UserAccountService userAccountService;
-    private UserAccountServiceConnector userLoginServiceConnector;
+    private UserAccountServiceConnector userAccountServiceConnector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +75,7 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
 
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
-            cs = (CoffeeSiteMovable) bundle.getParcelable("site");
+            cs = bundle.getParcelable("site");
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.comments_toolbar);
@@ -107,13 +107,6 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
 
-        if (Utils.isOnline()) {
-            commentActionsProgressBar.setVisibility(View.VISIBLE);
-            // Async task to load Comments for the site
-            // Comments are shown at the end of the Async task
-            new GetCommentsAsyncTask(this, cs.getId()).execute();
-        }
-
         // Adds Floating Action Button if a user is loged-in
         FloatingActionButton fab = findViewById(R.id.fab_new_comment);
 
@@ -141,6 +134,13 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         fab.setVisibility(View.VISIBLE);
 
         doBindUserLoginService();
+
+        if (Utils.isOnline()) {
+            commentActionsProgressBar.setVisibility(View.VISIBLE);
+            // Async task to load Comments for the site
+            // Comments are shown at the end of the Async task
+            new GetCommentsAsyncTask(this, cs.getId()).execute();
+        }
     }
 
     @Override
@@ -160,10 +160,13 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView, List<Comment> comments) {
-        recyclerViewAdapter =
-                new CommentsListActivity.CommentItemRecyclerViewAdapter(comments, userAccountService, this);
-        recyclerView.setAdapter(recyclerViewAdapter);
+    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+
+        if (this.comments != null && userAccountService != null) {
+            recyclerViewAdapter =
+                    new CommentsListActivity.CommentItemRecyclerViewAdapter(comments, userAccountService.getLoggedInUser(), this);
+            recyclerView.setAdapter(recyclerViewAdapter);
+        }
     }
 
     /**
@@ -194,12 +197,15 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     // information about the service's state.
     private boolean mShouldUnbindUserLoginService;
 
+
     @Override
-    public void onUserLoginServiceConnected() {
-        userAccountService = userLoginServiceConnector.getUserLoginService();
-
+    public void onUserAccountServiceConnected() {
+        userAccountService = userAccountServiceConnector.getUserLoginService();
         if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-
+            // Check if the RecyclerView is already active, if not activate here with AccountService available
+            if (this.comments != null && recyclerViewAdapter == null) {
+                setupRecyclerView(this.recyclerView);
+            }
         }
     }
 
@@ -248,9 +254,12 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-        userLoginServiceConnector = new UserAccountServiceConnector(this);
+        //userAccountServiceConnector = new UserAccountServiceConnector(this);
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
+
         if (bindService(new Intent(this, UserAccountService.class),
-                userLoginServiceConnector, Context.BIND_AUTO_CREATE)) {
+                userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindUserLoginService = true;
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
@@ -261,7 +270,7 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     private void doUnbindUserLoginService() {
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
-            unbindService(userLoginServiceConnector);
+            unbindService(userAccountServiceConnector);
             mShouldUnbindUserLoginService = false;
         }
     }
@@ -293,7 +302,6 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         showRESTCallError(error);
         // Open EnterCommentAndRatingDialogFragment
         showEnterCommentAndRatingDialog();
-
     }
 
     /**
@@ -307,14 +315,17 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
     }
 
     private void showComments() {
+
         this.comments = cs.getComments();
+        //if (this.comments != null && recyclerViewAdapter == null) {
         if (this.comments != null) {
             if (this.comments.size() > 0) {
-                setupRecyclerView((RecyclerView) this.recyclerView, this.comments);
+                setupRecyclerView((RecyclerView) this.recyclerView);
             } else {
                 List<Comment> emptyComments = new ArrayList<Comment>();
                 emptyComments.add(new Comment("Žádné komentáře k dispozici"));
-                setupRecyclerView((RecyclerView) this.recyclerView, emptyComments);
+                this.comments = emptyComments;
+                setupRecyclerView((RecyclerView) this.recyclerView);
             }
         }
     }
@@ -358,15 +369,19 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
         {
             private final List<Comment> mValues;
             private CommentsListActivity parenActivity;
-            private UserAccountService userAccountService;
+
+            private LoggedInUser loggedInUser;
+//            private UserAccountService userAccountService;
 
             private int commentIdToDelete;
 
 
-            CommentItemRecyclerViewAdapter(List<Comment> comments, UserAccountService userAccountService, CommentsListActivity parenActivity) {
+            //CommentItemRecyclerViewAdapter(List<Comment> comments, UserAccountService userAccountService, CommentsListActivity parenActivity) {
+            CommentItemRecyclerViewAdapter(List<Comment> comments, LoggedInUser loggedInUser, CommentsListActivity parenActivity) {
                 this.mValues = comments;
                 this.parenActivity = parenActivity;
-                this.userAccountService = userAccountService;
+                this.loggedInUser = loggedInUser;
+                //this.userAccountService = userAccountService;
             }
 
             @Override
@@ -383,11 +398,9 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
 
                 // Empty comment to show no koment available
                 if (getItemCount() == 1 && item.getId() == 0) {
-                    //holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
                     holder.commentText.setText(item.getText());
                     holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.ITALIC);
                     holder.commentText.setTextAlignment(TEXT_ALIGNMENT_CENTER);
-                    //holder.itemView.setTag(item);
                 } else {
 
                     holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
@@ -397,10 +410,13 @@ public class CommentsListActivity extends AppCompatActivity implements UserLogin
                     holder.itemView.setTag(item);
                 }
 
-                LoggedInUser loggedInUser = userAccountService.getLoggedInUser();
-                if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
-                    holder.deleteButtonIcon.setVisibility(VISIBLE);
-                }
+                //if (userAccountService != null) {
+                //if (loggedInUser != null) {
+                    //LoggedInUser loggedInUser = userAccountService.getLoggedInUser();
+                    if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
+                        holder.deleteButtonIcon.setVisibility(VISIBLE);
+                    }
+                //}
 
                 holder.deleteButtonIcon.setOnClickListener(
                         new OnClickListener() {

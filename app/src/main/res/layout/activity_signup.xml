@@ -60,14 +60,17 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:theme="@style/SiteInput.HintAppearance"
+                android:hint="@string/prompt_signup_username"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_signup_username"
+
                     android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,14 +78,17 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:theme="@style/SiteInput.HintAppearance"
+                android:hint="@string/prompt_signup_email"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_signup_email"
+
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,14 +96,17 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:theme="@style/SiteInput.HintAppearance"
+                android:hint="@string/prompt_signup_password"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_signup_password"
+
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -21,12 +21,13 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 0.7.3</string>
-    <string name="about_datum">15. 1. 2020</string>
+    <string name="about_version">v. 1.0.0</string>
+    <string name="about_datum">22. 2. 2020</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
-    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. V budoucnu umožní i zadávání nových lokací přímo z mobilu.</string>
-    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde můžete evidovat další kávové lokace."</string>
+    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
+    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde také můžete evidovat další kávové lokace."</string>
+    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem coffeecompass.cz, kde jsou uložena data o lokacích.</string>
     <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
@@ -120,15 +121,46 @@
     <string name="sladkosti_other_machines_chip">sladkosti</string>
     <string name="bagety_other_machines_chip">bagety</string>
     <string name="other_other_machines_chip">ostatní</string>
-    <string name="invalid_coffeesitename">Jméno lokace musí mít alespoň 4 znaky.</string>
+    <string name="invalid_coffeesitename">Jméno lokace - alespoň 4 znaky a max. 30 znaků.</string>
     <string name="invalid_longitude">Nesprávná hodnota zem. délky</string>
     <string name="invalid_latitude">Nesprávná hodnota zem. šířky</string>
     <string name="coffee_site_create_failure">Nepodařilo se vytvořit lokaci. Na tomto místě je pravděpodobně již jiná lokace.</string>
     <string name="coffee_site_update_failure">Modifikace lokace se nezdařila. Pozice pravděpodobně již obsazena.</string>
-    <string name="coffeesite_created_successfuly">Lokace vytvořena úspěšně.</string>
-    <string name="coffeesite_updated_successfuly">Lokace modifikována úspěšně.</string>
+    <string name="coffeesite_created_successfuly">Lokace úspěšně vytvořena.</string>
+    <string name="coffeesite_updated_successfuly">Lokace úspěšně modifikována.</string>
     <string name="coffeesiteservice_error_message_not_available">Chyba komunikace se serverem.</string>
-    <string name="coffee_site_cancel_failure">Zrušení lokace ne)spěšné. Zkuste prosím později nebo ze stránek coffeecompass.cz</string>
-    <string name="coffeesite_canceled_successfuly">Lokace zrušena úspěšně.</string>
+    <string name="coffee_site_cancel_failure">Zrušení lokace neúspěšné. Zkuste prosím později nebo ze stránek coffeecompass.cz</string>
+    <string name="coffeesite_canceled_successfuly">Lokace úspěšně zrušena.</string>
+    <string name="my_coffeesites_load_failure">Seznam lokací se nepodařilo stáhnout.</string>
+    <string name="coffeesite_activated_successfuly">Lokace úspěšně aktivována.</string>
+    <string name="coffeesite_deactivated_successfuly">Lokace úspěšně deaktivována.</string>
+    <string name="coffeesite_created_and_activated_successfuly">Lokace vytvořena a aktivována.</string>
+    <string name="cancel_coffeesite_dialog_question">Smazat tuto lokaci?</string>
+    <string name="cancel_coffeesite_confirm">SMAZAT</string>
+    <string name="cancel_coffeesite_cancelation">Ponechat</string>
+    <string name="save_or_saveactivate_coffeesite_dialog_question">Chcete novou lokaci pouze uložit nebo i aktivovat?</string>
+    <string name="save_and_activate_coffeesite_confirm">ULOŽIT A AKTIVOVAT</string>
+    <string name="cancel_coffeesite_save">Zrušit</string>
+    <string name="save_only_coffeesite_confirm">Pouze uložit</string>
+    <string name="coffeesite_save_activate">Uložit/aktivovat</string>
+    <string name="save_and_activate_dialog_title">Uložit a aktivovat</string>
+    <string name="save_coffeesite_updated">Uložit</string>
+    <string name="action_add_coffeesite">Vytvořit novou lokaci</string>
+    <string name="coffee_site_activate_failure">Nepodařilo se aktivovat lokaci. Na tomto místě je pravděpodobně již jiná lokace aktivní.</string>
+    <string name="invalid_locationType">Chybí typ lokality</string>
+    <string name="invalid_coffeesite_type">Chybí typ zdroje</string>
+    <string name="permissions_camera_storage_title">Oprávnění</string>
+    <string name="permissions_camera_storage_request">Pro provedení této operace je nutný souhlas s použitím fotoaparátu a úložiště zařízení.</string>
+    <string name="permissions_camera_storage_canel">Zrušit</string>
+    <string name="permissions_camera_storage_settings">NASTAVENÍ</string>
+    <string name="delete_image_dialog_title">Mazání fotky</string>
+    <string name="delete_image_dialog_question">Opravdu chcete smazat fotku pro tuto lokaci?</string>
+    <string name="delete_image_dialog_confirm">SMAZAT</string>
+    <string name="delete_image_dialog_cancel">Zrušit</string>
+    <string name="image_delete_ok">Fotka smazána.</string>
+    <string name="image_delete_success">Fotka úspěšně smazána.</string>
+    <string name="status_active">AKTIVNÍ</string>
+    <string name="status_inactive">NEAKTIVNÍ</string>
+    <string name="status_created">VYTVOŘENO</string>
 
 </resources>
