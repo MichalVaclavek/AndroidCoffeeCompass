@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 public abstract class CoffeeSiteEntity {
 
-
     @Expose
     @SerializedName("id")
     protected int id;

@@ -15,7 +15,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ChangeStatusOfCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteCUDOperationsAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsynTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
@@ -451,7 +451,7 @@ public class CoffeeSiteService extends IntentService implements UserAccountServi
     }
 
     private void findCoffeeSiteById(long coffeeSiteId) {
-        new GetCoffeeSiteAsynTask(this, coffeeSiteId).execute();
+        new GetCoffeeSiteAsyncTask(this, coffeeSiteId).execute();
     }
 
     /**

@@ -26,9 +26,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="24dp"
+            android:paddingLeft="20dp"
             android:paddingTop="24dp"
-            android:paddingRight="24dp">
+            android:paddingRight="20dp">
 
             <TextView
                 android:id="@+id/LoginLabel"
@@ -60,30 +60,29 @@
                 android:textSize="18sp" />
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:theme="@style/SiteInput.HintAppearance"
+                android:layout_marginBottom="8dp"
                 android:hint="@string/username_or_email"
-                android:layout_marginBottom="8dp">
+                android:theme="@style/SiteInput.HintAppearance">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_email"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                     />
+                    android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password Label -->
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:theme="@style/SiteInput.HintAppearance"
-                android:hint="@string/prompt_password"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:hint="@string/prompt_password"
+                android:theme="@style/SiteInput.HintAppearance">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_password"

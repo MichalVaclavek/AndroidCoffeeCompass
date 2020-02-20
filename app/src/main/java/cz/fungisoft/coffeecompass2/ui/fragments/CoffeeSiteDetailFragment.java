@@ -15,6 +15,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListAc
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * A fragment representing a single CoffeeSite detail screen.
@@ -34,7 +35,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
     /**
      * The object this fragment is presenting.
      */
-    //private CoffeeSiteMovable mItem;
     private CoffeeSite mItem;
 
     private DistanceChangeTextView distanceTextView;
@@ -63,20 +63,13 @@ public class CoffeeSiteDetailFragment extends Fragment {
         super.onStop();
     }
 
-    @Override
-    public void onResume() {
-        if (distanceTextView != null) {
-            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
-        }
-        super.onResume();
-    }
 
     @Override
     public void onStart() {
         if (distanceTextView != null && mItem != null
         && mItem instanceof  CoffeeSiteMovable) {
-            distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
             ((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
+            distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
         }
         super.onStart();
     }
@@ -139,8 +132,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 rootView.findViewById(R.id.openingTableRow).setVisibility(View.GONE);
             }
 
-            if (mItem.getHodnoceni() != null && !mItem.getHodnoceni().isEmpty()) {
-                ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni());
+            if (mItem.getHodnoceni() != null && !mItem.getHodnoceni().toString().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.hodnoceniTextView)).setText(mItem.getHodnoceni().toString());
             }  else {
                 rootView.findViewById(R.id.hodnoceni_tablerow).setVisibility(View.GONE);
             }
@@ -160,11 +153,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 distanceTableRow.setVisibility(View.VISIBLE);
 
                 distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
-                distanceTextView.setText(String.valueOf(mItem.getDistance()) + " m");
+                distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
                 distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
 
                 distanceTextView.setCoffeeSite((CoffeeSiteMovable) mItem);
-                ((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
+                //((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
             } else {
                 distanceTableRow.setVisibility(View.GONE);
             }

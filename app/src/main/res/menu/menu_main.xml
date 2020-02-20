@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/action_my_coffeesites"
-        android:icon="@drawable/solo_cup_orange_24"
+        android:icon="@drawable/ic_coffee_cup_main"
         android:title="Moje lokace"
         app:showAsAction="always"></item>
 

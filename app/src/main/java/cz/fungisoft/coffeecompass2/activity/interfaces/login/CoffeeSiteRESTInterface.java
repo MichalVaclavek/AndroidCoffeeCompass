@@ -37,7 +37,7 @@ public interface CoffeeSiteRESTInterface {
      * @param siteId
      * @return
      */
-    @GET("site/{siteId}")
+    @GET("{siteId}")
     Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") long siteId);
 
     /**

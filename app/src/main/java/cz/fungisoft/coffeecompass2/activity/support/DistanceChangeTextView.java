@@ -9,8 +9,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 @SuppressLint("AppCompatCustomView")
+/**
+ * Special version of TextView capable listening of CoffeeSite's distance property changes
+ */
 public class DistanceChangeTextView extends TextView implements PropertyChangeListener
 {
     public DistanceChangeTextView(Context context) {
@@ -34,7 +38,7 @@ public class DistanceChangeTextView extends TextView implements PropertyChangeLi
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (coffeeSite != null) {
-            setText(String.valueOf(coffeeSite.getDistance()) + " m");
+            setText(Utils.getDistanceInBetterReadableForm(coffeeSite.getDistance()));
         }
     }
 

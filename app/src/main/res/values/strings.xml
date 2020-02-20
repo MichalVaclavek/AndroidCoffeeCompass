@@ -26,7 +26,7 @@
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
-    <string name="about_sentence4">"Pokud se vám aplikace líbí, prosím, zaregistrujte se v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde také můžete evidovat další kávové lokace."</string>
+    <string name="about_sentence4">"Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde lze také evidovat další kávové lokace."</string>
     <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem coffeecompass.cz, kde jsou uložena data o lokacích.</string>
     <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
@@ -36,7 +36,7 @@
     <string name="local_service_connected">Connected to location service.</string>
     <string name="local_service_disconnected">Disconnected from location service.</string>
 
-    <string name="no_site_in_range">Žádná káva poblíž :-(</string>
+    <string name="no_site_in_range">Žádná káva poblíž &#128533;</string>
     <string name="current_range">"Aktuální okruh vyhledávání: "</string>
     <string name="still_searching">vyhledávám ... </string>
 
@@ -162,5 +162,7 @@
     <string name="status_active">AKTIVNÍ</string>
     <string name="status_inactive">NEAKTIVNÍ</string>
     <string name="status_created">VYTVOŘENO</string>
+    <string name="coffee_site_load_failure">Nepodařilo se načíst data o lokaci.</string>
+    <string name="no_comments_available">Žádné komentáře k dispozici</string>
 
 </resources>

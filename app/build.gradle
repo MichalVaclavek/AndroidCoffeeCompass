@@ -4,9 +4,9 @@ android {
     signingConfigs {
         release {
             storeFile file('E:\\Programming\\CoffeeCompas_Docs\\Android\\keys\\new_android_keystore.jks')
-            
+            storePassword 'Sicilia.2'
             keyAlias = 'key0'
-            
+            keyPassword 'Sicilia.2'
         }
     }
     compileSdkVersion 28

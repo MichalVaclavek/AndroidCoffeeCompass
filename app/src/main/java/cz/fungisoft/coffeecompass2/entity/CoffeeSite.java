@@ -81,7 +81,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         mesto = in.readString();
         uliceCP = in.readString();
-        hodnoceni = in.readString();
+//        hodnoceni = in.readString();
+        hodnoceni = in.readParcelable(AverageStarsWithNumOfHodnoceni.class.getClassLoader());
 
         createdByUserName = in.readString();
         lastEditUserName = in.readString();
@@ -138,7 +139,8 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         dest.writeString(mesto);
         dest.writeString(uliceCP);
-        dest.writeString(hodnoceni);
+        //dest.writeString(hodnoceni);
+        dest.writeParcelable(hodnoceni, flags);
 
         dest.writeString(createdByUserName);
         dest.writeString(lastEditUserName);
@@ -273,7 +275,10 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @SerializedName("cena")
     protected PriceRange cena;
 
-    protected String hodnoceni;
+    //protected String hodnoceni;
+    @Expose
+    @SerializedName("averageStarsWithNumOfHodnoceni")
+    protected AverageStarsWithNumOfHodnoceni hodnoceni;
 
     @Expose
     @SerializedName("originalUserName")
@@ -380,11 +385,11 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         this.lastEditUserName = lastEditUserName;
     }
 
-    public String getHodnoceni() {
+    public AverageStarsWithNumOfHodnoceni getHodnoceni() {
         return hodnoceni;
     }
 
-    public void setHodnoceni(String hodnoceni) {
+    public void setHodnoceni(AverageStarsWithNumOfHodnoceni hodnoceni) {
         this.hodnoceni = hodnoceni;
     }
 

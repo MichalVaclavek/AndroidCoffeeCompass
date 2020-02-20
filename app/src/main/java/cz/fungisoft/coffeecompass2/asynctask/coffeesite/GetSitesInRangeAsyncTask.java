@@ -25,6 +25,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfHodnoceni;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -213,7 +214,13 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
                         cs.setTypPodniku((CoffeeSiteType) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteType", csObject.getJSONObject("typPodniku")));
                         cs.setTypLokality((SiteLocationType) CoffeeSiteEntitiesFactory.getEntity("SiteLocationType", csObject.getJSONObject("typLokality")));
                         cs.setStatusZarizeni((CoffeeSiteStatus) CoffeeSiteEntitiesFactory.getEntity("CoffeeSiteStatus", csObject.getJSONObject("statusZarizeni")));
-                        cs.setHodnoceni(csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common"));
+                        //cs.setHodnoceni(csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common"));
+                        AverageStarsWithNumOfHodnoceni hodnoceni = new AverageStarsWithNumOfHodnoceni(
+                                csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getInt("avgStars"),
+                                csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getInt("numOfHodnoceni"),
+                                csObject.getJSONObject("averageStarsWithNumOfHodnoceni").getString("common")
+                        );
+                        cs.setHodnoceni(hodnoceni);
                         cs.setCreatedByUserName(csObject.getString("originalUserName"));
                         cs.setCreatedOnString(csObject.getString("createdOn"));
 

@@ -133,7 +133,7 @@ public class CommentsListActivity extends AppCompatActivity
         });
         fab.setVisibility(View.VISIBLE);
 
-        doBindUserLoginService();
+        doBindUserAccountService();
 
         if (Utils.isOnline()) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
@@ -145,7 +145,7 @@ public class CommentsListActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        doUnbindUserLoginService();
+        doUnbindUserAccountService();
         super.onDestroy();
     }
 
@@ -248,7 +248,7 @@ public class CommentsListActivity extends AppCompatActivity
 
     }
 
-    private void doBindUserLoginService() {
+    private void doBindUserAccountService() {
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
@@ -267,7 +267,7 @@ public class CommentsListActivity extends AppCompatActivity
         }
     }
 
-    private void doUnbindUserLoginService() {
+    private void doUnbindUserAccountService() {
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             unbindService(userAccountServiceConnector);
@@ -292,10 +292,10 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     /**
-     * Method to be called from async task after failed request for the number of stars for this CoffeeSite
-     * and User is returned from server.<br>
-     * This method can be called only before a current user wants to open EnterCommentAndRatingDialogFragment
-     *      * to enter Comment and Stars for the CoffeeSite.
+     * Method to be called from Async task after failed request for the number<br>
+     * of stars for this CoffeeSite and User is returned from server.<br>
+     * This method can be called only before a current user wants to open<br>
+     * EnterCommentAndRatingDialogFragment to enter Comment and Stars for the CoffeeSite.
      */
     public void processFailedNumberOfStarsForSiteAndUser(Result.Error error) {
         commentActionsProgressBar.setVisibility(View.GONE);
@@ -305,7 +305,7 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     /**
-     * Method to be called from async task after new comment is added to coffeeSite's list of comments
+     * Method to be called from Async task after new comment is added to coffeeSite's list of comments
      * @param comments
      */
     public void processComments(List<Comment> comments) {
@@ -323,7 +323,7 @@ public class CommentsListActivity extends AppCompatActivity
                 setupRecyclerView((RecyclerView) this.recyclerView);
             } else {
                 List<Comment> emptyComments = new ArrayList<Comment>();
-                emptyComments.add(new Comment("Žádné komentáře k dispozici"));
+                emptyComments.add(new Comment(getString(R.string.no_comments_available)));
                 this.comments = emptyComments;
                 setupRecyclerView((RecyclerView) this.recyclerView);
             }
@@ -371,17 +371,14 @@ public class CommentsListActivity extends AppCompatActivity
             private CommentsListActivity parenActivity;
 
             private LoggedInUser loggedInUser;
-//            private UserAccountService userAccountService;
 
             private int commentIdToDelete;
 
 
-            //CommentItemRecyclerViewAdapter(List<Comment> comments, UserAccountService userAccountService, CommentsListActivity parenActivity) {
             CommentItemRecyclerViewAdapter(List<Comment> comments, LoggedInUser loggedInUser, CommentsListActivity parenActivity) {
                 this.mValues = comments;
                 this.parenActivity = parenActivity;
                 this.loggedInUser = loggedInUser;
-                //this.userAccountService = userAccountService;
             }
 
             @Override
@@ -396,27 +393,31 @@ public class CommentsListActivity extends AppCompatActivity
 
                 final Comment item = mValues.get(position);
 
-                // Empty comment to show no koment available
+                // Empty comment to show no comment available
+                // Also hide rating circles/icons
                 if (getItemCount() == 1 && item.getId() == 0) {
+                    hideRatingSigns(holder);
                     holder.commentText.setText(item.getText());
                     holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.ITALIC);
                     holder.commentText.setTextAlignment(TEXT_ALIGNMENT_CENTER);
                 } else {
-
+                    showRatingSigns(holder);
                     holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
+
+                    // Inserts dots/icons of user's rating
+                    for (int i = item.getStarsFromUser() -1; i >=0 ; i--) {
+                        holder.starsImageView.get(i).setImageDrawable(this.parenActivity.getDrawable(R.drawable.rating_star_full));
+                    }
+
                     holder.commentText.setText(item.getText());
                     holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.NORMAL);
                     holder.commentText.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
                     holder.itemView.setTag(item);
                 }
 
-                //if (userAccountService != null) {
-                //if (loggedInUser != null) {
-                    //LoggedInUser loggedInUser = userAccountService.getLoggedInUser();
-                    if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
-                        holder.deleteButtonIcon.setVisibility(VISIBLE);
-                    }
-                //}
+                if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
+                    holder.deleteButtonIcon.setVisibility(VISIBLE);
+                }
 
                 holder.deleteButtonIcon.setOnClickListener(
                         new OnClickListener() {
@@ -428,6 +429,18 @@ public class CommentsListActivity extends AppCompatActivity
                             }
                         }
                 );
+            }
+
+            private void hideRatingSigns(ViewHolder holder) {
+                for (ImageView starView : holder.starsImageView) {
+                    starView.setVisibility(GONE);
+                }
+            }
+
+            private void showRatingSigns(ViewHolder holder) {
+                for (ImageView starView : holder.starsImageView) {
+                    starView.setVisibility(VISIBLE);
+                }
             }
 
             public int getCommentIdAfterDeleteIconTap() {
@@ -448,11 +461,34 @@ public class CommentsListActivity extends AppCompatActivity
                     final TextView commentText;
                     final ImageView deleteButtonIcon;
 
+                    final ImageView starRating1;
+                    final ImageView starRating2;
+                    final ImageView starRating3;
+                    final ImageView starRating4;
+                    final ImageView starRating5;
+
+                    final List<ImageView> starsImageView;
+
+
                     ViewHolder(View view) {
                         super(view);
+
+                        starsImageView = new ArrayList<>();
+
                         userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
                         commentText = (TextView) view.findViewById(R.id.commentText);
                         deleteButtonIcon = (ImageView) view.findViewById(R.id.deleteIconImageView);
+
+                        starRating5 = (ImageView) view.findViewById(R.id.rating_imageView_5);
+                        starsImageView.add(starRating5);
+                        starRating4 = (ImageView) view.findViewById(R.id.rating_imageView_4);
+                        starsImageView.add(starRating4);
+                        starRating3 = (ImageView) view.findViewById(R.id.rating_imageView_3);
+                        starsImageView.add(starRating3);
+                        starRating2 = (ImageView) view.findViewById(R.id.rating_imageView_2);
+                        starsImageView.add(starRating2);
+                        starRating1 = (ImageView) view.findViewById(R.id.rating_imageView_1);
+                        starsImageView.add(starRating1);
                     }
                 }
         }

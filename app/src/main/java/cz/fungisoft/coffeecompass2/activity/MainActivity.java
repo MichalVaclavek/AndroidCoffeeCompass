@@ -335,7 +335,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private void zobrazPresnostPolohy(Location location) {
         if (location != null && location.hasAccuracy()) {
             setAccuracyTextColor(barvaBlack);
-            accuracy.setText("(\u00B1 "  + location.getAccuracy() + " m)");
+            accuracy.setText("(\u00B1 "  + Math.round(location.getAccuracy()) + " m)");
         } else {
             setAccuracyTextColor(barvaRed);
             accuracy.setText("");

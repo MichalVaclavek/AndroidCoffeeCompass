@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * A Comment belonging to a CoffeeSite.
@@ -27,6 +26,12 @@ public class Comment implements Serializable, Parcelable {
 
     private String userName;
 
+    /**
+     * The server sends also info about stars rating from the UserName for this
+     * CoffeeSite to be displayed together with comment
+     */
+    private int starsFromUser = 0;
+
     private boolean canBeDeleted;
 
     private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
@@ -45,6 +50,7 @@ public class Comment implements Serializable, Parcelable {
             coffeeSiteID = in.readInt();
         }
         userName = in.readString();
+        starsFromUser = in.readInt();
         canBeDeleted = in.readByte() != 0;
     }
 
@@ -82,6 +88,7 @@ public class Comment implements Serializable, Parcelable {
             dest.writeInt(coffeeSiteID);
         }
         dest.writeString(userName);
+        dest.writeInt(starsFromUser);
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
     }
 
@@ -137,29 +144,38 @@ public class Comment implements Serializable, Parcelable {
         this.created = created;
     }
 
+    public int getStarsFromUser() {
+        return starsFromUser;
+    }
+
+    public void setStarsFromUser(int starsFromUser) {
+        this.starsFromUser = starsFromUser;
+    }
+
     public Comment() {}
 
     public Comment(String emtpyText) {
-        this(0, emtpyText, 0, "", false);
+        this(0, emtpyText, 0, "", false, 0);
     }
 
 
-    private Comment(Integer id, String commentText, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
+    private Comment(Integer id, String commentText, Integer coffeeSiteId, String userName, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this.id = id;
         this.text = commentText;
         this.coffeeSiteID = coffeeSiteId;
         this.userName = userName;
+        this.starsFromUser = starsFromUserForTheCoffeeSite;
         this.canBeDeleted = canBeDeleted;
         setCreated(new Date());
     }
 
-    public Comment(Integer id, String commentText, Date createdOn, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
-        this(id, commentText, coffeeSiteId, userName, canBeDeleted);
+    public Comment(Integer id, String commentText, Date createdOn, Integer coffeeSiteId, String userName, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+        this(id, commentText, coffeeSiteId, userName, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreated(createdOn);
     }
 
-    public Comment(Integer id, String commentText, String createdOnString, Integer coffeeSiteId, String userName, boolean canBeDeleted) {
-        this(id, commentText, coffeeSiteId, userName, canBeDeleted);
+    public Comment(Integer id, String commentText, String createdOnString, Integer coffeeSiteId, String userName, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+        this(id, commentText, coffeeSiteId, userName, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreatedOnString(createdOnString);
     }
 

@@ -104,11 +104,26 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      */
     static final int CREATE_COFFEESITE_REQUEST = 2;
 
+
     /**
      * Flag to indicato if the list of user's CoffeeSites is being loading
      * to check if the MenuItems should be enabled or disable
      */
     private boolean listOfSitesIsBeingLoading = false;
+
+    /**
+     * Getter and setter to be synchronized to update status correctly when
+     * CoffeeSites load async task is running.
+     * Really needed?
+     * @return
+     */
+    public synchronized boolean isListOfSitesIsBeingLoading() {
+        return listOfSitesIsBeingLoading;
+    }
+
+    public synchronized void setListOfSitesIsBeingLoading(boolean listOfSitesIsBeingLoading) {
+        this.listOfSitesIsBeingLoading = listOfSitesIsBeingLoading;
+    }
 
 
     @Override
@@ -177,7 +192,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // this method is invoked by invalidateOptionsMenu
         // called before and after loading i.e. in showProgressBar
         // and hideProgressBar metods
-        if (listOfSitesIsBeingLoading) {
+        if (isListOfSitesIsBeingLoading()) {
             addCoffeeSiteMenuItem.setEnabled(false);
             reloadMyCoffeeSitesMenuItem.setEnabled(false);
         } else {
@@ -349,7 +364,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void showProgressbarAndDisableMenuItems() {
-        listOfSitesIsBeingLoading = true;
+        setListOfSitesIsBeingLoading(true);
         invalidateOptionsMenu();
         loadMyCoffeeSitesProgressBar.setVisibility(View.VISIBLE);
     }
@@ -358,7 +373,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void hideProgressbarAndEnableMenuItems() {
-        listOfSitesIsBeingLoading = false;
+        setListOfSitesIsBeingLoading(false);
         invalidateOptionsMenu();
         loadMyCoffeeSitesProgressBar.setVisibility(View.GONE);
     }

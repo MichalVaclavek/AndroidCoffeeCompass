@@ -11,6 +11,7 @@
     <color name="selectedSearchDistanceBackround">#C1F1CC8A</color>
     <color name="listOfDistancesBackround">#FCD8A6</color>
     <color name="chip_gray">#DDDDDD</color>
-
+    <color name="site_status_gray">#C5C5C5</color>
+    <color name="site_status_dark_gray">#959595</color>
 </resources>
 

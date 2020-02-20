@@ -169,7 +169,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * Receiver for the CoffeeSiteService
      */
     private CoffeeSiteEntitiesServiceReciever coffeeSiteEntitiesServiceReceiver;
-    private CoffeeSiteServiceOperationsReceiver coffeeSiteServiceReciever;
+    private CoffeeSiteServiceOperationsReceiver coffeeSiteServiceReceiver;
 
     private CoffeeSite currentCoffeeSite;
 
@@ -518,7 +518,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteEntitiesServiceReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReciever);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReceiver);
         super.onStop();
     }
 
@@ -867,11 +867,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     private void registerCoffeeSiteOperationsReceiver() {
         Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), start");
-        coffeeSiteServiceReciever = new CoffeeSiteServiceOperationsReceiver();
+        coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_OPERATION);
         intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_STATUS); // because of Save and Activate Operation
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReciever, intentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
         Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), end");
     }
 

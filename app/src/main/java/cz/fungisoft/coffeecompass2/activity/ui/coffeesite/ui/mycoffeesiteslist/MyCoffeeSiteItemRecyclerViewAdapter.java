@@ -158,6 +158,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.locAndTypeView.setText(this.mValues.get(position).getTypPodniku().toString() + ", " +  this.mValues.get(position).getTypLokality().toString());
         viewHolder.createdOnView.setText(this.mValues.get(position).getCreatedOnString());
 
+        // Set default color for CoffeeSite Status view
+        viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
         // Prelozeni jmen statusu CoffeeSitu
         String status = this.mValues.get(position).getStatusZaznamu().toString();
         switch(status)
@@ -171,6 +173,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 break;
             case "CREATED":
                 viewHolder.statusView.setText(R.string.status_created);
+                viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_dark_gray));
                 break;
             default:
                 viewHolder.statusView.setText(this.mValues.get(position).getStatusZaznamu().toString());
@@ -180,7 +183,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             viewHolder.cityView.setText(this.mValues.get(position).getMesto());
         }
 
-        //viewHolder.siteFoto.setImageDrawable(null);
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
             Picasso.get().load(this.mValues.get(position).getMainImageURL()).into(viewHolder.siteFoto);
         } else {
@@ -271,9 +273,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
 
                 activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
+                // set origan icon
+                activateCoffeeSiteButton.setImageResource(R.drawable.round_play_circle_outline_green_18);
                 activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
 
                 deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
+                deactivateCoffeeSiteButton.setImageResource(R.drawable.round_pause_circle_outline_black_18);
                 deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
 
                 cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);

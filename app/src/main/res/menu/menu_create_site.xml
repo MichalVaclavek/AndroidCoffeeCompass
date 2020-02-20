@@ -3,13 +3,13 @@
     <item
         android:id="@+id/navigation_ulozit_and_or_aktivovat"
         android:enabled="false"
-        android:icon="@drawable/baseline_save_white_18dp"
+        android:icon="@drawable/ic_floppy_disk"
         android:title="@string/coffeesite_save_activate" />
 
     <item
         android:id="@+id/navigation_foto_delete"
         android:enabled="false"
-        android:icon="@drawable/remove_image_white_24"
+        android:icon="@drawable/ic_delete_picture"
         android:title="Smazat foto" />
 
 </menu>

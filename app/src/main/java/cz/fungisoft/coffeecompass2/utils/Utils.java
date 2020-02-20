@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -89,7 +91,7 @@ public class Utils {
     public static  String convertSearchDistance(int searchRange) {
         // Prevod na km
         return (searchRange >= 1000) ? " (" + searchRange/1000 + " km)"
-                                  : " (" + searchRange + " m)";
+                                     : " (" + searchRange + " m)";
     }
 
     /**
@@ -111,5 +113,46 @@ public class Utils {
         }
     }
 
+    /**
+     * Rounds double or float to given number of decimal places
+     *
+     * @param value
+     * @param places
+     * @return
+     */
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    /**
+     * Returns distnace in meters in following format:
+     *
+     * 0 m like - m
+     * up tp 999 m
+     * over 1000 m lke 1.1 km and so on
+     * over/equal 10 000 m like whole  kilometers
+     * @param distance
+     * @return
+     */
+    public static String getDistanceInBetterReadableForm(long distance) {
+
+        if (distance == 0) {
+            return "- m";
+        }
+        if (distance > 0 && distance < 1000) {
+            return distance + " m";
+        }
+        if (distance >= 1000 && distance < 10000) {
+            return Utils.round(distance / 1000d, 1) + " km";
+        }
+        if (distance >= 10000) {
+            return (Math.round(distance / 1000d)) + " km";
+        }
+        return "- m";
+    }
 
 }

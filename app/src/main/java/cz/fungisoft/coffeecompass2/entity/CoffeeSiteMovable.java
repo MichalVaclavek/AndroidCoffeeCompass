@@ -14,12 +14,12 @@ import cz.fungisoft.coffeecompass2.services.LocationService;
 /**
  * CoffeeSite which is able to listen locationService changes
  * and update it's distance from current location accordingly.<br>
- * Class is also capable to register listeners for 'distance'
- * change event.
+ * Another Class can also to register listeners for 'distance'
+ * change event of this CoffeeSiteMovable class
  */
 public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable
 {
-    private static final String TAG = "CoffeeSiteMovable:";
+    private static final String TAG = "CoffeeSiteMovable";
     /**
      * Support for property change, 'distance' in this case.
      */
@@ -70,6 +70,45 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
 
     public CoffeeSiteMovable() {
         super();
+    }
+
+    /**
+     * Constructor capable to create instance of CoffeeSiteMovable
+     * from its CoffeeSite ancestor instance.
+     * @param coffeeSite
+     */
+    public CoffeeSiteMovable(CoffeeSite coffeeSite) {
+        super();
+        this.setId(coffeeSite.getId());
+        this.setName(coffeeSite.getName());
+        this.setDistance(coffeeSite.getDistance());
+
+
+        this.setLatitude(coffeeSite.getLatitude());
+        this.setLongitude(coffeeSite.getLongitude());
+
+        this.setMainImageURL(coffeeSite.getMainImageURL());
+
+        this.setCena(coffeeSite.getCena());
+
+        this.setUliceCP(coffeeSite.getUliceCP());
+        this.setMesto(coffeeSite.getMesto());
+        this.setTypPodniku(coffeeSite.getTypPodniku());
+        this.setTypLokality(coffeeSite.getTypLokality());
+        this.setStatusZarizeni(coffeeSite.getStatusZarizeni());
+        this.setHodnoceni(coffeeSite.getHodnoceni());
+        this.setCreatedByUserName(coffeeSite.getCreatedByUserName());
+        this.setCreatedOnString(coffeeSite.getCreatedOnString());
+
+        this.setUvodniKoment(coffeeSite.getUvodniKoment());
+
+        this.setOteviraciDobaDny(coffeeSite.getOteviraciDobaDny());
+        this.setOteviraciDobaHod(coffeeSite.getOteviraciDobaHod());
+
+        this.setCupTypes(coffeeSite.getCupTypes());
+        this.setNextToMachineTypes(coffeeSite.getNextToMachineTypes());
+        this.setCoffeeSorts(coffeeSite.getCoffeeSorts());
+        this.setOtherOffers(coffeeSite.getOtherOffers());
     }
 
     public CoffeeSiteMovable(int id, String name, long dist) {

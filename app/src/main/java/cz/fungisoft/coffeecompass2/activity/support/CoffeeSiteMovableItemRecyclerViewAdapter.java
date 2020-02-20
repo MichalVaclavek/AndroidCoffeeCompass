@@ -29,6 +29,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Adapter to show found list of CoffeeSitesMovable
@@ -345,7 +346,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
         viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
 
-        viewHolder1.distanceView.setText(this.mValues.get(position).getDistance() + " m");
+        //viewHolder1.distanceView.setText(this.mValues.get(position).getDistance() + " m");
+        viewHolder1.distanceView.setText(Utils.getDistanceInBetterReadableForm(this.mValues.get(position).getDistance()));
         viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));
         viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
 

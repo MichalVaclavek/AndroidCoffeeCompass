@@ -16,6 +16,7 @@ import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteImageFragment;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Activity to show main Image of the CoffeeSite and the distance attribute
@@ -53,6 +54,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
                 cs = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
             } else {
                 cs = bundle.getParcelable("coffeeSite");
+                //cs = new CoffeeSiteMovable(cs);
             }
         }
         if (appBarLayout != null && cs != null) {
@@ -62,7 +64,8 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         distLabel = (DistanceChangeTextView) findViewById(R.id.distTextView);
         if (cs instanceof CoffeeSiteMovable) {
             distLabel.setVisibility(View.VISIBLE);
-            distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+            //distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+            distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
             distLabel.setTag(TAG + ". DistanceTextView for " + cs.getName());
             distLabel.setCoffeeSite((CoffeeSiteMovable) cs);
         } else {
@@ -106,7 +109,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         super.onResume();
         if (cs instanceof  CoffeeSiteMovable) {
             ((CoffeeSiteMovable) cs).addPropertyChangeListener(distLabel);
-            distLabel.setText(String.valueOf(cs.getDistance()) + " m");
+            distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
         }
     }
 

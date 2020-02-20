@@ -26,9 +26,9 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * ASyncTask to call REST api obtaining one CoffeeSite
  * by its id
  */
-public class GetCoffeeSiteAsynTask extends AsyncTask<Void, Void, Void> {
+public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "GetCoffeeSiteAsynTask";
+    private static final String TAG = "GetCoffeeSiteAsyncTask";
 
     private final CoffeeSiteService callingService;
 
@@ -37,7 +37,7 @@ public class GetCoffeeSiteAsynTask extends AsyncTask<Void, Void, Void> {
     private String operationResult = "";
     private String operationError = "";
 
-    public GetCoffeeSiteAsynTask(CoffeeSiteService callingService, long coffeeSiteId) {
+    public GetCoffeeSiteAsyncTask(CoffeeSiteService callingService, long coffeeSiteId) {
         this.callingService = callingService;
         this.coffeeSiteId = coffeeSiteId;
     }
@@ -58,7 +58,7 @@ public class GetCoffeeSiteAsynTask extends AsyncTask<Void, Void, Void> {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL)
+                .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
@@ -66,7 +66,6 @@ public class GetCoffeeSiteAsynTask extends AsyncTask<Void, Void, Void> {
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
         Call<CoffeeSite> call = api.getCoffeeSiteById(coffeeSiteId);
-
 
         Log.i(TAG, "start call");
 
