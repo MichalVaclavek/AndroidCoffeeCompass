@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.login;
+package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 
@@ -12,11 +12,11 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
  */
 public interface UserAccountActionsEvaluator {
 
-    public void evaluateLoginResult(Result result);
+    void evaluateLoginResult(Result result);
 
-    public void evaluateRegisterResult(Result result);
+    void evaluateRegisterResult(Result result);
 
-    public void evaluateLogoutResult(Result result);
+    void evaluateLogoutResult(Result result);
 
-    public void evaluateDeleteResult(Result result);
+    void evaluateDeleteResult(Result result);
 }

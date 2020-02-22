@@ -9,9 +9,9 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLogoutRESTR
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 
 /**
- * Class that handles authentication w/ login credentials and retrieves user information.
- *
- * Contacts server via REST to perform login
+ * Class that handles authentication / login credentials and retrieves logged-in user information.
+ * Calls respective methods of the REST requests classes to perform register, login, logout
+ * and delete of a user.
  */
 public class UserAccountDataSource {
 

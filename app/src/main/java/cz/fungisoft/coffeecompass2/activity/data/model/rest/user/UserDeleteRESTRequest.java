@@ -7,8 +7,8 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountRESTInterface;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -19,8 +19,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * REST user login or register request to be sent to server coffeecompass.cz
- * {@link JwtUserToken} is container for the answer to this request.
+ * REST user delete request to be sent to server coffeecompass.cz
  */
 public class UserDeleteRESTRequest {
 
@@ -28,11 +27,16 @@ public class UserDeleteRESTRequest {
 
     private UserAccountActionsEvaluator userAccountService;
 
+    /**
+     * User account to be deleted
+     */
     private final LoggedInUser user;
 
     /**
+     * Standard Constructor
      *
-     * @param user
+     * @param user user account to be deleted
+     * @param userDeleteService userAccount service to handle results of the delete REST call
      */
     public UserDeleteRESTRequest(LoggedInUser user, UserAccountActionsEvaluator userDeleteService) {
         super();
@@ -67,7 +71,6 @@ public class UserDeleteRESTRequest {
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
-        //Call<String> call = api.deleteUser(this.user.getUserName());
         Call<String> call = api.deleteUserById(user.getUserId());
 
         call.enqueue(new Callback<String>() {
@@ -75,15 +78,15 @@ public class UserDeleteRESTRequest {
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        Log.i("onSuccess", response.body());
-                        //TODO overeni, ze v odpovedi se vratilo ID, ktere bylo pozadovano ke smazani
+                        Log.i(REQ_TAG, response.body());
+                        // overeni, ze v odpovedi se vratilo ID, ktere bylo pozadovano ke smazani
                         if (response.body().equals(user.getUserId())) {
                             userAccountService.evaluateDeleteResult(new Result.Success<>(user.getUserName()));
                         } else {
                             userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response user ID doesn't equal to requested ID.")));
                         }
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response for delete user account request.");
+                        Log.i(REQ_TAG, "Returned empty response for delete user account request.");
                         userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response empty.")));
                     }
                 } else {
@@ -106,6 +109,3 @@ public class UserDeleteRESTRequest {
     }
 
 }
-
-
-

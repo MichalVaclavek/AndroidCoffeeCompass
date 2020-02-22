@@ -11,7 +11,7 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.OkHttpClient;

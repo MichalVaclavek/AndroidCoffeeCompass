@@ -37,10 +37,9 @@ public class CommentAndStarsToSave {
 
 
     /**
-     * Inner class for holding number of stars. Needed
-     * for automatic parsing within Retrofit when reading
-     * from server.
-     *
+     * Inner class for holding number of stars. Needed<br>
+     * for automatic parsing within Retrofit when reading<br>
+     * from server.<br>
      */
     public static class Stars {
 

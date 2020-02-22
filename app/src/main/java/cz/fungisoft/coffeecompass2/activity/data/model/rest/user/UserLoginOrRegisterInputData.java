@@ -1,7 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
 /**
- * Class to hold information fields needed for user login or register
+ * Class to hold information fields needed for user login or register.
+ * Used as an input for REST requests to coffeecompass.cz server.
  */
 public class UserLoginOrRegisterInputData {
 
@@ -51,4 +52,5 @@ public class UserLoginOrRegisterInputData {
             this.email = email;
         }
     }
+
 }

@@ -16,13 +16,12 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 
 /**
- * Data class that captures user information for logged in users retrieved from UserAccountRepository.
+ * Data class that collects user information for logged in users retrieved from UserAccountRepository.
  * Based on server REST API available items for current logged-in user.
  *
  * authProvider": "string",
  *   "createdOn": {
  *     "date": 0,
- *
  *   },
  *   "createdSites": 0,
  *   "deletedSites": 0,
@@ -85,19 +84,20 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-
-
     private List<String> userRoles;
+
     /**
-     * ID to identify device to keep user loged-in
+     * ID to identify device to keep user logged-in
      * when he/her opens app. again.
      */
     private String deviceID;
 
     /**
-     * Token created and sent by server to mobile app after
+     * Token created and sent by server to mobile app. after
      * successful login. This is used for next login as identity
      * of user/device instead of username/password.
+     * Also used for all other REST requests to coffeecompass.cz
+     * which are allowed for authenticated users only.
      */
     private JwtUserToken loginToken;
 
@@ -140,11 +140,7 @@ public class LoggedInUser implements Serializable {
 
     public void setLastName(String lastName) {
 
-        if (lastName.equals("null")) {
-            this.lastName = "";
-        } else {
-            this.lastName = lastName;
-        }
+        this.lastName = ("null".equals(lastName)) ? "" : lastName;
     }
 
     public List<String> getUserRoles() {
@@ -237,7 +233,7 @@ public class LoggedInUser implements Serializable {
 
     /**
      * Sets all the attributes of this object based on currentUser
-     * i.e creates clone clone of currentUser.
+     * i.e creates clone of currentUser.
      * Used to get current user from inner class of JsonObjectRequest.Response.Listener<JSONObject>
      * @param currentUser
      */
@@ -257,6 +253,13 @@ public class LoggedInUser implements Serializable {
         setNumOfUpdatedSites(currentUser.getNumOfUpdatedSites());
     }
 
+    /**
+     * Helper method to parse JSON response from coffeecompass.cz containing user's account
+     * data after successful register or login.
+     *
+     * @param jsonResponse SON response from coffeecompass.cz containing user's account  data
+     * @throws JSONException
+     */
     public void setupUserDataFromJson(String jsonResponse) throws JSONException {
 
         try {
@@ -282,4 +285,5 @@ public class LoggedInUser implements Serializable {
             throw e;
         }
     }
+
 }

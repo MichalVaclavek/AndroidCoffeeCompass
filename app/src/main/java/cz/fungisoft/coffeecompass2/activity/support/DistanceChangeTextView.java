@@ -13,7 +13,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 @SuppressLint("AppCompatCustomView")
 /**
- * Special version of TextView capable listening of CoffeeSite's distance property changes
+ * Special version of TextView capable listening of CoffeeSite's distance property change.
  */
 public class DistanceChangeTextView extends TextView implements PropertyChangeListener
 {
@@ -35,6 +35,10 @@ public class DistanceChangeTextView extends TextView implements PropertyChangeLi
 
     private CoffeeSiteMovable coffeeSite;
 
+    /**
+     * Enter the new distance value as this TextView text property.
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (coffeeSite != null) {

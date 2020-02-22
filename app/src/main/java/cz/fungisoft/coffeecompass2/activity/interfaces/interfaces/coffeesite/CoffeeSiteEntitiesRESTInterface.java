@@ -1,7 +1,8 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.login;
+package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
@@ -17,7 +18,7 @@ import retrofit2.http.GET;
 
 public interface CoffeeSiteEntitiesRESTInterface {
 
-    String GET_ENTITY_BASE = "https://coffeecompass.cz/rest/site/";
+    String GET_ENTITY_BASE = BuildConfig.COFFEESITE_API_PUBLIC_URL;
 
     /**
      * REST call for obtain OtherOffer enetities

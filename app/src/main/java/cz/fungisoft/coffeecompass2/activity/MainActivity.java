@@ -236,8 +236,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      */
     private void getNumberOfCoffeeSitesFromLoggedInUser() {
         if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-            //registerCoffeeSiteServiceReceiver();
-            //numberOfCoffeeSitesCreatedByLoggedInUser = 0;
             startNumberOfCoffeeSitesFromUserService();
         }
     }
@@ -548,8 +546,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         zobrazPresnostPolohy(location);
         updateAccuracyIndicator(location);
         if (location != null) {
-//            searchEspressoButton.setEnabled(true);
-            //hideProgressbarAndEnableMenuItems();
             searchKafeButton.setEnabled(true);
         }
     }
@@ -604,7 +600,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     protected void onPause() {
-//        searchEspressoButton.setEnabled(false);
         searchKafeButton.setEnabled(false);
         // Kontrola opravneni
         if (ActivityCompat.checkSelfPermission(this,
@@ -656,7 +651,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         // (and thus won't be supporting component replacement by other
         // applications).
 
-        //userAccountServiceConnector = new UserAccountServiceConnector(this);
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
         if (bindService(new Intent(this, UserAccountService.class),
@@ -734,7 +728,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     protected void onDestroy() {
-        //doUnbindUserLoginService();
         super.onDestroy();
     }
 

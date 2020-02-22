@@ -7,8 +7,8 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -26,13 +26,21 @@ public class UserLogoutRESTRequest {
 
     static final String REQ_TAG = "UserLogoutREST";
 
-    //private UserAccountService userAccountService;
+    // Activity or Service implementing interface for evaluation of the
+    // user logout REST call attempt response
     private UserAccountActionsEvaluator userAccountService;
 
+    /**
+     * User to be logged-out
+     */
     final LoggedInUser currentUser;
 
     /**
+     * Standard constructor.
      *
+     * @param currentUser - user to be logged-out
+     * @param userLogoutService - service to process logout attempt response. Usually UserAccountService responsible
+     *                          for user's account actions.
      */
     public UserLogoutRESTRequest(LoggedInUser currentUser, UserAccountService userLogoutService) {
         super();
@@ -40,6 +48,10 @@ public class UserLogoutRESTRequest {
         this.currentUser = currentUser;
     }
 
+    /**
+     * Main class to call Retrofit library methods to perform logout REST API call
+     * and for passing the result of the call to {@link UserAccountService}
+     */
     public void performLogoutRequest() {
 
         Log.d(REQ_TAG, "UserLogoutRESTRequest initiated");
@@ -72,15 +84,15 @@ public class UserLogoutRESTRequest {
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        Log.i("onSuccess", response.body().toString());
-                        //TODO overeni, ze v odpovedi je Boolean=true
+                        Log.i(REQ_TAG, response.body().toString());
+                        // If true is an answer, then the Logout request was successful
                         if ("true".equals(response.body().toString())) {
                             userAccountService.evaluateLogoutResult(new Result.Success<>(currentUser.getUserName()));
                         } else {
                             userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user. Response FALSE.")));
                         }
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
+                        Log.i(REQ_TAG, "Returned empty response");//Toast.makeText(getContext(),"Nothing returned",Toast.LENGTH_LONG).show();
                         userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user. Response empty.")));
                     }
                 } else {
@@ -96,13 +108,10 @@ public class UserLogoutRESTRequest {
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e(REQ_TAG, "Error executing Login user REST request." + t.getMessage());
+                Log.e(REQ_TAG, "Error executing Logout user REST request." + t.getMessage());
                 userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user.", t)));
             }
         });
     }
 
 }
-
-
-

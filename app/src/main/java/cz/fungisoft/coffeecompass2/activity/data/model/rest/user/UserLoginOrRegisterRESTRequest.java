@@ -8,7 +8,7 @@ import com.google.gson.GsonBuilder;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,31 +18,43 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountRESTInterface;
 
 /**
  * REST user login or register request to be sent to server coffeecompass.cz
- * {@link JwtUserToken} is container for the answer to this request.
+ * The request consists of two subsequent REST requests. First is login or
+ * register request, which is finished by receiving JWT token only, if successful.
+ * {@link JwtUserToken} is container for the answer to the first request
+ * and is then used for subsequent REST call obtaining user's account data.
  */
 public class UserLoginOrRegisterRESTRequest {
 
     static final String REQ_TAG = "UserLoginOrRegisterREST";
 
+    /**
+     * User register or login REST input data structure expected by server, sent using JSON
+     */
     private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
+    /**
+     * Evaluator of the user register or login REST response
+     */
     private UserAccountActionsEvaluator userLoginAndRegisterService;
 
+    /**
+     * User data obtained from server as a result of login or register process
+     */
     private final LoggedInUser currentUser;
 
-    private static int PERFORM_LOGIN = 1;
-    private static int PERFORM_REGISTER = 2;
+    private static final int PERFORM_LOGIN = 1;
+    private static final int PERFORM_REGISTER = 2;
 
     /**
      *
-     * @param deviceID
-     * @param email
-     * @param userName
-     * @param password
+     * @param deviceID - identification of device from which the user is trying to login or register
+     * @param email - email of the user to be used for registration of a new user
+     * @param userName - username to be used for registration or login of the user
+     * @param password - password entered by user, used to register or login
      */
     public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsEvaluator userLoginAndRegisterService) {
         super();
@@ -60,6 +72,14 @@ public class UserLoginOrRegisterRESTRequest {
         performRequest(PERFORM_REGISTER);
     }
 
+    /**
+     * Main method to perform new user Register or Login request.
+     * Uses Retrofit library to initiate REST API request.
+     * Calls evaluation methods of {@link #userLoginAndRegisterService} to
+     * process responses from server.
+     *
+     * @param requestType
+     */
     private void performRequest(final int requestType) {
 
         Log.d(REQ_TAG, "UserLoginOrRegisterRESTRequest initiated");
@@ -68,7 +88,8 @@ public class UserLoginOrRegisterRESTRequest {
                                      .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                                        .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL : UserAccountRESTInterface.REGISTER_USER_URL)
+                                        .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL
+                                                                                : UserAccountRESTInterface.REGISTER_USER_URL)
                                         .addConverterFactory(ScalarsConverterFactory.create())
                                         .addConverterFactory(GsonConverterFactory.create(gson))
                                         .build();
@@ -87,8 +108,9 @@ public class UserLoginOrRegisterRESTRequest {
             public void onResponse(Call<JwtUserToken> call, Response<JwtUserToken> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        Log.i("onSuccess", response.body().toString());
-
+                        Log.i(REQ_TAG, response.body().toString());
+                        // If there is successful response, then it contains JWT token as the login/register process passed
+                        // JWT token can be then used for subsequent REST request to obtain user's profile data
                         CurrentUserRESTRequest currentUserRESTRequest = new CurrentUserRESTRequest(response.body(), userLoginAndRegisterService);
                         if (requestType == PERFORM_LOGIN) {
                             currentUserRESTRequest.performRequestAfterLogin();
@@ -97,7 +119,7 @@ public class UserLoginOrRegisterRESTRequest {
                         }
                         return;
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");
+                        Log.i(REQ_TAG, "Returned empty response");
                         if (requestType == PERFORM_LOGIN) {
                             userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user. Response empty.")));
                         } else {

@@ -32,10 +32,14 @@ import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * Adapter to show found list of CoffeeSitesMovable
+ * Adapter to show found list of {@link cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable}.
+ * Is capable to react on events defined by CoffeeSiteMovable,
+ * especially the distance change event of any of the CoffeeSiteMovable
+ * item in the list.
  */
-public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PropertyChangeListener {
-
+public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+                                                      implements PropertyChangeListener
+{
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final FoundCoffeeSitesListActivity mParentActivity;
@@ -45,7 +49,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     private final boolean mTwoPane;
 
     private View.OnClickListener mOnClickListener;
-    private static LocationService mLocationService;
+    //private static LocationService mLocationService;
 
     private int currentSearchRange;
 
@@ -59,7 +63,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
     /**
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
-     * caused by new distance detected within one of the CoffeeSiteMovable in the list.<br>
+     * caused by new distance event detected within one of the CoffeeSiteMovable in the list.<br>
      *
      * @param evt - event of CoffeeSite's 'distance' property change
      */
@@ -124,7 +128,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
     /**
-     * Inserts newly detected sites.
+     * Inserts newly detected sites in the searched range.
      *
      * @param newSites
      */
@@ -134,10 +138,9 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         if (mValues.size() >= 1 && mValues.get(0).getName().equals("Dummy")) {
             mValues.remove(0);
             this.notifyItemRemoved(0);
-            //this.notifyItemRangeChanged(0, mValues.size());
         }
-
-        for (CoffeeSiteMovable csmToInsert : newSites) { // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
+        // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
+        for (CoffeeSiteMovable csmToInsert : newSites) {
             int posToInsert = -1;
             for (int i = 0; i < mValues.size(); i++) {
                 if ((csmToInsert.getDistance() < mValues.get(i).getDistance()) ) {
@@ -160,18 +163,18 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      * @param oldSites
      */
     public void removeOldSites(List<CoffeeSiteMovable> oldSites) {
-        //Go through all curent sites and remove old sites
+        //Go through all current sites and remove sites being out of range
         for (CoffeeSiteMovable csmToRemove : oldSites) {
             for (int i = mValues.size() - 1; i >= 0  ; i--) {
                 if (mValues.get(i).getId() == csmToRemove.getId()) {
                     mValues.remove(i);
                     this.notifyItemRemoved(i);
-                    //this.notifyItemRangeChanged(i, mValues.size());
                     break;
                 }
             }
         }
 
+        // If the list is empty now, insert an 'Empty card'
         if (mValues.size() == 0) {
             mValues.add(0, dummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
@@ -189,14 +192,14 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     public CoffeeSiteMovableItemRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
                                                     CoffeeSiteMovableListContent content,
                                                     int currentSearchRange,
-                                                    LocationService locationService,
+                                                    //LocationService locationService,
                                                     boolean twoPane) {
         this.content = content;
         this.currentSearchRange = currentSearchRange;
         mValues = this.content.getItems();
         mParentActivity = parent;
         mTwoPane = twoPane;
-        mLocationService = locationService;
+        //mLocationService = locationService;
 
         searchingDistanceLabel = mParentActivity.getResources().getString(R.string.current_range);
 
@@ -216,6 +219,9 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             public void onClick(View view) {
                 CoffeeSiteMovable item = (CoffeeSiteMovable) view.getTag();
                 if (mTwoPane) {
+                    // Open CoffeeSiteDetailFragment, if the item is clicked and there is
+                    // landscape orientation
+                    // to show details of the CoffeeSiteMovable holding this item
                     Bundle arguments = new Bundle();
                     arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.getId()));
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
@@ -225,6 +231,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
                             .replace(R.id.coffeesite_detail_container, fragment)
                             .commit();
                 } else {
+                    // Open CoffeeSiteDetailActivity if the item is clicked
+                    // to show details of the CoffeeSiteMovable holding this item
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) item);
@@ -241,11 +249,13 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         RecyclerView.ViewHolder retVal = null;
 
         switch (viewType) {
+            // Case 0 for standard View with any CoffeeSiteMovable in the list available
             case 0:
                 View view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.coffeesite_list_content, parent, false);
                 retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.ViewHolder1(view);
                 break;
+            // Case -1 for 'Empty card'
             case -1:
                 View view2 = LayoutInflater.from(parent.getContext())
                              .inflate(R.layout.coffeesite_list_emptycard, parent, false);
@@ -259,11 +269,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
 
         switch (viewHolder.getItemViewType()) {
+            // Case 0 for standard View with any CoffeeSiteMovable in the list available
             case 0:
                 ViewHolder1 viewHolder1 = (ViewHolder1) viewHolder;
                 setupBasicViewHolder(position, viewHolder1);
                 break;
-
+            // Case -1 for 'Empty card'
             case -1:
                 EmptyCardViewHolder emptyCardViewHolder = (EmptyCardViewHolder) viewHolder;
                 setupEmptyCardViewHolder(emptyCardViewHolder);
@@ -271,6 +282,15 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         }
     }
 
+    /**
+     * Returns itemVIewType to distinquish if the list of mValues contains standard items i.e.
+     * CoffeeSiteMovable or if it contains only 'Empty card' informing that the standard list
+     * is empty.
+     * Type 0 for standard View i.e. CoffeeSiteMovable in the list available
+     * Type -1 for 'Empty card' i.e. standard list is empty
+     * @param position
+     * @return
+     */
     @Override
     public int getItemViewType(int position) {
         int retViewType = 0;
@@ -342,6 +362,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
     private void setupBasicViewHolder(int position, ViewHolder1 viewHolder1) {
+
         viewHolder1.csNameView.setText(this.mValues.get(position).getName());
         viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
         viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
@@ -390,7 +411,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         }
 
         /**
-         * Inner ViewHolder class for 'emptyCard'
+         * Inner ViewHolder class for 'EmptyCard'
          */
         class EmptyCardViewHolder extends RecyclerView.ViewHolder {
 

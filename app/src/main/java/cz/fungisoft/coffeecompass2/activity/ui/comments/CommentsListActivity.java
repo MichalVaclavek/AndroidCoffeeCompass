@@ -46,7 +46,8 @@ import static android.view.View.*;
 
 /**
  * Activity to show list of CoffeeSite's Comments
- * Later it should allow to add a Comment for {@link LoggedInUser}
+ * It also allows to add a Comment for current logged-in user
+ * using {@link EnterCommentAndRatingDialogFragment}.
  */
 public class CommentsListActivity extends AppCompatActivity
                                   implements UserAccountServiceConnectionListener,
@@ -191,11 +192,11 @@ public class CommentsListActivity extends AppCompatActivity
         return f;
     }
 
-    // ** UserLogin Service connection/disconnection ** //
+    // ** UserAccountService connection/disconnection ** //
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
-    private boolean mShouldUnbindUserLoginService;
+    private boolean mShouldUnbindUserAccountService;
 
 
     @Override
@@ -260,7 +261,7 @@ public class CommentsListActivity extends AppCompatActivity
 
         if (bindService(new Intent(this, UserAccountService.class),
                 userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUnbindUserLoginService = true;
+            mShouldUnbindUserAccountService = true;
         } else {
             Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -268,10 +269,10 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     private void doUnbindUserAccountService() {
-        if (mShouldUnbindUserLoginService) {
+        if (mShouldUnbindUserAccountService) {
             // Release information about the service's state.
             unbindService(userAccountServiceConnector);
-            mShouldUnbindUserLoginService = false;
+            mShouldUnbindUserAccountService = false;
         }
     }
 
@@ -393,7 +394,7 @@ public class CommentsListActivity extends AppCompatActivity
 
                 final Comment item = mValues.get(position);
 
-                // Empty comment to show no comment available
+                // Empty comment TextView to show no comment available
                 // Also hide rating circles/icons
                 if (getItemCount() == 1 && item.getId() == 0) {
                     hideRatingSigns(holder);

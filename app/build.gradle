@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+
     signingConfigs {
         release {
             storeFile file('E:\\Programming\\CoffeeCompas_Docs\\Android\\keys\\new_android_keystore.jks')
@@ -14,20 +15,49 @@ android {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 20
-        versionName "3.00"
+        versionCode 21
+        versionName "3.01"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+
+            buildConfigField "String", "LOGIN_URL", "\"https://coffeecompass.cz/rest/public/user/\""
+            buildConfigField "String", "USER_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/user/\""
+
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
+            buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
+
+            buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
+
+            buildConfigField "String", "STARS_AND_COMMENTS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/public/starsAndComments/\""
+            buildConfigField "String", "STARS_AND_COMMENTS_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/starsAndComments/\""
+
+            buildConfigField "String", "IMAGES_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/image/\""
+
         }
+
         debug {
             applicationIdSuffix ".debug"
             debuggable true
             signingConfig signingConfigs.debug
+
+            buildConfigField "String", "USER_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/public/user/\""
+            buildConfigField "String", "USER_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/user/\""
+
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
+            buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
+
+            buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
+
+            buildConfigField "String", "STARS_AND_COMMENTS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/public/starsAndComments/\""
+            buildConfigField "String", "STARS_AND_COMMENTS_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/starsAndComments/\""
+
+            buildConfigField "String", "IMAGES_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/image/\""
         }
     }
 }

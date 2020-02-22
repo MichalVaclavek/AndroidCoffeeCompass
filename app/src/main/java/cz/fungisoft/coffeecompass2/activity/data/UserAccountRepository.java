@@ -4,7 +4,8 @@ import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 
 /**
- * Class that requests authentication and user information from the remote data source UserAccountDataSource.
+ * Class that holds data about LoggedInUser. Also requests authentication attempts and user information
+ * from the remote data source {@link UserAccountDataSource}.
  */
 public class UserAccountRepository {
 
@@ -84,4 +85,5 @@ public class UserAccountRepository {
             dataSource.delete(getLoggedInUser());
         }
     }
+
 }

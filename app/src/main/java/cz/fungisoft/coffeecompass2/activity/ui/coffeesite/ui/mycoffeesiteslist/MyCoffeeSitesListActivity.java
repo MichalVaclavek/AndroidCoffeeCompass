@@ -60,11 +60,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      */
     private List<CoffeeSite> content;
 
-    /**
-     * CoffeeSite selected by user from List to be working on
-     */
-    //private CoffeeSite selectedCoffeeSite;
-
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
@@ -137,10 +132,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         myCoffeeSitesToolbar = findViewById(R.id.my_sitesList_Toolbar);
 
-        // If called from MainActivity, we can pass the number of CoffeeSites from user
-        // to be shown/loaded
-        // Not used yet
-        //int numberOfMyCoffeeSites = getIntent().getIntExtra("myCoffeeSitesNumber", 0);
+        /* If called from MainActivity, we can pass the number of CoffeeSites from user
+         * to be shown/loaded
+         * Not used yet
+         * int numberOfMyCoffeeSites = getIntent().getIntExtra("myCoffeeSitesNumber", 0);
+         */
 
         // Load content CoffeeSites in case of returnign back to this activity?
         // Usually the content is loaded after the UserAccountService is connected
@@ -160,12 +156,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         layoutManager = new LinearLayoutManager(this);
 
-        // Must be called here onCreate() as after successful connection to UserAccountService
-        // loading of users CoffeeSites starts. We need this loading only if this Activity
-        // is created, not in case we returned to it from another Activity
+        /* Must be called here onCreate() as after successful connection to UserAccountService
+         loading of users CoffeeSites starts. We need this loading only if this Activity
+         is created, not in case we returned to it from another Activity
+         */
         doBindUserAccountService();
 
-        /**
+        /*
          * Registers receiver for all operations results performed by
          * CoffeeSiteService with current CoffeeSite of this Activity
          */
@@ -181,17 +178,18 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu; this adds items to the action bar if it is present
         getMenuInflater().inflate(R.menu.menu_my_coffeesites_list, menu);
 
         addCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_create_coffeesite);
         reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
 
-        // Disable menu options when the list of user's sites
-        // is being loading, otherwise enable
-        // this method is invoked by invalidateOptionsMenu
-        // called before and after loading i.e. in showProgressBar
-        // and hideProgressBar metods
+        /* Disable menu options when the list of user's sites
+         is being loading, otherwise enable.
+         This method is invoked by invalidateOptionsMenu
+         called before and after loading i.e. in showProgressBar
+         and hideProgressBar metods
+        */
         if (isListOfSitesIsBeingLoading()) {
             addCoffeeSiteMenuItem.setEnabled(false);
             reloadMyCoffeeSitesMenuItem.setEnabled(false);
@@ -205,6 +203,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
         if (id == android.R.id.home) {
             this.onBackPressed();
@@ -309,7 +308,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-
     private void registerCoffeeSiteOperationsReceiver() {
         Log.i(TAG, "registerCoffeeSiteOperationsReceiver() start");
         coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
@@ -355,7 +353,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 }
                 break;
 
-                default: break;
             }
         }
     }
@@ -431,7 +428,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (requestCode == CREATE_COFFEESITE_REQUEST) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                // The user created new CoffeeSite
+                // User created new CoffeeSite
                 if (currentUser != null) {
                     startMyCoffeeSitesLoadOperation();
                 }
@@ -457,6 +454,14 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
+    private void doUnbindUserLoginService() {
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
+            unbindService(userAccountServiceConnector);
+            mShouldUnbindUserLoginService = false;
+        }
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
@@ -476,7 +481,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             mListState = state.getParcelable(LIST_STATE_KEY);
         }
     }
-
 
     @Override
     public void onResume() {
@@ -505,16 +509,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-
-    private void doUnbindUserLoginService() {
-        if (mShouldUnbindUserLoginService) {
-            // Release information about the service's state.
-            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
-            unbindService(userAccountServiceConnector);
-            mShouldUnbindUserLoginService = false;
-        }
-    }
-
     @Override
     protected void onStop() {
         
@@ -530,4 +524,5 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
         super.onDestroy();
     }
+
 }

@@ -1,10 +1,8 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.login.interfaces.images;
+package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.images;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -14,10 +12,9 @@ import retrofit2.http.Query;
 
 public interface ImageRESTInterface {
 
-    String UPLOAD_IMAGE_URL = "https://coffeecompass.cz/rest/secured/image/";
+    String UPLOAD_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
 
-    String DELETE_IMAGE_URL = "https://coffeecompass.cz/rest/secured/image/";
-
+    String DELETE_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
 
     /**
      * Calls uploading of Image file. Returns URL of the uploaded image.

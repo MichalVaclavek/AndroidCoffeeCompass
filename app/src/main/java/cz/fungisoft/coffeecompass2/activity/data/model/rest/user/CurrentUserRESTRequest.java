@@ -12,8 +12,8 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountRESTInterface;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -32,19 +32,28 @@ public class CurrentUserRESTRequest {
 
     static final String REQ_TAG = "CurrentUserRESTRequest";
 
-    private static int PERFORM_LOGIN = 1;
-    private static int PERFORM_REGISTER = 2;
+    private static final int PERFORM_LOGIN = 1;
+    private static final int PERFORM_REGISTER = 2;
 
-    final JwtUserToken userJwtToken;
+    private final JwtUserToken userJwtToken;
 
     private final LoggedInUser currentUser;
 
+    /**
+     * Service or Class implementing interface for evaluation of user register
+     * or login REST request.
+     */
     private UserAccountActionsEvaluator userLoginAndRegisterService;
 
+    /**
+     *
+     * @param userLoginRESTResponse
+     * @param userLoginAndRegisterService
+     */
     public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsEvaluator userLoginAndRegisterService) {
         super();
         this.userJwtToken = userLoginRESTResponse;
-        currentUser = new LoggedInUser(userJwtToken);
+        this.currentUser = new LoggedInUser(userJwtToken);
         this.userLoginAndRegisterService = userLoginAndRegisterService;
     }
 
@@ -56,12 +65,20 @@ public class CurrentUserRESTRequest {
         performRequest(PERFORM_REGISTER);
     }
 
+    /**
+     * Call to coffeecompass.cz server to:
+     * - perform registration of a new user or
+     * - login of already registered user
+     *
+     * @param requestType either {@link #PERFORM_LOGIN} or {@link #PERFORM_REGISTER}
+     */
     private void performRequest(final int requestType) {
 
         Log.d(REQ_TAG, "CurrentUserRESTRequest initiated");
 
+        // Gson (JSON google) serializer/deserializer
         GsonBuilder gb = new GsonBuilder();
-        Gson gson = gb.setDateFormat("dd.MM. yyyy HH:mm").create();
+        Gson gson = gb.setDateFormat("dd.MM. yyyy HH:mm").create(); // setup format of user's account creation date received by REST
 
         // Inserts user authorization token to Authorization header
         Interceptor headerAuthorizationInterceptor = new Interceptor() {
@@ -86,16 +103,20 @@ public class CurrentUserRESTRequest {
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
+        // Call to is defined as returning String, which should contain user's data in JSON format
+        // We need further parsing of the JSON upon receiving response
         Call<String> call = api.getCurrentUser();
 
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
+
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         String jsonResponse = response.body();
-                        Log.i("onSuccess", jsonResponse);
+                        Log.i(REQ_TAG, jsonResponse);
                         try {
+                            // Parse successful JSON response to get user's account data
                             currentUser.setupUserDataFromJson(jsonResponse);
                             if (requestType == PERFORM_LOGIN) {
                                 userLoginAndRegisterService.evaluateLoginResult(new Result.Success<>(currentUser));
@@ -111,7 +132,7 @@ public class CurrentUserRESTRequest {
                         }
                         return;
                     } else {
-                        Log.i("onEmptyResponse", "Returned empty response");
+                        Log.i(REQ_TAG, "Returned empty response");
                     }
                 } else {
                     Log.e(REQ_TAG, "Current user response failure.");

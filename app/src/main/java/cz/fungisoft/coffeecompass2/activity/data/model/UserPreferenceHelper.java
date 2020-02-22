@@ -9,10 +9,8 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 
 /**
- * Saves loggged-in user data into "preferences" to use it
+ * Saves logged-in user data into "Preferences" to use it
  * after application is closed and opened again.
- * <p>
- * Also saves current selected search distance.
  */
 public class UserPreferenceHelper {
 

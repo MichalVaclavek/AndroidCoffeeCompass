@@ -250,7 +250,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteMovableListContent listContent) {
-        recyclerViewAdapter = new CoffeeSiteMovableItemRecyclerViewAdapter(this, listContent, this.searchRange, locationService , mTwoPane);
+        //recyclerViewAdapter = new CoffeeSiteMovableItemRecyclerViewAdapter(this, listContent, this.searchRange, locationService , mTwoPane);
+        recyclerViewAdapter = new CoffeeSiteMovableItemRecyclerViewAdapter(this, listContent, this.searchRange, mTwoPane);
         for (CoffeeSiteMovable csm : content.getItems()) {
             csm.addPropertyChangeListener(recyclerViewAdapter);
         }

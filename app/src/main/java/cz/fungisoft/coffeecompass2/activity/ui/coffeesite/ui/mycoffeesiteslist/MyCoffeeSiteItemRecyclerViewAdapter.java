@@ -49,14 +49,16 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * CoffeeSite selected by user from List to be working on
      */
     private CoffeeSite selectedCoffeeSite;
-
-    // A coffeeSite returned from server after modification
-    // i.e. activating, deactivating, canceling
-    // Used to compare with originaly selectedCoffeeSite to be modified
-    // we are ensuring, that modified CoffeeSite is the one intended for modification
-    // in selectedCoffeeSite
-    private CoffeeSite modifiedCoffeeSite;
     private int selectedPosition;
+
+    /**
+     * A coffeeSite returned from server after modification
+     * i.e. activating, deactivating, canceling.
+     * Used to compare with originally selectedCoffeeSite to be modified
+     * we are ensuring, that modified CoffeeSite is the one intended for modification
+     * in selectedCoffeeSite
+     */
+    private CoffeeSite modifiedCoffeeSite;
 
     private final MyCoffeeSitesListActivity mParentActivity;
     private List<CoffeeSite> mValues;
@@ -273,7 +275,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
 
                 activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
-                // set origan icon
+                // set original icon
                 activateCoffeeSiteButton.setImageResource(R.drawable.round_play_circle_outline_green_18);
                 activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
 
@@ -296,13 +298,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         if (Utils.isOnline()) {
             mParentActivity.showProgressbarAndDisableMenuItems();
 
-            Log.i(TAG, "startCoffeeSiteServiceOperation");
+            Log.i(TAG, "startCoffeeSiteServiceOperation() Start");
             Intent cfServiceIntent = new Intent();
             cfServiceIntent.setClass(mParentActivity, CoffeeSiteService.class);
             cfServiceIntent.putExtra("operation_type", operation);
             cfServiceIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
             mParentActivity.startService(cfServiceIntent);
-            Log.i("CreateCoffeeSiteAct", "startCoffeeSiteServiceOperation, End");
+            Log.i(TAG, "startCoffeeSiteServiceOperation() End");
         } else {
             Utils.showNoInternetToast(mParentActivity.getApplicationContext());
         }
@@ -312,13 +314,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      *  Registering Results receiver from CoffeeSiteService
      **/
     private void registerCoffeeSiteOperationsReceiver() {
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() start");
+        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() Start");
         coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_STATUS);
 
         LocalBroadcastManager.getInstance(mParentActivity).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() end");
+        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() End");
     }
 
     /**
@@ -330,7 +332,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         public void onReceive(Context context, Intent intent) {
             mParentActivity.hideProgressbarAndEnableMenuItems();
 
-            Log.i(TAG, "onReceive() start");
+            Log.i(TAG, "CoffeeSiteServiceOperationsReceiver onReceive() Start");
             String result = intent.getStringExtra("operationResult");
             String error = intent.getStringExtra("operationError");
             // This is not originaly selected CoffeeSite, but CoffeeSite with modified status
@@ -377,7 +379,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 case COFFEE_SITE_DELETE:{ //TODO in the future, when ADMIN User will be allowed to delete
                     Log.i(TAG, "Delete result: " + result);
                 } break;
-                default: break;
             }
         }
     }
@@ -463,11 +464,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         toast.show();
     }
 
-    private void showMyCoffeeSitesLoadFailure(String error) {
-        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.my_coffeesites_load_failure);
-        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
-        mySnackbar.show();
-    }
+//    private void showMyCoffeeSitesLoadFailure(String error) {
+//        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.my_coffeesites_load_failure);
+//        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
+//        mySnackbar.show();
+//    }
 
     private void showCoffeeSiteCancelFailure(String error) {
         error = !error.isEmpty() ? error : mParentActivity.getString(R.string.coffee_site_cancel_failure);

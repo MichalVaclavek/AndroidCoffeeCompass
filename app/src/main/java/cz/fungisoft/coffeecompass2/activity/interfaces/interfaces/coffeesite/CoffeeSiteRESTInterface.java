@@ -1,10 +1,9 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.login;
+package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsToSave;
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.Comment;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -16,11 +15,11 @@ import retrofit2.http.Query;
 
 public interface CoffeeSiteRESTInterface {
 
-    String GET_NUMBER_OF_STARS_URL = "https://coffeecompass.cz/rest/site/stars/";
+    String GET_NUMBER_OF_STARS_URL = BuildConfig.STARS_API_PUBLIC_URL;
 
-    String GET_COFFEE_SITE_URL = "https://coffeecompass.cz/rest/site/";
+    String GET_COFFEE_SITE_URL = BuildConfig.COFFEESITE_API_PUBLIC_URL;
 
-    String COFFEE_SITE_SECURED_URL = "https://coffeecompass.cz/rest/secured/site/";
+    String COFFEE_SITE_SECURED_URL = BuildConfig.COFFEESITE_API_SECURED_URL;
 
     /**
      * REST call for obtaining number of Stars, which were given by the User to the CoffeeSite.

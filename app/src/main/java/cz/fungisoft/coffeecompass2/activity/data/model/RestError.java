@@ -18,7 +18,6 @@ import java.io.Serializable;
  *  *   Instead of using our custom error response body, we can convert our body to:<br>
  *  * <p>
  *  *   Example:
- *  *
  *  *    {
  *  *       "type": "/errors/incorrect-user-pass",<br>
  *  *       "title": "Incorrect username or password.",<br>
