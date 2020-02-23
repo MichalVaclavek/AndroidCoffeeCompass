@@ -29,7 +29,8 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="cz.fungisoft.coffeecompass2.fileprovider"
+            android:authorities="@string/file_provider"
+
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -75,6 +76,7 @@
             android:exported="false" />
 
         <activity android:name=".activity.ui.register.SignupActivity" />
+
         <activity
             android:name=".activity.ui.login.LoginActivity"
             android:label="@string/title_activity_login"
@@ -84,6 +86,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
         </activity>
+
         <activity
             android:name=".activity.ui.comments.CommentsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />

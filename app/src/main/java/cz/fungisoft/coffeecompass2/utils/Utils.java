@@ -2,6 +2,8 @@ package cz.fungisoft.coffeecompass2.utils;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -15,6 +17,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -23,12 +27,18 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
 /**
- * Utility class. Up to now only one method checking if the internet connection is available.
+ * Utility class.
  */
 public class Utils {
 
     private static String TAG = "Utils";
 
+    /**
+     * Checks if the connection to internet is available.
+     * Basic method, can be used in UI thread.
+     *
+     * @return
+     */
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
@@ -39,6 +49,43 @@ public class Utils {
         catch (IOException e)          { Log.e(TAG," Problem during internet connection check."); }
         catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check"); }
 
+        return false;
+    }
+
+    private static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
+    }
+
+    /**
+     * Check internet connection availability.
+     * Must run in AsyncTask, i.e. not in UI thread.
+     * Here we use {@link InternetCheckAsyncTask} to call this method.
+     *
+     * @param context
+     * @return
+     */
+    public static boolean hasInternetAccess(Context context) {
+
+        if (isNetworkAvailable(context)) {
+
+            try {
+                HttpURLConnection urlc = (HttpURLConnection)
+                                         (new URL("http://clients3.google.com/generate_204")
+                                         .openConnection());
+                urlc.setRequestProperty("User-Agent", "Android");
+                urlc.setRequestProperty("Connection", "close");
+                urlc.setConnectTimeout(1500);
+                urlc.connect();
+                return (urlc.getResponseCode() == 204 && urlc.getContentLength() == 0);
+            } catch (IOException e) {
+                Log.e(TAG, "Error checking internet connection", e);
+            }
+        } else {
+            Log.d(TAG, context.getString(R.string.toast_no_internet));
+        }
         return false;
     }
 

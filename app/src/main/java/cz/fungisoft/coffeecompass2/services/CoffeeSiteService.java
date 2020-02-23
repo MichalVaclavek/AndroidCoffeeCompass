@@ -27,10 +27,10 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
 /**
  * Class to provide operations needed for creating, saving, updating, and
  * deleting CoffeeSite instances.
- * It also allowes to change CoffeeSite status (Activate, Deactivate, Cancel)
+ * It also allows to change CoffeeSite status (Activate, Deactivate, Cancel)
  * and loading of CoffeeSiteEntities needed to build CoffeeSite instance to be saved/updated
  * via REST API.
- * Mostly it contains all operations needed for comunication with coffeecompass.cz
+ * Mostly it contains all operations needed for communication with coffeecompass.cz
  * server API.
  * All requested REST api calls are done using AsynTask, except obtaining CoffeeSiteEntities,
  * which is called directly from this service.
@@ -52,9 +52,7 @@ public class CoffeeSiteService extends IntentService implements UserAccountServi
      */
     public final static String COFFEE_SITE_OPERATION = "coffee_site_operation";
     public final static int COFFEE_SITE_SAVE = 20;
-    //public final static int COFFEE_SITE_SAVE_AND_ACTIVATE = 21;
     public final static int COFFEE_SITE_UPDATE = 30;
-    //public final static int COFFEE_SITE_UPDATE_AND_ACTIVATE = 31; // ?? is it really needed ??
     public final static int COFFEE_SITE_DELETE = 40;
 
     /**
@@ -227,7 +225,9 @@ public class CoffeeSiteService extends IntentService implements UserAccountServi
         Log.i(REQ_COFFEESITE_TAG, "Sent requestedOperation Async task result to client: end");
     }
 
-    // Collects AsyncOperation result and calls method to inform client Activity about results
+    /**
+     * Collects AsyncOperation result and calls method to inform client Activity about results
+     */
     public void sendCoffeeSiteStatusChangeResultToClient(CoffeeSite coffeeSite, ChangeStatusOfCoffeeSiteAsyncTask.SITE_STATUS_ASYNC_REST_OPERATION status, String result, String error) {
         Log.i(REQ_COFFEESITE_TAG, "Sent status change Async task result to client: start");
         operationResult = result;
@@ -503,7 +503,7 @@ public class CoffeeSiteService extends IntentService implements UserAccountServi
         }
     }
 
-    private void doUnbindUserLoginService() {
+    private void doUnbindUserAccountService() {
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
@@ -515,7 +515,7 @@ public class CoffeeSiteService extends IntentService implements UserAccountServi
 
     @Override
     public void onDestroy() {
-        doUnbindUserLoginService();
+        doUnbindUserAccountService();
         super.onDestroy();
     }
 

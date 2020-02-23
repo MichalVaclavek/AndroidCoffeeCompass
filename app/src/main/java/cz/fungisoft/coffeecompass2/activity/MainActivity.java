@@ -39,6 +39,7 @@ import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
@@ -101,7 +102,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      * Saves, updates, deletes CoffeeSite and related
      * CoffeeSiteEntities
      */
-    private CoffeeSiteService coffeeSiteService;
+    //private CoffeeSiteService coffeeSiteService;
 
     private ProgressBar mainActivityProgressBar;
 
@@ -110,6 +111,24 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      * should be visible or not
      */
     private int numberOfCoffeeSitesCreatedByLoggedInUser = 0;
+
+    /**
+     * Detector of internet connection change
+     */
+    private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
+
+    private boolean statisticsDataRead = false;
+
+    public boolean isStatisticsDataRead() {
+        return statisticsDataRead;
+    }
+    private boolean cfEntitiesRead = false;
+
+    public boolean isCfEntitiesRead() {
+        return cfEntitiesRead;
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,14 +240,11 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         fab.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Start service operation loading all CoffeeSiteEntity instancies
-     * from server.
-     */
-    private void loadCoffeeSiteEntitiesFromServer() {
-        //registerCoffeeSiteEntitiesLoadReceiver();
-        startLoadingCoffeeSiteEntities();
-    }
+
+//    private void loadCoffeeSiteEntitiesFromServer() {
+//        //registerCoffeeSiteEntitiesLoadReceiver();
+//        startLoadingCoffeeSiteEntities();
+//    }
 
     /**
      * Start service operation loading all CoffeeSiteEntity instancies
@@ -242,6 +258,10 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     private CoffeeSiteFromUserNumberServiceReceiver coffeeSiteServiceReceiver;
 
+    /**
+     * Start service operation loading all CoffeeSiteEntity instancies
+     * from server.
+     */
     public void startLoadingCoffeeSiteEntities() {
 
         if (Utils.isOnline()) {
@@ -441,6 +461,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     public void zobrazStatistiky(Statistics stats) {
 
         if (stats != null) {
+            statisticsDataRead = true;
+
             TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);
             TextView sites7View = (TextView) findViewById(R.id.AllSites7TextView);
             TextView sitesToday = (TextView) findViewById(R.id.TodaySitesTextView);
@@ -550,14 +572,24 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
     }
 
+    public void startReadStatistics() {
+        new ReadStatsAsyncTask(this).execute();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 
-        // Read stats
-        // Load CoffeeSiteEntities
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkChangeStateReceiver, filter);
+
+        // Read stats if internet is available
+        // Can be readed later after internet becomes available, see NetworkStateReceiver
         if (Utils.isOnline()) {
-            new ReadStatsAsyncTask(this).execute();
+            if (!statisticsDataRead) {
+                new ReadStatsAsyncTask(this).execute();
+            }
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -584,10 +616,13 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         }
 
         // UserLoginAndRegister service connection
-        doBindUserLoginService();
+        doBindUserAccountService();
 
         registerCoffeeSiteServiceReceiver();
-        loadCoffeeSiteEntitiesFromServer();
+
+        // Reload list of CoffeeSite Entities to have latest values
+        startLoadingCoffeeSiteEntities();
+        //loadCoffeeSiteEntitiesFromServer();
     }
 
     @Override
@@ -600,6 +635,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
     @Override
     protected void onPause() {
+        unregisterReceiver(networkChangeStateReceiver);
+
         searchKafeButton.setEnabled(false);
         // Kontrola opravneni
         if (ActivityCompat.checkSelfPermission(this,
@@ -644,7 +681,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     // information about the service's state.
     private boolean mShouldUnbindUserLoginService;
 
-    private void doBindUserLoginService() {
+    private void doBindUserAccountService() {
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
