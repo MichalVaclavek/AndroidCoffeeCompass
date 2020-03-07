@@ -14,10 +14,11 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
  */
 public class UserAccountServiceConnector implements ServiceConnection {
 
-    private CoffeeSiteService callingCoffeeSiteService;
 
-    public UserAccountServiceConnector(CoffeeSiteService callingService) {
-        this.callingCoffeeSiteService = callingService;
+    private CoffeeSiteWithUserAccountService callingCoffeeSiteWithUserAccountService;
+
+    public UserAccountServiceConnector(CoffeeSiteWithUserAccountService callingService) {
+        this.callingCoffeeSiteWithUserAccountService = callingService;
     }
 
     /**
@@ -63,8 +64,11 @@ public class UserAccountServiceConnector implements ServiceConnection {
             listener.onUserAccountServiceConnected();
         }
 
-        if (this.callingCoffeeSiteService != null) {
-            this.callingCoffeeSiteService.onUserAccountServiceConnected();
+//        if (this.callingCoffeeSiteService != null) {
+//            this.callingCoffeeSiteService.onUserAccountServiceConnected();
+//        }
+        if (this.callingCoffeeSiteWithUserAccountService != null) {
+            this.callingCoffeeSiteWithUserAccountService.onUserAccountServiceConnected();
         }
         if (this.callingCoffeeSiteImageService != null) {
             this.callingCoffeeSiteImageService.onUserAccountServiceConnected();

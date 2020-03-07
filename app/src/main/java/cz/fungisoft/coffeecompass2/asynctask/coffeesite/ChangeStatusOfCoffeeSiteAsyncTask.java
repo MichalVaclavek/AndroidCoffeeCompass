@@ -8,13 +8,15 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.R;
+//import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
+//import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -43,7 +45,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
         CANCEL
     }
 
-    private final SITE_STATUS_ASYNC_REST_OPERATION requestedStatus;
+    //private final SITE_STATUS_ASYNC_REST_OPERATION requestedStatus;
 
     private final CoffeeSite coffeeSiteToModify;
 
@@ -52,19 +54,30 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
      */
     private final LoggedInUser currentUser;
 
-    private final CoffeeSiteService callingService;
+    //private final CoffeeSiteService callingService;
 
     private String operationResult = "";
     private String operationError = "";
 
+    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
+    private final CoffeeSiteRESTResultListener callingListenerService;
+
+    private Result.Error error;
+
     private final String tag;
 
-    public ChangeStatusOfCoffeeSiteAsyncTask(SITE_STATUS_ASYNC_REST_OPERATION status, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
+//    public ChangeStatusOfCoffeeSiteAsyncTask(SITE_STATUS_ASYNC_REST_OPERATION status, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
+    public ChangeStatusOfCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                         CoffeeSite coffeeSite,
+                                         LoggedInUser currentUser,
+                                         CoffeeSiteRESTResultListener callingService) {
         this.coffeeSiteToModify = coffeeSite;
         this.currentUser = currentUser;
-        this.callingService = callingService;
-        this.requestedStatus = status;
-        tag = "SiteStAsynT_" + this.requestedStatus.toString();
+        //this.callingService = callingService;
+        //this.requestedStatus = status;
+        this.callingListenerService = callingService;
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
+        tag = "SiteStatusAsynTask";
     }
 
     @Override
@@ -113,14 +126,26 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
             //TODO overeni, ze CoffeeSite ma aktualni status vhodny ke pozadovane operaci
             // tj. atributy canBeActivated, atd. viz DTO object
-            switch (this.requestedStatus) {
-                case ACTIVATE:
+//            switch (this.requestedStatus) {
+//                case ACTIVATE:
+//                    call = api.activateCoffeeSite(coffeeSiteToModify.getId());
+//                    break;
+//                case DEACTIVATE:
+//                    call = api.deactivateCoffeeSite(coffeeSiteToModify.getId());
+//                    break;
+//                case CANCEL:
+//                    call = api.cancelCoffeeSite(coffeeSiteToModify.getId());
+//                    break;
+//            }
+
+            switch (this.requestedRESTOperationCode) {
+                case COFFEE_SITE_ACTIVATE:
                     call = api.activateCoffeeSite(coffeeSiteToModify.getId());
                     break;
-                case DEACTIVATE:
+                case COFFEE_SITE_DEACTIVATE:
                     call = api.deactivateCoffeeSite(coffeeSiteToModify.getId());
                     break;
-                case CANCEL:
+                case COFFEE_SITE_CANCEL:
                     call = api.cancelCoffeeSite(coffeeSiteToModify.getId());
                     break;
             }
@@ -135,30 +160,41 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                             Log.i(tag, "onSuccess()");
                             operationResult = "OK";
                             CoffeeSite coffeeSite = response.body();
-                            callingService.sendCoffeeSiteStatusChangeResultToClient(coffeeSite, requestedStatus, operationResult, "");
+                            Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
+                            //callingService.sendCoffeeSiteStatusChangeResultToClient(coffeeSite, requestedStatus, operationResult, "");
+                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+
                         } else {
                             Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
                             operationError = error.toString();
-                            callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                            //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                         }
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
-                            operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            //operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            operationError = "Chyba komunikace se serverem.";
                         }
-                        callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                        //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                        if (error == null) {
+                            error = new Result.Error(operationError);
+                        }
+                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<CoffeeSite> call, Throwable t) {
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
-                    callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                    //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
+                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                 }
             });
         }

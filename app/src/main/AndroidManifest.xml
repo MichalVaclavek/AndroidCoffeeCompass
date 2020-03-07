@@ -70,10 +70,30 @@
             android:name=".services.CoffeeSiteImageService"
             android:enabled="true"
             android:exported="true" />
+<!--        <service-->
+<!--            android:name=".services.CoffeeSiteService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false" />-->
         <service
-            android:name=".services.CoffeeSiteService"
+            android:name=".services.CoffeeSiteWithUserAccountService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSiteCUDOperationsService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSiteEntitiesService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSiteLoadOperationsService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CoffeeSiteStatusChangeService"
+            android:enabled="true"
+            android:exported="true" />
 
         <activity android:name=".activity.ui.register.SignupActivity" />
 

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -39,13 +40,13 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
     private final LoggedInUser user;
 
 
-    private final CommentsListActivity commentsActivity;
+    private final WeakReference<CommentsListActivity> commentsActivity;
 
     private CommentAndStarsToSave commentAndStarsToSave;
 
     public SaveCommentAndStarsAsyncTask(int coffeeSiteId, LoggedInUser user, CommentsListActivity commentsActivity, CommentAndStarsToSave commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;
-        this.commentsActivity = commentsActivity;
+        this.commentsActivity = new WeakReference<>(commentsActivity);
         this.commentAndStarsToSave = commentAndStarsToSave;
         this.user = user;
     }
@@ -90,20 +91,28 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_TAG, "onResponse() success");
-                            commentsActivity.processComments(response.body());
+                            if (commentsActivity.get() != null) {
+                                commentsActivity.get().processComments(response.body());
+                            }
                         } else {
                             Log.i(REQ_TAG, "Returned empty response for saving comment request.");
                             Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
-                            commentsActivity.showRESTCallError(error);
+                            if (commentsActivity.get() != null) {
+                                commentsActivity.get().showRESTCallError(error);
+                            }
                         }
                     } else {
                         try {
                             String errorBody = response.errorBody().string();
-                            commentsActivity.showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            if (commentsActivity.get() != null) {
+                                commentsActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            }
                         } catch (IOException e) {
                             Log.e(REQ_TAG, "Error saving comment." + e.getMessage());
                             Result.Error error = new Result.Error(new IOException("Error saving comment.", e));
-                            commentsActivity.showRESTCallError(error);
+                            if (commentsActivity.get() != null) {
+                                commentsActivity.get().showRESTCallError(error);
+                            }
                         }
                     }
                 }
@@ -112,7 +121,9 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 public void onFailure(Call<List<Comment>> call, Throwable t) {
                     Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
-                    commentsActivity.showRESTCallError(error);
+                    if (commentsActivity.get() != null) {
+                        commentsActivity.get().showRESTCallError(error);
+                    }
                 }
             });
         }

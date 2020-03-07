@@ -1,9 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
@@ -18,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -27,21 +24,18 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
-
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_ACTIVATE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_CANCEL;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_DEACTIVATE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_DELETE;
 
 /**
- * Adapter to show found list of CoffeeSites created by logged-in user
+ * Adapter to show loaded list of CoffeeSites created by logged-in user
  */
-public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+                                                 implements CoffeeSiteServiceStatusOperationsListener {
 
     private static final String TAG = "MyCoffeeSiteListAdapter";
 
@@ -68,7 +62,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private View.OnClickListener mOnClickListener;
 
-    private CoffeeSiteServiceOperationsReceiver coffeeSiteServiceReceiver;
+    private CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
 
     /**
      * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
@@ -82,12 +76,17 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
      */
     public MyCoffeeSiteItemRecyclerViewAdapter(MyCoffeeSitesListActivity parent,
-                                               List<CoffeeSite> content) {
+                                               CoffeeSiteStatusChangeService coffeeSiteStatusChangeService,
+                                               List<CoffeeSite> content)
+    {
         mParentActivity = parent;
         mValues = content;
 
         mOnClickListener = createOnClickListener();
-        registerCoffeeSiteOperationsReceiver();
+        this.coffeeSiteStatusChangeService = coffeeSiteStatusChangeService;
+        if (this.coffeeSiteStatusChangeService != null) {
+            this.coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
+        }
     }
 
     /**
@@ -230,14 +229,66 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     public void onDialogPositiveClick() {
-        startCoffeeSiteServiceOperation(selectedCoffeeSite, COFFEE_SITE_CANCEL);
+        if (Utils.isOnline()) {
+            if (coffeeSiteStatusChangeService != null) {
+                mParentActivity.showProgressbarAndDisableMenuItems();
+                coffeeSiteStatusChangeService.cancel(selectedCoffeeSite);
+            }
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
     public void onDialogNegativeClick() {
     }
 
+    @Override
+    public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
+        mParentActivity.hideProgressbarAndEnableMenuItems();
+        modifiedCoffeeSite = activeCoffeeSite;
 
-        /**
+        Log.i(TAG, "Activation success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteActivateFailure(error);
+        }
+        else {
+            showCoffeeSiteActivateSuccess();
+            updateRecyclerViewCoffeeSiteActivated();
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteDeactivated(CoffeeSite inactiveCoffeeSite, String error) {
+        mParentActivity.hideProgressbarAndEnableMenuItems();
+        modifiedCoffeeSite = inactiveCoffeeSite;
+
+        Log.i(TAG, "Deactivate success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteDeactivateFailure(error);
+        }
+        else {
+            showCoffeeSiteDeactivateSuccess();
+            updateRecyclerViewCoffeeSiteDeactivated();
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteCanceled(CoffeeSite canceledCoffeeSite, String error) {
+        mParentActivity.hideProgressbarAndEnableMenuItems();
+        modifiedCoffeeSite = canceledCoffeeSite;
+
+        Log.i(TAG, "Cancel success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteCancelFailure(error);
+        }
+        else {
+            showCoffeeSiteCancelSuccess();
+            updateRecyclerViewItemRemoved();
+        }
+    }
+
+
+    /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
         class ViewHolder extends RecyclerView.ViewHolder {
@@ -288,100 +339,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
         }
 
-    /**
-     * Starts operation with currently selected CoffeeSite
-     *
-     * @param coffeeSite
-     * @param operation
-     */
-    private void startCoffeeSiteServiceOperation(CoffeeSite coffeeSite, int operation) {
-        if (Utils.isOnline()) {
-            mParentActivity.showProgressbarAndDisableMenuItems();
-
-            Log.i(TAG, "startCoffeeSiteServiceOperation() Start");
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(mParentActivity, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", operation);
-            cfServiceIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-            mParentActivity.startService(cfServiceIntent);
-            Log.i(TAG, "startCoffeeSiteServiceOperation() End");
-        } else {
-            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
-        }
-    }
-
-    /**
-     *  Registering Results receiver from CoffeeSiteService
-     **/
-    private void registerCoffeeSiteOperationsReceiver() {
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() Start");
-        coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_STATUS);
-
-        LocalBroadcastManager.getInstance(mParentActivity).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() End");
-    }
-
-    /**
-     * Receiver callbacks for CoffeeSiteService operations invoked earlier
-     */
-    private class CoffeeSiteServiceOperationsReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mParentActivity.hideProgressbarAndEnableMenuItems();
-
-            Log.i(TAG, "CoffeeSiteServiceOperationsReceiver onReceive() Start");
-            String result = intent.getStringExtra("operationResult");
-            String error = intent.getStringExtra("operationError");
-            // This is not originaly selected CoffeeSite, but CoffeeSite with modified status
-            modifiedCoffeeSite = intent.getParcelableExtra("coffeeSite");
-
-            // We need to find original CoffeeSite from the list
-            int operationType = intent.getIntExtra("operationType", 0);
-            Log.i(TAG, "Result: " + result + ". Error: " + error + ". OperationType: " + operationType);
-
-            switch (operationType) {
-
-                case COFFEE_SITE_ACTIVATE: {
-                    Log.i(TAG, "Activate result: " + result);
-                    if (!error.isEmpty()) {
-                        showCoffeeSiteActivateFailure(error);
-                    }
-                    else {
-                        showCoffeeSiteActivateSuccess();
-                        updateRecyclerViewCoffeeSiteActivated();
-                    }
-                }
-                break;
-                case COFFEE_SITE_DEACTIVATE: {
-                    Log.i(TAG, "Deactivate result: " + result);
-                    if (!error.isEmpty()) {
-                        showCoffeeSiteDeactivateFailure(error);
-                    }
-                    else {
-                        showCoffeeSiteDeactivateSuccess();
-                        updateRecyclerViewCoffeeSiteDeactivated();
-                    }
-                }
-                break;
-                case COFFEE_SITE_CANCEL: {
-                    Log.i(TAG, "Cancel result: " + result);
-                    if (!error.isEmpty()) {
-                        showCoffeeSiteCancelFailure(error);
-                    }
-                    else {
-                        showCoffeeSiteCancelSuccess();
-                        updateRecyclerViewItemRemoved();
-                    }
-                } break;
-                case COFFEE_SITE_DELETE:{ //TODO in the future, when ADMIN User will be allowed to delete
-                    Log.i(TAG, "Delete result: " + result);
-                } break;
-            }
-        }
-    }
 
     private CoffeeSite findCoffeeSiteFromListById(int id) {
         for (CoffeeSite coffeeSite : mValues) {
@@ -409,7 +366,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Called from parent activity (MyCoffeeSitesListActivity), when the CreateCoffeeSiteActivity
      * return result from above calling.
-     * Update recyclerview with new CoffeeSite's data after editing
+     * Updates RecyclerView with new CoffeeSite's data after editing
      *
      * @param editedCoffeeSite
      * @param position
@@ -423,15 +380,29 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
     public void onActivateButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        startCoffeeSiteServiceOperation(selectedCoffeeSite, COFFEE_SITE_ACTIVATE);
+        if (Utils.isOnline()) {
+            selectedCoffeeSite = (CoffeeSite) v.getTag();
+            selectedPosition = mValues.indexOf(selectedCoffeeSite);
+            if (coffeeSiteStatusChangeService != null) {
+                mParentActivity.showProgressbarAndDisableMenuItems();
+                coffeeSiteStatusChangeService.activate(selectedCoffeeSite);
+            }
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
     public void onDeactivateButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        startCoffeeSiteServiceOperation(selectedCoffeeSite, COFFEE_SITE_DEACTIVATE);
+        if (Utils.isOnline()) {
+            selectedCoffeeSite = (CoffeeSite) v.getTag();
+            selectedPosition = mValues.indexOf(selectedCoffeeSite);
+            if (coffeeSiteStatusChangeService != null) {
+                mParentActivity.showProgressbarAndDisableMenuItems();
+                coffeeSiteStatusChangeService.deactivate(selectedCoffeeSite);
+            }
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
     public void onCancelButtonClick(View v) {
@@ -491,6 +462,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private void updateRecyclerViewItemRemoved() {
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
+            && modifiedCoffeeSite != null && selectedCoffeeSite != null
             && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
             mValues.remove(selectedCoffeeSite);
             this.notifyItemRemoved(selectedPosition);
@@ -500,6 +472,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private void updateRecyclerViewCoffeeSiteActivated() {
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
+            && modifiedCoffeeSite != null && selectedCoffeeSite != null
             && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
 
             mValues.set(selectedPosition, modifiedCoffeeSite);
@@ -510,20 +483,26 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private void updateRecyclerViewCoffeeSiteDeactivated() {
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
+            && modifiedCoffeeSite != null && selectedCoffeeSite != null
             && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
             mValues.set(selectedPosition, modifiedCoffeeSite);
             this.notifyItemChanged(selectedPosition);
         }
     }
 
+    /**
+     * Called by parent Activity when destroyed
+     */
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(mParentActivity).unregisterReceiver(coffeeSiteServiceReceiver);
+        this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
     }
 
 
-    /** Pomocne metody pro vykresleni neaktivnich icon na buttonu sedivou barvou **/
-    /* Viz Stackoverflow, kdy se da pouzit i selector v xml souboru */
-    /* https://stackoverflow.com/questions/7228985/android-imagebutton-with-disabled-ui-feel/49162535#49162535 */
+    /**
+     * Pomocne metody pro vykresleni neaktivnich icon na buttonu sedivou barvou
+     * Viz Stackoverflow, kdy se da pouzit i selector v xml souboru
+     * https://stackoverflow.com/questions/7228985/android-imagebutton-with-disabled-ui-feel/49162535#49162535
+     */
     public static void setImageButtonEnabled(@NonNull final ImageView imageView,
                                              final boolean enabled) {
         imageView.setEnabled(enabled);

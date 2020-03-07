@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfHodnoceni;
@@ -45,21 +47,20 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
  */
 public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> {
 
-    private static final String TAG = "Read CoffeeSite list";
+    private static final String TAG = "GetCoffeeSites range";
 
-    // TODO vlozit do strings resources String url = getResources().getString(R.string.json_get_url);
-    private static final String sURLCore = "https://coffeecompass.cz/rest/site/searchSites/";
+    private static final String sURLCore = BuildConfig.COFFEESITE_API_PUBLIC_SEARCH_URL;
     private String sURL;
 
     /**
      * An Activity which invokes this async. task
      */
-    private MainActivity parentActivity;
+    private WeakReference<MainActivity> parentActivity;
 
     /**
      * A Service which invokes this asznc tsak
      */
-    private CoffeeSitesInRangeUpdateService parentService;
+    private WeakReference<CoffeeSitesInRangeUpdateService> parentService;
 
     private double latFrom, longFrom;
 
@@ -68,12 +69,12 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     private List<CoffeeSiteMovable> coffeeSites;
     private String searchCoffeeSort;
 
-    public GetSitesInRangeAsyncTask(MainActivity parentActivity) {
-        this.parentActivity = parentActivity;
+    private GetSitesInRangeAsyncTask(MainActivity parentActivity) {
+        this.parentActivity = new WeakReference<>(parentActivity);
     }
 
-    public GetSitesInRangeAsyncTask(CoffeeSitesInRangeUpdateService service) {
-        this.parentService = service;
+    private GetSitesInRangeAsyncTask(CoffeeSitesInRangeUpdateService service) {
+        this.parentService = new WeakReference<>(service);
     }
 
 
@@ -286,21 +287,22 @@ public class GetSitesInRangeAsyncTask extends AsyncTask<String, String, String> 
     @Override
     protected void onPostExecute(String result) {
 
-        if (parentActivity != null) {
+        if (parentActivity != null && parentActivity.get() != null) {
             CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent(coffeeSites);
 
-            Intent csListIntent = new Intent(parentActivity, FoundCoffeeSitesListActivity.class);
+
+            Intent csListIntent = new Intent(parentActivity.get(), FoundCoffeeSitesListActivity.class);
 
             csListIntent.putExtra("listContent", (Parcelable) content);
             csListIntent.putExtra("latLongFrom", new LatLng(this.latFrom, this.longFrom));
             csListIntent.putExtra("searchRange", this.searchRange);
             csListIntent.putExtra("coffeeSort", this.searchCoffeeSort);
 
-            parentActivity.startActivity(csListIntent);
+            parentActivity.get().startActivity(csListIntent);
         }
 
-        if (parentService != null) {
-            parentService.onSitesInRangeReturnedFromServer(coffeeSites);
+        if (parentService != null && parentService.get() != null) {
+            parentService.get().onSitesInRangeReturnedFromServer(coffeeSites);
         }
     }
 

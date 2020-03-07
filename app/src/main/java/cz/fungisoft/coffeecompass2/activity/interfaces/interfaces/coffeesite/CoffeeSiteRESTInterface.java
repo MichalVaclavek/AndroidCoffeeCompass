@@ -13,6 +13,9 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+/**
+ * Retrofit calls interface for CoffeeSite operations
+ */
 public interface CoffeeSiteRESTInterface {
 
     String GET_NUMBER_OF_STARS_URL = BuildConfig.STARS_API_PUBLIC_URL;

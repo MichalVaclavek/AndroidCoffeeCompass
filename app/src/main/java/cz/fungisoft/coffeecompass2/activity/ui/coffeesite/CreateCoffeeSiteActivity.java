@@ -7,14 +7,11 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,12 +56,21 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageServiceConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.FileCompressor;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
@@ -72,14 +78,9 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.M
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_ACTIVATE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_CANCEL;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_DEACTIVATE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_DELETE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_SAVE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_UPDATE;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService.StatusChangeOperation.COFFEE_SITE_ACTIVATE;
+
 
 /**
  * Activity to show View, where user can enter data for a new CoffeeSite or
@@ -95,7 +96,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                  TimePickerFragment.EnterTimeDialogListener,
                                                  SaveActivateCoffeeSiteDialogFragment.SaveActivateCoffeeSiteDialogListener,
                                                  DeleteCoffeeSiteImageDialogFragment.DeleteCoffeeSiteImageDialogListener,
-                                                 PropertyChangeListener {
+                                                 PropertyChangeListener,
+                                                 CoffeeSiteEntitiesServiceConnectionListener,
+                                                 CoffeeSiteEntitiesServiceOperationsListener,
+                                                 CoffeeSiteServicesConnectionListener,
+                                                 CoffeeSiteServiceCUDOperationsListener,
+                                                 CoffeeSiteServiceStatusOperationsListener {
 
     private static final String TAG = "CreateCoffeeSiteAct";
 
@@ -166,11 +172,17 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService coffeeSiteImageService;
     private CoffeeSiteImageServiceConnector coffeeSiteImageServiceConnector;
 
-    /**
-     * Receiver for the CoffeeSiteService
-     */
-    private CoffeeSiteEntitiesServiceReciever coffeeSiteEntitiesServiceReceiver;
-    private CoffeeSiteServiceOperationsReceiver coffeeSiteServiceReceiver;
+
+    protected CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteCUDOperationsService> coffeeSiteCUDOperationsServiceConnector;
+
+    protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
+    private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
+
+
+    protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
+    private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
+
 
     private CoffeeSite currentCoffeeSite;
 
@@ -516,24 +528,33 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Lets bind CoffeeSiteEtitiesService and load all CoffeeSiteEntities
+        // in onCoffeeSiteEntitiesConnected() method
+        // TODO - Verify, if calling this in onResume() would be more convenient
+        doBindCoffeeSiteEntitiesService();
+
+        doBindCoffeeSiteCUDOperationsService();
+        doBindCoffeeSiteStatusChangeService();
+    }
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteEntitiesServiceReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReceiver);
+        doUnbindCoffeeSiteEntitiesService();
+        doUnbindCoffeeSiteCUDOperationsService();
+        doUnbindCoffeeSiteStatusChangeService();
         super.onStop();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerCoffeeSiteOperationsReceiver();
-
-        if (!CoffeeSiteEntitiesRepository.isDataReadedFromServer()) {
-            loadCoffeeSiteEntitiesFromServer();
-        }
     }
 
+
+    /******************* CoffeeSiteImageService ***************************************/
 
     private void doBindCoffeeSiteImageService() {
         // Attempts to establish a connection with the service.  We use an
@@ -564,7 +585,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSiteImageService.addImageOperationsResultListener(this);
         }
     }
-
 
     private void doUnbindCoffeeSiteImageService() {
         if (mShouldUnbindCoffeeSiteImageService) {
@@ -637,47 +657,150 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
-    /** which can be slected by user during new CoffeeSite creation **/
+    /** which can be selected by user during new CoffeeSite creation **/
     /* ----- END ------- */
 
-    /**
-     * Start service operation loading all CoffeeSiteEntity instancies
-     * from server.
-     */
-    private void loadCoffeeSiteEntitiesFromServer() {
-        registerCoffeeSiteEntitiesLoadReceiver();
-        startCoffeeSiteServiceForEntities();
-    }
 
-    public void startCoffeeSiteServiceForEntities() {
+    /*** CoffeeSiteEntitiesService ***/
 
-        if (Utils.isOnline()) {
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", CoffeeSiteService.COFFEE_SITE_ENTITIES_LOAD);
-            startService(cfServiceIntent);
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteEntitiesService;
+
+    private void doBindCoffeeSiteEntitiesService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
+        coffeeSiteEntitiesServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
+                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteEntitiesService = true;
         } else {
-            Utils.showNoInternetToast(getApplicationContext());
+            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
         }
     }
 
-    private void registerCoffeeSiteEntitiesLoadReceiver() {
-        coffeeSiteEntitiesServiceReceiver = new CoffeeSiteEntitiesServiceReciever();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_ENTITY );
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteEntitiesServiceReceiver, intentFilter);
-    }
-
-    private class CoffeeSiteEntitiesServiceReciever extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String result = intent.getStringExtra("operationResult");
-            showCoffeeSiteTypes();
-            showLocationTypes();
-            showPriceRanges();
+    private void doUnbindCoffeeSiteEntitiesService() {
+        if (mShouldUnbindCoffeeSiteEntitiesService) {
+            if (coffeeSiteEntitiesService != null) {
+                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
+            }
+            // Release information about the service's state.
+            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteImageServiceConnectionListener(this);
+            unbindService( coffeeSiteEntitiesServiceConnector);
+            mShouldUnbindCoffeeSiteEntitiesService = false;
         }
     }
+
+
+    @Override
+    public void onCoffeeSiteEntitiesServiceConnected() {
+        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
+        if (coffeeSiteEntitiesService != null) {
+            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
+            startLoadingCoffeeSiteEntities();
+        }
+    }
+
+    public void startLoadingCoffeeSiteEntities() {
+        //showProgressbar();
+        if (coffeeSiteEntitiesService != null) {
+            coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
+        }
+    }
+
+
+    /********* CoffeeSiteCUDOperationsService **************/
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteCUDOperationsService;
+
+    private void doBindCoffeeSiteCUDOperationsService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
+                coffeeSiteCUDOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteCUDOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+
+    private void doUnbindCoffeeSiteCUDOperationsService() {
+        if (mShouldUnbindCoffeeSiteCUDOperationsService) {
+            if (coffeeSiteCUDOperationsService != null) {
+                coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
+            }
+            // Release information about the service's state.
+            coffeeSiteCUDOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteCUDOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteCUDOperationsService = false;
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteServiceConnected() {
+        if (coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService() != null) {
+            if (coffeeSiteCUDOperationsService == null) {
+                coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService();
+                coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
+            }
+        }
+        if (coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService() != null) {
+            if (coffeeSiteStatusChangeService == null) {
+                coffeeSiteStatusChangeService = coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService();
+                coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
+            }
+        }
+    }
+
+    /********* CoffeeSiteStatusChangeService **************/
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteStatusChangeService;
+
+    private void doBindCoffeeSiteStatusChangeService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
+                coffeeSiteStatusChangeServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteStatusChangeService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindCoffeeSiteStatusChangeService() {
+        if (mShouldUnbindCoffeeSiteStatusChangeService) {
+            if (coffeeSiteStatusChangeService != null) {
+                coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+            }
+            // Release information about the service's state.
+            coffeeSiteStatusChangeServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteStatusChangeServiceConnector);
+            mShouldUnbindCoffeeSiteStatusChangeService = false;
+        }
+    }
+
 
     /** Listener methods for Dialogs **/
 
@@ -698,7 +821,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Negative and Neutral are swapped as we require to have
+     * Negative and Neutral are swapped here as we require to have
      * Neutral item as second one in the Dialog.
      * @param dialog
      */
@@ -725,8 +848,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onImageSaveSuccess(String imageSaveResult) {
+        hideProgressbar();
         if (mode == MODE_MODIFY) {
-            startCoffeeSiteServiceOperation(currentCoffeeSite, COFFEE_SITE_UPDATE);
+            //startCoffeeSiteServiceOperation(currentCoffeeSite, COFFEE_SITE_UPDATE);
+            // If we are in MODIFY MODE, the Image was saved first, now
+            // the CoffeeSite itself has to be updated/saved
+            if (coffeeSiteCUDOperationsService != null) {
+                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
+            }
         }
         // Image saved, button to delete it can be enabled, but probably
         // not needed as after Save we are going to MyCoffeeSiteActivity
@@ -742,8 +871,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageSaveFailure(String imageSaveResult) {
+        hideProgressbar();
         if (mode == MODE_MODIFY) {
-            startCoffeeSiteServiceOperation(currentCoffeeSite, COFFEE_SITE_UPDATE);
+            // Even if image save failed, we need to save CoffeeSite itself
+            if (coffeeSiteCUDOperationsService != null) {
+                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
+            }
         }
     }
 
@@ -757,7 +890,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onImageDeleteSuccess(String imageDeleteResult) {
-
+        hideProgressbar();
         String text = getString(R.string.image_delete_ok);;
         if (Long.valueOf(imageDeleteResult) == currentCoffeeSite.getId()) {
             text = getString(R.string.image_delete_success);
@@ -774,6 +907,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageDeleteFailure(String imageDeleteResult) {
+        hideProgressbar();
         Toast toast = Toast.makeText(getApplicationContext(),
                 imageDeleteResult,
                 Toast.LENGTH_SHORT);
@@ -789,37 +923,50 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param coffeeSite
      */
     private void saveCoffeeSite(CoffeeSite coffeeSite) {
+        showProgressbar();
         saveAndActivateRequested = false;
-        startCoffeeSiteServiceOperation(coffeeSite, COFFEE_SITE_SAVE);
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.save(coffeeSite);
+        }
     }
 
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {
+        showProgressbar();
         saveAndActivateRequested = true;
-        startCoffeeSiteServiceOperation(coffeeSite, COFFEE_SITE_SAVE);
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.save(coffeeSite);
+        }
+    }
+
+    private void activateCoffeeSite(CoffeeSite coffeeSite) {
+        showProgressbar();
+        if (coffeeSiteStatusChangeService != null) {
+            coffeeSiteStatusChangeService.activate(coffeeSite);
+        }
     }
 
     private void updateCoffeeSite(CoffeeSite coffeeSite) {
+        showProgressbar();
         // If there is a photoFile, save it first to be available
         // after CoffeeSite is returned after it's update
         if (imagePhotoFile != null) {
             uploadCoffeeSiteImage(imagePhotoFile, coffeeSite.getId());
         } else {
-            startCoffeeSiteServiceOperation(coffeeSite, COFFEE_SITE_UPDATE);
+            if (coffeeSiteCUDOperationsService != null) {
+                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
+            }
        }
     }
 
-
-    private void activateCoffeeSite(CoffeeSite coffeeSite) {
-        startCoffeeSiteServiceOperation(coffeeSite, COFFEE_SITE_ACTIVATE);
-    }
-
     private void deleteCoffeeSiteImage(CoffeeSite coffeeSite) {
+        showProgressbar();
         if (coffeeSiteImageService != null) {
             coffeeSiteImageService.deleteImage(coffeeSite.getId());
         }
     }
 
     private void uploadCoffeeSiteImage(File imageFile, int coffeeSiteId) {
+        showProgressbar();
         if (coffeeSiteImageService != null) {
             coffeeSiteImageService.uploadImage(imageFile, coffeeSiteId);
         }
@@ -837,113 +984,56 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         siteFotoView.setImageDrawable(getDrawable(R.drawable.outline_add_photo_alternate_white_36));
     }
 
-    /** ------------- CoffeeSiteService start and register --------------- **/
 
-    /**
-     * Method to call CoffeeSiteService operations to Save, Update, Delete CoffeeSite
-     *
-     * @param coffeeSite
-     * @param operation
-     */
-    private void startCoffeeSiteServiceOperation(CoffeeSite coffeeSite, int operation) {
-        if (Utils.isOnline()) {
-
-            showProgressbar();
-
-            Log.i(TAG, "startCoffeeSiteServiceOperation: " + operation);
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", operation);
-            cfServiceIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-            startService(cfServiceIntent);
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
-        }
-    }
-
-    /**
-     * Register this Activity to be inform about results of CoffeeSitesService results
-     * for Actions of the CoffeeSiteService.COFFEE_SITE_OPERATION (Save, Update, Delete)
-     * and CoffeeSiteService.COFFEE_SITE_STATUS  (Activate, Deactivate, Cancel)
-     * types
-     */
-    private void registerCoffeeSiteOperationsReceiver() {
-        Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), start");
-        coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_OPERATION);
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_STATUS); // because of Save and Activate Operation
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-        Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), end");
-    }
-
-    /**
-     * Receiver callbacks for CoffeeSiteService operations invoked earlier
-     */
-    private class CoffeeSiteServiceOperationsReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            hideProgressbar();
-
-            Log.i(TAG, "onReceive start");
-            String result = intent.getStringExtra("operationResult");
-            String error = intent.getStringExtra("operationError");
-            int operationType = intent.getIntExtra("operationType", 0);
-
-            CoffeeSite updatedCreatedCoffeeSite = (CoffeeSite) intent.getExtras().getParcelable("coffeeSite");
-
-            Log.i(TAG,"Operation type: " + operationType + ". Result:" + result + ". Error: " + error);
-
-            switch (operationType) {
-                case COFFEE_SITE_SAVE: {
-                    Log.i(TAG, "Save result: " + result);
-                    if (error.isEmpty()) {
-                        // New CoffeeSite saved successfuly
-                        showCoffeeSiteOperationSuccess(COFFEE_SITE_SAVE, result);
-                        // If there is a photoFile, save it too
-                        if (imagePhotoFile != null) {
-                            uploadCoffeeSiteImage(imagePhotoFile, updatedCreatedCoffeeSite.getId());
-                        }
-                        // Was also activation requested?
-                        if (saveAndActivateRequested) {
-                            activateCoffeeSite(updatedCreatedCoffeeSite);
-                        } else {
-                            goToMyCoffeeSitesActivity();
-                        }
-                    } else {
-                        showCoffeeSiteCreateFailure(error);
-                    }
-                } break;
-                case COFFEE_SITE_ACTIVATE: {
-                    Log.i(TAG, "Activate result: " + result);
-                    if (!error.isEmpty()) {
-                        showCoffeeSiteActivateFailure(error);
-                    }
-                    else {
-                        showCoffeeSiteStatusChangeSuccess(COFFEE_SITE_ACTIVATE, result);
-                    }
-                    goToMyCoffeeSitesActivity();
-                } break;
-                case COFFEE_SITE_UPDATE: {
-                    Log.i(TAG, "Update result: " + result);
-                    if (!error.isEmpty()) {
-                        showCoffeeSiteUpdateFailure(error);
-                    }
-                    else {
-                        // successful return from CoffeeSite update REST call
-                        showCoffeeSiteOperationSuccess(COFFEE_SITE_UPDATE, result);
-                        goToMyCoffeeSitesActivityAfterUpdate(updatedCreatedCoffeeSite);
-                    }
-                } break;
-                case COFFEE_SITE_DELETE: { //TODO in the future, when ADMIN User will be allowed to delete
-                    Log.i(TAG, "Delete result: " + result);
-                } break;
-                default: break;
+    @Override
+    public void onCoffeeSiteSaved(CoffeeSite savedCoffeeSite, String error) {
+        hideProgressbar();
+        Log.i(TAG, "Save OK?: " + error.isEmpty());
+        if (error.isEmpty()) {
+            // New CoffeeSite saved successfuly
+            showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_SAVE, "OK");
+            // If there is a photoFile, save it too
+            if (imagePhotoFile != null) {
+                uploadCoffeeSiteImage(imagePhotoFile, savedCoffeeSite.getId());
             }
+            // Was also activation requested?
+            if (saveAndActivateRequested) {
+                activateCoffeeSite(savedCoffeeSite);
+            } else {
+                goToMyCoffeeSitesActivity();
+            }
+        } else {
+            showCoffeeSiteCreateFailure(error);
         }
     }
+
+    @Override
+    public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
+        hideProgressbar();
+        Log.i(TAG, "Update success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteUpdateFailure(error);
+        }
+        else {
+            // successful return from CoffeeSite update REST call
+            showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_UPDATE, "OK");
+            goToMyCoffeeSitesActivityAfterUpdate(updatedCoffeeSite);
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
+        hideProgressbar();
+        Log.i(TAG, "Activate success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteActivateFailure(error);
+        }
+        else {
+            showCoffeeSiteStatusChangeSuccess(COFFEE_SITE_ACTIVATE, "OK");
+        }
+        goToMyCoffeeSitesActivity();
+    }
+
 
     /**
      * Starts MyCoffeeSitesListActivity
@@ -973,7 +1063,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         this.startActivity(activityIntent);
         finish();
     }
-
 
     /* ********************** ****************************** */
 
@@ -1187,7 +1276,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
 
-    private void showCoffeeSiteStatusChangeSuccess(int status, String result) {
+    private void showCoffeeSiteStatusChangeSuccess(CoffeeSiteStatusChangeService.StatusChangeOperation status, String result) {
 
         switch (status) {
 
@@ -1209,7 +1298,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         toast.show();
     }
 
-    private void showCoffeeSiteOperationSuccess(int operation, String result) {
+    private void showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation operation, String result) {
 
         // If not equal only OK, then there is something interesting, otherwise get default
         switch (operation) {
@@ -1217,9 +1306,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             case COFFEE_SITE_SAVE: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_created_successfuly);
             } break;
-            case COFFEE_SITE_ACTIVATE: {
-                result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_activated_successfuly);
-            } break;
+//            case COFFEE_SITE_ACTIVATE: {
+//                result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_activated_successfuly);
+//            } break;
             case COFFEE_SITE_UPDATE: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_updated_successfuly);
             } break;
@@ -1319,7 +1408,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     protected void onDestroy() {
-        //doUnbindUserLoginService();
         doUnbindCoffeeSiteImageService();
         super.onDestroy();
     }

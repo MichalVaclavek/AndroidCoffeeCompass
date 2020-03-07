@@ -6,11 +6,13 @@ import android.util.Log;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -25,14 +27,27 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
 
     private final LoggedInUser currentUser;
 
-    private final CoffeeSiteService callingService;
+    //private final WeakReference<CoffeeSiteService> callingListenerService;
+    //private final CoffeeSiteService callingListenerService;
+    /**
+     * Only one result listener is expected for Async task
+     */
+    private final CoffeeSiteNumbersRESTResultListener callingListenerService;
+
+    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
 
     private String operationResult = "";
     private String operationError = "";
+    private Result.Error error;
 
-    public GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(LoggedInUser user, CoffeeSiteService callingService) {
+    //public GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(LoggedInUser user, CoffeeSiteService callingListenerService) {
+    public GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                                          LoggedInUser user,
+                                                          CoffeeSiteNumbersRESTResultListener callingService) {
         this.currentUser = user;
-        this.callingService = callingService;
+        //this.callingListenerService = new WeakReference<>(callingListenerService);
+        this.callingListenerService = callingService;
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
     @Override
@@ -80,30 +95,56 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
                             Log.i(TAG, "onSuccess()");
                             Integer coffeeSitesNumber = response.body();
                             operationResult = "OK";
-                            callingService.sendCoffeeSitesFromUserNumberResultToClient(coffeeSitesNumber, operationResult, "");
+//                            if (callingListenerService.get() != null) {
+//                                callingListenerService.get().sendCoffeeSitesFromUserNumberResultToClient(coffeeSitesNumber, operationResult, "");
+//                            }
+                            //callingListenerService.sendCoffeeSitesFromUserNumberResultToClient(coffeeSitesNumber, operationResult, "");
+                            Result.Success<Integer> result = new Result.Success<>(coffeeSitesNumber);
+                            callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, result);
                         } else {
                             Log.i(TAG, "Returned empty response for obtaining CoffeeSites number created by User REST request.");
-                            Result.Error error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User. Response empty."));
+                            error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User. Response empty."));
                             operationError = error.toString();
-                            callingService.sendCoffeeSitesFromUserNumberResultToClient(0,"", operationError);
+//                            if (callingListenerService.get() != null) {
+//                                callingListenerService.get().sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
+//                            }
+                            //callingListenerService.sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
+//                            Result.Error result = new Result.Error(coffeeSitesNumber);
+                            callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, error);
                         }
                     } else {
                         try {
-                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            //operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
                             Log.e(TAG, e.getMessage());
-                            operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                            if (callingListenerService.get() != null) {
+//                                operationError = callingListenerService.get().getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                            }
+                            //operationError = callingListenerService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            operationError = "Chyba komunikace se serverem."; // TODO read from resources
                         }
-                        callingService.sendCoffeeSitesFromUserNumberResultToClient(0,"", operationError);
+//                        if (callingListenerService.get() != null) {
+//                            callingListenerService.get().sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
+//                        }
+                        if (error == null) {
+                            error = new Result.Error(operationError);
+                        }
+                        callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, error);
+//                        callingListenerService.sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Integer> call, Throwable t) {
                     Log.e(TAG, "Error obtaining CoffeeSites number created by User REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User REST request.", t));
+                    error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User REST request.", t));
                     operationError = error.toString();
-                    callingService.sendCoffeeSitesFromUserNumberResultToClient(0,"", operationError);
+//                    if (callingListenerService.get() != null) {
+//                        callingListenerService.get().sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
+//                    }
+                    callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, error);
+//                    callingListenerService.sendCoffeeSitesFromUserNumberResultToClient(0, "", operationError);
                 }
             });
         }

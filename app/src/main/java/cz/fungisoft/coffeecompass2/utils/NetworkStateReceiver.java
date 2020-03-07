@@ -14,8 +14,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepositor
  * Receiver of events indicating change of network connectivity.
  * <p>
  * Up to now, used in case the network connectivity becomes available
- * on MainActivity.
- *
+ * in MainActivity after it was lost or not available on startup.
  */
 public class NetworkStateReceiver extends BroadcastReceiver implements InternetCheckAsyncTask.Consumer {
 
@@ -33,14 +32,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      */
     private static boolean online = true;  // we expect the app being online when starting
 
-    /**
-     * Async task to check if the connection to internet is available after the IP network connectivity
-     * is fine (this is the event this Receiver is listening too).
-     * IP network may be available, but not the internet. It has to b checked subsequently.
-     */
-    private InternetCheckAsyncTask internetCheckAsyncTask;
-
-
     public static final String TAG = NetworkStateReceiver.class.getSimpleName();
 
     /**
@@ -53,7 +44,12 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
 
         Log.d(TAG, "Network connectivity change");
 
-        internetCheckAsyncTask = new InternetCheckAsyncTask(this);
+        /**
+         * Async task to check if the connection to internet is available after the IP network connectivity
+         * is fine (this is the event this Receiver is listening too).
+         * IP network may be available, but not the internet. It has to b checked subsequently.
+         */
+        InternetCheckAsyncTask internetCheckAsyncTask = new InternetCheckAsyncTask(this);
 
         this.context = context;
 
@@ -108,27 +104,25 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     }
 
     /**
-     * Calls MainActivity method to load statistics.
+     * Calls MainActivity method to load statistics from server.
      *
-     * @param isOnline
-     * @param context
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
      */
     private void startReadStatisticsInMainActivity(boolean isOnline, Context context) {
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;
-                if (!ma.isStatisticsDataRead()) {
-                    ma.startReadStatistics();
-                }
+                ma.startReadStatistics();
             }
         }
     }
 
     /**
-     * Calls MainActivity method to load statistics.
+     * Calls MainActivity method to start loading of CoffeeSite entities from server.
      *
-     * @param isOnline
-     * @param context
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
      */
     private void startLoadEntitiesInMainActivity(boolean isOnline, Context context) {
         if (isOnline) {
@@ -136,6 +130,23 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
                 MainActivity ma = (MainActivity) context;
                 if (!CoffeeSiteEntitiesRepository.isDataReadedFromServer()) {
                     ma.startLoadingCoffeeSiteEntities();
+                }
+            }
+        }
+    }
+
+    /**
+     * Calls MainActivity method to start loading number of CoffeeSite created by user.
+     *
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
+     */
+    private void startLoadNumberOfSitesOfUserInMainActivity(boolean isOnline, Context context) {
+        if (isOnline) {
+            if (context instanceof MainActivity) {
+                MainActivity ma = (MainActivity) context;
+                if (!ma.isNumberOfCoffeeSitesCreatedByLoggedInUserChecked()) {
+                    ma.startNumberOfCoffeeSitesFromUserService();
                 }
             }
         }
@@ -149,6 +160,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         online = internet;
         startReadStatisticsInMainActivity(online, this.context);
         startLoadEntitiesInMainActivity(online, this.context);
+        startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
     }
 
     @Override

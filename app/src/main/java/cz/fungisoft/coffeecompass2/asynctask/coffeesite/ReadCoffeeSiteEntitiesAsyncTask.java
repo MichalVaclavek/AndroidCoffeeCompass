@@ -7,9 +7,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
@@ -25,7 +28,7 @@ import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
+//import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,12 +42,18 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
 
     static final String REQ_ENTITIES_TAG = "GetCoffeeSiteEntities";
 
-    private final CoffeeSiteService callingService;
+    //private final WeakReference<CoffeeSiteService> callingService;
 
     private CoffeeSiteEntitiesRepository entitiesRepository;
 
     private String operationResult = "";
     private String operationError = "";
+
+    private final CoffeeSiteEntitiesLoadRESTResultListener callingListenerService;
+
+    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
+
+    private Result.Error error;
 
     private int entitiesCallCounter = 0;
 
@@ -58,9 +67,15 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
         return entitiesCallCounter;
     }
 
-    public ReadCoffeeSiteEntitiesAsyncTask(CoffeeSiteService callingService, CoffeeSiteEntitiesRepository entitiesRepository) {
-        this.callingService = callingService;
+
+    //public ReadCoffeeSiteEntitiesAsyncTask(CoffeeSiteService callingService, CoffeeSiteEntitiesRepository entitiesRepository) {
+    public ReadCoffeeSiteEntitiesAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                           CoffeeSiteEntitiesLoadRESTResultListener callingListenerService,
+                                           CoffeeSiteEntitiesRepository entitiesRepository) {
+        //this.callingService = new WeakReference<>(callingService);
         this.entitiesRepository = entitiesRepository;
+        this.callingListenerService = callingListenerService;
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
     /** Starts Retrofit requestedOperation to load all instancies of
@@ -109,39 +124,39 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
         if (entityClass == CoffeeSiteStatus.class) {
             call = (Call<T>) api.getAllCoffeeSiteSiteStatuses();
         }
-        //2. Get all CoffeeSiteStatus
+        //2. Get all CoffeeSiteRecordStatus
         if (entityClass == CoffeeSiteRecordStatus.class) {
             call = (Call<T>) api.getAllCoffeeSiteRecordStatuses();
         }
-        //3. Get all CoffeeSiteStatus
+        //3. Get all CoffeeSiteType
         if (entityClass == CoffeeSiteType.class) {
             call = (Call<T>) api.getAllCoffeeSiteTypes();
         }
-        //4. Get all CoffeeSiteStatus
+        //4. Get all CoffeeSort
         if (entityClass == CoffeeSort.class) {
             call = (Call<T>) api.getAllCoffeeSorts();
         }
-        //5. Get all CoffeeSiteStatus
+        //5. Get all CupType
         if (entityClass == CupType.class) {
             call = (Call<T>) api.getAllCupTypes();
         }
-        //6. Get all CoffeeSiteStatus
+        //6. Get all NextToMachineType
         if (entityClass == NextToMachineType.class) {
             call = (Call<T>) api.getAllNextToMachineTypes();
         }
-        //7. Get all CoffeeSiteStatus
+        //7. Get all OtherOffer
         if (entityClass == OtherOffer.class) {
             call = (Call<T>) api.getAllOtherOffers();
         }
-        //8. Get all CoffeeSiteStatus
+        //8. Get all SiteLocationType
         if (entityClass == SiteLocationType.class) {
             call = (Call<T>) api.getAllSiteLocationTypes();
         }
-        //9. Get all CoffeeSiteStatus
+        //9. Get all StarsQualityDescription
         if (entityClass == StarsQualityDescription.class) {
             call = (Call<T>) api.getAllStarsQualityDescriptions();
         }
-        //10. Get all CoffeeSiteStatus
+        //10. Get all PriceRange
         if (entityClass == PriceRange.class) {
             call = (Call<T>) api.getAllPriceRanges();
         }
@@ -159,26 +174,42 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
                                 operationResult = "OK";
                                 entitiesRepository.setDataReadedFromServer(true);
-                                callingService.sendLoadEntitiesOperationResultToClient(operationResult, "");
-
+//                                if (callingService.get() != null) {
+//                                    callingService.get().sendLoadEntitiesOperationResultToClient(operationResult, "");
+//                                }
+                                Result.Success<Boolean> result = new Result.Success<>(true);
+                                callingListenerService.onCoffeeSiteEntitiesLoaded(result);
                             }
                         } else {
                             Log.i(REQ_ENTITIES_TAG, "Returned empty response retrieving info about CoffeeSite entities REST request.");
-                            Result.Error error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request."));
+                            error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request."));
                             operationError = "ERROR";
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                                callingService.sendLoadEntitiesOperationResultToClient("", operationError);
+//                                if (callingService.get() != null) {
+//                                    callingService.get().sendLoadEntitiesOperationResultToClient("", operationError);
+//                                }
                             }
+                            callingListenerService.onCoffeeSiteEntitiesLoaded(error);
                         }
                     } else {
                         try {
-                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            //operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
                             Log.e(REQ_ENTITIES_TAG, e.getMessage());
-                            operationError = callingService.getString(R.string.coffeesiteservice_error_message_not_available);
+//                            if (callingService.get() != null) {
+//                                operationError = callingService.get().getString(R.string.coffeesiteservice_error_message_not_available);
+//                            }
+                            operationError = "Chyba komunikace se serverem.";
+                        }
+                        if (error == null) {
+                            error = new Result.Error(operationError);
                         }
                         if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                            callingService.sendLoadEntitiesOperationResultToClient("", operationError);
+                            callingListenerService.onCoffeeSiteEntitiesLoaded(error);
+//                            if (callingService.get() != null) {
+//                                callingService.get().sendLoadEntitiesOperationResultToClient("", operationError);
+//                            }
                         }
                     }
                 }
@@ -187,10 +218,13 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                 public void onFailure(Call<T> call, Throwable t) {
                     incrementEntitiesCallCounter();
                     Log.e(REQ_ENTITIES_TAG, "Error retrieving info about CoffeeSite entities REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request.", t));
+                    error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request.", t));
                     operationError = error.getDetail();
                     if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                        callingService.sendLoadEntitiesOperationResultToClient("", operationError);
+//                        if (callingService.get() != null) {
+//                            callingService.get().sendLoadEntitiesOperationResultToClient("", operationError);
+//                        }
+                        callingListenerService.onCoffeeSiteEntitiesLoaded(error);
                     }
                 }
             });

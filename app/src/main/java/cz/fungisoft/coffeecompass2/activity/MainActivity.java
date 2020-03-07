@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -15,7 +14,6 @@ import androidx.core.content.ContextCompat;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.text.Html;
 import android.util.Log;
@@ -37,6 +35,14 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
@@ -49,20 +55,26 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
 /**
  * Main activity to show:
+ *
  *  - search buttons to find either ESPRESSO CoffeeSites only or any CoffeeSite within specified distance range
  *  - info about location of the phone and accuracy of this location
  *  - basic statistics info about CoffeeSites and Users
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
-public class MainActivity extends ActivityWithLocationService implements PropertyChangeListener, UserAccountServiceConnectionListener {
+public class MainActivity extends ActivityWithLocationService
+                          implements PropertyChangeListener,
+                                     UserAccountServiceConnectionListener,
+                                     CoffeeSiteEntitiesServiceConnectionListener,
+                                     CoffeeSiteEntitiesServiceOperationsListener,
+                                     CoffeeSiteServicesConnectionListener,
+                                     CoffeeSiteLoadServiceOperationsListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -82,7 +94,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private Location location;
 
 //    private Button searchEspressoButton;
-    private static Button searchKafeButton;
+    private Button searchKafeButton;
 
 
     private Toolbar mainToolbar;
@@ -95,14 +107,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private static  String searchRangeString;
 
     // Saves selected search distance range
-    private static SearchDistancePreferenceHelper searchRangePreferenceHelper;
+    private SearchDistancePreferenceHelper searchRangePreferenceHelper;
 
-    /**
-     * Service to perform operations with CoffeeSite.
-     * Saves, updates, deletes CoffeeSite and related
-     * CoffeeSiteEntities
-     */
-    //private CoffeeSiteService coffeeSiteService;
 
     private ProgressBar mainActivityProgressBar;
 
@@ -113,21 +119,19 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     private int numberOfCoffeeSitesCreatedByLoggedInUser = 0;
 
     /**
+     * To detect, if it is needed to load number of CoffeeSites from user after
+     * the internet connection is re-established
+     */
+    private boolean numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
+
+    public boolean isNumberOfCoffeeSitesCreatedByLoggedInUserChecked() {
+        return numberOfCoffeeSitesCreatedByLoggedInUserChecked;
+    }
+
+    /**
      * Detector of internet connection change
      */
     private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
-
-    private boolean statisticsDataRead = false;
-
-    public boolean isStatisticsDataRead() {
-        return statisticsDataRead;
-    }
-    private boolean cfEntitiesRead = false;
-
-    public boolean isCfEntitiesRead() {
-        return cfEntitiesRead;
-    }
-
 
 
     @Override
@@ -141,7 +145,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         // there is an attempt to connect to LocationService in super Activity
         // lets show progress bar as it can take some time, when the
         // MainActivity runs for the first time
-        // It is hidden in on LocationServiceConnected
+        // Progress bar is hidden in on LocationServiceConnected
         showProgressbar();
 
         // Get serachDistance from Preferences
@@ -203,8 +207,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
 
-        //findViewById(R.id.all_sites_TextView);
-
         //Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
@@ -218,7 +220,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
 
         locationImageView = (ImageView) findViewById(R.id.locationImageView);
 
-        //Drawable locBad = getResources().getDrawable(R.drawable.location_bad);
         Drawable locBad = ResourcesCompat.getDrawable(getResources(), R.drawable.location_bad, null);
         locationImageView.setBackground(locBad);
 
@@ -241,90 +242,129 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
 
-//    private void loadCoffeeSiteEntitiesFromServer() {
-//        //registerCoffeeSiteEntitiesLoadReceiver();
-//        startLoadingCoffeeSiteEntities();
-//    }
+    // ** CoffeeSiteEntitiesService connection/disconnection ** //
 
-    /**
-     * Start service operation loading all CoffeeSiteEntity instancies
-     * from server.
-     */
-    private void getNumberOfCoffeeSitesFromLoggedInUser() {
-        if (userAccountService != null && userAccountService.isUserLoggedIn()) {
+    protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
+    private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteEntitiesService;
+
+    private void doBindCoffeeSiteEntitiesService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
+        coffeeSiteEntitiesServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
+                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteEntitiesService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteEntitiesServiceConnected() {
+        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
+        if (coffeeSiteEntitiesService != null) {
+            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
+            startLoadingCoffeeSiteEntities();
+        }
+    }
+
+    private void doUnbindCoffeeSiteEntitiesService() {
+        if (mShouldUnbindCoffeeSiteEntitiesService) {
+            if (coffeeSiteEntitiesService != null) {
+                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
+            }
+            // Release information about the service's state.
+            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteImageServiceConnectionListener(this);
+            unbindService( coffeeSiteEntitiesServiceConnector);
+            mShouldUnbindCoffeeSiteEntitiesService = false;
+        }
+    }
+
+    public void startLoadingCoffeeSiteEntities() {
+        if (coffeeSiteEntitiesService != null) {
+            coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
+        }
+    }
+
+
+    // ****** CoffeeSiteLoadOperationsService connection/disconnection ****** //
+
+    protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteLoadOperationsService;
+
+    private void doBindCoffeeSiteLoadOperationsService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
+                coffeeSiteLoadOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteLoadOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteServiceConnected() {
+
+        if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
+            coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
+            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             startNumberOfCoffeeSitesFromUserService();
         }
     }
 
-    private CoffeeSiteFromUserNumberServiceReceiver coffeeSiteServiceReceiver;
-
-    /**
-     * Start service operation loading all CoffeeSiteEntity instancies
-     * from server.
-     */
-    public void startLoadingCoffeeSiteEntities() {
-
-        if (Utils.isOnline()) {
-            showProgressbar();
-
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", CoffeeSiteService.COFFEE_SITE_ENTITIES_LOAD);
-            startService(cfServiceIntent);
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
+    private void doUnbindCoffeeSiteLoadOperationsService() {
+        if (mShouldUnbindCoffeeSiteLoadOperationsService) {
+            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+            // Release information about the service's state.
+            coffeeSiteLoadOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteLoadOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteLoadOperationsService = false;
         }
     }
 
-    public void startNumberOfCoffeeSitesFromUserService() {
+    @Override
+    public void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {
+        hideProgressbar();
 
-        if (Utils.isOnline()) {
-            numberOfCoffeeSitesCreatedByLoggedInUser = 0;
-            showProgressbar();
-
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", CoffeeSiteService.COFFEE_SITES_NUMBER_FROM_CURRENT_USER);
-            startService(cfServiceIntent);
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
-        }
-    }
-
-    private void registerCoffeeSiteServiceReceiver() {
-        coffeeSiteServiceReceiver = new CoffeeSiteFromUserNumberServiceReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_LOADING);
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_ENTITY);
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-    }
-
-
-    private class CoffeeSiteFromUserNumberServiceReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            hideProgressbar();
-
-            String result = intent.getStringExtra("operationResult");
-            int operationType = intent.getIntExtra("operationType", 0);
-            Log.i(TAG, "Operation type: " + operationType + ". Result: " + result);
-
-            if ("OK".equals(result)
-                && operationType == CoffeeSiteService.COFFEE_SITES_NUMBER_FROM_CURRENT_USER) {
-                numberOfCoffeeSitesCreatedByLoggedInUser = intent.getIntExtra("coffeeSitesNumber", 0);
-
-                MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
-                if (myCoffeeSitesMenuItem != null) {
-                    //myCoffeeSitesMenuItem.setVisible(false);
-                    if (numberOfCoffeeSitesCreatedByLoggedInUser > 0) {
-                        myCoffeeSitesMenuItem.setVisible(true);
-                    }
+        if (error.isEmpty()) {
+            numberOfCoffeeSitesCreatedByLoggedInUser = coffeeSitesNumber;
+            numberOfCoffeeSitesCreatedByLoggedInUserChecked = true;
+            MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
+            if (myCoffeeSitesMenuItem != null) {
+                if (numberOfCoffeeSitesCreatedByLoggedInUser > 0) {
+                    myCoffeeSitesMenuItem.setVisible(true);
                 }
             }
         }
     }
+
+    public void startNumberOfCoffeeSitesFromUserService() {
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
+        }
+    }
+
+    /**************************************************************************/
 
 
     /**
@@ -461,7 +501,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     public void zobrazStatistiky(Statistics stats) {
 
         if (stats != null) {
-            statisticsDataRead = true;
 
             TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);
             TextView sites7View = (TextView) findViewById(R.id.AllSites7TextView);
@@ -522,14 +561,14 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      * Currently not needed as a new Activity is shown for every search result
      * including nothing found.
      */
-    public void showNothingFoundStatus(String subject) {
-
-        int resource = ("espresso".equals(subject)) ? R.string.no_espresso_found : R.string.no_site_found;
-        Toast toast = Toast.makeText(getApplicationContext(),
-                                    resource,
-                                    Toast.LENGTH_SHORT);
-        toast.show();
-    }
+//    public void showNothingFoundStatus(String subject) {
+//
+//        int resource = ("espresso".equals(subject)) ? R.string.no_espresso_found : R.string.no_site_found;
+//        Toast toast = Toast.makeText(getApplicationContext(),
+//                                    resource,
+//                                    Toast.LENGTH_SHORT);
+//        toast.show();
+//    }
 
     protected void requestPermission(String permissionType, int requestCode) {
 
@@ -546,7 +585,7 @@ public class MainActivity extends ActivityWithLocationService implements Propert
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length == 0
                         || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Vyzaduje se pristup k poloze", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Vyžaduje se přístup k poloze.", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
@@ -585,11 +624,9 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         registerReceiver(networkChangeStateReceiver, filter);
 
         // Read stats if internet is available
-        // Can be readed later after internet becomes available, see NetworkStateReceiver
+        // Can be read later after internet becomes available, see NetworkStateReceiver
         if (Utils.isOnline()) {
-            if (!statisticsDataRead) {
-                new ReadStatsAsyncTask(this).execute();
-            }
+            startReadStatistics();
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -614,21 +651,27 @@ public class MainActivity extends ActivityWithLocationService implements Propert
                 searchKafeButton.setEnabled(false);
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Lets bind CoffeeSiteEtitiesService and load all CoffeeSiteEntities
+        // in onCoffeeSiteEntitiesConnected() method
+        // TODO - Verify, if calling this in onResume() would be more convenient
+        doBindCoffeeSiteEntitiesService();
 
         // UserLoginAndRegister service connection
         doBindUserAccountService();
 
-        registerCoffeeSiteServiceReceiver();
-
-        // Reload list of CoffeeSite Entities to have latest values
-        startLoadingCoffeeSiteEntities();
-        //loadCoffeeSiteEntitiesFromServer();
+        doBindCoffeeSiteLoadOperationsService();
     }
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReceiver);
-        doUnbindUserLoginService();
+        doUnbindUserAccountService();
+        doUnbindCoffeeSiteEntitiesService();
+        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
     }
 
@@ -687,7 +730,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
         if (bindService(new Intent(this, UserAccountService.class),
@@ -726,8 +768,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
      * Evaluates if the MyCoffeeSitesIcon should be displayd or not.
      * This icon is shown only if logged in user has more then 0
      * CoffeeSites created.
-     * So, the Service call to find number of created sites is strated,
-     * and the result is evaluated in callback method of thius service call
+     * So, the Service call to find number of created sites is started,
+     * and the result is evaluated in callback method of this service call
      */
     private void evaluateMyCoffeeSitesIcon() {
         // Not show icon as a default
@@ -735,8 +777,6 @@ public class MainActivity extends ActivityWithLocationService implements Propert
         if (myCoffeeSitesMenuItem != null) {
             myCoffeeSitesMenuItem.setVisible(false);
         }
-
-        getNumberOfCoffeeSitesFromLoggedInUser();
     }
 
     /**
@@ -754,7 +794,8 @@ public class MainActivity extends ActivityWithLocationService implements Propert
     }
 
 
-    private void doUnbindUserLoginService() {
+    private void doUnbindUserAccountService() {
+
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);

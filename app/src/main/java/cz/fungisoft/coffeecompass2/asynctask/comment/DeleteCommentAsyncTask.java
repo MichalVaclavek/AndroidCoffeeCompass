@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
@@ -30,12 +31,12 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private int commentID;
 
-    private CommentsListActivity commentsActivity;
+    private WeakReference<CommentsListActivity> commentsActivity;
 
     public DeleteCommentAsyncTask(int commentID, LoggedInUser user, CommentsListActivity parentActivity) {
         this.user = user;
         this.commentID = commentID;
-        this.commentsActivity = parentActivity;
+        this.commentsActivity = new WeakReference<>(parentActivity);
     }
 
     @Override
@@ -72,20 +73,28 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.i(REQ_TAG, "onResponse() success");
-                        commentsActivity.processNumberOfComments(Integer.parseInt(response.body().toString()));
+                        if (commentsActivity.get() != null) {
+                            commentsActivity.get().processNumberOfComments(Integer.parseInt(response.body().toString()));
+                        }
                     } else {
                         Log.i(REQ_TAG, "Returned empty response for delete comment request.");
                         Result.Error error = new Result.Error(new IOException("Error deleting comment. Response empty."));
-                        commentsActivity.showRESTCallError(error);
+                        if (commentsActivity.get() != null) {
+                            commentsActivity.get().showRESTCallError(error);
+                        }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
-                        commentsActivity.showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        if (commentsActivity.get() != null) {
+                            commentsActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        }
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error deleting comment." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error deleting comment.", e));
-                        commentsActivity.showRESTCallError(error);
+                        if (commentsActivity.get() != null) {
+                            commentsActivity.get().showRESTCallError(error);
+                        }
                     }
                 }
             }
@@ -94,9 +103,12 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
             public void onFailure(Call<Integer> call, Throwable t) {
                 Log.e(REQ_TAG, "Error deleting comment REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error deleting comment.", t));
-                commentsActivity.showRESTCallError(error);
+                if (commentsActivity.get() != null) {
+                    commentsActivity.get().showRESTCallError(error);
+                }
             }
         });
         return null;
     }
+
 }

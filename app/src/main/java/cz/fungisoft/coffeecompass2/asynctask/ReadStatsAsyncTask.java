@@ -11,11 +11,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 
@@ -27,14 +29,15 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Read statistics";
 
-    private static final String bURL = "https://coffeecompass.cz/rest/home";
+    private static final String bURL = BuildConfig.HOME_API_URL;
 
-    private MainActivity parentActivity;
+    private WeakReference<MainActivity> parentActivity;
 
     private Statistics stats;
 
     public ReadStatsAsyncTask(MainActivity parentActivity) {
-        this.parentActivity = parentActivity;
+
+        this.parentActivity = new WeakReference<>(parentActivity);
     }
 
     @Override
@@ -72,7 +75,9 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
         finally {
-            try { if (inpStream != null) inpStream.close();}
+            try {
+                if (inpStream != null) inpStream.close();
+            }
             catch (Exception e) {
                 Log.e(TAG, "Error closing input stream: " + e.getMessage());
             }
@@ -97,6 +102,8 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        parentActivity.zobrazStatistiky(stats);
+        if (parentActivity.get() != null) {
+            parentActivity.get().zobrazStatistiky(stats);
+        }
     }
 }

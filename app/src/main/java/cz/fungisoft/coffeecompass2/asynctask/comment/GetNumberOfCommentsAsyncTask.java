@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
@@ -24,12 +25,12 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private int coffeeSiteId;
 
-    private final CoffeeSiteDetailActivity coffeeSiteDetailActivity;
+    private final WeakReference<CoffeeSiteDetailActivity> coffeeSiteDetailActivity;
 
 
     public GetNumberOfCommentsAsyncTask(int coffeeSiteId, CoffeeSiteDetailActivity coffeeSiteDetailActivity) {
         this.coffeeSiteId = coffeeSiteId;
-        this.coffeeSiteDetailActivity = coffeeSiteDetailActivity;
+        this.coffeeSiteDetailActivity = new WeakReference<>(coffeeSiteDetailActivity);
     }
 
     @Override
@@ -53,20 +54,28 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                        Log.i(REQ_TAG, "onResponse() success");
-                        coffeeSiteDetailActivity.processNumberOfComments(Integer.parseInt(response.body().toString()));
+                       if (coffeeSiteDetailActivity.get() != null) {
+                           coffeeSiteDetailActivity.get().processNumberOfComments(Integer.parseInt(response.body().toString()));
+                       }
                     } else {
                         Log.i(REQ_TAG, "Returned empty response for obtaining number of Comments request.");
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Comments."));
-                        coffeeSiteDetailActivity.showRESTCallError(error);
+                        if (coffeeSiteDetailActivity.get() != null) {
+                            coffeeSiteDetailActivity.get().showRESTCallError(error);
+                        }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
-                        coffeeSiteDetailActivity.showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        if (coffeeSiteDetailActivity.get() != null) {
+                            coffeeSiteDetailActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        }
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error obtaining number of Comments." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Comments.", e));
-                        coffeeSiteDetailActivity.showRESTCallError(error);
+                        if (coffeeSiteDetailActivity.get() != null) {
+                            coffeeSiteDetailActivity.get().showRESTCallError(error);
+                        }
                     }
                 }
             }
@@ -75,7 +84,9 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
             public void onFailure(Call<Integer> call, Throwable t) {
                 Log.e(REQ_TAG, "Error obtaining number of Comments REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error obtaining number of Comments", t));
-                coffeeSiteDetailActivity.showRESTCallError(error);
+                if (coffeeSiteDetailActivity.get() != null) {
+                    coffeeSiteDetailActivity.get().showRESTCallError(error);
+                }
             }
         });
         return null;

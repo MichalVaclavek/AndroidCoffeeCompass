@@ -25,7 +25,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
  * Service to handle requests for saving or deleting Image/Photo of the CoffeeSite.
  * Calls REST interface to save/delete the image from coffeecompass.cz server.
  * Needs UserAccountService available to obtain logged-in user data as the
- * REST requsts for savin/deleting image requires logged-in user.
+ * REST requests for saving/deleting image requires logged-in user.
  */
 public class CoffeeSiteImageService extends Service implements UserAccountServiceConnectionListener {
 

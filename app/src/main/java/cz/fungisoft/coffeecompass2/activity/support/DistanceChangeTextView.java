@@ -12,6 +12,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 @SuppressLint("AppCompatCustomView")
+
 /**
  * Special version of TextView capable listening of CoffeeSite's distance property change.
  */

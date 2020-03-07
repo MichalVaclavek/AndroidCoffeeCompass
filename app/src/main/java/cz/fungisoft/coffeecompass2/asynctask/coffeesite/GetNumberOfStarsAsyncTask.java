@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
@@ -25,12 +26,12 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
     private long userID;
     private int coffeeSiteId;
 
-    private CommentsListActivity parentActivity;
+    private WeakReference<CommentsListActivity> parentActivity;
 
     public GetNumberOfStarsAsyncTask(long userID, int coffeeSiteId, CommentsListActivity parentActivity) {
         this.userID = userID;
         this.coffeeSiteId = coffeeSiteId;
-        this.parentActivity = parentActivity;
+        this.parentActivity = new WeakReference<>(parentActivity);
     }
 
     @Override
@@ -53,22 +54,30 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.i(REQ_TAG, "onResponse()");
-                        parentActivity.processNumberOfStarsForSiteAndUser((Integer.parseInt(response.body().toString())));
+                        if (parentActivity.get() != null) {
+                            parentActivity.get().processNumberOfStarsForSiteAndUser((Integer.parseInt(response.body().toString())));
+                        }
                     } else {
                         Log.i(REQ_TAG, "Returned empty response for obtaining number of Stars for CoffeeSite and User request.");
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User. Response empty."));
                         //parentActivity.showRESTCallError(error);
-                        parentActivity.processFailedNumberOfStarsForSiteAndUser(error);
+                        if (parentActivity.get() != null) {
+                            parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
+                        }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
-                        parentActivity.showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        if (parentActivity.get() != null) {
+                            parentActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                        }
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error obtaining number of Stars for CoffeeSite and User." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User.", e));
                         //parentActivity.showRESTCallError(error);
-                        parentActivity.processFailedNumberOfStarsForSiteAndUser(error);
+                        if (parentActivity.get() != null) {
+                            parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
+                        }
                     }
                 }
             }
@@ -78,7 +87,9 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
                 Log.e(REQ_TAG, "Error obtaining number of Stars for CoffeeSite and User REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User", t));
                 //parentActivity.showRESTCallError(error);
-                parentActivity.processFailedNumberOfStarsForSiteAndUser(error);
+                if (parentActivity.get() != null) {
+                    parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
+                }
             }
         });
         return null;

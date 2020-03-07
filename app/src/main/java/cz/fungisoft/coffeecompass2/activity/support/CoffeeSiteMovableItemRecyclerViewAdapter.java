@@ -49,7 +49,6 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     private final boolean mTwoPane;
 
     private View.OnClickListener mOnClickListener;
-    //private static LocationService mLocationService;
 
     private int currentSearchRange;
 
@@ -128,7 +127,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
     /**
-     * Inserts newly detected sites in the searched range.
+     * Inserts newly detected sites (in the searched range) into the current list
+     * of found coffee sites.
      *
      * @param newSites
      */
@@ -367,7 +367,6 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
         viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
 
-        //viewHolder1.distanceView.setText(this.mValues.get(position).getDistance() + " m");
         viewHolder1.distanceView.setText(Utils.getDistanceInBetterReadableForm(this.mValues.get(position).getDistance()));
         viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));
         viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());

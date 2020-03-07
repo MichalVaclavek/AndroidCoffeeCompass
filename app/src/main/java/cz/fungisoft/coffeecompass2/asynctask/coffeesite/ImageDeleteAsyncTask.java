@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -29,7 +30,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
      */
     private int coffeeSiteId;
 
-    private CoffeeSiteImageService callingService;
+    private WeakReference<CoffeeSiteImageService> callingService;
 
     private String operationResult = "";
     private String operationError = "";
@@ -38,7 +39,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
 
 
     public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, int coffeeSiteId) {
-        this.callingService = imageService;
+        this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
         this.coffeeSiteId = coffeeSiteId;
     }
@@ -92,21 +93,29 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                             Log.i(TAG, "onSuccess()");
                             operationResult = "OK";
                             int coffeeSiteID = response.body();
-                            callingService.evaluateImageDeleteResult(new Result.Success<>(coffeeSiteID));
+                            if (callingService.get() != null) {
+                                callingService.get().evaluateImageDeleteResult(new Result.Success<>(coffeeSiteID));
+                            }
                         } else {
                             Log.i(TAG, "Returned empty response for deleting image request.");
                             Result.Error error = new Result.Error(new IOException("Error deleting image. Response empty."));
-                            callingService.evaluateImageDeleteResult(error);
+                            if (callingService.get() != null) {
+                                callingService.get().evaluateImageDeleteResult(error);
+                            }
                         }
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
                         } catch (IOException e) {
                             Log.e(TAG, e.getMessage());
-                            operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            if (callingService.get() != null) {
+                                operationError = callingService.get().getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            }
                         }
                         Result.Error error = new Result.Error(new IOException(operationError));
-                        callingService.evaluateImageDeleteResult(error);
+                        if (callingService.get() != null) {
+                            callingService.get().evaluateImageDeleteResult(error);
+                        }
                     }
                 }
 
@@ -115,7 +124,9 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     Log.e(TAG, "Error deleting image REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error deleting image.", t));
                     operationError = error.toString();
-                    callingService.evaluateImageDeleteResult(error);
+                    if (callingService.get() != null) {
+                        callingService.get().evaluateImageDeleteResult(error);
+                    }
                 }
             });
         }

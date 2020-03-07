@@ -7,6 +7,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
  * or an REST Error.
  */
 public class Result<T> {
+
     // hide the private constructor to limit subclass types (Success, Error)
     private Result() {
     }
@@ -55,7 +56,10 @@ public class Result<T> {
             this.error = error;
             this.detailToDisplay = error.getDetail();
         }
+        public Error(String error) {
 
+            this.detailToDisplay = error;
+        }
         public Exception getException() {
 
             return this.exception;

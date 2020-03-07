@@ -28,11 +28,14 @@ android {
 
             resValue "string", "file_provider", "cz.fungisoft.coffeecompass2.fileprovider.release"
 
+            buildConfigField "String", "HOME_API_URL", "\"https://coffeecompass.cz/rest/home\""
+
             buildConfigField "String", "LOGIN_URL", "\"https://coffeecompass.cz/rest/public/user/\""
             buildConfigField "String", "USER_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/user/\""
 
             buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
             buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/searchSites/\""
 
             buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
 
@@ -50,11 +53,14 @@ android {
 
             resValue "string", "file_provider", "cz.fungisoft.coffeecompass2.fileprovider.debug"
 
+            buildConfigField "String", "HOME_API_URL", "\"https://coffeecompass.cz/rest/home\""
+
             buildConfigField "String", "USER_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/public/user/\""
             buildConfigField "String", "USER_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/user/\""
 
             buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
             buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/searchSites/\""
 
             buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
 

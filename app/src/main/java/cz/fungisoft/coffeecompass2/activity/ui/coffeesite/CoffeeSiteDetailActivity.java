@@ -1,9 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -11,7 +9,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 import android.view.MenuItem;
@@ -20,24 +17,19 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import butterknife.BindView;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_ACTIVATE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_DELETE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_LOAD;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_SAVE;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE_UPDATE;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
@@ -46,7 +38,9 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE
  * in a {@link FoundCoffeeSitesListActivity}.
  * We need CoffeeSiteService to load current instance of CoffeeSite ...
  */
-public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
+public class CoffeeSiteDetailActivity extends ActivityWithLocationService
+                                      implements CoffeeSiteServicesConnectionListener,
+                                                 CoffeeSiteLoadServiceOperationsListener {
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
@@ -56,7 +50,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     private CoffeeSite coffeeSite;
 
-    private CoffeeSiteServiceLoadReceiver coffeeSiteServiceReceiver;
+    protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
@@ -150,7 +145,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReceiver);
+        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
     }
 
@@ -158,34 +153,14 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
     protected void onStart() {
         super.onStart();
         // Always try to load actual instance of CoffeeSite and convert it to CoffeeSiteMovable in
-        // CoffeeSiteServiceLoadReceiver.onReceive()
-        registerCoffeeSiteLoadReceiver();
-        startCoffeeSiteLoad();
-    }
-
-    /**
-     * Register this Activity to be inform about results of CoffeeSitesService results
-     * for Actions of the CoffeeSiteService.COFFEE_SITE_OPERATION (Save, Update, Delete)
-     * and CoffeeSiteService.COFFEE_SITE_STATUS  (Activate, Deactivate, Cancel)
-     * types
-     */
-    private void registerCoffeeSiteLoadReceiver() {
-        Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), start");
-        coffeeSiteServiceReceiver = new CoffeeSiteServiceLoadReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_LOADING);
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-        Log.i("CreateCoffeeSiteAct", "registerCoffeeSiteOperationsReceiver(), end");
+        doBindCoffeeSiteLoadOperationsService();
     }
 
     public void startCoffeeSiteLoad() {
 
         if (Utils.isOnline()) {
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", CoffeeSiteService.COFFEE_SITE_LOAD);
-            cfServiceIntent.putExtra("coffeeSiteId", coffeeSite.getId());
-            startService(cfServiceIntent);
+            showProgressbar();
+            coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -291,56 +266,76 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService {
         commentsButton.setEnabled(true);
     }
 
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteLoadOperationsService;
 
-    /**
-     * Receiver callbacks for CoffeeSiteService operations invoked earlier
-     */
-    private class CoffeeSiteServiceLoadReceiver extends BroadcastReceiver {
+    private void doBindCoffeeSiteLoadOperationsService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
+                coffeeSiteLoadOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteLoadOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
+    @Override
+    public void onCoffeeSiteServiceConnected() {
 
-            hideProgressbar();
+        if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
+            coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
+            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
+            startCoffeeSiteLoad();
+        }
+    }
 
-            Log.i(TAG, "onReceive start");
-            String result = intent.getStringExtra("operationResult");
-            String error = intent.getStringExtra("operationError");
-            int operationType = intent.getIntExtra("operationType", 0);
-
-            CoffeeSite loadedCoffeeSite = (CoffeeSite) intent.getExtras().getParcelable("coffeeSite");
-
-            Log.i(TAG,"Operation type: " + operationType + ". Result:" + result + ". Error: " + error);
-
-            switch (operationType) {
-                case COFFEE_SITE_LOAD: {
-                    Log.i(TAG, "Save result: " + result);
-                    if (error.isEmpty()) {
-                        // Loaded actual instance of CoffeeSite - transform it to CoffeeSiteMovable
-                        if (loadedCoffeeSite != null) {
-                            // Keep already known distance if available
-                            if (coffeeSite != null) {
-                                loadedCoffeeSite.setDistance(coffeeSite.getDistance());
-                            }
-                            coffeeSite = new CoffeeSiteMovable(loadedCoffeeSite);
-                            if (locationService != null) {
-                                ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
-                                locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));
-                            }
-                        }
-                        // Refresh detailFragment to update View with the new CoffeeSiteMovable
-                        detailFragment.setCoffeeSite(coffeeSite);
-                        final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        ft.detach(detailFragment);
-                        ft.attach(detailFragment);
-                        ft.commit();
-                    } else {
-                        // Not needed to change current coffeeSite, only show some message?
-                        showCoffeeSiteLoadFailure(error);
-                    }
-                } break;
-
-                default: break;
+    private void doUnbindCoffeeSiteLoadOperationsService() {
+        if (mShouldUnbindCoffeeSiteLoadOperationsService) {
+            if (coffeeSiteLoadOperationsService != null) {
+                coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
             }
+            // Release information about the service's state.
+            coffeeSiteLoadOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteLoadOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteLoadOperationsService = false;
+        }
+    }
+
+
+    @Override
+    public void onCoffeeSiteLoaded(CoffeeSite loadedCoffeeSite, String error) {
+        hideProgressbar();
+        Log.i(TAG, "Save success?: " + error.isEmpty());
+        if (error.isEmpty()) {
+            // Loaded actual instance of CoffeeSite - transform it to CoffeeSiteMovable
+            if (loadedCoffeeSite != null) {
+                // Keep already known distance if available
+                if (coffeeSite != null) {
+                    loadedCoffeeSite.setDistance(coffeeSite.getDistance());
+                }
+                coffeeSite = new CoffeeSiteMovable(loadedCoffeeSite);
+                if (locationService != null) {
+                    ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
+                    locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));
+                }
+            }
+            // Refresh detailFragment to update View with the new CoffeeSiteMovable
+            detailFragment.setCoffeeSite(coffeeSite);
+            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.detach(detailFragment);
+            ft.attach(detailFragment);
+            ft.commit();
+        } else {
+            // Not needed to change current coffeeSite, only show some message?
+            showCoffeeSiteLoadFailure(error);
         }
     }
 

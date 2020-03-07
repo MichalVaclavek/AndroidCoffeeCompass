@@ -7,14 +7,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+//import java.lang.ref.WeakReference;
 
-import cz.fungisoft.coffeecompass2.R;
+//import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
+//import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -37,7 +40,7 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
         DELETE
     }
 
-    private final SITE_ASYNC_REST_OPERATION requestedOperation;
+    //private final SITE_ASYNC_REST_OPERATION requestedOperation;
 
     private final CoffeeSite newOrModifiedCoffeeSite;
 
@@ -46,19 +49,32 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
      */
     private final LoggedInUser currentUser;
 
-    private final CoffeeSiteService callingService;
+    //private final WeakReference<CoffeeSiteService> callingService;
 
     private String operationResult = "";
     private String operationError = "";
 
+    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
+    private final CoffeeSiteRESTResultListener callingListenerService;
+
+    private Result.Error error;
+
     private final String tag;
 
-    public CoffeeSiteCUDOperationsAsyncTask(SITE_ASYNC_REST_OPERATION operation, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
+    //public CoffeeSiteCUDOperationsAsyncTask(SITE_ASYNC_REST_OPERATION operation, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
+    public CoffeeSiteCUDOperationsAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                            CoffeeSite coffeeSite,
+                                            LoggedInUser currentUser,
+                                            CoffeeSiteRESTResultListener callingService) {
+
         this.newOrModifiedCoffeeSite = coffeeSite;
         this.currentUser = currentUser;
-        this.callingService = callingService;
-        this.requestedOperation = operation;
-        tag = "SiteOpAsynTask_" + this.requestedOperation.toString();
+        //this.callingService = new WeakReference<>(callingService);
+        //this.requestedOperation = operation;
+        this.callingListenerService = callingService;
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
+
+        tag = "SiteOperationAsyncTask";
     }
 
     @Override
@@ -105,14 +121,26 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
 
             Call<CoffeeSite> call = null;
 
-            switch (this.requestedOperation) {
-                case CREATE:
+//            switch (this.requestedOperation) {
+//                case CREATE:
+//                    call = api.createCoffeeSite(newOrModifiedCoffeeSite);
+//                    break;
+//                case UPDATE:
+//                    call = api.updateCoffeeSite(newOrModifiedCoffeeSite.getId(), newOrModifiedCoffeeSite);
+//                    break;
+//                case DELETE: // TODO to be implemented returning Long
+//                    //call = api.deleteCoffeeSite(newOrModifiedCoffeeSite.getId());
+//                    break;
+//            }
+
+            switch (this.requestedRESTOperationCode) {
+                case COFFEE_SITE_SAVE:
                     call = api.createCoffeeSite(newOrModifiedCoffeeSite);
                     break;
-                case UPDATE:
+                case COFFEE_SITE_UPDATE:
                     call = api.updateCoffeeSite(newOrModifiedCoffeeSite.getId(), newOrModifiedCoffeeSite);
                     break;
-                case DELETE: // TODO to be implemented returning Long
+                case COFFEE_SITE_DELETE: // TODO to be implemented returning Long
                     //call = api.deleteCoffeeSite(newOrModifiedCoffeeSite.getId());
                     break;
             }
@@ -127,30 +155,51 @@ public class CoffeeSiteCUDOperationsAsyncTask extends AsyncTask<Void, Void, Void
                             Log.i(tag, "onSuccess()");
                             operationResult = "OK";
                             CoffeeSite coffeeSite = response.body();
-                            callingService.sendCoffeeSiteCUDOperationResultToClient(coffeeSite, requestedOperation, operationResult, "");
+//                            if (callingService.get() != null) {
+//                                callingService.get().sendCoffeeSiteCUDOperationResultToClient(coffeeSite, requestedOperation, operationResult, "");
+//                            }
+                            Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
+//                            callingService.sendCoffeeSitesFromUserLoadResultToClient(coffeeSites, operationResult, "");
+                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
                         } else {
                             Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
                             operationError = error.toString();
-                            callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
+//                            if (callingService.get() != null) {
+//                                callingService.get().sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation, "", operationError);
+//                            }
+                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                         }
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
-                            operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                            if (callingService.get() != null) {
+//                                operationError = callingService.get().getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                            }
+                            operationError = "Chyba komunikace se serverem.";
                         }
-                        callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
+//                        if (callingService.get() != null) {
+//                            callingService.get().sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation, "", operationError);
+//                        }
+                        if (error == null) {
+                            error = new Result.Error(operationError);
+                        }
+                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<CoffeeSite> call, Throwable t) {
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
-                    callingService.sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation,"", operationError);
+//                    if (callingService.get() != null) {
+//                        callingService.get().sendCoffeeSiteCUDOperationResultToClient(null, requestedOperation, "", operationError);
+//                    }
+                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                 }
             });
         }

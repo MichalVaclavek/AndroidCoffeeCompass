@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -33,15 +34,14 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
     private static final String sURLCore = "https://coffeecompass.cz/rest/public/starsAndComments/comments/";
     private String sURL;
 
-    private CommentsListActivity parentActivity;
+    private WeakReference<CommentsListActivity> parentActivity;
 
     private List<Comment> comments;
 
     private int coffeeSiteID;
 
     public GetCommentsAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
-        this.parentActivity = parentActivity;
-        //this.coffeeSite = cs;
+        this.parentActivity = new WeakReference<>(parentActivity);
         this.coffeeSiteID = coffeeSiteID;
 
         sURL = sURLCore + this.coffeeSiteID;
@@ -157,7 +157,9 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
     protected void onPostExecute(String result) {
 
         if (comments != null) {
-            parentActivity.processComments(comments);
+            if (parentActivity.get() != null) {
+                parentActivity.get().processComments(comments);
+            }
         }
     }
 

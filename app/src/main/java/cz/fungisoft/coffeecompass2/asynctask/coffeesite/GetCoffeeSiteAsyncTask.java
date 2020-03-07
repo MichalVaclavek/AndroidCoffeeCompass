@@ -7,13 +7,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+//import java.lang.ref.WeakReference;
+//import java.util.List;
 
-import cz.fungisoft.coffeecompass2.R;
+//import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
+//import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
+//import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,15 +35,24 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "GetCoffeeSiteAsyncTask";
 
-    private final CoffeeSiteService callingService;
+    //private final WeakReference<CoffeeSiteService> callingService;
 
     private final long coffeeSiteId;
 
     private String operationResult = "";
     private String operationError = "";
 
-    public GetCoffeeSiteAsyncTask(CoffeeSiteService callingService, long coffeeSiteId) {
-        this.callingService = callingService;
+    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
+    private final CoffeeSiteRESTResultListener callingListenerService;
+
+    private Result.Error error;
+
+    //public GetCoffeeSiteAsyncTask(CoffeeSiteService callingService, long coffeeSiteId) {
+    public GetCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                  CoffeeSiteRESTResultListener callingService, long coffeeSiteId) {
+        //this.callingService = new WeakReference<>(callingService);
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
+        this.callingListenerService = callingService;
         this.coffeeSiteId = coffeeSiteId;
     }
 
@@ -78,30 +92,51 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
                         //Log.i("onSuccess", response.body());
                         CoffeeSite coffeeSite = response.body();
                         operationResult = "OK";
-                        callingService.sendCoffeeSiteLoadResultToClient(coffeeSite, operationResult, "");
+//                        if (callingService.get() != null) {
+//                            callingService.get().sendCoffeeSiteLoadResultToClient(coffeeSite, operationResult, "");
+//                        }
+                        Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
+//                            callingService.sendCoffeeSitesFromUserLoadResultToClient(coffeeSites, operationResult, "");
+                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
                     } else {
                         Log.i(TAG, "Returned empty response for loading CoffeeSite request.");
-                        Result.Error error = new Result.Error(new IOException("Error loading CoffeeSite. Response empty."));
+                        error = new Result.Error(new IOException("Error loading CoffeeSite. Response empty."));
                         operationError = error.toString();
-                        callingService.sendCoffeeSiteLoadResultToClient(null,"", operationError);
+//                        if (callingService.get() != null) {
+//                            callingService.get().sendCoffeeSiteLoadResultToClient(null, "", operationError);
+//                        }
+                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                     }
                 } else {
                     try {
                         operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                        error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                     } catch (IOException e) {
                         Log.e(TAG, e.getMessage());
-                        operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                        if (callingService.get() != null) {
+//                            operationError = callingService.get().getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+//                        }
+                        operationError = "Chyba komunikace se serverem.";
                     }
-                    callingService.sendCoffeeSiteLoadResultToClient(null,"", operationError);
+//                    if (callingService.get() != null) {
+//                        callingService.get().sendCoffeeSiteLoadResultToClient(null, "", operationError);
+//                    }
+                    if (error == null) {
+                        error = new Result.Error(operationError);
+                    }
+                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                 }
             }
 
             @Override
             public void onFailure(Call<CoffeeSite> call, Throwable t) {
                 Log.e(TAG, "Error loading CoffeeSite REST request." + t.getMessage());
-                Result.Error error = new Result.Error(new IOException("Error loading CoffeeSite.", t));
+                error = new Result.Error(new IOException("Error loading CoffeeSite.", t));
                 operationError = error.toString();
-                callingService.sendCoffeeSiteLoadResultToClient(null,"", operationError);
+//                if (callingService.get() != null) {
+//                    callingService.get().sendCoffeeSiteLoadResultToClient(null, "", operationError);
+//                }
+                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
             }
         });
         return null;

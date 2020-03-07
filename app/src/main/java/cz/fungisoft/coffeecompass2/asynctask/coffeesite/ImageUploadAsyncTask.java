@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -32,7 +33,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private long coffeeSiteId;
 
-    private CoffeeSiteImageService callingService;
+    private WeakReference<CoffeeSiteImageService> callingService;
 
     private String operationResult = "";
     private String operationError = "";
@@ -41,7 +42,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
 
     public ImageUploadAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, File imageFile, long coffeeSiteId) {
-        this.callingService = imageService;
+        this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
         this.imageFile = imageFile;
         this.coffeeSiteId = coffeeSiteId;
@@ -106,21 +107,29 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                             Log.i(TAG, "onSuccess()");
                             operationResult = "OK";
                             String imageURL = response.body();
-                            callingService.evaluateImageSaveResult(new Result.Success<>(imageURL.trim()));
+                            if (callingService.get() != null) {
+                                callingService.get().evaluateImageSaveResult(new Result.Success<>(imageURL.trim()));
+                            }
                         } else {
                             Log.i(TAG, "Returned empty response for uploading image request.");
                             Result.Error error = new Result.Error(new IOException("Error uploading image. Response empty."));
-                            callingService.evaluateImageSaveResult(error);
+                            if (callingService.get() != null) {
+                                callingService.get().evaluateImageSaveResult(error);
+                            }
                         }
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
                         } catch (IOException e) {
                             Log.e(TAG, e.getMessage());
-                            operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            if (callingService.get() != null) {
+                                operationError = callingService.get().getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+                            }
                         }
                         Result.Error error = new Result.Error(new IOException(operationError));
-                        callingService.evaluateImageSaveResult(error);
+                        if (callingService.get() != null) {
+                            callingService.get().evaluateImageSaveResult(error);
+                        }
                     }
                 }
 
@@ -129,7 +138,9 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                     Log.e(TAG, "Error uploading image REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error uploading image.", t));
                     //operationError = error.toString();
-                    callingService.evaluateImageSaveResult(error);
+                    if (callingService.get() != null) {
+                        callingService.get().evaluateImageSaveResult(error);
+                    }
                 }
             });
         }

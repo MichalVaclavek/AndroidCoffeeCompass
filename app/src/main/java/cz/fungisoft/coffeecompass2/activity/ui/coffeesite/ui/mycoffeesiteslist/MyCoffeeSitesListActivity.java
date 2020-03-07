@@ -29,18 +29,21 @@ import java.util.Iterator;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
 import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITES_FROM_CURRENT_USER_LOAD;
 
 /**
  * Activity to load and show list of CoffeeSites created, not Canceled, by logged-in user.
@@ -50,7 +53,9 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteService.COFFEE_SITE
  */
 public class MyCoffeeSitesListActivity extends AppCompatActivity
                                        implements UserAccountServiceConnectionListener,
-                                                  CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener {
+                                                  CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
+                                                  CoffeeSiteServicesConnectionListener,
+                                                  CoffeeSiteLoadServiceOperationsListener {
 
     private static final String TAG = "MyCoffeeSitesListAct";
 
@@ -67,8 +72,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private Parcelable mListState;
 
     private static final String LIST_STATE_KEY = "CoffeeSiteList";
-
-    private MyCoffeeSitesListActivity.CoffeeSiteServiceOperationsReceiver coffeeSiteServiceReceiver;
 
     /**
      * UserAccount Service is probably not needed here
@@ -89,10 +92,15 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     private ProgressBar loadMyCoffeeSitesProgressBar;
 
-    private Toolbar myCoffeeSitesToolbar;
-
     private MenuItem addCoffeeSiteMenuItem;
     private MenuItem reloadMyCoffeeSitesMenuItem;
+
+
+    protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
+    private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
+
+    protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
 
     /**
      * Request type to ask CreateCoffeeSiteActivity to create new CoffeeSite
@@ -101,8 +109,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
 
     /**
-     * Flag to indicato if the list of user's CoffeeSites is being loading
-     * to check if the MenuItems should be enabled or disable
+     * Flag to indicate if the list of user's CoffeeSites is being loading
+     * to check if the MenuItems should be enabled or disabled
      */
     private boolean listOfSitesIsBeingLoading = false;
 
@@ -130,7 +138,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
 
-        myCoffeeSitesToolbar = findViewById(R.id.my_sitesList_Toolbar);
+        Toolbar myCoffeeSitesToolbar = findViewById(R.id.my_sitesList_Toolbar);
 
         /* If called from MainActivity, we can pass the number of CoffeeSites from user
          * to be shown/loaded
@@ -156,17 +164,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         layoutManager = new LinearLayoutManager(this);
 
-        /* Must be called here onCreate() as after successful connection to UserAccountService
+        /* Must be called here, in onCreate(), as after successful connection to UserAccountService
          loading of users CoffeeSites starts. We need this loading only if this Activity
          is created, not in case we returned to it from another Activity
          */
         doBindUserAccountService();
 
-        /*
-         * Registers receiver for all operations results performed by
-         * CoffeeSiteService with current CoffeeSite of this Activity
-         */
-        registerCoffeeSiteOperationsReceiver();
     }
 
     @Override
@@ -185,10 +188,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
 
         /* Disable menu options when the list of user's sites
-         is being loading, otherwise enable.
+         is being loaded, otherwise enable.
          This method is invoked by invalidateOptionsMenu
-         called before and after loading i.e. in showProgressBar
-         and hideProgressBar metods
+         called before and after loading i.e. in showProgressBar()
+         and hideProgressBar() methods
         */
         if (isListOfSitesIsBeingLoading()) {
             addCoffeeSiteMenuItem.setEnabled(false);
@@ -215,9 +218,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             return true;
         }
         if (id == R.id.action_refresh_list) {
-            if (currentUser != null && recyclerViewAdapter != null) {
-                // Delete current list
-                recyclerViewAdapter.clearList();
+            if (currentUser != null) {
+                if (recyclerViewAdapter != null) {
+                    // Delete current list
+                    recyclerViewAdapter.clearList();
+                }
                 // Load list again
                 startMyCoffeeSitesLoadOperation();
             }
@@ -281,98 +286,145 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, List<CoffeeSite> listContent) {
-        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this, listContent);
+        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this,  coffeeSiteStatusChangeService, listContent);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
 
-    /** ------------ CoffeeSiteService calls and callback ------------------------------- **/
-
-    /**
-     * Starts operation to load all CoffeeSites created by current user
-     *
-     */
     private void startMyCoffeeSitesLoadOperation() {
         if (Utils.isOnline()) {
-            Log.i(TAG, "startCoffeeSiteServiceLoadOperation");
-            Intent cfServiceIntent = new Intent();
-            cfServiceIntent.setClass(this, CoffeeSiteService.class);
-            cfServiceIntent.putExtra("operation_type", COFFEE_SITES_FROM_CURRENT_USER_LOAD);
-            //cfServiceIntent.putExtra("countDownLatch", countDownLatch);
-            showProgressbarAndDisableMenuItems();
-
-            startService(cfServiceIntent);
-            Log.i(TAG, "startCoffeeSiteServiceOperation, End");
+            if (coffeeSiteLoadOperationsService != null) {
+                if (!isListOfSitesIsBeingLoading()) {
+                    showProgressbarAndDisableMenuItems();
+                    setListOfSitesIsBeingLoading(true);
+                    coffeeSiteLoadOperationsService.findAllCoffeeSitesFromCurrentUser();
+                }
+            }
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
     }
 
-    private void registerCoffeeSiteOperationsReceiver() {
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() start");
-        coffeeSiteServiceReceiver = new CoffeeSiteServiceOperationsReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CoffeeSiteService.COFFEE_SITE_LOADING);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(coffeeSiteServiceReceiver, intentFilter);
-        Log.i(TAG, "registerCoffeeSiteOperationsReceiver() end");
+    /********* CoffeeSiteStatusChangeService **************/
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteStatusChangeService;
+
+    private void doBindCoffeeSiteStatusChangeService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
+                coffeeSiteStatusChangeServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteStatusChangeService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
     }
 
-    /**
-     * Receiver callbacks for CoffeeSiteService operations invoked earlier
-     */
-    private class CoffeeSiteServiceOperationsReceiver extends BroadcastReceiver {
+    private void doUnbindCoffeeSiteStatusChangeService() {
+        if (mShouldUnbindCoffeeSiteStatusChangeService) {
+            // Release information about the service's state.
+            coffeeSiteStatusChangeServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteStatusChangeServiceConnector);
+            mShouldUnbindCoffeeSiteStatusChangeService = false;
+        }
+    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            hideProgressbarAndEnableMenuItems();
 
-            Log.i(TAG, "onReceive start");
-            String result = intent.getStringExtra("operationResult");
-            String error = intent.getStringExtra("operationError");
-            int operationType = intent.getIntExtra("operationType", 0);
-            Log.i(TAG, "Result: " + result + " Error: " + error + ", PperationType: " + operationType);
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteLoadOperationsService;
 
-            switch (operationType) {
+    private void doBindCoffeeSiteLoadOperationsService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
+                coffeeSiteLoadOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteLoadOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
 
-                case COFFEE_SITES_FROM_CURRENT_USER_LOAD: {
+    @Override
+    public void onCoffeeSiteServiceConnected() {
 
-                    if (!error.isEmpty()) {
-                        showMyCoffeeSitesLoadFailure(error);
-                        Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Error: " + error);
-                    }
-                    else {
-                        showMyCoffeeSitesLoadSuccess();
-                        Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + result);
-                        content = intent.getParcelableArrayListExtra("coffeeSitesList");
-                        if (content != null) {
-                            // Only CoffeeSites not in CANCELED state are to be shown
-                            prepareAndActivateRecyclerView();
-                        }
-                    }
-                }
-                break;
-
+        if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
+            if (coffeeSiteLoadOperationsService == null) {
+                coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
+                coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
+            }
+            startMyCoffeeSitesLoadOperation();
+        }
+        if (coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService() != null) {
+            if (coffeeSiteStatusChangeService == null) {
+                coffeeSiteStatusChangeService = coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService();
             }
         }
     }
+
+    private void doUnbindCoffeeSiteLoadOperationsService() {
+        if (mShouldUnbindCoffeeSiteLoadOperationsService) {
+            if (coffeeSiteLoadOperationsService != null) {
+                coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+            }
+            // Release information about the service's state.
+            coffeeSiteLoadOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteLoadOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteLoadOperationsService = false;
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteListFromLoggedInUserLoaded(List<CoffeeSite> coffeeSites, String error) {
+        setListOfSitesIsBeingLoading(false);
+        hideProgressbarAndEnableMenuItems();
+
+        if (!error.isEmpty()) {
+            showMyCoffeeSitesLoadFailure(error);
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Error: " + error);
+        }
+        else {
+            showMyCoffeeSitesLoadSuccess();
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + "OK");
+            //content = intent.getParcelableArrayListExtra("coffeeSitesList");
+            content = coffeeSites;
+            if (content != null) {
+                // Only CoffeeSites not in CANCELED state are to be shown
+                prepareAndActivateRecyclerView();
+            }
+        }
+    }
+
 
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void showProgressbarAndDisableMenuItems() {
-        setListOfSitesIsBeingLoading(true);
-        invalidateOptionsMenu();
         loadMyCoffeeSitesProgressBar.setVisibility(View.VISIBLE);
+        invalidateOptionsMenu();
     }
 
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void hideProgressbarAndEnableMenuItems() {
-        setListOfSitesIsBeingLoading(false);
-        invalidateOptionsMenu();
         loadMyCoffeeSitesProgressBar.setVisibility(View.GONE);
+        invalidateOptionsMenu();
     }
 
     private void showMyCoffeeSitesLoadSuccess()
@@ -432,7 +484,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 if (currentUser != null) {
                     startMyCoffeeSitesLoadOperation();
                 }
-
             }
         }
 
@@ -454,7 +505,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-    private void doUnbindUserLoginService() {
+    private void doUnbindUserAccountService() {
         if (mShouldUnbindUserLoginService) {
             // Release information about the service's state.
             userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
@@ -510,15 +561,22 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        doBindCoffeeSiteStatusChangeService();
+        doBindCoffeeSiteLoadOperationsService();
+    }
+
+    @Override
     protected void onStop() {
-        
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(coffeeSiteServiceReceiver);
+        doUnbindCoffeeSiteStatusChangeService();
+        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        doUnbindUserLoginService();
+        doUnbindUserAccountService();
         if (recyclerViewAdapter != null) {
             recyclerViewAdapter.onDestroy();
         }
