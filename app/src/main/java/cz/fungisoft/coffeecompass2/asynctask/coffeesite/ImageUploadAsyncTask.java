@@ -78,13 +78,10 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                     //.addInterceptor(logging)
                     .build();
 
-            //Gson gson = new GsonBuilder().create();
-
             Retrofit retrofit = new Retrofit.Builder()
                     .client(client)
                     .baseUrl(ImageRESTInterface.UPLOAD_IMAGE_URL)
                     .addConverterFactory(ScalarsConverterFactory.create())
-                    //.addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
 
             // Create a request body with file and image media type

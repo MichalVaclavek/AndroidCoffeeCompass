@@ -60,7 +60,6 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
                     } else {
                         Log.i(REQ_TAG, "Returned empty response for obtaining number of Stars for CoffeeSite and User request.");
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User. Response empty."));
-                        //parentActivity.showRESTCallError(error);
                         if (parentActivity.get() != null) {
                             parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
                         }
@@ -74,7 +73,6 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error obtaining number of Stars for CoffeeSite and User." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User.", e));
-                        //parentActivity.showRESTCallError(error);
                         if (parentActivity.get() != null) {
                             parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
                         }
@@ -86,7 +84,6 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
             public void onFailure(Call<Integer> call, Throwable t) {
                 Log.e(REQ_TAG, "Error obtaining number of Stars for CoffeeSite and User REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error obtaining number of Stars for CoffeeSite and User", t));
-                //parentActivity.showRESTCallError(error);
                 if (parentActivity.get() != null) {
                     parentActivity.get().processFailedNumberOfStarsForSiteAndUser(error);
                 }

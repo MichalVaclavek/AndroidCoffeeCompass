@@ -400,6 +400,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         doBindCoffeeSiteImageService();
 
+        doBindCoffeeSiteCUDOperationsService();
+        doBindCoffeeSiteStatusChangeService();
+
         // To compress image/photo files of the CoffeeSIte
         fileCompressor = new FileCompressor(this);
         // To detect, that user did not choose new image file yet
@@ -536,15 +539,15 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // TODO - Verify, if calling this in onResume() would be more convenient
         doBindCoffeeSiteEntitiesService();
 
-        doBindCoffeeSiteCUDOperationsService();
-        doBindCoffeeSiteStatusChangeService();
+//        doBindCoffeeSiteCUDOperationsService();
+//        doBindCoffeeSiteStatusChangeService();
     }
 
     @Override
     protected void onStop() {
         doUnbindCoffeeSiteEntitiesService();
-        doUnbindCoffeeSiteCUDOperationsService();
-        doUnbindCoffeeSiteStatusChangeService();
+//        doUnbindCoffeeSiteCUDOperationsService();
+//        doUnbindCoffeeSiteStatusChangeService();
         super.onStop();
     }
 
@@ -1409,6 +1412,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onDestroy() {
         doUnbindCoffeeSiteImageService();
+
+        doUnbindCoffeeSiteCUDOperationsService();
+        doUnbindCoffeeSiteStatusChangeService();
         super.onDestroy();
     }
 

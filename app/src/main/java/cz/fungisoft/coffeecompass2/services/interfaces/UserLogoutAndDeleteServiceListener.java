@@ -3,7 +3,7 @@ package cz.fungisoft.coffeecompass2.services.interfaces;
 
 /**
  * Listener Interface to define events, which are fired by UserAccountService
- * after new user registration.
+ * after User logout on delete.
  */
 public interface UserLogoutAndDeleteServiceListener {
 

@@ -12,7 +12,8 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteCUDOperationsAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteCreateUpdateAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteDeleteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteIdRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
@@ -95,7 +96,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         currentUser = getCurrentUser();
         if (currentUser != null) {
             coffeeSite.setCreatedByUserName(currentUser.getUserName());
-            new CoffeeSiteCUDOperationsAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
                     this).execute();
         }
     }
@@ -106,7 +107,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         currentUser = getCurrentUser();
         if (currentUser != null) {
             coffeeSite.setLastEditUserName(currentUser.getUserName());
-            new CoffeeSiteCUDOperationsAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
                     this).execute();
         }
     }
@@ -116,7 +117,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_DELETE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new CoffeeSiteCUDOperationsAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteDeleteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
                     this).execute();
         }
     }
@@ -135,6 +136,12 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         }
     }
 
+    /**
+     * Called for example from AsyncTask to delete CoffeeSite
+     *
+     * @param oper
+     * @param result
+     */
     @Override
     public void onCoffeeSitesIdReturned(CoffeeSiteRESTOper oper, Result<Long> result) {
         long returnedCoffeeSiteId;
@@ -147,7 +154,6 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             informClientAboutCoffeeSiteIdOperationResult(oper, 0, error.getDetail());
             Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
         }
-
     }
 
 
@@ -164,14 +170,13 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
                     break;
                 case COFFEE_SITE_UPDATE: listener.onCoffeeSiteUpdated(coffeeSite, error);
                     break;
-
-                default: break;
             }
         }
     }
 
     /**
-     * Informs calling Activity about requested ...
+     * Informs calling Activity about requested Delete (or other operation returning coffeeSite ID )
+     * operations result.
      */
     private void informClientAboutCoffeeSiteIdOperationResult(CoffeeSiteRESTOper operation, long coffeeSiteId, String error) {
 
@@ -179,8 +184,6 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             switch (operation) {
                 case COFFEE_SITE_DELETE: listener.onCoffeeSiteDeleted(coffeeSiteId, error);
                     break;
-
-                default: break;
             }
         }
     }

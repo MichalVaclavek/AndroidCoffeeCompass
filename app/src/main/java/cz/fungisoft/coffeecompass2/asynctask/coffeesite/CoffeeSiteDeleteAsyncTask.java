@@ -7,16 +7,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
-import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteIdRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -28,44 +26,53 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * Async Task to run REST api request to obtain all coffeeSites
- * created by current logged-in User
+ * AsyncTask pro Delete operaci s CoffeeSite
  */
-public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void, Void> {
+public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "GetSitesFromUserAsnTsk";
+    private final CoffeeSite coffeeSite;
 
+    /**
+     * Current logged-in user
+     */
     private final LoggedInUser currentUser;
 
     private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
-    private final CoffeeSitesRESTResultListener callingListenerService;
+
+    private final CoffeeSiteIdRESTResultListener callingListenerDeleteService;
 
     private Result.Error error;
 
+    private final String tag;
 
-    public GetCoffeeSitesFromCurrentUserAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                                  LoggedInUser user,
-                                                  CoffeeSitesRESTResultListener callingService) {
-        this.currentUser = user;
-        this.callingListenerService = callingService;
+    public CoffeeSiteDeleteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                            CoffeeSite coffeeSite,
+                                            LoggedInUser currentUser,
+                                            CoffeeSiteIdRESTResultListener callingDeleteService) {
+
+        this.coffeeSite = coffeeSite;
+        this.currentUser = currentUser;
+        this.callingListenerDeleteService = callingDeleteService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
+
+        tag = "SiteOperationAsyncTask";
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-
-        Log.i(TAG, "start");
+        Log.i(tag, "start");
         operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
         if (currentUser != null) {
 
-            // Inserts currentUser authorization token to Authorization header
-            Interceptor headerAuthorizationInterceptor = new Interceptor() {
+            // Inserts user authorization token to Authorization header
+            Interceptor headerAuthorizationInterceptor;
+            headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
@@ -80,9 +87,6 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
-                    .writeTimeout(20, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(headerAuthorizationInterceptor)
                     //.addInterceptor(logging)
                     .build();
@@ -100,54 +104,54 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
             CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-            Call<List<CoffeeSite>> call = api.getAllCoffeeSitesByCurrentUser();
+            Call<Integer> call = api.deleteCoffeeSite(coffeeSite.getId());
 
-            Log.i(TAG, "start call");
+            Log.i(tag, "start call");
 
-            call.enqueue(new Callback<List<CoffeeSite>>() {
+            call.enqueue(new Callback<Integer>() {
                 @Override
-                public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
+                public void onResponse(Call<Integer> call, Response<Integer> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
-                            Log.i(TAG, "onSuccess()");
-                            List<CoffeeSite> coffeeSites = response.body();
+                            Log.i(tag, "onSuccess()");
                             operationResult = "OK";
-                            Result.Success<List<CoffeeSite>> result = new Result.Success<>(coffeeSites);
-                            if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, result);
+                            Integer coffeeSite = response.body();
+                            Result.Success<Integer> result = new Result.Success<>(coffeeSite);
+                            if (callingListenerDeleteService != null) {
+                                callingListenerDeleteService.onCoffeeSitesIdReturned(requestedRESTOperationCode, result);
                             }
                         } else {
-                            Log.i(TAG, "Returned empty response for loading CoffeeSites from user REST request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            Log.i(tag, "Returned empty response for deleting CoffeeSite request.");
+                            error = new Result.Error(new IOException("Error deleting CoffeeSite. Response empty."));
                             operationError = error.toString();
-                            if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                            if (callingListenerDeleteService != null) {
+                                callingListenerDeleteService.onCoffeeSitesIdReturned(requestedRESTOperationCode, error);
                             }
                         }
                     } else {
                         try {
+                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
                             error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
-                            Log.e(TAG, e.getMessage());
+                            Log.e(tag, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";
                         }
-                        Log.e(TAG, "response Not successful");
                         if (error == null) {
                             error = new Result.Error(operationError);
                         }
-                        if (callingListenerService != null) {
-                            callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                        if (callingListenerDeleteService != null) {
+                            callingListenerDeleteService.onCoffeeSitesIdReturned(requestedRESTOperationCode, error);
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
-                    Log.e(TAG, "Error loading CoffeeSites from User REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error loading CoffeeSites from user REST request.", t));
+                public void onFailure(Call<Integer> call, Throwable t) {
+                    Log.e(tag, "Error deleting CoffeeSite REST request." + t.getMessage());
+                    error = new Result.Error(new IOException("Error deleting CoffeeSite.", t));
                     operationError = error.toString();
-                    if (callingListenerService != null) {
-                        callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                    if (callingListenerDeleteService != null) {
+                        callingListenerDeleteService.onCoffeeSitesIdReturned(requestedRESTOperationCode, error);
                     }
                 }
             });

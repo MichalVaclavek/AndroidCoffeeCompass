@@ -4,14 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -170,6 +167,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
          */
         doBindUserAccountService();
 
+        doBindCoffeeSiteStatusChangeService();
+        doBindCoffeeSiteLoadOperationsService();
     }
 
     @Override
@@ -265,9 +264,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
-        if (currentUser != null) {
-            startMyCoffeeSitesLoadOperation();
-        }
+//        if (currentUser != null) {
+//            startMyCoffeeSitesLoadOperation();
+//        }
     }
 
 
@@ -563,14 +562,14 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        doBindCoffeeSiteStatusChangeService();
-        doBindCoffeeSiteLoadOperationsService();
+        //doBindCoffeeSiteStatusChangeService();
+        //doBindCoffeeSiteLoadOperationsService();
     }
 
     @Override
     protected void onStop() {
-        doUnbindCoffeeSiteStatusChangeService();
-        doUnbindCoffeeSiteLoadOperationsService();
+//        doUnbindCoffeeSiteStatusChangeService();
+//        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
     }
 
@@ -580,6 +579,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (recyclerViewAdapter != null) {
             recyclerViewAdapter.onDestroy();
         }
+        doUnbindCoffeeSiteStatusChangeService();
+        doUnbindCoffeeSiteLoadOperationsService();
         super.onDestroy();
     }
 

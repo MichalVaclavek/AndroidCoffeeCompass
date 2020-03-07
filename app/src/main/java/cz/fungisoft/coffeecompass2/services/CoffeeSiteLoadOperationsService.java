@@ -147,7 +147,12 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
 
     public void findAllCoffeeSitesByUserId(long userId) {
-        //new GetCoffeeSitesFromCurrentUserAsyncTask(currentUser, this).execute();
+        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_USER_LOAD;
+        if (currentUser != null) {
+            new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
+        } else {
+            Log.i(TAG, "Current user is null. Cannot execute GetCoffeeSitesFromCurrentUserAsyncTask.execute()");
+        }
     }
 
     public void findNumberOfCoffeeSitesFromCurrentUser() {
@@ -155,10 +160,9 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_NUMBER_FROM_CURRENT_USER;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            //new GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(currentUser, this).execute();
             new GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask");
+            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
@@ -167,17 +171,15 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_LOAD;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            //new GetCoffeeSitesFromCurrentUserAsyncTask(currentUser, this).execute();
             new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask");
+            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
     public void findCoffeeSiteById(long coffeeSiteId) {
 
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD;
-        //new GetCoffeeSiteAsyncTask(this, coffeeSiteId).execute();
         new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, coffeeSiteId).execute();
     }
 
