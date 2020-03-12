@@ -22,7 +22,7 @@ public class SearchDistancePreferenceHelper {
     public void putSearchDistance(int searchDistance) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putInt(SEARCH_DISTANCE, searchDistance);
-        edit.commit();
+        edit.apply();
     }
 
     public int getSearchDistanc() {

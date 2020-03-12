@@ -30,22 +30,12 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Class to call AsyncTasks operations to change CoffeeSite status. Statuses can be:
  *
- * Operations can be:
- *
  * ACTIVATE
  * DEACTIVATE
  * CANCEL
  *
  */
 public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
-
-    public enum SITE_STATUS_ASYNC_REST_OPERATION {
-        ACTIVATE,
-        DEACTIVATE,
-        CANCEL
-    }
-
-    //private final SITE_STATUS_ASYNC_REST_OPERATION requestedStatus;
 
     private final CoffeeSite coffeeSiteToModify;
 
@@ -54,9 +44,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
      */
     private final LoggedInUser currentUser;
 
-    //private final CoffeeSiteService callingService;
-
-    private String operationResult = "";
+    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -66,15 +54,12 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
     private final String tag;
 
-//    public ChangeStatusOfCoffeeSiteAsyncTask(SITE_STATUS_ASYNC_REST_OPERATION status, CoffeeSite coffeeSite, LoggedInUser currentUser, CoffeeSiteService callingService) {
     public ChangeStatusOfCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                         CoffeeSite coffeeSite,
-                                         LoggedInUser currentUser,
-                                         CoffeeSiteRESTResultListener callingService) {
+                                             CoffeeSite coffeeSite,
+                                             LoggedInUser currentUser,
+                                             CoffeeSiteRESTResultListener callingService) {
         this.coffeeSiteToModify = coffeeSite;
         this.currentUser = currentUser;
-        //this.callingService = callingService;
-        //this.requestedStatus = status;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         tag = "SiteStatusAsynTask";
@@ -83,7 +68,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(tag, "start");
-        operationResult = "";
+        //operationResult = "";
         operationError = "";
 
         Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
@@ -126,18 +111,6 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
             //TODO overeni, ze CoffeeSite ma aktualni status vhodny ke pozadovane operaci
             // tj. atributy canBeActivated, atd. viz DTO object
-//            switch (this.requestedStatus) {
-//                case ACTIVATE:
-//                    call = api.activateCoffeeSite(coffeeSiteToModify.getId());
-//                    break;
-//                case DEACTIVATE:
-//                    call = api.deactivateCoffeeSite(coffeeSiteToModify.getId());
-//                    break;
-//                case CANCEL:
-//                    call = api.cancelCoffeeSite(coffeeSiteToModify.getId());
-//                    break;
-//            }
-
             switch (this.requestedRESTOperationCode) {
                 case COFFEE_SITE_ACTIVATE:
                     call = api.activateCoffeeSite(coffeeSiteToModify.getId());
@@ -158,18 +131,20 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(tag, "onSuccess()");
-                            operationResult = "OK";
+                            //operationResult = "OK";
                             CoffeeSite coffeeSite = response.body();
                             Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
-                            //callingService.sendCoffeeSiteStatusChangeResultToClient(coffeeSite, requestedStatus, operationResult, "");
-                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+                            if (callingListenerService != null) {
+                                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+                            }
 
                         } else {
                             Log.i(tag, "Returned empty response for saving CoffeeSite request.");
                             error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
                             operationError = error.toString();
-                            //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
-                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                            if (callingListenerService != null) {
+                                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                            }
                         }
                     } else {
                         try {
@@ -177,14 +152,15 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                             error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
-                            //operationError = callingService.getResources().getString(R.string.coffeesiteservice_error_message_not_available);
+
                             operationError = "Chyba komunikace se serverem.";
                         }
-                        //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
                         if (error == null) {
                             error = new Result.Error(operationError);
                         }
-                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                        if (callingListenerService != null) {
+                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                        }
                     }
                 }
 
@@ -193,11 +169,13 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
-                    //callingService.sendCoffeeSiteStatusChangeResultToClient(null, requestedStatus,"", operationError);
-                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                    if (callingListenerService != null) {
+                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                    }
                 }
             });
         }
         return null;
     }
+
 }

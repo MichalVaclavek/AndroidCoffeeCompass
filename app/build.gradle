@@ -15,7 +15,7 @@ android {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 21
+        versionCode 22
         versionName "3.01"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,7 +30,7 @@ android {
 
             buildConfigField "String", "HOME_API_URL", "\"https://coffeecompass.cz/rest/home\""
 
-            buildConfigField "String", "LOGIN_URL", "\"https://coffeecompass.cz/rest/public/user/\""
+            buildConfigField "String", "USER_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/public/user/\""
             buildConfigField "String", "USER_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/user/\""
 
             buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""

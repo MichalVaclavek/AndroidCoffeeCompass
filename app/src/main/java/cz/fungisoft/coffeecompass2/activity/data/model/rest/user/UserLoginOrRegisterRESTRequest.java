@@ -155,6 +155,3 @@ public class UserLoginOrRegisterRESTRequest {
     }
 
 }
-
-
-

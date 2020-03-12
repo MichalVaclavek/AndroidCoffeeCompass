@@ -37,7 +37,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
     private final LoggedInUser currentUser;
 
-    private String operationResult = "";
+    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -58,7 +58,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
     protected Void doInBackground(Void... voids) {
 
         Log.i(TAG, "start");
-        operationResult = "";
+        //operationResult = "";
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
@@ -111,7 +111,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");
                             List<CoffeeSite> coffeeSites = response.body();
-                            operationResult = "OK";
+                            //operationResult = "OK";
                             Result.Success<List<CoffeeSite>> result = new Result.Success<>(coffeeSites);
                             if (callingListenerService != null) {
                                 callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, result);

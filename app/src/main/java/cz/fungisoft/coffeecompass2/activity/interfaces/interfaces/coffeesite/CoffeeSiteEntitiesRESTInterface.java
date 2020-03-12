@@ -16,12 +16,17 @@ import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import retrofit2.Call;
 import retrofit2.http.GET;
 
+/**
+ * Retrofit library interface for operations/REST calls related to
+ * CoffeeSiteEntities.
+ */
 public interface CoffeeSiteEntitiesRESTInterface {
 
     String GET_ENTITY_BASE = BuildConfig.COFFEESITE_API_PUBLIC_URL;
 
     /**
-     * REST call for obtain OtherOffer enetities
+     * REST call for obtain OtherOffer entity JSON values. Parsing from JSON
+     * to OtherOffer instancies is done by Retrofit lib.
      * URL example https://coffeecompass.cz/rest/site/allOtherOffers
      * @return
      */

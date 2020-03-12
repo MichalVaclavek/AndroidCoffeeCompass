@@ -14,7 +14,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLoginOrRegi
  *  - token string itself - usualy contains username and expiry date. It is expected to be JWT token as
  *  it is used on coffeecompass.cz (but this probably not important on the client side?)
  *  - expiry date of the token
- *  - token type (usually Bearer)
+ *  - token type (usually 'Bearer')
  */
 public class JwtUserToken implements Serializable {
 

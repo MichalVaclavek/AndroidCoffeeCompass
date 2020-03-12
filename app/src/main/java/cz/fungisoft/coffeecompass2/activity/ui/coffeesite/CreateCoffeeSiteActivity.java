@@ -205,6 +205,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private int mode = MODE_CREATE;
 
     /**
+     * To indicate, that user is trying to enter longitude and latitude manually
+     * Used in CREATE mode to block automatic overwriting of long. lat. text view
+     * in such manual enter mode
+     */
+    private boolean locationEnterManualMode = false;
+
+    /**
      * To show snackbar
      */
     private View contextView;
@@ -242,7 +249,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
         }
 
-        //bottomNavigation = findViewById(R.id.bottom_navigation);
         // Enable/disable bottom navigation menu items
         imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
         saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
@@ -308,15 +314,22 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                                     currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null);
 
-                                    // Show dialog to choose if the CoffeeSite should be only saved
+                                    // Show dialog to choose, if the CoffeeSite should be only saved
                                     // or saved and activated
-                                    SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
-                                    dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
-
+                                    if (Utils.isOnline()) {
+                                        SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
+                                        dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
+                                    } else {
+                                        Utils.showNoInternetToast(getApplicationContext());
+                                    }
                                 }
                                 if (mode == MODE_MODIFY) {
                                     currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite);
-                                    updateCoffeeSite(currentCoffeeSite);
+                                    if (Utils.isOnline()) {
+                                        updateCoffeeSite(currentCoffeeSite);
+                                    } else {
+                                        Utils.showNoInternetToast(getApplicationContext());
+                                    }
                                 }
 
                                 return true;
@@ -336,6 +349,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         // Input for CoffeeSite name, Longitude and Latitude validation
         createCoffeeSiteViewModel.getCoffeeSiteFormState().observe(this, new Observer<CoffeeSiteCreateFormState>() {
+
             @Override
             public void onChanged(@Nullable CoffeeSiteCreateFormState createCoffeeSiteFormState) {
                 if (createCoffeeSiteFormState == null) {
@@ -347,17 +361,27 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                 if (createCoffeeSiteFormState.getCoffeeSiteNameError() != null) {
                     coffeeSiteNameEditText.setError(getString(createCoffeeSiteFormState.getCoffeeSiteNameError()));
+                } else {
+                    coffeeSiteNameEditText.setError(null); // clears error icon and text
                 }
                 if (createCoffeeSiteFormState.getLatitudeError() != null) {
                     latitudeEditText.setError(getString(createCoffeeSiteFormState.getLatitudeError()));
+                } else {
+                    latitudeEditText.setError(null); // clears error icon and text
                 }
                 if (createCoffeeSiteFormState.getLongitudeError() != null) {
                     longitudeEditText.setError(getString(createCoffeeSiteFormState.getLongitudeError()));
+                } else {
+                    longitudeEditText.setError(null); // clears error icon and text
                 }
             }
         });
 
+        /**
+         * Common TextWatcher to watch changes in mandatory input fields
+         */
         TextWatcher afterTextChangedListener = new TextWatcher() {
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // ignore
@@ -368,9 +392,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 // ignore
             }
 
-            // Validate input in loginViewModel
+            // Validate input in createCoffeeSiteViewModel
             @Override
             public void afterTextChanged(Editable s) {
+
                 createCoffeeSiteViewModel.coffeeSiteDataChanged(coffeeSiteNameEditText.getText().toString(),
                         longitudeEditText.getText().toString(), latitudeEditText.getText().toString());
                 if (!locationTypeEditText.getText().toString().isEmpty()) {
@@ -381,11 +406,45 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 }
             }
         };
+
         coffeeSiteNameEditText.addTextChangedListener(afterTextChangedListener);
         longitudeEditText.addTextChangedListener(afterTextChangedListener);
         latitudeEditText.addTextChangedListener(afterTextChangedListener);
         locationTypeEditText.addTextChangedListener(afterTextChangedListener);
         sourceTypeEditText.addTextChangedListener(afterTextChangedListener);
+
+        /**
+         * Special TextWatcher to watch if a user entered manually longitudeTextView or latitudeTextView
+         */
+        TextWatcher afterLongLatTextViewChangedListener = new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            // Validate input in createCoffeeSiteViewModel
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Detect if the input of longitude or latitude was changed by setText or by user
+                if (longitudeEditText.getTag() == null || latitudeEditText.getTag() == null) {
+                    // Value changed by user, because before setText() programmatically entered, the tag
+                    // is set to a special value
+                    locationEnterManualMode = true; // means from now on, ignore values entered programmatically in showCurrentLocationInView()
+                                                    // as user wants to enter values manually
+                    // but if both  textInputs are cleared, allow automatic enter again
+                    if (longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty()) {
+                        locationEnterManualMode = false;
+                    }
+                }
+            }
+        };
+
+        latitudeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
+        locationTypeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
 
         openingFromTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingFromTimeEditText, event));
         openingToTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingToTimeEditText, event));
@@ -553,6 +612,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     protected void onResume() {
+        locationEnterManualMode = false;
         super.onResume();
     }
 
@@ -716,7 +776,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
     }
 
-
     /********* CoffeeSiteCUDOperationsService **************/
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -818,7 +877,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 imagePhotoFile = null;
             }
             if (currentCoffeeSite != null && !currentCoffeeSite.getMainImageURL().isEmpty()) {
-                deleteCoffeeSiteImage(currentCoffeeSite);
+                if (Utils.isOnline()) {
+                    deleteCoffeeSiteImage(currentCoffeeSite);
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
             }
         }
     }
@@ -949,6 +1012,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void updateCoffeeSite(CoffeeSite coffeeSite) {
+
         showProgressbar();
         // If there is a photoFile, save it first to be available
         // after CoffeeSite is returned after it's update
@@ -1045,7 +1109,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         Intent activityIntent = new Intent(CreateCoffeeSiteActivity.this, MyCoffeeSitesListActivity.class);
         activityIntent.putExtra("coffeeSite", (Parcelable) updatedCoffeeSite);
         activityIntent.putExtra("coffeeSitePosition", coffeeSitePositionInRecyclerView);
-        //this.startActivity(activityIntent);
+
         setResult(Activity.RESULT_OK, activityIntent);
         finish();
     }
@@ -1060,8 +1124,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void goToMyCoffeeSitesActivity() {
         Intent activityIntent = new Intent(CreateCoffeeSiteActivity.this, MyCoffeeSitesListActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //activityIntent.putExtra("currentUserName", userAccountService.getLoggedInUser().getUserName());
-        //activityIntent.putExtra("coffeeSite", (Parcelable) currentCoffeeSite);
         setResult(Activity.RESULT_OK, activityIntent);
         this.startActivity(activityIntent);
         finish();
@@ -1077,10 +1139,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-
-        location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-        locationService.addPropertyChangeListener(this);
-        showCurrentLocationInView();
+        if (mode == MODE_CREATE) {
+            location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            locationService.addPropertyChangeListener(this);
+            showCurrentLocationInView();
+        }
     }
 
 
@@ -1238,10 +1301,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /**
      * Shows current location in the respective latitude and longitude view
-     * if location service is available and we are in MODE_CREATE
+     * if location service is available and via are not in locationEnterManualMode
      */
     private void showCurrentLocationInView() {
-        if (location != null && mode == MODE_CREATE) {
+        if (location != null && !locationEnterManualMode) {
             String latitude = String.valueOf(location.getLatitude());
             if (latitude.length() > 12)
                 latitude = latitude.substring(0, 11);
@@ -1249,8 +1312,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             if (longitude.length() > 12)
                 longitude = longitude.substring(0, 11);
 
+            latitudeEditText.setTag("latitudeChangedProgrammatically");
+            longitudeEditText.setTag( "longitudeChangedProgrammatically" );
             latitudeEditText.setText(latitude);
             longitudeEditText.setText(longitude);
+            latitudeEditText.setTag( null);
+            longitudeEditText.setTag( null);
         }
     }
 
@@ -1309,9 +1376,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             case COFFEE_SITE_SAVE: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_created_successfuly);
             } break;
-//            case COFFEE_SITE_ACTIVATE: {
-//                result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_activated_successfuly);
-//            } break;
             case COFFEE_SITE_UPDATE: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_updated_successfuly);
             } break;

@@ -22,7 +22,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
             coffeeSiteFormState.setValue(new CoffeeSiteCreateFormState(null, R.string.invalid_longitude, null));
         } else if (!isLatitudeValid(latitude)) {
             coffeeSiteFormState.setValue(new CoffeeSiteCreateFormState(null, null, R.string.invalid_latitude));
-        } else{
+        } else {
             coffeeSiteFormState.setValue(new CoffeeSiteCreateFormState(true));
         }
     }

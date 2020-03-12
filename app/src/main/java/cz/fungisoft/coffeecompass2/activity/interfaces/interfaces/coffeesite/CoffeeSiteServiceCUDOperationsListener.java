@@ -6,10 +6,10 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 /**
  * Listener interface implemented by Activities to listen async results
  * of operations performed by {@link CoffeeSiteCUDOperationsService}
- * If everything was fine with operation, than CoffeeSite param
+ * If everything is fine with operation, than CoffeeSite param
  * of every method is not null and error is empty.
  * In case of problem, CoffeeSite param is null and error
- * contains description of error
+ * contains description of error.
  */
 public interface CoffeeSiteServiceCUDOperationsListener {
 

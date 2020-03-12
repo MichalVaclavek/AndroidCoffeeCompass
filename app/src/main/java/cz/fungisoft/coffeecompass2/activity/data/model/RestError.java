@@ -7,27 +7,27 @@ import java.io.Serializable;
  * According coffeecompass.cz REST API
  *
  * Based on RFC7807 and https://www.baeldung.com/rest-api-error-handling-best-practices
- *  * <p>
- *  * This schema is composed of five parts:<br>
+ *  <p>
+ *  This schema is composed of five parts:<br>
  *
- *  *   type — A URI identifier that categorizes the error<br>
- *  *   title — A brief, human-readable message about the error<br>
- *  *   status — The HTTP response code (optional)<br>
- *  *   detail — A human-readable explanation of the error<br>
- *  *   instance — A URI that identifies the specific occurrence of the error<br>
- *  *   Instead of using our custom error response body, we can convert our body to:<br>
- *  * <p>
- *  *   Example:
- *  *    {
- *  *       "type": "/errors/incorrect-user-pass",<br>
- *  *       "title": "Incorrect username or password.",<br>
- *  *       "status": 403,<br>
- *  *       "detail": "Authentication failed due to incorrect username or password.",<br>
- *  *       "instance": "/login/log/abc123"<br>
- *  *   }
- *  *
- *  *   Doplneno o parametry: errorParameter, errorParameterValue
- *  *   pro pripad chyb pri validaci vstupnich parametru POST a PUT requestu
+ *    type — A URI identifier that categorizes the error<br>
+ *    title — A brief, human-readable message about the error<br>
+ *    status — The HTTP response code (optional)<br>
+ *    detail — A human-readable explanation of the error<br>
+ *    instance — A URI that identifies the specific occurrence of the error<br>
+ *    Instead of using our custom error response body, we can convert our body to:<br>
+ *  <p>
+ *    Example:
+ *    {
+ *       "type": "/errors/incorrect-user-pass",<br>
+ *       "title": "Incorrect username or password.",<br>
+ *       "status": 403,<br>
+ *       "detail": "Authentication failed due to incorrect username or password.",<br>
+ *       "instance": "/login/log/abc123"<br>
+ *   }
+ *
+ *  Doplneno o parametry: errorParameter, errorParameterValue
+ *  pro pripad chyb pri validaci vstupnich parametru POST a PUT requestu
  *
  */
 public class RestError implements Serializable {

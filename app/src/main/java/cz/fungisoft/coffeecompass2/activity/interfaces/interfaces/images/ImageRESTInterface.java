@@ -10,6 +10,11 @@ import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+/**
+* Retrofit interface for REST requests related to CoffeeSite's image object.
+* Used by {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageUploadAsyncTask}
+ * and {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageDeleteAsyncTask}
+*/
 public interface ImageRESTInterface {
 
     String UPLOAD_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
@@ -28,7 +33,7 @@ public interface ImageRESTInterface {
 
 
     /**
-     * Calls delete of CoffeeSite|s image. Input is an ID of the CoffeeSite
+     * Calls delete of CoffeeSite"s image. Input is an ID of the CoffeeSite
      * to whom the image belongs to.
      *
      * Example: https://coffeecompass.cz/rest/secured/image/delete/site/320

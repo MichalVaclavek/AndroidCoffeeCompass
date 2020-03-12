@@ -37,7 +37,7 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
      */
     private final LoggedInUser currentUser;
 
-    private String operationResult = "";
+    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -64,7 +64,7 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(tag, "start");
-        operationResult = "";
+        //operationResult = "";
         operationError = "";
 
         Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
@@ -114,7 +114,7 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(tag, "onSuccess()");
-                            operationResult = "OK";
+                            //operationResult = "OK";
                             Integer coffeeSite = response.body();
                             Result.Success<Integer> result = new Result.Success<>(coffeeSite);
                             if (callingListenerDeleteService != null) {

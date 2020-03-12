@@ -20,6 +20,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+/**
+ * AsyncTask to perform REST Retrofit call to coffeecompass.cz to get number of active CoffeeSites
+ * created by one user.
+ */
 public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "GetSitesFromUserAsnTsk";
 
@@ -32,7 +36,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
 
-    private String operationResult = "";
+    //private String operationResult = "";
     private String operationError = "";
     private Result.Error error;
 
@@ -47,7 +51,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(TAG, "start");
-        operationResult = "";
+        //operationResult = "";
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
@@ -89,7 +93,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");
                             Integer coffeeSitesNumber = response.body();
-                            operationResult = "OK";
+                            //operationResult = "OK";
                             Result.Success<Integer> result = new Result.Success<>(coffeeSitesNumber);
                             if (callingListenerService != null) {
                                 callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, result);

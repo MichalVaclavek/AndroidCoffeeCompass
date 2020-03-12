@@ -20,6 +20,15 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_CANCEL;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_DEACTIVATE;
 
+/**
+ * Service to cover all actions regarding CoffeeSite status changes i.e. activation,
+ * deactivation, cancel.<br>
+ * Service uses usually AsyncTasks to perform REST calls to coffeecompass.cz server.
+ * Respective status change methods are called by Activities.<br>
+ * Service must implement {@link CoffeeSiteRESTResultListener} which informs about result
+ * of the respectve Async tasks. The results are then passed to Activities, which
+ * implement {@link CoffeeSiteServiceStatusOperationsListener}
+ */
 public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountService
                                            implements CoffeeSiteRESTResultListener {
 

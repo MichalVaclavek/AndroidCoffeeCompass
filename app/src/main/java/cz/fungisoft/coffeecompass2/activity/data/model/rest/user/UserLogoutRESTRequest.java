@@ -80,6 +80,7 @@ public class UserLogoutRESTRequest {
         Call<Boolean> call = api.logoutCurrentUserWithId(currentUser.getUserId());
 
         call.enqueue(new Callback<Boolean>() {
+
             @Override
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.isSuccessful()) {

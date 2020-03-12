@@ -6,7 +6,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 /**
  * An observable interface to indicate new result
  * of the REST operation, whose return value is Long (usually CoffeeSite id)
-
+ * <br>
  * Usually called by AsyncTasks with Retrofit call with Long
  * as return value of REST call.
  */

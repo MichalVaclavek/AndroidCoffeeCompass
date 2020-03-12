@@ -3,7 +3,7 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
- * A generic class that holds a result success w/ data or an exception error
+ * A generic class that holds a result success data or an Exception error
  * or an REST Error.
  */
 public class Result<T> {

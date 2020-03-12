@@ -9,7 +9,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 /**
  * An observable interface to indicate new result
  * of the REST operation, whose return value is list of CoffeeSites.
- * It is used by respective CoffeeSiteWithUserAccountService ancestor,
+ * It is used by respective CoffeeSiteWithUserAccountService descendant,
  * which for example, loads CoffeeSites created by current user.
  * <p>
  * Usually called by AsyncTasks with Retrofit call with {@code List<CoffeeSite>}

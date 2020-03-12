@@ -47,7 +47,7 @@ public class UserDeleteRESTRequest {
 
     public void performDeleteRequest() {
 
-        Log.d(REQ_TAG, "UserDeleteRESTRequest initiated");
+        Log.d(REQ_TAG, "UserDeleteRESTRequest started.");
 
         // Inserts user authorization token to Authorization header
         Interceptor headerAuthorizationInterceptor = new Interceptor() {

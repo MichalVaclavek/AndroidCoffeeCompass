@@ -35,13 +35,15 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository.COFFEE_SITE_ENTITY_CLASSES;
 
+/**
+ * AsyncTask to load/create all CoffeeSiteEntity instancies from server.
+ */
 public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_ENTITIES_TAG = "GetCoffeeSiteEntities";
 
     private CoffeeSiteEntitiesRepository entitiesRepository;
 
-    private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteEntitiesLoadRESTResultListener callingListenerService;
@@ -98,7 +100,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
     }
 
     /**
-     *
      *  CoffeeSiteRecordStatus.class, CoffeeSiteStatus.class, CoffeeSiteType.class,
      *  CoffeeSort.class, CupType.class, NextToMachineType.class, OtherOffer.class, PriceRange.class,
      *  SiteLocationType.class, StarsQualityDescription.class};
@@ -109,7 +110,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
      */
     private <T extends List<? extends CoffeeSiteEntity>> void readAndSaveEntitiesFromServer(Class<? extends CoffeeSiteEntity> entityClass,
                                                                                             CoffeeSiteEntitiesRESTInterface api) {
-        operationResult = "";
         operationError = "";
 
         Call<T> call = null;
@@ -165,7 +165,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                             entitiesRepository.setEntities(response.body());
 
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                                operationResult = "OK";
                                 entitiesRepository.setDataReadedFromServer(true);
                                 Result.Success<Boolean> result = new Result.Success<>(true);
                                 if (callingListenerService != null) {

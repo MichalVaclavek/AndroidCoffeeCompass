@@ -40,7 +40,7 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
      */
     private final LoggedInUser currentUser;
 
-    private String operationResult = "";
+    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -66,7 +66,7 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(tag, "start");
-        operationResult = "";
+        //operationResult = "";
         operationError = "";
 
         Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
@@ -124,7 +124,7 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(tag, "onSuccess()");
-                            operationResult = "OK";
+                            //operationResult = "OK";
                             CoffeeSite coffeeSite = response.body();
                             Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
                             if (callingListenerService != null) {

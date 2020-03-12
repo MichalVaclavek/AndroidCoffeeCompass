@@ -15,19 +15,18 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
 /**
- * A common anncestor of CoffeeSiteServices with connected UserAccountService
- * All other CoffeeSiteServices can extend this service as this one is also abstract
- * and use UserAccountService.
+ * A common ancestor of CoffeeSiteServices with connected UserAccountService
+ * All other CoffeeSiteServices can extend this service as this one is also abstract.
  */
 public abstract class CoffeeSiteWithUserAccountService extends Service
                                                        implements UserAccountServiceConnectionListener {
 
     static final String TAG = "CoffeeSiteServiceBase";
 
-
-    // Enum to identify different actions called by CoffeeSiteServices
-    // Needed to distinquiese correct action call within RESTListener methods
-
+    /**
+     *  Enum to identify different actions called by CoffeeSiteServices
+     *  Needed to distinquiese correct action call within RESTListener methods
+     */
     public enum CoffeeSiteRESTOper {
 
         COFFEE_SITE_ENTITIES_LOAD,

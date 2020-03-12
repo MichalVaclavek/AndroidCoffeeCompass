@@ -51,116 +51,116 @@ public class UserPreferenceHelper {
         this.context = context;
     }
 
-    public void putIsLogin(boolean loginorout) {
+    private void putIsLogin(boolean loginorout) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putBoolean(INTRO, loginorout);
-        edit.commit();
+        edit.apply();
     }
     public boolean getIsLogin() {
         return app_prefs.getBoolean(INTRO, false);
     }
 
-    public void putUserId(long userId) {
+    private void putUserId(long userId) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putLong(USER_ID, userId);
-        edit.commit();
+        edit.apply();
     }
-    public long getUserId() {
+    private long getUserId() {
         return app_prefs.getLong(USER_ID, 0);
     }
 
-    public void putDisplayName(String displayName) {
+    private void putDisplayName(String displayName) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(DISPLAY_NAME, displayName);
-        edit.commit();
+        edit.apply();
     }
     public String getUserName() {
         return app_prefs.getString(USER_NAME, null);
     }
 
-    public void putUserName(String userName) {
+    private void putUserName(String userName) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(USER_NAME, userName);
-        edit.commit();
+        edit.apply();
     }
-    public String getDisplayName() {
+    private String getDisplayName() {
         return app_prefs.getString(DISPLAY_NAME, "");
     }
 
-    public void putEmail(String email) {
+    private void putEmail(String email) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(EMAIL, email);
-        edit.commit();
+        edit.apply();
     }
     public String getEmail() {
         return app_prefs.getString(EMAIL, "");
     }
 
-    public void putNumOfCreatedSites(int numOfCreatedSites) {
+    private void putNumOfCreatedSites(int numOfCreatedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putInt(NUM_OF_CREATED_SITES, numOfCreatedSites);
-        edit.commit();
+        edit.apply();
     }
-    public int getNumOfCreatedSites() {
+    private int getNumOfCreatedSites() {
         return app_prefs.getInt(NUM_OF_CREATED_SITES, 0);
     }
 
-    public void putNumOfUpdatedSites(int numOfUpdatedSites) {
+    private void putNumOfUpdatedSites(int numOfUpdatedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putInt(NUM_OF_UPDATED_SITES, numOfUpdatedSites);
-        edit.commit();
+        edit.apply();
     }
-    public int getNumOfUpdatedSites() {
+    private int getNumOfUpdatedSites() {
         return app_prefs.getInt(NUM_OF_UPDATED_SITES, 0);
     }
 
-    public void putNumOfDeletedSites(int numOfDeletedSites) {
+    private void putNumOfDeletedSites(int numOfDeletedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putInt(NUM_OF_DELETED_SITES, numOfDeletedSites);
-        edit.commit();
+        edit.apply();
     }
-    public int getNumOfDeletedSites() {
+    private int getNumOfDeletedSites() {
         return app_prefs.getInt(NUM_OF_DELETED_SITES, 0);
     }
 
-    public void putFirstName(String firstName) {
+    private void putFirstName(String firstName) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(FIRST_NAME, firstName);
-        edit.commit();
+        edit.apply();
     }
-    public String getFirstName() {
+    private String getFirstName() {
         return app_prefs.getString(FIRST_NAME, "");
     }
 
-    public void putLastName(String lastName) {
+    private void putLastName(String lastName) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(LAST_NAME, lastName);
-        edit.commit();
+        edit.apply();
     }
-    public String getLastName() {
+    private String getLastName() {
         return app_prefs.getString(LAST_NAME, "");
     }
 
-    public void putCreatedOn(String createdOn) {
+    private void putCreatedOn(String createdOn) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(CREATED_ON, createdOn);
-        edit.commit();
+        edit.apply();
     }
-    public String getCreatedOn() {
+    private String getCreatedOn() {
         return app_prefs.getString(CREATED_ON, "");
     }
 
-    public void putUserRoles(List<String> userRoles) {
+    private void putUserRoles(List<String> userRoles) {
         String[] rolesArray = new String[userRoles.size()];
         rolesArray = userRoles.toArray(rolesArray);
         SharedPreferences.Editor edit = app_prefs.edit();
         for (int i=0; i < rolesArray.length; i++) {
             edit.putString(USER_ROLES + String.valueOf(i), rolesArray[i]);
         }
-        edit.commit();
+        edit.apply();
     }
 
-    public List<String> getUserRoles() {
+    private List<String> getUserRoles() {
         List<String> retVal = new ArrayList<>();
         int rolesCounter = 0;
         while (!app_prefs.getString(USER_ROLES + String.valueOf(rolesCounter), "").isEmpty()) {
@@ -170,22 +170,22 @@ public class UserPreferenceHelper {
         return retVal;
     }
 
-    public void putDeviceId(String deviceId) {
+    private void putDeviceId(String deviceId) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(DEVICE_ID, deviceId);
-        edit.commit();
+        edit.apply();
     }
-    public String getDeviceId() {
+    private String getDeviceId() {
         return app_prefs.getString(DEVICE_ID, "");
     }
 
-    public void putLoginToken(JwtUserToken loginToken) {
+    private void putLoginToken(JwtUserToken loginToken) {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.putString(LOGIN_TOKEN, loginToken.getAccessToken());
         edit.putString(LOGIN_TOKEN_EXPIRY, loginToken.getExpiryDateFormated());
         edit.putString(LOGIN_TOKEN_TYPE, loginToken.getTokenType());
 
-        edit.commit();
+        edit.apply();
     }
 
     public JwtUserToken getLoginToken() {
@@ -197,11 +197,11 @@ public class UserPreferenceHelper {
         return userToken;
     }
 
-    public String getLoginTokenExpiry() {
+    private String getLoginTokenExpiry() {
         return app_prefs.getString(LOGIN_TOKEN_EXPIRY, "");
     }
 
-    public String getLoginTokenType() {
+    private String getLoginTokenType() {
         return app_prefs.getString(LOGIN_TOKEN_TYPE, "Bearer");
     }
 
@@ -256,6 +256,6 @@ public class UserPreferenceHelper {
     public void removeUserData() {
         SharedPreferences.Editor edit = app_prefs.edit();
         edit.clear();
-        edit.commit();
+        edit.apply();
     }
 }

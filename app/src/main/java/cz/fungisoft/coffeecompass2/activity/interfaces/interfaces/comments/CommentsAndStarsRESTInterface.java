@@ -16,7 +16,7 @@ import retrofit2.http.Path;
 /**
  * Retrofit interface for REST requests related to user's Comments and Rating(Stars)
  * entered to CoffeeSite.
- * Used by {@link SaveCommentAndStarsAsyncTask}.
+ * Used by {@link SaveCommentAndStarsAsyncTask} and {@link cz.fungisoft.coffeecompass2.asynctask.comment.DeleteCommentAsyncTask}.
  */
 public interface CommentsAndStarsRESTInterface {
 

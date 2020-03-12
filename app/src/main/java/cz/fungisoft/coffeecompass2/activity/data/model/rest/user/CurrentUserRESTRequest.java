@@ -74,7 +74,7 @@ public class CurrentUserRESTRequest {
      */
     private void performRequest(final int requestType) {
 
-        Log.d(REQ_TAG, "CurrentUserRESTRequest initiated");
+        Log.i(REQ_TAG, "CurrentUserRESTRequest perform request start.");
 
         // Gson (JSON google) serializer/deserializer
         GsonBuilder gb = new GsonBuilder();
