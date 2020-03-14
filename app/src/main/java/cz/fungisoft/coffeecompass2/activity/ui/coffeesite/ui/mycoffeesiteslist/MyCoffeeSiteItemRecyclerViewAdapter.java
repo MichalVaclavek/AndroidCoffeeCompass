@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.appcompat.widget.AppCompatImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +26,10 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
@@ -35,7 +40,8 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
  * Adapter to show loaded list of CoffeeSites created by logged-in user
  */
 public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-                                                 implements CoffeeSiteServiceStatusOperationsListener {
+                                                 implements CoffeeSiteServiceStatusOperationsListener,
+                                                            CoffeeSiteServiceCUDOperationsListener {
 
     private static final String TAG = "MyCoffeeSiteListAdapter";
 
@@ -60,9 +66,23 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Used for opening CoffeeSiteDetailActivity
      */
-    private View.OnClickListener mOnClickListener;
+    private View.OnClickListener mOnClickListenerToCoffeeSiteDetailActivityStart;
 
+    /**
+     * Used for opening CoffeeSiteImageActivity
+     */
+    private View.OnClickListener mOnClickListenerToCoffeeSiteImageActivityStart;
+
+    /**
+     * Used for changing status of selected CoffeeSite from/to ACTIVE/INACTIVE/CANCEL
+     * statuses after click on respective action button by user.
+     */
     private CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
+
+    /**
+     * Used for saving selected CoffeeSite after inserting CoffeeSite's creator initial coment
+     */
+    private CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
 
     /**
      * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
@@ -77,15 +97,24 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     public MyCoffeeSiteItemRecyclerViewAdapter(MyCoffeeSitesListActivity parent,
                                                CoffeeSiteStatusChangeService coffeeSiteStatusChangeService,
-                                               List<CoffeeSite> content)
-    {
+                                               CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService,
+                                               List<CoffeeSite> content) {
         mParentActivity = parent;
         mValues = content;
 
-        mOnClickListener = createOnClickListener();
+        mOnClickListenerToCoffeeSiteDetailActivityStart = createOnClickListenerForDetailActivityStart();
+
+        mOnClickListenerToCoffeeSiteImageActivityStart = createOnClickListenerForShowImageActivityStart();
+
         this.coffeeSiteStatusChangeService = coffeeSiteStatusChangeService;
         if (this.coffeeSiteStatusChangeService != null) {
             this.coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
+        }
+
+
+        this.coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsService;
+        if (this.coffeeSiteCUDOperationsService != null) {
+            this.coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
         }
     }
 
@@ -95,7 +124,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      *
      * @return
      */
-    private View.OnClickListener createOnClickListener() {
+    private View.OnClickListener createOnClickListenerForDetailActivityStart() {
         View.OnClickListener retVal;
 
         retVal = new View.OnClickListener() {
@@ -113,15 +142,38 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         return retVal;
     }
 
+    /**
+     * OnClick listener to open CoffeeSiteDetailActivity to show details
+     * of the CoffeeSite as it is shown when searching and looking into the detailes.
+     *
+     * @return
+     */
+    private View.OnClickListener createOnClickListenerForShowImageActivityStart() {
+        View.OnClickListener retVal;
+
+        retVal = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CoffeeSite item = (CoffeeSite) view.getTag();
+                if (item instanceof CoffeeSite) {
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+                    intent.putExtra("coffeeSite", (Parcelable) item);
+                    context.startActivity(intent);
+                }
+            }
+        };
+        return retVal;
+    }
+
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        RecyclerView.ViewHolder retVal = null;
-
+        RecyclerView.ViewHolder retVal;
         View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.mycoffeesite_list_content, parent, false);
         retVal = new ViewHolder(view);
-
         return retVal;
     }
 
@@ -196,12 +248,18 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.activateCoffeeSiteButton.setTag(this.mValues.get(position));
         viewHolder.deactivateCoffeeSiteButton.setTag(this.mValues.get(position));
         viewHolder.cancelCoffeeSiteButton.setTag(this.mValues.get(position));
+        viewHolder.insertCommentButton.setTag(this.mValues.get(position));
 
         // Foto and main Label with CoffeeSite name are clickable
         viewHolder.siteFoto.setTag(this.mValues.get(position));
-        viewHolder.siteFoto.setOnClickListener(mOnClickListener);
+        viewHolder.siteFoto.setOnClickListener(mOnClickListenerToCoffeeSiteImageActivityStart);
+
         viewHolder.csNameView.setTag(this.mValues.get(position));
-        viewHolder.csNameView.setOnClickListener(mOnClickListener);
+        viewHolder.csNameView.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
+        viewHolder.createdOnLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.createdOnLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
+        viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
 
 
         if (this.mValues.get(position).canBeActivated()) {
@@ -228,7 +286,30 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         dialog.show(mParentActivity.getSupportFragmentManager(), "CancelCoffeeSiteDialogFragment");
     }
 
-    public void onDialogPositiveClick() {
+    /**
+     * Show the dialog to insert CoffeeSite's author comment
+     */
+    private void showInsertAuthorsCommentDialog() {
+        // Create an instance of the dialog fragment and show it
+        //Passes CoffeeSite's author comment into the dialog
+        InsertAuthorCommentDialogFragment dialog = newInstance(this.selectedCoffeeSite.getUvodniKoment());
+        dialog.show(mParentActivity.getSupportFragmentManager(), "InsertAuthorCommentDialogFragment");
+    }
+
+    public static InsertAuthorCommentDialogFragment newInstance(String authorComment) {
+        InsertAuthorCommentDialogFragment f = new InsertAuthorCommentDialogFragment();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putString("authorComment", authorComment);
+        f.setArguments(args);
+
+        return f;
+    }
+
+    /* ********************************************************************* */
+
+    void onCancelCoffeeSiteDialogPositiveClick() {
         if (Utils.isOnline()) {
             if (coffeeSiteStatusChangeService != null) {
                 mParentActivity.showProgressbarAndDisableMenuItems();
@@ -239,8 +320,25 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-    public void onDialogNegativeClick() {
+    void onCancelCoffeeSiteDialogNegativeClick() {
     }
+
+    void onInsertAuthorCommentDialogPositiveClick(InsertAuthorCommentDialogFragment dialog) {
+        if (Utils.isOnline()) {
+            if (coffeeSiteStatusChangeService != null) {
+                mParentActivity.showProgressbarAndDisableMenuItems();
+                selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
+                coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
+            }
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
+    }
+
+    void onInsertAuthorCommentDialogNegativeClick(InsertAuthorCommentDialogFragment dialog) {
+    }
+
+    /* *************************************************** */
 
     @Override
     public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
@@ -287,6 +385,27 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
+    /**
+     * Used, when CoffeeSite's author comment is saved by CoffeeSiteCUDOperationsService
+     *
+     * @param updatedCoffeeSite
+     * @param error
+     */
+    @Override
+    public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
+        mParentActivity.hideProgressbarAndEnableMenuItems();
+        modifiedCoffeeSite = updatedCoffeeSite;
+
+        Log.i(TAG, "Author's comment save success?: " + error.isEmpty());
+        if (!error.isEmpty()) {
+            showCoffeeSiteSaveAuthorCommentFailure(error);
+        }
+        else {
+            showCoffeeSiteAuthorCommentSaveSuccess();
+            updateEditedCoffeeSite(modifiedCoffeeSite, selectedPosition);
+        }
+    }
+
 
     /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
@@ -298,6 +417,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             final TextView createdOnView; // to show created date of this CoffeeSite
             final TextView statusView; // to show record status of the CoffeeSite
             final TextView cityView; // to show city name of the CoffeeSite
+            /**
+             * To insert listener to whole group of TExtViews
+             */
+            final LinearLayout createdOnLinearLayout;
+            final LinearLayout locationAndStatusLinearLayout;
 
             final ImageView siteFoto;
 
@@ -306,6 +430,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             final AppCompatImageButton activateCoffeeSiteButton;
             final AppCompatImageButton deactivateCoffeeSiteButton;
             final AppCompatImageButton cancelCoffeeSiteButton;
+            final AppCompatImageButton insertCommentButton;
 
             /**
              * Standard constructor for ViewHolder.
@@ -336,6 +461,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
                 cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
                 cancelCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onCancelButtonClick);
+
+                insertCommentButton = view.findViewById(R.id.insert_creator_comment_ImageButton);
+                insertCommentButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onInsertCommentButtonClick);
+
+                createdOnLinearLayout = view.findViewById(R.id.created_on_linear_layout);
+                locationAndStatusLinearLayout = view.findViewById(R.id.location_and_status_linear_layout);
             }
         }
 
@@ -411,6 +542,14 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         showConfirmDeleteAccountDialog();
     }
 
+    public void onInsertCommentButtonClick(View v) {
+        selectedCoffeeSite = (CoffeeSite) v.getTag();
+        selectedPosition = mValues.indexOf(selectedCoffeeSite);
+        showInsertAuthorsCommentDialog();
+    }
+
+    /* ****************************************************************** */
+
     private void showMyCoffeeSitesLoadSuccess()
     {}
 
@@ -435,6 +574,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         toast.show();
     }
 
+    private void showCoffeeSiteAuthorCommentSaveSuccess() {
+        Toast toast = Toast.makeText(mParentActivity.getApplicationContext(),
+                R.string.author_comment_save_success,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
 //    private void showMyCoffeeSitesLoadFailure(String error) {
 //        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.my_coffeesites_load_failure);
 //        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
@@ -455,6 +601,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private void showCoffeeSiteDeactivateFailure(String error) {
         error = !error.isEmpty() ? error : mParentActivity.getString(R.string.coffee_site_cancel_failure);
+        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
+        mySnackbar.show();
+    }
+
+    private void showCoffeeSiteSaveAuthorCommentFailure(String error) {
+        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.author_comment_save_failure);
         Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
         mySnackbar.show();
     }
@@ -495,6 +647,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     public void onDestroy() {
         this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+        this.coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
     }
 
 

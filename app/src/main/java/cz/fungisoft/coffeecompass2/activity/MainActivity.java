@@ -334,7 +334,9 @@ public class MainActivity extends ActivityWithLocationService
 
     private void doUnbindCoffeeSiteLoadOperationsService() {
         if (mShouldUnbindCoffeeSiteLoadOperationsService) {
-            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+            if (coffeeSiteLoadOperationsService != null) {
+                coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+            }
             // Release information about the service's state.
             coffeeSiteLoadOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
             unbindService(coffeeSiteLoadOperationsServiceConnector);

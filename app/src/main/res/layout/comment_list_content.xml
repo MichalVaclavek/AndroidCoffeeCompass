@@ -106,7 +106,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_gravity="right|top"
                         android:baselineAlignBottom="false"
-                        android:visibility="visible"
+                        android:visibility="gone"
                         app:srcCompat="@android:drawable/ic_delete" />
 
                 </RelativeLayout>

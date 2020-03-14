@@ -54,7 +54,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
                 cs = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
             } else {
                 cs = bundle.getParcelable("coffeeSite");
-                //cs = new CoffeeSiteMovable(cs);
             }
         }
         if (appBarLayout != null && cs != null) {

@@ -175,7 +175,6 @@ public class CommentsListActivity extends AppCompatActivity
      */
     private void showEnterCommentAndRatingDialog() {
         // Create an instance of the dialog fragment and show it
-        //EnterCommentAndRatingDialogFragment dialog = new EnterCommentAndRatingDialogFragment();
         //Passes number of stars for CoffeeSite and User to EnterCommentAndRatingDialogFragment
         EnterCommentAndRatingDialogFragment dialog = newInstance(this.starsFromCurrentUser);
         dialog.show(getSupportFragmentManager(), "EnterCommentAndRatingDialogFragment");

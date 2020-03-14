@@ -31,7 +31,7 @@
 
             <TextView
                 android:id="@+id/cs_name_TextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textColor="@color/colorPrimaryDark"
@@ -39,8 +39,9 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/created_on_linear_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
@@ -58,19 +59,43 @@
                     android:text="TextView" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/cs_loc_and_type_TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textColor="@color/colorPrimary2" />
-
-            <TextView
-                android:id="@+id/cs_status_TextView"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="18sp" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/location_and_status_linear_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/cs_loc_and_type_TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        android:textColor="@color/colorPrimary2" />
+
+                    <TextView
+                        android:id="@+id/cs_status_TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/insert_creator_comment_ImageButton"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    card_view:srcCompat="@drawable/comment" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/buttons_layout"
@@ -84,7 +109,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onE"
                     android:src="@drawable/outline_edit_black_18" />
 
                 <ImageButton
@@ -110,6 +134,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/g8477" />
+
             </LinearLayout>
 
         </LinearLayout>

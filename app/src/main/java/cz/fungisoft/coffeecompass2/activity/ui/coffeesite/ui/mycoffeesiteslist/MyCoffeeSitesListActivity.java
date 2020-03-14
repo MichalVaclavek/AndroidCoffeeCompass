@@ -27,6 +27,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
@@ -51,6 +52,7 @@ import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesite
 public class MyCoffeeSitesListActivity extends AppCompatActivity
                                        implements UserAccountServiceConnectionListener,
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
+                                                  InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,
                                                   CoffeeSiteServicesConnectionListener,
                                                   CoffeeSiteLoadServiceOperationsListener {
 
@@ -95,6 +97,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
+
+    /**
+     * Used for saving selected CoffeeSite after inserting CoffeeSite's creator initial coment
+     */
+    protected CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteCUDOperationsService> coffeeSiteCUDOperationsServiceConnector;
+
 
     protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
@@ -168,6 +177,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         doBindUserAccountService();
 
         doBindCoffeeSiteStatusChangeService();
+        doBindCoffeeSiteCUDOperationsService();
         doBindCoffeeSiteLoadOperationsService();
     }
 
@@ -242,6 +252,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         startActivityForResult(activityIntent, CREATE_COFFEESITE_REQUEST);
     }
 
+    /** **************** UserAccountService ******************* START ****/
+
     private void doBindUserAccountService() {
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
@@ -264,11 +276,57 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
-//        if (currentUser != null) {
-//            startMyCoffeeSitesLoadOperation();
-//        }
     }
 
+    /** UnBind UserAccountService ****/
+    private void doUnbindUserAccountService() {
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
+            unbindService(userAccountServiceConnector);
+            mShouldUnbindUserLoginService = false;
+        }
+    }
+
+    /** **************** UserAccountService ******************* END ****/
+
+    /********* CoffeeSiteCUDOperationsService **************/
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteCUDOperationsService;
+
+    private void doBindCoffeeSiteCUDOperationsService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
+                coffeeSiteCUDOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteCUDOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteLoadOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+
+    private void doUnbindCoffeeSiteCUDOperationsService() {
+        if (mShouldUnbindCoffeeSiteCUDOperationsService) {
+//            if (coffeeSiteCUDOperationsService != null) {
+//                coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
+//            }
+            // Release information about the service's state.
+            coffeeSiteCUDOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteCUDOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteCUDOperationsService = false;
+        }
+    }
+
+    /* */
 
     private void prepareAndActivateRecyclerView() {
         Bundle extras = getIntent().getExtras();
@@ -279,13 +337,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (extras != null || content != null) {
             //Collections.sort(content);
             content = removeCanceledElements(content);
-            //myCoffeeSitesToolbar.setTitle(myCoffeeSitesToolbar.getTitle() + " (" + content.size() + ")");
             setupRecyclerView((RecyclerView) recyclerView, content);
         }
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView, List<CoffeeSite> listContent) {
-        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this,  coffeeSiteStatusChangeService, listContent);
+        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this,  coffeeSiteStatusChangeService, coffeeSiteCUDOperationsService, listContent);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
@@ -374,6 +431,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 coffeeSiteStatusChangeService = coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService();
             }
         }
+
+        if (coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService() != null) {
+            if (coffeeSiteCUDOperationsService == null) {
+                coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService();
+                //coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
+            }
+        }
     }
 
     private void doUnbindCoffeeSiteLoadOperationsService() {
@@ -400,7 +464,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         else {
             showMyCoffeeSitesLoadSuccess();
             Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + "OK");
-            //content = intent.getParcelableArrayListExtra("coffeeSitesList");
             content = coffeeSites;
             if (content != null) {
                 // Only CoffeeSites not in CANCELED state are to be shown
@@ -489,29 +552,33 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /*** DIALOGS LISTENERS ****/
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (recyclerViewAdapter != null) {
-            recyclerViewAdapter.onDialogPositiveClick();
+            if (dialog instanceof  CancelCoffeeSiteDialogFragment) {
+                recyclerViewAdapter.onCancelCoffeeSiteDialogPositiveClick();
+            }
+            if (dialog instanceof InsertAuthorCommentDialogFragment) {
+                recyclerViewAdapter.onInsertAuthorCommentDialogPositiveClick((InsertAuthorCommentDialogFragment) dialog);
+            }
         }
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         if (recyclerViewAdapter != null) {
-            recyclerViewAdapter.onDialogNegativeClick();
+            if (dialog instanceof  CancelCoffeeSiteDialogFragment) {
+                recyclerViewAdapter.onCancelCoffeeSiteDialogNegativeClick();
+            }
+            if (dialog instanceof InsertAuthorCommentDialogFragment) {
+                recyclerViewAdapter.onInsertAuthorCommentDialogNegativeClick((InsertAuthorCommentDialogFragment) dialog);
+            }
         }
     }
 
-    private void doUnbindUserAccountService() {
-        if (mShouldUnbindUserLoginService) {
-            // Release information about the service's state.
-            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
-            unbindService(userAccountServiceConnector);
-            mShouldUnbindUserLoginService = false;
-        }
-    }
+    /*** DIALOGS LISTENERS ****/
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
@@ -536,12 +603,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
 
-        /**
-         * Registers receiver for all operations results performed by
-         * CoffeeSiteService with current CoffeeSite of this Activity
-         */
-        //registerCoffeeSiteOperationsReceiver();
-
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
         }
@@ -562,14 +623,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        //doBindCoffeeSiteStatusChangeService();
-        //doBindCoffeeSiteLoadOperationsService();
     }
 
     @Override
     protected void onStop() {
-//        doUnbindCoffeeSiteStatusChangeService();
-//        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
     }
 
@@ -581,6 +638,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
         doUnbindCoffeeSiteStatusChangeService();
         doUnbindCoffeeSiteLoadOperationsService();
+        doUnbindCoffeeSiteCUDOperationsService();
         super.onDestroy();
     }
 

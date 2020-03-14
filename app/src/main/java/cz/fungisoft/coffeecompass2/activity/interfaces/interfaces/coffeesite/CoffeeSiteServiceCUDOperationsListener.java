@@ -13,7 +13,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
  */
 public interface CoffeeSiteServiceCUDOperationsListener {
 
-    void onCoffeeSiteSaved(CoffeeSite savedCoffeeSite, String error);
+    default void onCoffeeSiteSaved(CoffeeSite savedCoffeeSite, String error) {};
     void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error);
     default void onCoffeeSiteDeleted(long deletedCoffeeSiteId, String error) {}
 }
