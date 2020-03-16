@@ -261,20 +261,19 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
 
-
         if (this.mValues.get(position).canBeActivated()) {
             viewHolder.activateCoffeeSiteButton.setEnabled(true);
         } else {
             viewHolder.activateCoffeeSiteButton.setEnabled(false);
         }
-        setImageButtonEnabled(viewHolder.activateCoffeeSiteButton, viewHolder.activateCoffeeSiteButton.isEnabled());
+        setImageButtonEnabled(viewHolder.activateCoffeeSiteButton, mParentActivity.getDrawable(R.drawable.round_play_circle_outline_green_18) , viewHolder.activateCoffeeSiteButton.isEnabled());
 
         if (this.mValues.get(position).canBeDeactivated()) {
             viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
         } else {
             viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
         }
-        setImageButtonEnabled(viewHolder.deactivateCoffeeSiteButton, viewHolder.deactivateCoffeeSiteButton.isEnabled());
+        setImageButtonEnabled(viewHolder.deactivateCoffeeSiteButton, mParentActivity.getDrawable(R.drawable.round_pause_circle_outline_black_18), viewHolder.deactivateCoffeeSiteButton.isEnabled());
     }
 
     /**
@@ -324,14 +323,16 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     void onInsertAuthorCommentDialogPositiveClick(InsertAuthorCommentDialogFragment dialog) {
-        if (Utils.isOnline()) {
-            if (coffeeSiteStatusChangeService != null) {
-                mParentActivity.showProgressbarAndDisableMenuItems();
-                selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
-                coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
+        if (dialog != null && !dialog.getAuthorComment().equals(selectedCoffeeSite.getUvodniKoment())) {
+            if (Utils.isOnline()) {
+                if (coffeeSiteStatusChangeService != null) {
+                    mParentActivity.showProgressbarAndDisableMenuItems();
+                    selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
+                    coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
+                }
+            } else {
+                Utils.showNoInternetToast(mParentActivity.getApplicationContext());
             }
-        } else {
-            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
         }
     }
 
@@ -407,7 +408,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
 
-    /**
+        /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
         class ViewHolder extends RecyclerView.ViewHolder {
@@ -418,7 +419,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             final TextView statusView; // to show record status of the CoffeeSite
             final TextView cityView; // to show city name of the CoffeeSite
             /**
-             * To insert listener to whole group of TExtViews
+             * To insert listener to whole group of TextViews
              */
             final LinearLayout createdOnLinearLayout;
             final LinearLayout locationAndStatusLinearLayout;
@@ -656,13 +657,14 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * Viz Stackoverflow, kdy se da pouzit i selector v xml souboru
      * https://stackoverflow.com/questions/7228985/android-imagebutton-with-disabled-ui-feel/49162535#49162535
      */
-    public static void setImageButtonEnabled(@NonNull final ImageView imageView,
+    public static void setImageButtonEnabled(@NonNull final ImageView imageView, Drawable originalIcon,
                                              final boolean enabled) {
         imageView.setEnabled(enabled);
         imageView.setAlpha(enabled ? 1.0f : 0.3f);
 
-        final Drawable originalIcon = imageView.getDrawable();
-        final Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
+        //final Drawable originalIcon = imageView.getDrawable();
+        //final Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
+        Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
         imageView.setImageDrawable(icon);
     }
 

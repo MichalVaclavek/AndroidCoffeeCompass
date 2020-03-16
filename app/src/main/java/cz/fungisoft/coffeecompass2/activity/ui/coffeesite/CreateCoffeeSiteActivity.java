@@ -88,7 +88,8 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService
  * It offers 3 functions in every "mode" (MODE_CREATE and MODE_MODIFY)
  * in BottomNavigationMenu.
  * The functions for MODE_CREATE are: Save, Save and Activate, Delete photo
- * The functions for MODE_MODIFY are: Save and Delete photo
+ * The functions for MODE_MODIFY are: Save and Delete photo.
+ * Implements many interfaces as many services and their results are to be observed.
  */
 public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                       implements CoffeeSiteImageServiceCallResultListener,
@@ -392,7 +393,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 // ignore
             }
 
-            // Validate input in createCoffeeSiteViewModel
+            /**
+             * Validates input in createCoffeeSiteViewModel
+             * @param s
+             */
             @Override
             public void afterTextChanged(Editable s) {
 
@@ -531,8 +535,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Creates empty file to store taken photo or selected picture from Gall
-     * ery
+     * Creates empty file to store taken photo or selected picture from Gallery
+     *
      * @return
      * @throws IOException
      */
@@ -569,7 +573,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 photoURI = FileProvider.getUriForFile(this,
-                        //"cz.fungisoft.coffeecompass2.fileprovider",
                         getString(R.string.file_provider),
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -597,16 +600,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // in onCoffeeSiteEntitiesConnected() method
         // TODO - Verify, if calling this in onResume() would be more convenient
         doBindCoffeeSiteEntitiesService();
-
-//        doBindCoffeeSiteCUDOperationsService();
-//        doBindCoffeeSiteStatusChangeService();
     }
 
     @Override
     protected void onStop() {
         doUnbindCoffeeSiteEntitiesService();
-//        doUnbindCoffeeSiteCUDOperationsService();
-//        doUnbindCoffeeSiteStatusChangeService();
         super.onStop();
     }
 
@@ -700,6 +698,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         AutoCompleteTextView locationTypesDropdown = findViewById(R.id.location_type_dropdown);
         locationTypesDropdown.setAdapter(locationTypesAdapter);
         locationTypesDropdown.setValidator(new LocationTypeValidator());
+
         locationTypesDropdown.setOnFocusChangeListener(new LocationTypeInputFocusListener());
     }
 
@@ -770,7 +769,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     public void startLoadingCoffeeSiteEntities() {
-        //showProgressbar();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
         }
@@ -958,7 +956,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void onImageDeleteSuccess(String imageDeleteResult) {
         hideProgressbar();
         String text = getString(R.string.image_delete_ok);;
-        if (Long.valueOf(imageDeleteResult) == currentCoffeeSite.getId()) {
+        if (Long.parseLong(imageDeleteResult) == currentCoffeeSite.getId()) {
             text = getString(R.string.image_delete_success);
         }
 
@@ -979,7 +977,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 Toast.LENGTH_SHORT);
         toast.show();
     }
-
 
     /* ---- Methods to invoke CoffeeSIteService operation based on user's selection */
 
@@ -1012,7 +1009,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void updateCoffeeSite(CoffeeSite coffeeSite) {
-
         showProgressbar();
         // If there is a photoFile, save it first to be available
         // after CoffeeSite is returned after it's update
@@ -1427,7 +1423,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
     }
 
-    class SiteTypeInputFocusListener implements View.OnFocusChangeListener {
+    static class SiteTypeInputFocusListener implements View.OnFocusChangeListener {
 
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
@@ -1571,7 +1567,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Helper inner class to achieve functionality of hiding keyboaard when the inputTextView
+     * Helper inner class to achieve functionality of hiding keyboaard, when the inputTextView
      * loose the focus.
      */
     private class MyFocusChangeListener implements View.OnFocusChangeListener {

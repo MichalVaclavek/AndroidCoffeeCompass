@@ -14,7 +14,7 @@ import androidx.fragment.app.DialogFragment;
 import cz.fungisoft.coffeecompass2.R;
 
 /**
- * Dialog to confirm Canceling of the CoffeeSite i.e. changing it's status to Cancel.
+ * Dialog to insert CoffeeSite's author initial comment.
  */
 public class InsertAuthorCommentDialogFragment extends DialogFragment {
 

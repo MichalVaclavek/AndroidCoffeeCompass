@@ -316,9 +316,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     private void doUnbindCoffeeSiteCUDOperationsService() {
         if (mShouldUnbindCoffeeSiteCUDOperationsService) {
-//            if (coffeeSiteCUDOperationsService != null) {
-//                coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
-//            }
             // Release information about the service's state.
             coffeeSiteCUDOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
             unbindService(coffeeSiteCUDOperationsServiceConnector);
@@ -435,7 +432,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService() != null) {
             if (coffeeSiteCUDOperationsService == null) {
                 coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService();
-                //coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
             }
         }
     }
