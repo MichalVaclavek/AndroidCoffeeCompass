@@ -80,7 +80,7 @@ public class UserDeleteRESTRequest {
                     if (response.body() != null) {
                         Log.i(REQ_TAG, response.body());
                         // overeni, ze v odpovedi se vratilo ID, ktere bylo pozadovano ke smazani
-                        if (response.body().equals(user.getUserId())) {
+                        if (response.body().equals(String.valueOf(user.getUserId()))) {
                             userAccountService.evaluateDeleteResult(new Result.Success<>(user.getUserName()));
                         } else {
                             userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error delete user. Response user ID doesn't equal to requested ID.")));

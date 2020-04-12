@@ -94,7 +94,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private MenuItem addCoffeeSiteMenuItem;
     private MenuItem reloadMyCoffeeSitesMenuItem;
 
-
+    /**
+     * Used to change selected CoffeeSite's status (ACTIVE, INACTIVE, CANCELED)
+     */
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
 
@@ -112,7 +114,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * Request type to ask CreateCoffeeSiteActivity to create new CoffeeSite
      */
     static final int CREATE_COFFEESITE_REQUEST = 2;
-
 
     /**
      * Flag to indicate if the list of user's CoffeeSites is being loading
