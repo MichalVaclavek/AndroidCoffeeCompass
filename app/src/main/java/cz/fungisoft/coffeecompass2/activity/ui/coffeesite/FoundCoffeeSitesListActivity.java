@@ -242,6 +242,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         }
     }
 
+    /**
+     * Starts MapsActivity to show found CoffeeSites
+     */
     private void openMap() {
         Intent mapIntent = new Intent(this, MapsActivity.class);
         mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());

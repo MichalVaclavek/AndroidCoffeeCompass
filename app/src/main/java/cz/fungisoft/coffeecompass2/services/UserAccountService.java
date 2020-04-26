@@ -279,6 +279,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             listener.onUserRegisterSuccess(registerResult.getValue());
         }
     }
+
     private void onUserRegisterFailure() {
         for (UserRegisterServiceListener listener : userRegisterServiceListeners) {
             listener.onUserRegisterFailure(registerResult.getValue());
@@ -303,15 +304,20 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             listener.onUserLogoutSuccess();
         }
     }
+
     private void onUserLogoutFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
-            //TODO - pokud je chybou, ze Resource not found, userID, pak provest logout
-            // protoze slo o pokus smazat uzivatele, ktery jiz byl smazan
-            // webovou aplikaci nebo jinou instanci mobilni aplikace
             String errorDetail = (logoutResult.getValue().getError() != null)
                                  ? logoutResult.getValue().getError()
                                  : getString(R.string.logout_failure);
-            listener.onUserLogoutFailure(errorDetail);
+            if (errorDetail.contains(getString(R.string.user_no_value_present_error))) {
+                // logout failure, because account does not exist (usually deleted from another device)
+                // follow normal logout finish procedure
+                userLoginAndRegisterRepository.setLoggedInUser(null);
+                listener.onUserLogoutSuccess();
+            } else {
+                listener.onUserLogoutFailure(errorDetail);
+            }
         }
     }
 
@@ -321,12 +327,20 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             listener.onUserDeleteSuccess();
         }
     }
+
     private void onUserDeleteFailure() {
         for (UserLogoutAndDeleteServiceListener listener : userLogoutAndDeleteServiceListeners) {
             String errorDetail = (deleteResult.getValue().getError() != null)
                                  ? deleteResult.getValue().getError()
                                  : getString(R.string.delete_user_failure);
-            listener.onUserDeleteFailure(errorDetail);
+
+            if (errorDetail.contains(getString(R.string.user_no_value_present_error))) {
+                // Attempt to delete already deleted user
+                userLoginAndRegisterRepository.setLoggedInUser(null);
+                listener.onUserDeleteSuccess();
+            } else {
+                listener.onUserDeleteFailure(errorDetail);
+            }
         }
     }
 

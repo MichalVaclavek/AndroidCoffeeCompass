@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -57,6 +58,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
@@ -79,6 +81,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
 
+//import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService.StatusChangeOperation.COFFEE_SITE_ACTIVATE;
 
 
@@ -151,16 +154,24 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @BindView(R.id.coffeeSite_imageView)
     ImageView siteFotoView;
 
+    @BindView(R.id.google_map_icon_imageView)
+    ImageView mapIconToOpenActivityView;
+
     @BindView(R.id.bottom_navigation)
     BottomNavigationView bottomNavigation;
 
     MenuItem imageDeleteMenuItem;
     MenuItem saveMenuItem; // save and/or activate
 
-    private Location location;
+    private Location currentLocation;
 
     private static final long MAX_STARI_DAT = 1000 * 60;
     private static final float LAST_PRESNOST = 100.0f;
+
+    /**
+     * Location of the CoffeeSite selected in SelectLocationMapActivity
+     */
+    private LatLng selectedCoffeeSiteLocation;
 
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -173,17 +184,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService coffeeSiteImageService;
     private CoffeeSiteImageServiceConnector coffeeSiteImageServiceConnector;
 
-
     protected CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteCUDOperationsService> coffeeSiteCUDOperationsServiceConnector;
 
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
 
-
     protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
     private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
-
 
     private CoffeeSite currentCoffeeSite;
 
@@ -226,6 +234,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private boolean saveAndActivateRequested = false;
 
     /**
+     * Request type to ask CreateCoffeeSiteActivity to create new CoffeeSite
+     */
+    static final int GET_COFFEESITE_LOCATION_REQUEST = 1;
+
+    /**
      * Progress ba to be shown during saving of a new or
      * modified CoffeeSite and/or CofeeSite's Image
      */
@@ -248,6 +261,21 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (bundle != null) { // When called from MyCoffeeSitesListActivity ...
             currentCoffeeSite = (CoffeeSite) bundle.getParcelable("coffeeSite");
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
+        }
+
+        /* It can changed when called from SelectedLocationMapActivity
+         * Probably not needed here as the return from SelectedLocationMapActivity is
+         * processed in onActivityResult() method
+         */
+        if (bundle != null) {
+            selectedCoffeeSiteLocation = (LatLng) getIntent().getExtras().get("selectedLocation");
+            // Location selected by user
+            // stop automatic location refresh in the respective TextInputs
+            // and insert selected coordinates in the input
+            if (selectedCoffeeSiteLocation != null) {
+                locationEnterManualMode = true;
+                showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+            }
         }
 
         // Enable/disable bottom navigation menu items
@@ -275,6 +303,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
 
         siteFotoView.setOnClickListener(createSitePhotoViewOnClickListener());
+        mapIconToOpenActivityView.setOnClickListener(mapIconToOpenActivityViewOnClickListener());
 
         showCoffeeSiteTypes();
         showLocationTypes();
@@ -385,12 +414,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // ignore
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // ignore
             }
 
             /**
@@ -490,6 +517,22 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         return retVal;
     }
 
+    /**
+     * OnClickListener for mapIconToOpenActivityView ImageView
+     * Opens {@link SelectLocationMapActivity}
+     */
+    private View.OnClickListener mapIconToOpenActivityViewOnClickListener() {
+        View.OnClickListener retVal;
+
+        retVal = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openSelectLocationMapActivity();
+            }
+        };
+        return retVal;
+    }
+
     static final int REQUEST_TAKE_PHOTO = 100;
     static final int REQUEST_GALLERY_PHOTO = 101;
 
@@ -514,9 +557,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     // Show it in View
                     Picasso.get().load(imagePhotoFile).into(siteFotoView);
                     imageDeleteMenuItem.setEnabled(true);
-
                 }
                 break;
+
                 case REQUEST_GALLERY_PHOTO: {
                     Uri selectedImage = data.getData();
                     try {
@@ -529,6 +572,20 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     imageDeleteMenuItem.setEnabled(true);
                 }
                 break;
+
+                // Check which request we're responding to
+                case GET_COFFEESITE_LOCATION_REQUEST: {
+                    // It can changed when called from SelectedLocationMapActivity
+                    selectedCoffeeSiteLocation = (LatLng) data.getExtras().get("selectedLocation");
+                    // Location selected by user
+                    // stop automatic location refresh in the respective TextInputs
+                    // and insert selected coordinates in the input
+                    if (selectedCoffeeSiteLocation != null) {
+                        locationEnterManualMode = true;
+                        showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+                }
+                break;
+                }
                 default: break;
             }
         }
@@ -607,13 +664,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         doUnbindCoffeeSiteEntitiesService();
         super.onStop();
     }
-
-    @Override
-    protected void onResume() {
-        locationEnterManualMode = false;
-        super.onResume();
-    }
-
 
     /******************* CoffeeSiteImageService ***************************************/
 
@@ -1134,11 +1184,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onLocationServiceConnected() {
+
         super.onLocationServiceConnected();
         if (mode == MODE_CREATE) {
-            location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            currentLocation = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationService.addPropertyChangeListener(this);
-            showCurrentLocationInView();
+            // Initiate coffeeSite location selected by user
+            if (currentLocation != null) {
+                selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                if (!locationEnterManualMode) {
+                    showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+                }
+            }
         }
     }
 
@@ -1283,35 +1340,40 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Method which is invoked when Location is changed.
+     * Method which is invoked when current Location of equipment has changed.
      *
      * @param evt
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (locationService != null) {
-            location = locationService.getCurrentLocation();
+            currentLocation = locationService.getCurrentLocation();
         }
-        showCurrentLocationInView();
+        //showCurrentLocationInView();
+        if (!locationEnterManualMode) {
+            showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+        }
     }
 
     /**
-     * Shows current location in the respective latitude and longitude view
-     * if location service is available and via are not in locationEnterManualMode
+     * Shows location selected by user from Map in the respective latitude and longitude view
      */
-    private void showCurrentLocationInView() {
-        if (location != null && !locationEnterManualMode) {
-            String latitude = String.valueOf(location.getLatitude());
-            if (latitude.length() > 12)
-                latitude = latitude.substring(0, 11);
-            String longitude = String.valueOf(location.getLongitude());
-            if (longitude.length() > 12)
-                longitude = longitude.substring(0, 11);
+    private void showLocationInView(double latitude, double longitude) {
+
+        if (latitude >= -180 && latitude <= 180
+               && longitude >= -180 && longitude <= 180 ) {
+
+            String latitudeString = String.valueOf(latitude);
+            if (latitudeString.length() > 12)
+                latitudeString = latitudeString.substring(0, 11);
+            String longitudeString = String.valueOf(longitude);
+            if (longitudeString.length() > 12)
+                longitudeString = longitudeString.substring(0, 11);
 
             latitudeEditText.setTag("latitudeChangedProgrammatically");
             longitudeEditText.setTag( "longitudeChangedProgrammatically" );
-            latitudeEditText.setText(latitude);
-            longitudeEditText.setText(longitude);
+            latitudeEditText.setText(latitudeString);
+            longitudeEditText.setText(longitudeString);
             latitudeEditText.setTag( null);
             longitudeEditText.setTag( null);
         }
@@ -1345,7 +1407,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void showCoffeeSiteStatusChangeSuccess(CoffeeSiteStatusChangeService.StatusChangeOperation status, String result) {
 
         switch (status) {
-
             case COFFEE_SITE_CANCEL: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_canceled_successfuly);
             } break;
@@ -1365,10 +1426,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation operation, String result) {
-
         // If not equal only OK, then there is something interesting, otherwise get default
         switch (operation) {
-
             case COFFEE_SITE_SAVE: {
                 result = !(result.isEmpty() || "OK".equals(result)) ? result : getString(R.string.coffeesite_created_successfuly);
             } break;
@@ -1398,94 +1457,19 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         saveCoffeeSiteProgressBar.setVisibility(View.GONE);
     }
 
-
-    /**
-     * Validators for CoffeeSiteType input and for CoffeeSiteLocationType input
-     */
-    class SiteTypeValidator implements AutoCompleteTextView.Validator {
-
-        @Override
-        public boolean isValid(CharSequence text) {
-            Log.v("Test", "Checking if valid: " + text);
-            Arrays.sort(SITE_TYPES);
-            if (Arrays.binarySearch(SITE_TYPES, text.toString()) > 0) {
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public CharSequence fixText(CharSequence invalidText) {
-            Log.v("Test", "Returning fixed text");
-
-            return SITE_TYPES[0];
-        }
-    }
-
-    static class SiteTypeInputFocusListener implements View.OnFocusChangeListener {
-
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            Log.v("Test", "Focus changed");
-            if (v.getId() == R.id.site_type_dropdown && !hasFocus) {
-                Log.v("Test", "Performing validation");
-                ((AutoCompleteTextView)v).performValidation();
-            }
-        }
-    }
-
-
-    class LocationTypeValidator implements AutoCompleteTextView.Validator {
-
-        @Override
-        public boolean isValid(CharSequence text) {
-            Log.v("Test", "Checking if valid: " + text);
-            Arrays.sort(LOCATION_TYPES);
-            if (Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0) {
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public CharSequence fixText(CharSequence invalidText) {
-            Log.v("Test", "Returning fixed text");
-
-            return LOCATION_TYPES[0];
-        }
-    }
-
-    class LocationTypeInputFocusListener implements View.OnFocusChangeListener {
-
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            Log.v(TAG, "Focus changed");
-            if (v.getId() == R.id.location_type_dropdown && !hasFocus) {
-                Log.v(TAG, "Performing dropdown input validation.");
-                ((AutoCompleteTextView)v).performValidation();
-            }
-        }
-    }
-
     @Override
     protected void onDestroy() {
         doUnbindCoffeeSiteImageService();
-
         doUnbindCoffeeSiteCUDOperationsService();
         doUnbindCoffeeSiteStatusChangeService();
         super.onDestroy();
     }
 
     /**
-     * Alert dialog for capture or select from galley
+     * Alert dialog for capture or select from gallery
      */
     private void selectImage() {
-        final CharSequence[] items = {
-                "Foto", "Vybrat z galerie",
-                "Zrušit"
-        };
+        final CharSequence[] items = { "Foto", "Vybrat z galerie", "Zrušit"};
         AlertDialog.Builder builder = new AlertDialog.Builder(CreateCoffeeSiteActivity.this);
         builder.setItems(items, (dialog, item) -> {
             if (items[item].equals("Foto")) {
@@ -1498,6 +1482,29 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         });
         builder.show();
     }
+
+    /**
+     * Starts MapsActivity to select geo location of a new CoffeeSite
+     */
+    private void openSelectLocationMapActivity() {
+        double lat;
+        double lon;
+        // Read current coordinates from respective input fields
+        try {
+            lat = Double.parseDouble(latitudeEditText.getText().toString());
+            lon = Double.parseDouble(longitudeEditText.getText().toString());
+            if (lat >= -180 && lat <= 180
+                    && lon >= -180 && lon <= 180) {
+                selectedCoffeeSiteLocation = new LatLng(lat, lon);
+                Intent mapIntent = new Intent(this, SelectLocationMapActivity.class);
+                mapIntent.putExtra("selectedLocation", selectedCoffeeSiteLocation);
+                startActivityForResult(mapIntent, GET_COFFEESITE_LOCATION_REQUEST);
+            }
+        } catch (NumberFormatException ex) {
+            Log.e(TAG, "Latitude and/or longitude not available for start SelectLocationMapActivity");
+        }
+    }
+
 
     /***** Requesting PERMISIONS on User's action demand ******************/
 
@@ -1541,6 +1548,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 .onSameThread()
                 .check();
     }
+
     /**
      * Showing Alert Dialog with Settings option
      * Navigates user to app settings
@@ -1564,6 +1572,79 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
         startActivityForResult(intent, 101);
+    }
+
+    /*  -------------- INNER CLASSES ------------------- */
+
+    /**
+     * Validators for CoffeeSiteType input and for CoffeeSiteLocationType input
+     */
+    class SiteTypeValidator implements AutoCompleteTextView.Validator {
+
+        @Override
+        public boolean isValid(CharSequence text) {
+            Log.v("Test", "Checking if valid: " + text);
+            Arrays.sort(SITE_TYPES);
+            if (Arrays.binarySearch(SITE_TYPES, text.toString()) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public CharSequence fixText(CharSequence invalidText) {
+            Log.v("Test", "Returning fixed text");
+
+            return SITE_TYPES[0];
+        }
+    }
+
+    static class SiteTypeInputFocusListener implements View.OnFocusChangeListener {
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            Log.v("Test", "Focus changed");
+            if (v.getId() == R.id.site_type_dropdown && !hasFocus) {
+                Log.v("Test", "Performing validation");
+                ((AutoCompleteTextView)v).performValidation();
+            }
+        }
+    }
+
+    /**
+     * Helper inner class to check if CoffeeSite's location type dropdown input field
+     * is correctly entered as it can be entered manually by user. If not correct
+     * then it is fixed providing first location type item from {@link LOCATION_TYPES} list.
+     */
+    class LocationTypeValidator implements AutoCompleteTextView.Validator {
+
+        @Override
+        public boolean isValid(CharSequence text) {
+            Log.v(TAG, "Checking if valid: " + text);
+            Arrays.sort(LOCATION_TYPES);
+            if (Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public CharSequence fixText(CharSequence invalidText) {
+            Log.v("Test", "Returning fixed text");
+            return LOCATION_TYPES[0];
+        }
+    }
+
+    class LocationTypeInputFocusListener implements View.OnFocusChangeListener {
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            Log.v(TAG, "Focus changed");
+            if (v.getId() == R.id.location_type_dropdown && !hasFocus) {
+                Log.v(TAG, "Performing dropdown input validation.");
+                ((AutoCompleteTextView)v).performValidation();
+            }
+        }
     }
 
     /**

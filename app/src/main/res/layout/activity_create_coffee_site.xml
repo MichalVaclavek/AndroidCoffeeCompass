@@ -59,11 +59,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/site_latitude_input"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
                     android:layout_marginBottom="10dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:hint="Zem. šířka"
                     android:theme="@style/SiteInput.HintAppearance"
                     app:boxStrokeColor="@color/colorPrimary2"
@@ -82,11 +82,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/site_longitude_input"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginBottom="10dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:hint=" Zem. délka"
                     android:theme="@style/SiteInput.HintAppearance"
                     app:boxStrokeColor="@color/colorPrimary2"
@@ -101,6 +101,16 @@
                         android:textSize="18sp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/google_map_icon_imageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:clickable="true"
+                    android:elevation="4dp"
+                    android:visibility="visible"
+                    app:srcCompat="@drawable/google_maps_48" />
 
             </LinearLayout>
 
@@ -163,7 +173,6 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
                 android:hint="@string/site_type"
                 android:theme="@style/SiteInput.HintAppearance"
                 app:endIconMode="dropdown_menu"
@@ -188,7 +197,6 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
                 android:hint="@string/location_type"
                 android:theme="@style/SiteInput.HintAppearance"
                 app:endIconMode="dropdown_menu"

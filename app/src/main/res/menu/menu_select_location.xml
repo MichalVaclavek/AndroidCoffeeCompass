@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- ark Favorite", should appear as action button if possible -->
+
+    <item
+        android:id="@+id/action_location_selected_ok"
+        android:icon="@drawable/ic_done_green_36dp"
+        android:orderInCategory="100"
+        android:title="OK"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_location_selection_cancel"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:title="Zrušit"
+        app:showAsAction="always"></item>
+
+</menu>
