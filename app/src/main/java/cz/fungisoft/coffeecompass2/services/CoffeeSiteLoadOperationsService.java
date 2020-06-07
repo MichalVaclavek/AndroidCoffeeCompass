@@ -38,12 +38,12 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
      * Enum type to identify CoffeeSite change status operations
      * Can be used in Activities using this service
      */
-    public enum LoadOperation {
-        COFFEE_SITE_LOAD,
-        COFFEE_SITES_FROM_USER_LOAD,
-        COFFEE_SITES_FROM_CURRENT_USER_LOAD,
-        COFFEE_SITES_NUMBER_FROM_CURRENT_USER
-    }
+//    public enum LoadOperation {
+//        COFFEE_SITE_LOAD,
+//        COFFEE_SITES_FROM_USER_LOAD,
+//        COFFEE_SITES_FROM_CURRENT_USER_LOAD,
+//        COFFEE_SITES_NUMBER_FROM_CURRENT_USER
+//    }
 
 
     // Listeners, usualy Activities, which called respective service method
@@ -61,6 +61,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteLoadOperationsService.LocalBinder();
+
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with

@@ -24,7 +24,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 
 /**
- * Location service to provide location to all other Activities.
+ * Location service to provide location to all other Activities.<br>
  * Basically used in conjuction with ActivityWithLocationService ancestors
  */
 public class LocationService extends Service {

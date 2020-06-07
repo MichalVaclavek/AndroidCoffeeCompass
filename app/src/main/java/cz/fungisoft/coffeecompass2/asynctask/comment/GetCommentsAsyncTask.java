@@ -132,10 +132,11 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
                         Integer coffeeSiteId = commentObject.getInt("coffeeSiteID");
                         String userName = commentObject.getString("userName");
+                        int userId = commentObject.getInt("userId");
                         int starsFromUserForCS = commentObject.getInt("starsFromUser");
                         boolean canBeDeleted = commentObject.getBoolean("canBeDeleted");
 
-                        Comment comment = new Comment(id, commentText, createdOn, coffeeSiteId, userName, canBeDeleted, starsFromUserForCS);
+                        Comment comment = new Comment(id, commentText, createdOn, coffeeSiteId, userName, userId, canBeDeleted, starsFromUserForCS);
 
                         retComments.add(comment);
                     }

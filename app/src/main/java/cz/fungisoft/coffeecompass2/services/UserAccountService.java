@@ -32,7 +32,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServic
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 
 /**
- * Service to run user login and logout, and new user register and delete
+ * Service to run user login and logout, and new user register and delete.
  * Async tasks and to provide info about currently logged-in user to other Activities, if requested.
  */
 public class UserAccountService extends Service implements UserAccountActionsEvaluator {

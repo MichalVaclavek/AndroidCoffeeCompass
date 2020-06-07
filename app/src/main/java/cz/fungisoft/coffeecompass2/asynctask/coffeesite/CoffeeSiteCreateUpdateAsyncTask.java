@@ -40,7 +40,6 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
      */
     private final LoggedInUser currentUser;
 
-    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;

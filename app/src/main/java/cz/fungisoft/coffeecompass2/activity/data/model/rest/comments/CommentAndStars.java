@@ -4,7 +4,7 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.comments;
  * Class for holding Comment and Stars for CoffeeSite entered by user
  * to be saved on server via REST call.
  */
-public class CommentAndStarsToSave {
+public class CommentAndStars {
 
     private Stars stars;
 
@@ -17,12 +17,12 @@ public class CommentAndStarsToSave {
     public String getComment() {
         return this.comment;
     }
-    public CommentAndStarsToSave() {
+    public CommentAndStars() {
         stars = new Stars();
         comment = "";
     }
 
-    public CommentAndStarsToSave(Stars stars, String comment) {
+    public CommentAndStars(Stars stars, String comment) {
         this.stars = stars;
         this.comment = comment;
     }

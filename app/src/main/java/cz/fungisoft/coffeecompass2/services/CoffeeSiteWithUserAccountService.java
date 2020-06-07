@@ -24,8 +24,8 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
     static final String TAG = "CoffeeSiteServiceBase";
 
     /**
-     *  Enum to identify different actions called by CoffeeSiteServices
-     *  Needed to distinquiese correct action call within RESTListener methods
+     *  Enum to identify different actions called by CoffeeSiteServices.
+     *  Needed to distinguish correct action call within RESTListener methods
      */
     public enum CoffeeSiteRESTOper {
 

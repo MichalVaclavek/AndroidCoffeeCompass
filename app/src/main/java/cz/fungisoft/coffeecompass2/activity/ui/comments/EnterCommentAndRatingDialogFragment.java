@@ -13,18 +13,21 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsToSave;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 
 /**
- * Dialog to enter Comment for CoffeeSite and the rating (stars) of the CoffeeSite
+ * Dialog to enter new Comment for CoffeeSite and the rating (stars) of the CoffeeSite
+ * or for updating existing Comment text and/or Stars.
  */
 public class EnterCommentAndRatingDialogFragment extends DialogFragment {
 
-    private final CommentAndStarsToSave commentAndStars = new CommentAndStarsToSave();
+    private final CommentAndStars commentAndStars = new CommentAndStars();
 
     private int numOfStarsForSiteAndUser = 0;
 
-    public CommentAndStarsToSave getCommentAndStars() {
+    private String currentCommentText = "";
+
+    public CommentAndStars getCommentAndStars() {
         return commentAndStars;
     }
 
@@ -33,8 +36,8 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface CommentAndRatingDialogListener {
 
-        void onSaveCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog);
-        void onSaveCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog);
+        void onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog);
+        default void onSaveUpdateCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog) {};
     }
 
     // Use this instance of the interface to deliver action events
@@ -45,6 +48,7 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.numOfStarsForSiteAndUser = getArguments().getInt("numOfStars");
+        this.currentCommentText = getArguments().getString("commentText");
     }
 
     // Override the Fragment.onAttach() method to instantiate the CommentAndRatingDialogListener
@@ -98,6 +102,11 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
         }
         commentInput = dialogView.findViewById(R.id.commentTextInput);
 
+        // If current Comment is to be modified
+        if (!currentCommentText.isEmpty()) {
+            commentInput.setText(currentCommentText);
+        }
+
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
@@ -109,16 +118,15 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
                         // find the radiobutton by returned id
                         RadioButton starsButton = (RadioButton) dialogView.findViewById(selectedId);
                         int stars = Integer.parseInt(starsButton.getText().toString());
-                        commentAndStars.setStars(new CommentAndStarsToSave.Stars(stars));
+                        commentAndStars.setStars(new CommentAndStars.Stars(stars));
                         commentAndStars.setComment(commentInput.getText().toString());
-                        //CommentAndStarsToSave commentAndStars = new CommentAndStarsToSave(new CommentAndStarsToSave.Stars(stars), commentInput.getText().toString());
-                        listener.onSaveCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment.this);
+                        listener.onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment.this);
                     }
                 })
                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
-                        listener.onSaveCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment.this);
+                        listener.onSaveUpdateCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment.this);
                     }
                 });
         // Create the AlertDialog object and return it

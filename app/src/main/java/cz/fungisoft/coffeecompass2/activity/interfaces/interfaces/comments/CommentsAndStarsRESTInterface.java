@@ -3,7 +3,7 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.comments;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsToSave;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import retrofit2.Call;
@@ -11,6 +11,7 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -36,8 +37,17 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @POST("saveStarsAndComment/{siteID}")
-    Call<List<Comment>> saveCommentAndStars(@Path("siteID") int siteID, @Body CommentAndStarsToSave commentAndStarsToSave);
+    Call<List<Comment>> saveCommentAndStars(@Path("siteID") int siteID, @Body CommentAndStars commentAndStarsToSave);
 
+    /**
+     * Calls REST updating of Comment and Stars for CoffeeSiteID=siteID. Returns updated Comment.
+     * Requires Authorization header.
+     *
+     * @param commentAndStarsToUpdate
+     * @return
+     */
+    @PUT("updateCommentAndStars")
+    Call<Comment> updateCommentAndStars(@Body Comment commentAndStarsToUpdate);
 
     /**
      * REST call for obtaining number of Comments for the CoffeeSite with id=siteID

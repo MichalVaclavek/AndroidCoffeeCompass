@@ -14,7 +14,7 @@ public class DeleteCommentDialogFragment extends DialogFragment {
     public interface DeleteCommentDialogListener {
 
         void onDeleteCommentDialogPositiveClick(DeleteCommentDialogFragment dialog);
-        void onDeleteCommentDialogNegativeClick(DeleteCommentDialogFragment dialog);
+        default void onDeleteCommentDialogNegativeClick(DeleteCommentDialogFragment dialog) {};
     }
 
     // Use this instance of the interface to deliver action events

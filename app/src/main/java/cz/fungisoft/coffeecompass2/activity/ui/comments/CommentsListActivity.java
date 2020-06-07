@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
@@ -58,6 +59,8 @@ public class CommentsListActivity extends AppCompatActivity
 
     private CoffeeSite cs;
     private List<Comment> comments;
+    // The text of Comment user wants to modify
+    private Comment selectedComment;
     private int starsFromCurrentUser = 0;
     private RecyclerView.LayoutManager layoutManager;
 
@@ -68,6 +71,10 @@ public class CommentsListActivity extends AppCompatActivity
 
     protected UserAccountService userAccountService;
     private UserAccountServiceConnector userAccountServiceConnector;
+
+    private enum CommentOperation {SAVE, UPDATE};
+
+    private CommentOperation currentCommentOperation = CommentOperation.SAVE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,21 +118,12 @@ public class CommentsListActivity extends AppCompatActivity
         // Adds Floating Action Button if a user is loged-in
         FloatingActionButton fab = findViewById(R.id.fab_new_comment);
 
-        // effective final this activity instance for annonymous onClick() handler
-        final CommentsListActivity callingActivity = this;
-
         fab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                currentCommentOperation = CommentOperation.SAVE;
                 if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-                    if (Utils.isOnline()) {
-                        commentActionsProgressBar.setVisibility(View.VISIBLE);
-                        // Async task for loading current user's rating for this CoffeeSite
-                        // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes
-                        new GetNumberOfStarsAsyncTask(userAccountService.getLoggedInUser().getUserId(), cs.getId(), callingActivity).execute();
-                    } else { // Dialog can be opened as there might be only temporary connection problem
-                        showEnterCommentAndRatingDialog();
-                    }
+                    startNumberOfStarsAsyncTask();
                 } else {
                     Snackbar mySnackbar = Snackbar.make(view, R.string.comments_only_for_registered_user, Snackbar.LENGTH_LONG);
                     mySnackbar.show();
@@ -141,6 +139,17 @@ public class CommentsListActivity extends AppCompatActivity
             // Async task to load Comments for the site
             // Comments are shown at the end of the Async task
             new GetCommentsAsyncTask(this, cs.getId()).execute();
+        }
+    }
+
+    private void startNumberOfStarsAsyncTask() {
+        if (Utils.isOnline()) {
+            commentActionsProgressBar.setVisibility(View.VISIBLE);
+            // Async task for loading current user's rating for this CoffeeSite
+            // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes
+            new GetNumberOfStarsAsyncTask(userAccountService.getLoggedInUser().getUserId(), cs.getId(), this).execute();
+        } else { // Dialog can be opened as there might be only temporary connection problem
+            showEnterCommentAndRatingDialog();
         }
     }
 
@@ -176,18 +185,25 @@ public class CommentsListActivity extends AppCompatActivity
     private void showEnterCommentAndRatingDialog() {
         // Create an instance of the dialog fragment and show it
         //Passes number of stars for CoffeeSite and User to EnterCommentAndRatingDialogFragment
-        EnterCommentAndRatingDialogFragment dialog = newInstance(this.starsFromCurrentUser);
+        EnterCommentAndRatingDialogFragment dialog;
+        if (currentCommentOperation == CommentOperation.UPDATE) {
+            this.selectedComment = recyclerViewAdapter.getCommentAfterCommentTextTap();
+            dialog = newInstance(this.starsFromCurrentUser, this.selectedComment != null ? this.selectedComment.getText() : "");
+        } else {
+            dialog = newInstance(this.starsFromCurrentUser, "");
+        }
+
         dialog.show(getSupportFragmentManager(), "EnterCommentAndRatingDialogFragment");
     }
 
-    public static EnterCommentAndRatingDialogFragment newInstance(int numOfStars) {
+    public static EnterCommentAndRatingDialogFragment newInstance(int numOfStars, String currentCommentText) {
         EnterCommentAndRatingDialogFragment f = new EnterCommentAndRatingDialogFragment();
 
-        // Supply num input as an argument.
+        // Supply num and text input as an argument.
         Bundle args = new Bundle();
         args.putInt("numOfStars", numOfStars);
+        args.putString("commentText", currentCommentText);
         f.setArguments(args);
-
         return f;
     }
 
@@ -214,21 +230,22 @@ public class CommentsListActivity extends AppCompatActivity
      * @param dialog
      */
     @Override
-    public void onSaveCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog) {
+    public void onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog) {
         if (Utils.isOnline()) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
-            new SaveCommentAndStarsAsyncTask(cs.getId(), userAccountService.getLoggedInUser(), this, dialog.getCommentAndStars()).execute();
+            if (currentCommentOperation == CommentOperation.SAVE) {
+                new SaveCommentAndStarsAsyncTask(cs.getId(), userAccountService.getLoggedInUser(), this, dialog.getCommentAndStars()).execute();
+            }
+            if (currentCommentOperation == CommentOperation.UPDATE
+                   && this.selectedComment != null) {
+                //this.selectedComment = recyclerViewAdapter.getCommentAfterCommentTextTap();
+                this.selectedComment.setText(dialog.getCommentAndStars().getComment());
+                this.selectedComment.setStarsFromUser(dialog.getCommentAndStars().getStars().getNumOfStars());
+                new UpdateCommentAndStarsAsyncTask(userAccountService.getLoggedInUser(), this, this.selectedComment).execute();
+            }
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
-    }
-
-    /**
-     * Process negative response. nothing to do here
-     * @param dialog
-     */
-    @Override
-    public void onSaveCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog) {
     }
 
     /**
@@ -241,11 +258,6 @@ public class CommentsListActivity extends AppCompatActivity
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             new DeleteCommentAsyncTask(recyclerViewAdapter.getCommentIdAfterDeleteIconTap(), userAccountService.getLoggedInUser(), this).execute();
         }
-    }
-
-    @Override
-    public void onDeleteCommentDialogNegativeClick(DeleteCommentDialogFragment dialog) {
-
     }
 
     private void doBindUserAccountService() {
@@ -279,16 +291,14 @@ public class CommentsListActivity extends AppCompatActivity
      * Method to be called from async task after the number of stars for this CoffeeSite and User
      * is returned from server.
      * This method can be called only before a current user wants to open EnterCommentAndRatingDialogFragment
-     * to enter Comment and Stars for the CoffeeSite.
+     * to enter new Comment and Stars for the CoffeeSite or before updating current Comment and Stars for CoffeeSite.
      *
      * @param stars
      */
     public void processNumberOfStarsForSiteAndUser(int stars) {
         this.starsFromCurrentUser = stars;
         commentActionsProgressBar.setVisibility(View.GONE);
-        // Open EnterCommentAndRatingDialogFragment
         showEnterCommentAndRatingDialog();
-
     }
 
     /**
@@ -301,6 +311,7 @@ public class CommentsListActivity extends AppCompatActivity
         commentActionsProgressBar.setVisibility(View.GONE);
         showRESTCallError(error);
         // Open EnterCommentAndRatingDialogFragment
+        this.starsFromCurrentUser = 0;
         showEnterCommentAndRatingDialog();
     }
 
@@ -314,8 +325,24 @@ public class CommentsListActivity extends AppCompatActivity
         commentActionsProgressBar.setVisibility(View.GONE);
     }
 
-    private void showComments() {
+    /**
+     * Method to be called from Async task after updated Comment is returned. Modifies
+     * view of this Comment in the list of all Comments.
+     *
+     * @param comments
+     */
+    public void processUpdatedComment(Comment updatedComment) {
+        for (Comment comment : comments) {
+            if (comment.getId() == updatedComment.getId()) {
+                comments.set(comments.indexOf(comment), updatedComment);
+                break;
+            }
+        }
+        showComments();
+        commentActionsProgressBar.setVisibility(View.GONE);
+    }
 
+    private void showComments() {
         this.comments = cs.getComments();
         //if (this.comments != null && recyclerViewAdapter == null) {
         if (this.comments != null) {
@@ -373,7 +400,7 @@ public class CommentsListActivity extends AppCompatActivity
             private LoggedInUser loggedInUser;
 
             private int commentIdToDelete;
-
+            private Comment selectedComment;
 
             CommentItemRecyclerViewAdapter(List<Comment> comments, LoggedInUser loggedInUser, CommentsListActivity parenActivity) {
                 this.mValues = comments;
@@ -397,9 +424,9 @@ public class CommentsListActivity extends AppCompatActivity
                 // Also hide rating circles/icons
                 if (getItemCount() == 1 && item.getId() == 0) {
                     hideRatingSigns(holder);
-                    holder.commentText.setText(item.getText());
-                    holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.ITALIC);
-                    holder.commentText.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+                    holder.commentTextView.setText(item.getText());
+                    holder.commentTextView.setTypeface(holder.commentTextView.getTypeface(), Typeface.ITALIC);
+                    holder.commentTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
                 } else {
                     showRatingSigns(holder);
                     holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
@@ -409,9 +436,9 @@ public class CommentsListActivity extends AppCompatActivity
                         holder.starsImageView.get(i).setImageDrawable(this.parenActivity.getDrawable(R.drawable.rating_star_full));
                     }
 
-                    holder.commentText.setText(item.getText());
-                    holder.commentText.setTypeface(holder.commentText.getTypeface(), Typeface.NORMAL);
-                    holder.commentText.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
+                    holder.commentTextView.setText(item.getText());
+                    holder.commentTextView.setTypeface(holder.commentTextView.getTypeface(), Typeface.NORMAL);
+                    holder.commentTextView.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
                     holder.itemView.setTag(item);
                 }
 
@@ -426,6 +453,18 @@ public class CommentsListActivity extends AppCompatActivity
                                 commentIdToDelete = item.getId();
                                 DeleteCommentDialogFragment deleteDialog = new DeleteCommentDialogFragment();
                                 deleteDialog.show(parenActivity.getSupportFragmentManager(), "Delete comment dialog");
+                            }
+                        }
+                );
+                holder.commentTextView.setOnClickListener(
+                        new OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                selectedComment = item;
+                                parenActivity.currentCommentOperation = CommentOperation.UPDATE;
+                                if (parenActivity.userAccountService != null && parenActivity.userAccountService.isUserLoggedIn()) {
+                                    parenActivity.startNumberOfStarsAsyncTask();
+                                }
                             }
                         }
                 );
@@ -447,6 +486,10 @@ public class CommentsListActivity extends AppCompatActivity
                 return commentIdToDelete;
             }
 
+            public Comment getCommentAfterCommentTextTap() {
+                return selectedComment;
+            }
+
             @Override
             public int getItemCount() {
                 return mValues.size();
@@ -458,7 +501,7 @@ public class CommentsListActivity extends AppCompatActivity
                 class ViewHolder extends RecyclerView.ViewHolder {
 
                     final TextView userAndDateText;
-                    final TextView commentText;
+                    final TextView commentTextView;
                     final ImageView deleteButtonIcon;
 
                     final ImageView starRating1;
@@ -476,7 +519,7 @@ public class CommentsListActivity extends AppCompatActivity
                         starsImageView = new ArrayList<>();
 
                         userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
-                        commentText = (TextView) view.findViewById(R.id.commentText);
+                        commentTextView = (TextView) view.findViewById(R.id.commentText);
                         deleteButtonIcon = (ImageView) view.findViewById(R.id.deleteIconImageView);
 
                         starRating5 = (ImageView) view.findViewById(R.id.rating_imageView_5);

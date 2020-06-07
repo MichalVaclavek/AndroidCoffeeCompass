@@ -14,7 +14,9 @@ import com.squareup.picasso.Picasso;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
-
+/**
+ * Fragment of the CoffeeSiteImageActivity view to show photo of the CoffeeSite.
+ */
 public class CoffeeSiteImageFragment extends Fragment {
 
     private CoffeeSite site;

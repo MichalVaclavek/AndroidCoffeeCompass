@@ -192,7 +192,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     private final SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
 
-    //@SerializedName("createdOn")
     @Expose
     @SerializedName("createdOn")
     protected Date createdOn;
