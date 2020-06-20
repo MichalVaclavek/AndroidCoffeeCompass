@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
@@ -54,7 +56,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,
                                                   CoffeeSiteServicesConnectionListener,
-                                                  CoffeeSiteLoadServiceOperationsListener {
+                                                  CoffeeSiteLoadServiceOperationsListener,
+                                                  CoffeeSiteServiceCUDOperationsListener {
 
     private static final String TAG = "MyCoffeeSitesListAct";
 
@@ -145,8 +148,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
 
-        Toolbar myCoffeeSitesToolbar = findViewById(R.id.my_sitesList_Toolbar);
-
         /* If called from MainActivity, we can pass the number of CoffeeSites from user
          * to be shown/loaded
          * Not used yet
@@ -171,7 +172,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         layoutManager = new LinearLayoutManager(this);
 
-        /* Must be called here, in onCreate(), as after successful connection to UserAccountService
+        /*
+         Must be called here, in onCreate(), as after successful connection to UserAccountService
          loading of users CoffeeSites starts. We need this loading only if this Activity
          is created, not in case we returned to it from another Activity
          */
@@ -314,9 +316,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-
     private void doUnbindCoffeeSiteCUDOperationsService() {
         if (mShouldUnbindCoffeeSiteCUDOperationsService) {
+            if (coffeeSiteLoadOperationsService != null) {
+                coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
+            }
             // Release information about the service's state.
             coffeeSiteCUDOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
             unbindService(coffeeSiteCUDOperationsServiceConnector);
@@ -333,7 +337,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         recyclerView.setLayoutManager(layoutManager);
         if (extras != null || content != null) {
-            //Collections.sort(content);
             content = removeCanceledElements(content);
             setupRecyclerView((RecyclerView) recyclerView, content);
         }
@@ -433,6 +436,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService() != null) {
             if (coffeeSiteCUDOperationsService == null) {
                 coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService();
+                coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
             }
         }
     }
@@ -549,7 +553,42 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * Activated only, when Author's comment is inserted/updated. Not needed to update recycler view?
+     * @param updatedCoffeeSite
+     * @param error
+     */
+    @Override
+    public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
+        hideProgressbarAndEnableMenuItems();
+
+        if (recyclerViewAdapter.isUpdatingCommentOnly()) {
+            Log.i(TAG, "Author's comment save success?: " + error.isEmpty());
+            if (error.isEmpty()) {
+                recyclerViewAdapter.updateCoffeeSiteAfterCommentEdited(updatedCoffeeSite);
+                showCoffeeSiteAuthorCommentSaveSuccess();
+            }
+            else {
+               showCoffeeSiteSaveAuthorCommentFailure(error);
+            }
+        }
+    }
+
+    private void showCoffeeSiteAuthorCommentSaveSuccess() {
+        Toast toast = Toast.makeText(getApplicationContext(),
+                R.string.author_comment_save_success,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void showCoffeeSiteSaveAuthorCommentFailure(String error) {
+        error = !error.isEmpty() ? error : getString(R.string.author_comment_save_failure);
+        Snackbar mySnackbar = Snackbar.make(contextView, error, Snackbar.LENGTH_LONG);
+        mySnackbar.show();
+    }
+
     /*** DIALOGS LISTENERS ****/
+    /*** Dialog for entering Author's comment to CoffeeSite ****/
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
@@ -575,7 +614,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-    /*** DIALOGS LISTENERS ****/
+    /*** DIALOGS LISTENERS *** END ***/
 
     @Override
     protected void onSaveInstanceState(Bundle state) {

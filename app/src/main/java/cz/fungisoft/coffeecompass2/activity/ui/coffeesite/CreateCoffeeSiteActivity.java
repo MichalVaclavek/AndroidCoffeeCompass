@@ -88,7 +88,7 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService
 /**
  * Activity to show View, where user can enter data for a new CoffeeSite or
  * where the data of already created CoffeeSite can be edited.
- * It offers 3 functions in every "mode" (MODE_CREATE and MODE_MODIFY)
+ * It offers 2 functions in every "mode" (MODE_CREATE and MODE_MODIFY)
  * in BottomNavigationMenu.
  * The functions for MODE_CREATE are: Save, Save and Activate, Delete photo
  * The functions for MODE_MODIFY are: Save and Delete photo.

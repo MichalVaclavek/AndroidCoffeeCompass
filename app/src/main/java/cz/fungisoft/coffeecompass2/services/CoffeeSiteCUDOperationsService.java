@@ -65,7 +65,6 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
      * IPC.
      */
     public class LocalBinder extends CoffeeSiteWithUserAccountService.LocalBinder {
-
         CoffeeSiteCUDOperationsService getService() {
             return CoffeeSiteCUDOperationsService.this;
         }
@@ -158,7 +157,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
 
 
     /**
-     * Informs calling Activity about requested action result via Intent
+     * Informs calling Activity about requested action result via Intent.<br>
      * Expects that operationResult and operationError are set by
      * methods calling this method
      */

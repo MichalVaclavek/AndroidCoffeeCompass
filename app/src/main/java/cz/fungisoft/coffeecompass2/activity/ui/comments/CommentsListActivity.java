@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,7 +63,6 @@ public class CommentsListActivity extends AppCompatActivity
     // The text of Comment user wants to modify
     private Comment selectedComment;
     private int starsFromCurrentUser = 0;
-    private RecyclerView.LayoutManager layoutManager;
 
     private RecyclerView recyclerView;
     private CommentsListActivity.CommentItemRecyclerViewAdapter recyclerViewAdapter;
@@ -106,7 +106,7 @@ public class CommentsListActivity extends AppCompatActivity
         recyclerView = findViewById(R.id.commentsList);
         assert recyclerView != null;
 
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
         /*
@@ -238,7 +238,6 @@ public class CommentsListActivity extends AppCompatActivity
             }
             if (currentCommentOperation == CommentOperation.UPDATE
                    && this.selectedComment != null) {
-                //this.selectedComment = recyclerViewAdapter.getCommentAfterCommentTextTap();
                 this.selectedComment.setText(dialog.getCommentAndStars().getComment());
                 this.selectedComment.setStarsFromUser(dialog.getCommentAndStars().getStars().getNumOfStars());
                 new UpdateCommentAndStarsAsyncTask(userAccountService.getLoggedInUser(), this, this.selectedComment).execute();
@@ -444,6 +443,7 @@ public class CommentsListActivity extends AppCompatActivity
 
                 if ((item != null) && (loggedInUser != null) && item.getUserName().equals(loggedInUser.getUserName())) {
                     holder.deleteButtonIcon.setVisibility(VISIBLE);
+                    holder.editButtonIcon.setVisibility(VISIBLE);
                 }
 
                 holder.deleteButtonIcon.setOnClickListener(
@@ -456,18 +456,18 @@ public class CommentsListActivity extends AppCompatActivity
                             }
                         }
                 );
-                holder.commentTextView.setOnClickListener(
-                        new OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                selectedComment = item;
-                                parenActivity.currentCommentOperation = CommentOperation.UPDATE;
-                                if (parenActivity.userAccountService != null && parenActivity.userAccountService.isUserLoggedIn()) {
-                                    parenActivity.startNumberOfStarsAsyncTask();
-                                }
-                            }
-                        }
-                );
+                // Handle click to edit Comment - add the click handler to both edit icon and
+                // whole LinearLayout with Comment and Rating itself
+                View.OnClickListener editCommentClickListener = view -> {
+                    selectedComment = item;
+                    parenActivity.currentCommentOperation = CommentOperation.UPDATE;
+                    if (parenActivity.userAccountService != null && parenActivity.userAccountService.isUserLoggedIn()) {
+                        parenActivity.startNumberOfStarsAsyncTask();
+                    }
+                };
+
+                holder.commentTextView.setOnClickListener(editCommentClickListener);
+                holder.editButtonIcon.setOnClickListener(editCommentClickListener);
             }
 
             private void hideRatingSigns(ViewHolder holder) {
@@ -502,7 +502,11 @@ public class CommentsListActivity extends AppCompatActivity
 
                     final TextView userAndDateText;
                     final TextView commentTextView;
+                    final LinearLayout commentAndRatingLayout;
+
+                    final LinearLayout editAndDeleteIconLayout;
                     final ImageView deleteButtonIcon;
+                    final ImageView editButtonIcon;
 
                     final ImageView starRating1;
                     final ImageView starRating2;
@@ -520,7 +524,11 @@ public class CommentsListActivity extends AppCompatActivity
 
                         userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
                         commentTextView = (TextView) view.findViewById(R.id.commentText);
+                        commentAndRatingLayout = (LinearLayout)  view.findViewById(R.id.user_comment_and_rating_linearlayout);
+
+                        editAndDeleteIconLayout = (LinearLayout)  view.findViewById(R.id.edit_delete_comment_images_linearlayout);
                         deleteButtonIcon = (ImageView) view.findViewById(R.id.deleteIconImageView);
+                        editButtonIcon = (ImageView) view.findViewById(R.id.edit_comment_icon_imageview);
 
                         starRating5 = (ImageView) view.findViewById(R.id.rating_imageView_5);
                         starsImageView.add(starRating5);

@@ -37,7 +37,6 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
     private final LoggedInUser currentUser;
 
-    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -80,8 +79,8 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
-                    .writeTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(headerAuthorizationInterceptor)
                     //.addInterceptor(logging)

@@ -28,6 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
@@ -37,6 +38,7 @@ import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -52,7 +54,6 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivi
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -150,7 +151,7 @@ public class MainActivity extends ActivityWithLocationService
         // Progress bar is hidden in onLocationServiceConnected()
         showProgressbar();
 
-        // Get cuurent serachDistance from Preferences
+        // Get current serachDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
         searchRange = searchRangePreferenceHelper.getSearchDistanc();
 
@@ -227,7 +228,7 @@ public class MainActivity extends ActivityWithLocationService
         // Floating action button to open Activity for creating new CoffeeSite
         FloatingActionButton fab = findViewById(R.id.add_site_floatingActionButton);
 
-        // effective final this activity instance for annonymous onClick() handler
+        // effective final this activity instance for anonymous onClick() handler
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -541,11 +542,11 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (Utils.isOnline()) {
-            new GetSitesInRangeAsyncTask(this,
-                                         location.getLatitude(),
-                                         location.getLongitude(),
-                                         searchRange,
-                                "espresso").execute();
+//            new GetSitesInRangeAsyncTask(this,
+//                                         location.getLatitude(),
+//                                         location.getLongitude(),
+//                                         searchRange,
+//                                "espresso").execute();
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -557,11 +558,14 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (Utils.isOnline()) {
-            new GetSitesInRangeAsyncTask(this,
-                                        location.getLatitude(),
-                                        location.getLongitude(),
-                                        searchRange,
-                                "").execute();
+
+                Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+
+                csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
+                csListIntent.putExtra("searchRange", searchRange);
+                csListIntent.putExtra("coffeeSort", "");
+
+                startActivity(csListIntent);
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }

@@ -12,6 +12,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 public interface CoffeeSiteLoadServiceOperationsListener {
 
     default void onCoffeeSiteLoaded(CoffeeSite coffeeSite, String error) {}
+    default void onCoffeeSitesFromRangeLoaded(List<CoffeeSite> coffeeSites, String error) {}
     default void onCoffeeSiteListFromUserLoaded(List<CoffeeSite> coffeeSites, String error) {}
     default void onCoffeeSiteListFromLoggedInUserLoaded(List<CoffeeSite> coffeeSites, String error) {}
     default void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {}

@@ -18,6 +18,8 @@ import retrofit2.http.Query;
  */
 public interface CoffeeSiteRESTInterface {
 
+    String COFFEESITE_API_PUBLIC_SEARCH_URL = BuildConfig.COFFEESITE_API_PUBLIC_SEARCH_URL;
+
     String GET_NUMBER_OF_STARS_URL = BuildConfig.STARS_API_PUBLIC_URL;
 
     String GET_COFFEE_SITE_URL = BuildConfig.COFFEESITE_API_PUBLIC_URL;
@@ -41,6 +43,14 @@ public interface CoffeeSiteRESTInterface {
      */
     @GET("{siteId}")
     Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") long siteId);
+
+    /**
+     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
+     *
+     * @return
+     */
+    @GET("searchSites/")
+    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range, @Query("sort") String sort);
 
     /**
      * REST call for obtaining all CoffeeSites created by userId

@@ -35,7 +35,7 @@ android {
 
             buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
             buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
-            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/searchSites/\""
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/\""
 
             buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
 
@@ -60,7 +60,7 @@ android {
 
             buildConfigField "String", "COFFEESITE_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/\""
             buildConfigField "String", "COFFEESITE_API_SECURED_URL", "\"https://coffeecompass.cz/rest/secured/site/\""
-            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/searchSites/\""
+            buildConfigField "String", "COFFEESITE_API_PUBLIC_SEARCH_URL", "\"https://coffeecompass.cz/rest/site/\""
 
             buildConfigField "String", "STARS_API_PUBLIC_URL", "\"https://coffeecompass.cz/rest/site/stars/\""
 

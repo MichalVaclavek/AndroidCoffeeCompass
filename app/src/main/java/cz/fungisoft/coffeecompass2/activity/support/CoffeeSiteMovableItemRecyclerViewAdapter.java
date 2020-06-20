@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -27,7 +28,6 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivi
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
@@ -38,12 +38,12 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * item in the list.
  */
 public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-                                                      implements PropertyChangeListener
-{
+                                                      implements PropertyChangeListener {
+
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final FoundCoffeeSitesListActivity mParentActivity;
-    private List<CoffeeSiteMovable> mValues;
+    private List<CoffeeSiteMovable> mValues = new ArrayList<>();
     private CoffeeSiteMovableListContent content;
 
     private final boolean mTwoPane;
@@ -53,12 +53,17 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     private int currentSearchRange;
 
     private static CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
+    private static CoffeeSiteMovable initialDummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "InitialDummy", 0);
 
     // Animations for vyhledavam text
     private AlphaAnimation animation1;
     private AlphaAnimation animation2;
 
     private String searchingDistanceLabel;
+
+    private EmptyCardViewHolder emptyCardViewHolder;
+
+    final int[] searchingTextAnimationsCounter = {0};
 
     /**
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
@@ -74,7 +79,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             int toPosition = -1;
             boolean moveUp  = false;
             boolean moveDown = false;
-            //1. Find an item which is not in right position
+            // 1. Find an item which is not in right position
             // only one item can be on a wrong position ??
             //TODO - to be sure, we should keep searching for wrong positions until end of list??
             // remember current/wrong pos.
@@ -134,11 +139,23 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      */
     public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
-        // If there was 'Empty list card' shown, remove it
-        if (mValues.size() >= 1 && mValues.get(0).getName().equals("Dummy")) {
+        // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
+        if (newSites.size() == 0 && mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
+            // Remove Initial Empty card
+            mValues.remove(0);
+            this.notifyItemRemoved(0);
+            // Replace by standard Empty card
+            mValues.add(0, dummyEmptyListCoffeeSite);
+            this.notifyItemInserted(0);
+        }
+
+        // If there are new CoffeeSites and there was 'Empty list card' shown, remove it
+        if (newSites.size() > 0 && mValues.size() >= 1
+                && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy"))) {
             mValues.remove(0);
             this.notifyItemRemoved(0);
         }
+
         // Go from top, and find first coffeeSite which distance is bigger then new site. Insert into it's position
         for (CoffeeSiteMovable csmToInsert : newSites) {
             int posToInsert = -1;
@@ -174,13 +191,34 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             }
         }
 
-        // If the list is empty now, insert an 'Empty card'
+        // If the list is empty now, insert standard 'Empty card'
         if (mValues.size() == 0) {
             mValues.add(0, dummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
         }
     }
 
+
+    public int getCurrentNumberOfSitesShown() {
+        if (mValues != null && mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy"))) {
+            return 0;
+        } else {
+            return mValues.size();
+        }
+    }
+
+    /**
+     * Returns current CoffeeSitesMovable shown by the Adapter
+     * @return current CoffeeSitesMovable shown by the Adapter
+     */
+    public List<CoffeeSiteMovable> getShownItems() {
+        if (mValues != null && mValues.size() >= 1
+                && (!mValues.get(0).getName().equals("Dummy") || !mValues.get(0).getName().equals("InitialDummy"))) {
+            return mValues;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
     /**
      * Standard constructor of the class MyCoffeeSiteItemRecyclerViewAdapter
@@ -192,21 +230,24 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     public CoffeeSiteMovableItemRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
                                                     CoffeeSiteMovableListContent content,
                                                     int currentSearchRange,
-                                                    //LocationService locationService,
                                                     boolean twoPane) {
         this.content = content;
         this.currentSearchRange = currentSearchRange;
-        mValues = this.content.getItems();
         mParentActivity = parent;
         mTwoPane = twoPane;
-        //mLocationService = locationService;
 
-        searchingDistanceLabel = mParentActivity.getResources().getString(R.string.current_range);
-
+        searchingDistanceLabel = mParentActivity.getResources().getString(R.string.current_range_label);
         mOnClickListener = createOnClickListener();
 
-        if (mValues.size() == 0) {
-            mValues.add(0, dummyEmptyListCoffeeSite );
+        if (this.content != null) {
+            mValues = this.content.getItems();
+
+            if (mValues.size() == 0) {
+                mValues.add(0, dummyEmptyListCoffeeSite);
+                this.notifyItemInserted(0);
+            }
+        } else {
+            mValues.add(0, initialDummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
         }
     }
@@ -261,6 +302,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
                              .inflate(R.layout.coffeesite_list_emptycard, parent, false);
                 retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.EmptyCardViewHolder(view2);
                 break;
+            // Case -2 for 'Initial Empty card'
+            case -2:
+                View view3 = LayoutInflater.from(parent.getContext())
+                             .inflate(R.layout.coffeesite_list_emptycard_initial_search, parent, false);
+                retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.InitialSearchingCardViewHolder(view3);
+                break;
         }
         return retVal;
     }
@@ -276,24 +323,35 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
                 break;
             // Case -1 for 'Empty card'
             case -1:
-                EmptyCardViewHolder emptyCardViewHolder = (EmptyCardViewHolder) viewHolder;
+                emptyCardViewHolder = (EmptyCardViewHolder) viewHolder;
                 setupEmptyCardViewHolder(emptyCardViewHolder);
+                break;
+            // Case 1 for 'Initial Empty card'
+            case -2:
+                InitialSearchingCardViewHolder initialEmptySearchingCardViewHolder = (InitialSearchingCardViewHolder) viewHolder;
+                setupInitialEmptySearchingCardViewHolder(initialEmptySearchingCardViewHolder);
                 break;
         }
     }
 
     /**
      * Returns itemVIewType to distinquish if the list of mValues contains standard items i.e.
-     * CoffeeSiteMovable or if it contains only 'Empty card' informing that the standard list
-     * is empty.
+     * CoffeeSiteMovable or if it contains only 'Empty card' or 'InitialDummy' card to inform,
+     * that the standard list is empty.
+     *
      * Type 0 for standard View i.e. CoffeeSiteMovable in the list available
-     * Type -1 for 'Empty card' i.e. standard list is empty
+     * Type -1 for standard 'Empty card' i.e. standard list is empty
+     * Type -2 for 'InitialDummy' i.e. CoffeeSites list is empty and searching of CoffeeSites just began
+     *
      * @param position
      * @return
      */
     @Override
     public int getItemViewType(int position) {
         int retViewType = 0;
+        if (mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
+            retViewType = -2;
+        }
         if (mValues.size() == 1 && mValues.get(0).getName().equals("Dummy")) {
             retViewType = -1;
         }
@@ -305,9 +363,20 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         return mValues.size();
     }
 
+    /**
+     * Creates view to show, that no CoffeeSite was found. This view card also contains
+     * TextView which can be animated, when searching CoffeeSites if it starts again.
+     * <p>
+     * Animation is played 3 times, only to indicate, that something is happening - searching,
+     * and if nothing is found, than animation must finish to indicate, that process of
+     * searching is gone.
+     *
+     * @param viewHolder
+     */
     private void setupEmptyCardViewHolder(final EmptyCardViewHolder viewHolder) {
 
-        viewHolder.currentDistanceEmptyCardView.setText(searchingDistanceLabel + this.currentSearchRange +  " m");
+        viewHolder.currentDistanceTextViewLabel.setText(searchingDistanceLabel);
+        viewHolder.currentDistanceTextView.setText(getSearchingDistanceLabel(this.currentSearchRange));
 
         // Animation of the label indicating system is alive and searching for new locations
         animation1 = new AlphaAnimation(0.0f, 1.0f);
@@ -319,7 +388,98 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         animation2.setStartOffset(800);
 
         // Animation of the searchingInfoLabel
-        animation1.setAnimationListener(new Animation.AnimationListener(){
+        animation1.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                // start animation2 when animation1 ends (continue)
+                if (searchingTextAnimationsCounter[0] != 3) {
+                    viewHolder.searchingInfoLabel.startAnimation(animation2);
+                } else { // 3 animations played, show default message, reset counter end stop
+                    searchingTextAnimationsCounter[0] = 0;
+                    emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onAnimationStart(Animation arg0) {
+                // TODO Auto-generated method stub
+                searchingTextAnimationsCounter[0]++;
+            }
+        });
+
+        //animation2 AnimationListener
+        animation2.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                // start animation1 when animation2 ends (repeat)
+                viewHolder.searchingInfoLabel.startAnimation(animation1);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onAnimationStart(Animation arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
+
+    }
+
+    /**
+     * Start animation of text on Empty card, when new searching of CoffeeSites started again
+     */
+    public void newSitesInRangeSearchingStarted() {
+        if (emptyCardViewHolder != null &&
+                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))    {
+            emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
+            emptyCardViewHolder.searchingInfoLabel.setVisibility(View.VISIBLE);
+            emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
+        }
+    }
+
+    /**
+     * Not yet implemented as the AsyncTasks are not ready to support it.
+     * @param numberOfSitesAlreadyRead
+     */
+    public void showNumberOfSitesAlreadyRead(int numberOfSitesAlreadyRead) {
+        // Update label to show how many sites where already read when new reading of Sites in range
+        if (mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy")))  {
+            //TODO - number of already read CoffeeSites on standard Empty or InitialDummy card
+        }
+    }
+
+    /**
+     * Creates view to show, that initial, first CoffeeSite searching is in progress by
+     * animating {@code viewHolder.searchingInfoLabel} TextView
+     *
+     * @param viewHolder
+     */
+    private void setupInitialEmptySearchingCardViewHolder(final InitialSearchingCardViewHolder viewHolder) {
+
+        viewHolder.currentDistanceTextViewLabel.setText(searchingDistanceLabel);
+        viewHolder.currentDistanceTextView.setText(getSearchingDistanceLabel(this.currentSearchRange));
+
+        // Animation of the label indicating system is alive and searching for new locations
+        animation1 = new AlphaAnimation(0.0f, 1.0f);
+        animation1.setDuration(1600);
+        animation1.setStartOffset(200);
+
+        animation2 = new AlphaAnimation(1.0f, 0.0f);
+        animation2.setDuration(500);
+        animation2.setStartOffset(800);
+
+        // Animation of the searchingInfoLabel
+        animation1.setAnimationListener(new Animation.AnimationListener() {
 
             @Override
             public void onAnimationEnd(Animation arg0) {
@@ -338,8 +498,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             }
         });
 
-        //animation2 AnimationListener
-        animation2.setAnimationListener(new Animation.AnimationListener(){
+        animation2.setAnimationListener(new Animation.AnimationListener() {
 
             @Override
             public void onAnimationEnd(Animation arg0) {
@@ -382,6 +541,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         viewHolder1.itemView.setOnClickListener(this.mOnClickListener);
     }
 
+
         /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
@@ -395,7 +555,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             final ImageView siteFoto;
 
             /**
-             * Standard constructor for ViewHolder.
+             * Standard constructor for CoffeeSite's ViewHolder.
              *
              * @param view
              */
@@ -410,11 +570,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         }
 
         /**
-         * Inner ViewHolder class for 'EmptyCard'
+         * Inner ViewHolder class for standard 'EmptyCard'
          */
         class EmptyCardViewHolder extends RecyclerView.ViewHolder {
 
-            final TextView currentDistanceEmptyCardView;
+            final TextView currentDistanceTextViewLabel;
+            final TextView currentDistanceTextView;
             final TextView searchingInfoLabel;
             final CardView emptyCardView;
 
@@ -427,9 +588,42 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
                 super(view);
 
                 emptyCardView = view.findViewById(R.id.list_empty_card);
-                currentDistanceEmptyCardView = view.findViewById(R.id.currentRangeTextView);
+                currentDistanceTextViewLabel = view.findViewById(R.id.currentRangeLabelTextView);
+                currentDistanceTextView = view.findViewById(R.id.current_distance_range_empty_card_textView);
                 searchingInfoLabel = view.findViewById(R.id.stillSearchingTextView);
+                searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
             }
+        }
+
+        /**
+         * Inner ViewHolder class for 'Initial Empty card'
+         */
+        class InitialSearchingCardViewHolder extends RecyclerView.ViewHolder {
+
+            final TextView currentDistanceTextViewLabel;
+            final TextView currentDistanceTextView;
+            final TextView searchingInfoLabel;
+            final CardView emptyCardView;
+
+            /**
+             * Standard constructor for ViewHolder.
+             *
+             * @param view
+             */
+            InitialSearchingCardViewHolder(View view) {
+                super(view);
+
+                emptyCardView = view.findViewById(R.id.list_empty_card_initial_search);
+                currentDistanceTextViewLabel = view.findViewById(R.id.current_range_initial_empty_card_label_TextView);
+                currentDistanceTextView = view.findViewById(R.id.current_distance_range_initial_empty_card_textView);
+                searchingInfoLabel = view.findViewById(R.id.initialSearchingTextView);
+            }
+        }
+
+
+        private String getSearchingDistanceLabel(int searchRange) {
+            return (searchRange >= 1000) ?  searchRange/1000 + " km"
+                                         : searchRange + " m";
         }
 
 }

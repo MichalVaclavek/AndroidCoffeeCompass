@@ -4,16 +4,16 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 
 /**
  * Connector for CoffeeSitesInRangeUpdateService
  */
 public class CoffeeSitesInRangeUpdateServiceConnector implements ServiceConnection {
 
-    private SitesInRangeUpdateListener callingActivity;
+    private CoffeeSitesInRangeUpdateListener callingActivity;
 
-    public CoffeeSitesInRangeUpdateServiceConnector(SitesInRangeUpdateListener callingActivity) {
+    public CoffeeSitesInRangeUpdateServiceConnector(CoffeeSitesInRangeUpdateListener callingActivity) {
         this.callingActivity = callingActivity;
     }
 

@@ -15,11 +15,11 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 
 /**
  * Service to check, if there is a change of CoffeeSites int hte search range while equipment is
@@ -27,7 +27,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.SitesInRangeUpdateListene
  * Implements PropertyChangeListener of the LocationService which is needed for equipment move
  * detection.
  */
-public class CoffeeSitesInRangeUpdateService extends Service implements PropertyChangeListener {
+public class CoffeeSitesInRangeUpdateService extends Service implements PropertyChangeListener, CoffeeSitesInRangeResultListener {
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -54,7 +54,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment.
      */
-    private List<CoffeeSiteMovable> currentSitesInRange;
+    private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
 
     /**
      * Location when the currentSitesInRange where observed
@@ -78,7 +78,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      * are included in the current sites in Range. i.e. "plus" difference between current
      * and old sites in Range)
      */
-    private List<CoffeeSiteMovable> newSitesInRange;
+    private List<CoffeeSiteMovable> newSitesInRange = new ArrayList<>();
 
     /**
      * CoffeeSites, which have left the current Range.
@@ -86,14 +86,13 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      * not included in the current sites in Range. i.e. "minus" difference between current
      * and old sites in Range)
      */
-    private List<CoffeeSiteMovable> goneSitesOutOfRange;
+    private List<CoffeeSiteMovable> goneSitesOutOfRange = new ArrayList<>();;
 
-    private List<SitesInRangeUpdateListener>  sitesInRangeUpdateListeners;
+    private List<CoffeeSitesInRangeUpdateListener>  sitesInRangeUpdateListeners = new ArrayList<>();
+
     private String coffeeSort;
 
-
     public CoffeeSitesInRangeUpdateService() {
-        this(new LatLng(0,0), 0, "", new ArrayList<CoffeeSiteMovable>());
     }
 
     /**
@@ -108,19 +107,17 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
         this.currentSearchRange = searchRange;
         this.coffeeSort = coffeeSort;
 
-        sitesInRangeUpdateListeners = new ArrayList<>();
+        //sitesInRangeUpdateListeners = new ArrayList<>();
 
-        this.currentSitesInRange = currentSitesInRange;
-        newSitesInRange = new ArrayList<>();
-        goneSitesOutOfRange = new ArrayList<>();
+        //this.currentSitesInRange = currentSitesInRange;
     }
 
-    public void addSitesInRangeUpdateListener(SitesInRangeUpdateListener sitesInRangeUpdateListener) {
+    public void addSitesInRangeUpdateListener(CoffeeSitesInRangeUpdateListener sitesInRangeUpdateListener) {
         sitesInRangeUpdateListeners.add(sitesInRangeUpdateListener);
         Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeUpdateListeners.size());
     }
 
-    public void removePropertyChangeListener(SitesInRangeUpdateListener sitesInRangeUpdateListener) {
+    public void removePropertyChangeListener(CoffeeSitesInRangeUpdateListener sitesInRangeUpdateListener) {
         sitesInRangeUpdateListeners.remove(sitesInRangeUpdateListener);
         Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeUpdateListeners.size());
     }
@@ -149,7 +146,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
 
         if (movedDistance >= distanceToRangeNewSearchRatio * currentSearchRange) {
             searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            startGetSitesInRangeAsyncTask(this.coffeeSort);
+            startGetSitesInRangeAsyncTask(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, currentSearchRange);
         }
     }
 
@@ -194,20 +191,17 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      *
      * @return
      */
-    public void requestCurrentSitesInRange(MainActivity parentActivity, int currentSearchRange) {
+    public void requestCurrentSitesInRange(int currentSearchRange, String coffeeSort, LatLng locationFrom) {
         // Acquire current location from LocationService
-        LatLng currentLocation = locationService.getCurrentLatLng();
-        this.currentSearchRange = currentSearchRange;
-
-        if (Utils.isOnline()) {
-            new GetSitesInRangeAsyncTask(parentActivity,
-                                        currentLocation.latitude,
-                                        currentLocation.longitude,
-                                        this.currentSearchRange,
-                                        "").execute();
-        } else {
-            showNoInternetToast();
+        this.searchLocationOfCurrentSites = locationFrom;
+        if (locationService != null && this.searchLocationOfCurrentSites == null) {
+            this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
         }
+        this.currentSearchRange = currentSearchRange;
+        this.coffeeSort = coffeeSort;
+
+        // Call REST async. task
+        startGetSitesInRangeAsyncTask(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, currentSearchRange);
     }
 
     /**
@@ -223,7 +217,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
           this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
           this.currentSearchRange = range;
           // Call REST async. task
-          startGetSitesInRangeAsyncTask(coffeeSort);
+          startGetSitesInRangeAsyncTask(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, range);
     }
 
     /**
@@ -231,16 +225,27 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      *
      * @param coffeeSort
      */
-    private void startGetSitesInRangeAsyncTask(String coffeeSort) {
+    private void startGetSitesInRangeAsyncTask(String coffeeSort, double latitude, double longitude, int range) {
 
         if (Utils.isOnline()) {
-            new GetSitesInRangeAsyncTask(this,
-                    searchLocationOfCurrentSites.latitude,
-                    searchLocationOfCurrentSites.longitude,
-                    this.currentSearchRange,
+            for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
+                listener.onStartSearchingSitesInRange();
+            }
+            new GetCoffeeSitesInRangeAsyncTask(this,
+                    latitude,
+                    longitude,
+                    range,
                     coffeeSort).execute();
+        } else {
+            showNoInternetToast();
         }
     }
+
+//    public void onOneNewSiteReadWhenReadingSitesInRange(int numberOfSitesAlreadyRead) {
+//        for (SitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
+//            listener.onNextSiteInRangeRead(numberOfSitesAlreadyRead);
+//        }
+//    }
 
     /**
      * A callback method to be called, when there are CoffeeSites in range returned by
@@ -248,6 +253,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
      * Compares return coffeeSites with currentSitesInRange and finds new and old
      * CoffeeSites.
      */
+    @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
         // 1. Find newSites
         newSitesInRange.clear();
@@ -261,13 +267,24 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
 
         currentSitesInRange = coffeeSites;
 
-        for (SitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
+        for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
             if (goneSitesOutOfRange.size() > 0) {
                 listener.onSitesOutOfRange(goneSitesOutOfRange);
             }
             if (newSitesInRange.size() > 0) {
                 listener.onNewSitesInRange(newSitesInRange);
             }
+            // Initial request
+            if (currentSitesInRange.size() == 0 && newSitesInRange.size() == 0) {
+                listener.onNewSitesInRange(newSitesInRange);
+            }
+        }
+    }
+
+    @Override
+    public void onSitesInRangeReturnedFromServerError(String error) {
+        for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
+            listener.onNewSitesInRangeError(error);
         }
     }
 

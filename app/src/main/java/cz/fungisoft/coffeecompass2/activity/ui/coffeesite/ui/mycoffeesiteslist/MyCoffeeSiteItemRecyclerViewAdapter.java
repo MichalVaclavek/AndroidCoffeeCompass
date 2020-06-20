@@ -40,8 +40,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
  * Adapter to show loaded list of CoffeeSites created by logged-in user
  */
 public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-                                                 implements CoffeeSiteServiceStatusOperationsListener,
-                                                            CoffeeSiteServiceCUDOperationsListener {
+                                                 implements CoffeeSiteServiceStatusOperationsListener {
 
     private static final String TAG = "MyCoffeeSiteListAdapter";
 
@@ -50,6 +49,19 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private CoffeeSite selectedCoffeeSite;
     private int selectedPosition;
+
+    /**
+     * To indicate, that update Author's comment function was selected by user.
+     * Used when reacting to onUpdateCoffeeSite()  event from CoffeeSiteCUDOOperationsService,
+     * which is processed in parrent MyCoffeeSitesListActivity.
+     * Ensures, that only one correct Toast is shown, when reacting to the same event,
+     * but in CreateCoffeeSiteActivity (which shows first Toast, that operation update succeeded).
+     */
+    private boolean updatingCommentOnly = false;
+
+    public boolean isUpdatingCommentOnly() {
+        return updatingCommentOnly;
+    }
 
     /**
      * A coffeeSite returned from server after modification
@@ -111,11 +123,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             this.coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
         }
 
-
         this.coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsService;
-        if (this.coffeeSiteCUDOperationsService != null) {
-            this.coffeeSiteCUDOperationsService.addCUDOperationsListener(this);
-        }
     }
 
     /**
@@ -131,7 +139,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             @Override
             public void onClick(View view) {
                 CoffeeSite item = (CoffeeSite) view.getTag();
-                if (item instanceof CoffeeSite) {
+                if (item != null) {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) item);
@@ -155,7 +163,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             @Override
             public void onClick(View view) {
                 CoffeeSite item = (CoffeeSite) view.getTag();
-                if (item instanceof CoffeeSite) {
+                if (item != null) {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) item);
@@ -295,7 +303,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         dialog.show(mParentActivity.getSupportFragmentManager(), "InsertAuthorCommentDialogFragment");
     }
 
-    public static InsertAuthorCommentDialogFragment newInstance(String authorComment) {
+    private static InsertAuthorCommentDialogFragment newInstance(String authorComment) {
         InsertAuthorCommentDialogFragment f = new InsertAuthorCommentDialogFragment();
 
         // Supply num input as an argument.
@@ -327,6 +335,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             if (Utils.isOnline()) {
                 if (coffeeSiteStatusChangeService != null) {
                     mParentActivity.showProgressbarAndDisableMenuItems();
+                    updatingCommentOnly = true;
                     selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
                     coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
                 }
@@ -385,28 +394,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             updateRecyclerViewItemRemoved();
         }
     }
-
-    /**
-     * Used, when CoffeeSite's author comment is saved by CoffeeSiteCUDOperationsService
-     *
-     * @param updatedCoffeeSite
-     * @param error
-     */
-    @Override
-    public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
-        mParentActivity.hideProgressbarAndEnableMenuItems();
-        modifiedCoffeeSite = updatedCoffeeSite;
-
-        Log.i(TAG, "Author's comment save success?: " + error.isEmpty());
-        if (!error.isEmpty()) {
-            showCoffeeSiteSaveAuthorCommentFailure(error);
-        }
-        else {
-            showCoffeeSiteAuthorCommentSaveSuccess();
-            updateEditedCoffeeSite(modifiedCoffeeSite, selectedPosition);
-        }
-    }
-
 
         /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
@@ -481,20 +468,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         return null;
     }
 
-    /** Buttons onClick methods **/
-    /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
-
-    public void onEditButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
-        activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
-        activityIntent.putExtra("coffeeSitePosition", selectedPosition);
-
-        mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
-    }
-
-
     /**
      * Called from parent activity (MyCoffeeSitesListActivity), when the CreateCoffeeSiteActivity
      * return result from above calling.
@@ -508,6 +481,33 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         this.selectedPosition = position;
         mValues.set(selectedPosition, selectedCoffeeSite);
         this.notifyItemChanged(selectedPosition);
+    }
+
+    /**
+     * Called from parent activity, if Author's comment was updated.
+     * selected position is known from {@link #onInsertCommentButtonClick()}
+     *
+     * @param editedCoffeeSite
+     */
+    public void updateCoffeeSiteAfterCommentEdited(CoffeeSite editedCoffeeSite) {
+        this.selectedCoffeeSite = editedCoffeeSite;
+        updatingCommentOnly = false; // editing of Author's comment finished
+        mValues.set(selectedPosition, selectedCoffeeSite);
+        this.notifyItemChanged(selectedPosition);
+    }
+
+    /** ========== Buttons onClick methods =============== **/
+
+    /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
+
+    public void onEditButtonClick(View v) {
+        selectedCoffeeSite = (CoffeeSite) v.getTag();
+        selectedPosition = mValues.indexOf(selectedCoffeeSite);
+        Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
+        activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
+        activityIntent.putExtra("coffeeSitePosition", selectedPosition);
+
+        mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }
 
 
@@ -575,18 +575,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         toast.show();
     }
 
-    private void showCoffeeSiteAuthorCommentSaveSuccess() {
-        Toast toast = Toast.makeText(mParentActivity.getApplicationContext(),
-                R.string.author_comment_save_success,
-                Toast.LENGTH_SHORT);
-        toast.show();
+    private void showMyCoffeeSitesLoadFailure(String error) {
+        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.my_coffeesites_load_failure);
+        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
+        mySnackbar.show();
     }
-
-//    private void showMyCoffeeSitesLoadFailure(String error) {
-//        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.my_coffeesites_load_failure);
-//        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
-//        mySnackbar.show();
-//    }
 
     private void showCoffeeSiteCancelFailure(String error) {
         error = !error.isEmpty() ? error : mParentActivity.getString(R.string.coffee_site_cancel_failure);
@@ -602,12 +595,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private void showCoffeeSiteDeactivateFailure(String error) {
         error = !error.isEmpty() ? error : mParentActivity.getString(R.string.coffee_site_cancel_failure);
-        Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
-        mySnackbar.show();
-    }
-
-    private void showCoffeeSiteSaveAuthorCommentFailure(String error) {
-        error = !error.isEmpty() ? error : mParentActivity.getString(R.string.author_comment_save_failure);
         Snackbar mySnackbar = Snackbar.make(mParentActivity.contextView, error, Snackbar.LENGTH_LONG);
         mySnackbar.show();
     }
@@ -648,7 +635,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     public void onDestroy() {
         this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
-        this.coffeeSiteCUDOperationsService.removeCUDOperationsListener(this);
     }
 
 
@@ -662,8 +648,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         imageView.setEnabled(enabled);
         imageView.setAlpha(enabled ? 1.0f : 0.3f);
 
-        //final Drawable originalIcon = imageView.getDrawable();
-        //final Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
         Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
         imageView.setImageDrawable(icon);
     }

@@ -15,6 +15,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
@@ -33,18 +34,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                                                         CoffeeSiteNumbersRESTResultListener {
 
     static final String TAG = "CoffeeSiteLoadService";
-
-    /**
-     * Enum type to identify CoffeeSite change status operations
-     * Can be used in Activities using this service
-     */
-//    public enum LoadOperation {
-//        COFFEE_SITE_LOAD,
-//        COFFEE_SITES_FROM_USER_LOAD,
-//        COFFEE_SITES_FROM_CURRENT_USER_LOAD,
-//        COFFEE_SITES_NUMBER_FROM_CURRENT_USER
-//    }
-
 
     // Listeners, usualy Activities, which called respective service method
     // and wants to be informed about resutl later, as all the operations are Async
@@ -205,6 +194,8 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 case COFFEE_SITES_FROM_USER_LOAD: listener.onCoffeeSiteListFromUserLoaded(coffeeSites, error);
                     break;
                 case COFFEE_SITES_FROM_CURRENT_USER_LOAD: listener.onCoffeeSiteListFromLoggedInUserLoaded(coffeeSites, error);
+                    break;
+                case COFFEE_SITE_LOAD_ALL_FROM_RANGE: listener.onCoffeeSitesFromRangeLoaded(coffeeSites, error);
                     break;
                 default: break;
             }
