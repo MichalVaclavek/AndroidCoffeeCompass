@@ -38,6 +38,13 @@ public class CoffeeSiteMovableListContent implements Parcelable {
         return items;
     }
 
+    public void setItems(List<CoffeeSiteMovable> coffeeSiteList) {
+        this.items = coffeeSiteList;
+        for (CoffeeSiteMovable csm : items) {
+            items_map.put(String.valueOf(csm.getId()), csm);
+        }
+    }
+
     /**
      * A map of CoffeeSite items, by ID. Used by RecyclerView in the FoundCoffeeSitesListActivity
      */
@@ -47,11 +54,11 @@ public class CoffeeSiteMovableListContent implements Parcelable {
         return items_map;
     }
 
+    public CoffeeSiteMovableListContent() {
+    }
+
     public CoffeeSiteMovableListContent(List<CoffeeSiteMovable> coffeeSiteList) {
-        this.items = coffeeSiteList;
-        for (CoffeeSiteMovable csm : items) {
-            items_map.put(String.valueOf(csm.getId()), csm);
-        }
+        setItems(coffeeSiteList);
     }
 
     @Override

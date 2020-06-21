@@ -60,7 +60,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
-    private CoffeeSiteMovableListContent content;
+    private CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent();
 
     private CoffeeSiteMovableItemRecyclerViewAdapter recyclerViewAdapter;
     private Parcelable mListState;
@@ -102,13 +102,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         this.searchRange = (int) getIntent().getExtras().get("searchRange");
 
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
-        // Prevod na km
-//        String searchRangeString = (searchRange >= 1000) ? " (" + searchRange/1000 + " km)"
-//                                                  : " (" + searchRange + " m)";
+        setSupportActionBar(toolbar);
 
         originalToolbarTitle = String.valueOf(getTitle());
-
-        setSupportActionBar(toolbar);
 
         layoutManager = new LinearLayoutManager(this);
 
@@ -251,11 +247,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     public void onCoffeeSitesInRangeUpdateServiceConnected() {
         sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
         sitesInRangeUpdateService.addSitesInRangeUpdateListener(this);
-        if (this.content != null) {
-            sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(this.content.getItems(), this.searchLocation, this.searchRange, this.searchCoffeeSort);
-        } else {
-            sitesInRangeUpdateService.requestCurrentSitesInRange(this.searchRange, this.searchCoffeeSort, this.searchLocation);
-        }
+        sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(this.searchLocation, this.searchRange, this.searchCoffeeSort);
     }
 
     private void doUnBindSitesInRangeService() {
@@ -272,6 +264,11 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     }
 
     @Override
+    public void onSearchingSitesInRangeFinished() {
+        recyclerViewAdapter.newSitesInRangeSearchingFinished();
+    }
+
+    @Override
     public void onNextSiteInRangeRead(int numberOfSitesAlreadyRead) {
         recyclerViewAdapter.showNumberOfSitesAlreadyRead(numberOfSitesAlreadyRead);
     }
@@ -279,7 +276,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     @Override
     public void onNewSitesInRange(List<CoffeeSiteMovable> newSitesInRange) {
         // Add all new sites into current list
-        //content = new CoffeeSiteMovableListContent(newSitesInRange);
         for (CoffeeSiteMovable csm : newSitesInRange) {
             // First add new CoffeeSites as locationService listeners
             csm.setLocationService(locationService);
@@ -291,7 +287,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
             toolbar.setTitle(getTitle() + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
         }
-        content = new CoffeeSiteMovableListContent(recyclerViewAdapter.getShownItems());
+        // Update content
+        content.setItems(recyclerViewAdapter.getShownItems());
     }
 
     @Override
@@ -314,6 +311,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         } else {
             toolbar.setTitle(originalToolbarTitle);
         }
+        // Update content
+        content.setItems(recyclerViewAdapter.getShownItems());
     }
 
 }

@@ -127,7 +127,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:layout_gravity="top"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="7dp"
                             android:baselineAlignBottom="false"
                             android:visibility="gone"
                             app:srcCompat="@android:drawable/ic_delete" />

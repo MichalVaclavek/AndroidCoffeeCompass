@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="2dp"
                 android:layout_marginTop="5dp"
-                android:textColor="@color/colorPrimary2"
+                android:textColor="@color/colorNiceYellow"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 

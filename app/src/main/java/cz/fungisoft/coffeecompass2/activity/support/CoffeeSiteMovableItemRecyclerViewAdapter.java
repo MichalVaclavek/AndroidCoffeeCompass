@@ -63,7 +63,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
     private EmptyCardViewHolder emptyCardViewHolder;
 
-    final int[] searchingTextAnimationsCounter = {0};
+    private boolean finishAnimation = false;
 
     /**
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
@@ -139,17 +139,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      */
     public void insertNewSites(List<CoffeeSiteMovable> newSites) {
 
-        // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
-        if (newSites.size() == 0 && mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
-            // Remove Initial Empty card
-            mValues.remove(0);
-            this.notifyItemRemoved(0);
-            // Replace by standard Empty card
-            mValues.add(0, dummyEmptyListCoffeeSite);
-            this.notifyItemInserted(0);
-        }
-
-        // If there are new CoffeeSites and there was 'Empty list card' shown, remove it
+        // If there are new CoffeeSites and there was 'Empty list card' or InitialDummy shown, remove it
         if (newSites.size() > 0 && mValues.size() >= 1
                 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy"))) {
             mValues.remove(0);
@@ -241,12 +231,6 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
         if (this.content != null) {
             mValues = this.content.getItems();
-
-            if (mValues.size() == 0) {
-                mValues.add(0, dummyEmptyListCoffeeSite);
-                this.notifyItemInserted(0);
-            }
-        } else {
             mValues.add(0, initialDummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
         }
@@ -364,6 +348,49 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
     /**
+     * Not yet implemented as the AsyncTasks are not ready to support it.
+     * @param numberOfSitesAlreadyRead
+     */
+    public void showNumberOfSitesAlreadyRead(int numberOfSitesAlreadyRead) {
+        // Update label to show how many sites where already read when new reading of Sites in range
+        if (mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy")))  {
+            //TODO - number of already read CoffeeSites on standard Empty or InitialDummy card
+        }
+    }
+
+    /**
+     * Start animation of text on Empty card, when new searching of CoffeeSites started again
+     */
+    public void newSitesInRangeSearchingStarted() {
+        if (emptyCardViewHolder != null &&
+                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy"))) {
+            emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
+            emptyCardViewHolder.searchingInfoLabel.setVisibility(View.VISIBLE);
+            emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
+        }
+    }
+
+    /**
+     * Finish animations or replace Initial Empty card by standard Dummy card
+     */
+    public void newSitesInRangeSearchingFinished() {
+        if (emptyCardViewHolder != null &&
+                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))    {
+            finishAnimation = true;
+        }
+
+        // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
+        if (mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
+            // Remove Initial Empty card
+            mValues.remove(0);
+            this.notifyItemRemoved(0);
+            // Replace by standard Empty card
+            mValues.add(0, dummyEmptyListCoffeeSite);
+            this.notifyItemInserted(0);
+        }
+    }
+
+    /**
      * Creates view to show, that no CoffeeSite was found. This view card also contains
      * TextView which can be animated, when searching CoffeeSites if it starts again.
      * <p>
@@ -393,23 +420,20 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             @Override
             public void onAnimationEnd(Animation arg0) {
                 // start animation2 when animation1 ends (continue)
-                if (searchingTextAnimationsCounter[0] != 3) {
+                if (!finishAnimation) {
                     viewHolder.searchingInfoLabel.startAnimation(animation2);
-                } else { // 3 animations played, show default message, reset counter end stop
-                    searchingTextAnimationsCounter[0] = 0;
+                } else {
                     emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
                 }
             }
 
             @Override
             public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
-                searchingTextAnimationsCounter[0]++;
+                finishAnimation = false;
             }
         });
 
@@ -424,39 +448,15 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
             @Override
             public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
             }
         });
 
     }
 
-    /**
-     * Start animation of text on Empty card, when new searching of CoffeeSites started again
-     */
-    public void newSitesInRangeSearchingStarted() {
-        if (emptyCardViewHolder != null &&
-                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))    {
-            emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
-            emptyCardViewHolder.searchingInfoLabel.setVisibility(View.VISIBLE);
-            emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
-        }
-    }
-
-    /**
-     * Not yet implemented as the AsyncTasks are not ready to support it.
-     * @param numberOfSitesAlreadyRead
-     */
-    public void showNumberOfSitesAlreadyRead(int numberOfSitesAlreadyRead) {
-        // Update label to show how many sites where already read when new reading of Sites in range
-        if (mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy")))  {
-            //TODO - number of already read CoffeeSites on standard Empty or InitialDummy card
-        }
-    }
 
     /**
      * Creates view to show, that initial, first CoffeeSite searching is in progress by
@@ -489,12 +489,10 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
             @Override
             public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
             }
         });
 
@@ -508,12 +506,10 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
             @Override
             public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
             }
         });
 
@@ -542,7 +538,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
 
-        /**
+    /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
         class ViewHolder1 extends RecyclerView.ViewHolder {

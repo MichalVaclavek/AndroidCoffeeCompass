@@ -95,23 +95,6 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
     public CoffeeSitesInRangeUpdateService() {
     }
 
-    /**
-     * Basic constructor. Not used, probably not needed.
-     *
-     * @param searchLocation
-     * @param searchRange
-     * @param coffeeSort
-     */
-    public CoffeeSitesInRangeUpdateService(LatLng searchLocation, int searchRange, String coffeeSort, List<CoffeeSiteMovable> currentSitesInRange) {
-        this.searchLocationOfCurrentSites = searchLocation;
-        this.currentSearchRange = searchRange;
-        this.coffeeSort = coffeeSort;
-
-        //sitesInRangeUpdateListeners = new ArrayList<>();
-
-        //this.currentSitesInRange = currentSitesInRange;
-    }
-
     public void addSitesInRangeUpdateListener(CoffeeSitesInRangeUpdateListener sitesInRangeUpdateListener) {
         sitesInRangeUpdateListeners.add(sitesInRangeUpdateListener);
         Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeUpdateListeners.size());
@@ -146,7 +129,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
 
         if (movedDistance >= distanceToRangeNewSearchRatio * currentSearchRange) {
             searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            startGetSitesInRangeAsyncTask(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, currentSearchRange);
+            startGetSitesInRangeAsyncTask(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
         }
     }
 
@@ -188,36 +171,20 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
 
     /**
      * Calls the REST API function to get current CoffeeSites in Range.
-     *
-     * @return
-     */
-    public void requestCurrentSitesInRange(int currentSearchRange, String coffeeSort, LatLng locationFrom) {
-        // Acquire current location from LocationService
-        this.searchLocationOfCurrentSites = locationFrom;
-        if (locationService != null && this.searchLocationOfCurrentSites == null) {
-            this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-        }
-        this.currentSearchRange = currentSearchRange;
-        this.coffeeSort = coffeeSort;
-
-        // Call REST async. task
-        startGetSitesInRangeAsyncTask(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, currentSearchRange);
-    }
-
-    /**
-     * Calls the REST API function to get current CoffeeSites in Range.
      * and updates the sites in range using locationService. If anything
      * updated, then inform listeners about the change.
      *
      * @return
      */
-      public void requestUpdatesOfCurrentSitesInRange(List<CoffeeSiteMovable> currentSitesInRange, LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
-
-          this.currentSitesInRange = currentSitesInRange;
-          this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
-          this.currentSearchRange = range;
+    public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
+        this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
+        if (locationService != null && this.searchLocationOfCurrentSites == null) {
+            this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+        }
+        this.currentSearchRange = range;
+        this.coffeeSort = coffeeSort;
           // Call REST async. task
-          startGetSitesInRangeAsyncTask(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, range);
+        startGetSitesInRangeAsyncTask(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, range);
     }
 
     /**
@@ -240,12 +207,6 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
             showNoInternetToast();
         }
     }
-
-//    public void onOneNewSiteReadWhenReadingSitesInRange(int numberOfSitesAlreadyRead) {
-//        for (SitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
-//            listener.onNextSiteInRangeRead(numberOfSitesAlreadyRead);
-//        }
-//    }
 
     /**
      * A callback method to be called, when there are CoffeeSites in range returned by
@@ -274,10 +235,8 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
             if (newSitesInRange.size() > 0) {
                 listener.onNewSitesInRange(newSitesInRange);
             }
-            // Initial request
-            if (currentSitesInRange.size() == 0 && newSitesInRange.size() == 0) {
-                listener.onNewSitesInRange(newSitesInRange);
-            }
+
+            listener.onSearchingSitesInRangeFinished();
         }
     }
 
@@ -285,6 +244,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
     public void onSitesInRangeReturnedFromServerError(String error) {
         for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
             listener.onNewSitesInRangeError(error);
+            listener.onSearchingSitesInRangeFinished();
         }
     }
 

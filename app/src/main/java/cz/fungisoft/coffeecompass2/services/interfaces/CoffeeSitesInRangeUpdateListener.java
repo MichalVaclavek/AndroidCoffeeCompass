@@ -20,6 +20,13 @@ public interface CoffeeSitesInRangeUpdateListener {
     void onStartSearchingSitesInRange();
 
     /**
+     * Called, when searching of sites in range finished.
+     *
+     * @param newSitesInRange
+     */
+    void onSearchingSitesInRangeFinished();
+
+    /**
      * Called, when one new CoffeeSite in current searching within range is read.
      *
      * @param numberOfSitesAlreadyRead number of CoffeeSites already read within reading list of CoffeeSites in range

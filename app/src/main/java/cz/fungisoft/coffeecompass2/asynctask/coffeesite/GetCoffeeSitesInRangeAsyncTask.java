@@ -107,7 +107,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
                             callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
                          }
                     } else {
-                        error = "Returned empty response for loading CoffeeSites from user REST request.";
+                        error = "Returned empty response for loading CoffeeSites in range REST request.";
                         Log.i(TAG, error);
                         callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
                     }
@@ -131,7 +131,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
 
             @Override
             public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
-                error = "Error loading CoffeeSites from User REST request." + t.getMessage();
+                error = "Error loading CoffeeSites  in range REST request." + t.getMessage();
                 Log.e(TAG, error);
                 callingService.onSitesInRangeReturnedFromServerError(error);
             }
