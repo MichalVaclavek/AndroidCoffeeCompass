@@ -141,6 +141,13 @@ public class Utils {
                                      : " (" + searchRange + " m)";
     }
 
+    public static  String convertSearchDistanceNoBrackets(int searchRange) {
+        // Prevod na km
+        return (searchRange >= 1000) ? searchRange/1000 + " km"
+                                     : searchRange + " m";
+    }
+
+
     /**
      * Get real file path from URI
      */

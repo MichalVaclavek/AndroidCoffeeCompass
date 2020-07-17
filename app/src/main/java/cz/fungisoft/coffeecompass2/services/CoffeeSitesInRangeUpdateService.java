@@ -157,6 +157,7 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
 
     private void doUnbindLocationService() {
         if (mShouldUnbind) {
+            locationService.removePropertyChangeListener(this);
             // Release information about the service's state.
             unbindService(locationServiceConnector);
             mShouldUnbind = false;
@@ -229,22 +230,22 @@ public class CoffeeSitesInRangeUpdateService extends Service implements Property
         currentSitesInRange = coffeeSites;
 
         for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
+            listener.onSearchingSitesInRangeFinished();
+
             if (goneSitesOutOfRange.size() > 0) {
                 listener.onSitesOutOfRange(goneSitesOutOfRange);
             }
             if (newSitesInRange.size() > 0) {
                 listener.onNewSitesInRange(newSitesInRange);
             }
-
-            listener.onSearchingSitesInRangeFinished();
         }
     }
 
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
         for (CoffeeSitesInRangeUpdateListener listener : sitesInRangeUpdateListeners) {
-            listener.onNewSitesInRangeError(error);
             listener.onSearchingSitesInRangeFinished();
+            listener.onNewSitesInRangeError(error);
         }
     }
 

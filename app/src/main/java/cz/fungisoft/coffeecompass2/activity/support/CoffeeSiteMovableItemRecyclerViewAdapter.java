@@ -364,8 +364,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     public void newSitesInRangeSearchingStarted() {
         if (emptyCardViewHolder != null &&
                 mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy"))) {
+            finishAnimation = false;
             emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
-            emptyCardViewHolder.searchingInfoLabel.setVisibility(View.VISIBLE);
             emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
         }
     }
@@ -375,7 +375,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      */
     public void newSitesInRangeSearchingFinished() {
         if (emptyCardViewHolder != null &&
-                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))    {
+                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))  {
             finishAnimation = true;
         }
 
@@ -420,8 +420,28 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             @Override
             public void onAnimationEnd(Animation arg0) {
                 // start animation2 when animation1 ends (continue)
+                viewHolder.searchingInfoLabel.startAnimation(animation2);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+            }
+
+            @Override
+            public void onAnimationStart(Animation arg0) {
+                finishAnimation = false;
+                emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
+            }
+        });
+
+        //animation2 AnimationListener
+        animation2.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                // start animation1 when animation2 ends (repeat)
                 if (!finishAnimation) {
-                    viewHolder.searchingInfoLabel.startAnimation(animation2);
+                    viewHolder.searchingInfoLabel.startAnimation(animation1);
                 } else {
                     emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
                 }
@@ -433,28 +453,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                finishAnimation = false;
             }
         });
-
-        //animation2 AnimationListener
-        animation2.setAnimationListener(new Animation.AnimationListener() {
-
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-                // start animation1 when animation2 ends (repeat)
-                viewHolder.searchingInfoLabel.startAnimation(animation1);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation arg0) {
-            }
-
-            @Override
-            public void onAnimationStart(Animation arg0) {
-            }
-        });
-
     }
 
 
@@ -530,7 +530,9 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL()).into(viewHolder1.siteFoto);
+            Picasso.get().load(this.mValues.get(position).getMainImageURL()).fit().placeholder(R.drawable.kafe_backround_120x160).into(viewHolder1.siteFoto);
+        } else {
+            viewHolder1.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
         }
 
         viewHolder1.itemView.setTag(this.mValues.get(position));

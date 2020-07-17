@@ -9,7 +9,7 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_go_to_create_coffeesite"
-        android:icon="@drawable/baseline_add_white_24"
+        android:icon="@drawable/baseline_add_white_18dp"
         android:title="@string/action_add_coffeesite"
         app:showAsAction="ifRoom" />
 

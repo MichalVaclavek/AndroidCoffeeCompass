@@ -28,6 +28,8 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 
+import static cz.fungisoft.coffeecompass2.utils.Utils.convertSearchDistance;
+
 
 /**
  * An activity representing a list of CoffeeSites.
@@ -285,7 +287,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         }
         recyclerViewAdapter.insertNewSites(newSitesInRange);
         if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
-            toolbar.setTitle(getTitle() + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
+            toolbar.setTitle(originalToolbarTitle + " : " + Utils.convertSearchDistanceNoBrackets(this.searchRange) + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
         }
         // Update content
         content.setItems(recyclerViewAdapter.getShownItems());
@@ -307,7 +309,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
             csm.removePropertyChangeListener(recyclerViewAdapter);
         }
         if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
-            toolbar.setTitle(getTitle() + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
+            toolbar.setTitle(originalToolbarTitle + " : " + Utils.convertSearchDistanceNoBrackets(this.searchRange) + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
         } else {
             toolbar.setTitle(originalToolbarTitle);
         }

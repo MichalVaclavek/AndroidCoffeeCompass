@@ -534,7 +534,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 CoffeeSite editedCoffeeSite = (CoffeeSite) data.getExtras().getParcelable("coffeeSite");
                 int coffeeSitePositionInRecyclerView = data.getExtras().getInt("coffeeSitePosition");
                 if (recyclerViewAdapter != null) {
-                    Picasso.get().invalidate(Uri.parse(editedCoffeeSite.getMainImageURL()));
                     recyclerViewAdapter.updateEditedCoffeeSite(editedCoffeeSite, coffeeSitePositionInRecyclerView);
                 }
             }

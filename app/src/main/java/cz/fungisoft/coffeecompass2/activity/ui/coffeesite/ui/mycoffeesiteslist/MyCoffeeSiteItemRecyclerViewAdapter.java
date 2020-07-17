@@ -2,9 +2,6 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -26,7 +23,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
@@ -228,13 +224,31 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
                 viewHolder.statusView.setText(R.string.status_active);
+
+                viewHolder.activateCoffeeSiteButton.setEnabled(false);
+                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_grey_36);
+
+                viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
+                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
                 break;
             case "INACTIVE":
                 viewHolder.statusView.setText(R.string.status_inactive);
+                viewHolder.activateCoffeeSiteButton.setEnabled(true);
+
+                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+
+                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
+                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             case "CREATED":
                 viewHolder.statusView.setText(R.string.status_created);
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_dark_gray));
+
+                viewHolder.activateCoffeeSiteButton.setEnabled(true);
+                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+
+                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
+                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             default:
                 viewHolder.statusView.setText(this.mValues.get(position).getStatusZaznamu().toString());
@@ -245,7 +259,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL()).into(viewHolder.siteFoto);
+            Picasso.get().load(this.mValues.get(position).getMainImageURL()).fit().placeholder(R.drawable.kafe_backround_120x160).into(viewHolder.siteFoto);
         } else {
             viewHolder.siteFoto.setImageDrawable(viewHolder.siteFoto.getContext().getResources().getDrawable(R.drawable.kafe_backround_120x160)); // @drawable/kafe_backround_120x160
         }
@@ -274,14 +288,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         } else {
             viewHolder.activateCoffeeSiteButton.setEnabled(false);
         }
-        setImageButtonEnabled(viewHolder.activateCoffeeSiteButton, mParentActivity.getDrawable(R.drawable.round_play_circle_outline_green_18) , viewHolder.activateCoffeeSiteButton.isEnabled());
 
         if (this.mValues.get(position).canBeDeactivated()) {
             viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
         } else {
             viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
         }
-        setImageButtonEnabled(viewHolder.deactivateCoffeeSiteButton, mParentActivity.getDrawable(R.drawable.round_pause_circle_outline_black_18), viewHolder.deactivateCoffeeSiteButton.isEnabled());
     }
 
     /**
@@ -440,11 +452,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
                 activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
                 // set original icon
-                activateCoffeeSiteButton.setImageResource(R.drawable.round_play_circle_outline_green_18);
+                activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
                 activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
 
                 deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
-                deactivateCoffeeSiteButton.setImageResource(R.drawable.round_pause_circle_outline_black_18);
+                deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
                 deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
 
                 cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
@@ -476,7 +488,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param editedCoffeeSite
      * @param position
      */
-    public void updateEditedCoffeeSite(CoffeeSite editedCoffeeSite, int position) {
+    void updateEditedCoffeeSite(CoffeeSite editedCoffeeSite, int position) {
         this.selectedCoffeeSite = editedCoffeeSite;
         this.selectedPosition = position;
         mValues.set(selectedPosition, selectedCoffeeSite);
@@ -500,7 +512,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
 
-    public void onEditButtonClick(View v) {
+    private void onEditButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
         selectedPosition = mValues.indexOf(selectedCoffeeSite);
         Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
@@ -511,7 +523,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
 
-    public void onActivateButtonClick(View v) {
+    private void onActivateButtonClick(View v) {
         if (Utils.isOnline()) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
@@ -524,7 +536,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-    public void onDeactivateButtonClick(View v) {
+    private void onDeactivateButtonClick(View v) {
         if (Utils.isOnline()) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
@@ -537,13 +549,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-    public void onCancelButtonClick(View v) {
+    private void onCancelButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
         selectedPosition = mValues.indexOf(selectedCoffeeSite);
         showConfirmDeleteAccountDialog();
     }
 
-    public void onInsertCommentButtonClick(View v) {
+    private void onInsertCommentButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
         selectedPosition = mValues.indexOf(selectedCoffeeSite);
         showInsertAuthorsCommentDialog();
@@ -635,32 +647,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     public void onDestroy() {
         this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
-    }
-
-
-    /**
-     * Pomocne metody pro vykresleni neaktivnich icon na buttonu sedivou barvou
-     * Viz Stackoverflow, kdy se da pouzit i selector v xml souboru
-     * https://stackoverflow.com/questions/7228985/android-imagebutton-with-disabled-ui-feel/49162535#49162535
-     */
-    public static void setImageButtonEnabled(@NonNull final ImageView imageView, Drawable originalIcon,
-                                             final boolean enabled) {
-        imageView.setEnabled(enabled);
-        imageView.setAlpha(enabled ? 1.0f : 0.3f);
-
-        Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
-        imageView.setImageDrawable(icon);
-    }
-
-    private static Drawable convertDrawableToGrayScale(@NonNull Drawable drawable) {
-        final ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0);
-        final ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-
-        final Drawable mutated = drawable.mutate();
-        mutated.setColorFilter(filter);
-
-        return mutated;
     }
 
 }

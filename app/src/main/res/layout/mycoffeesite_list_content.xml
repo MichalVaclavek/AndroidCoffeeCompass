@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.MaterialComponents.CardView"
     android:id="@+id/my_coffeesite_card_view"
     android:layout_width="match_parent"
@@ -17,6 +18,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/colorBackground"
         android:orientation="horizontal"
         android:paddingLeft="8dp"
         android:paddingTop="8dp"
@@ -93,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_weight="1"
-                    card_view:srcCompat="@drawable/comment" />
+                    android:src="@drawable/ic_baseline_comment_36" />
 
             </LinearLayout>
 
@@ -109,7 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/outline_edit_black_18" />
+                    android:src="@drawable/ic_baseline_edit_36" />
 
                 <ImageButton
                     android:id="@+id/button_activate_coffeesite"
@@ -117,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/round_play_circle_outline_green_18" />
+                    android:src="@drawable/ic_play_circle_outline_green_36" />
 
                 <ImageButton
                     android:id="@+id/button_deactivate_coffeesite"
@@ -125,7 +127,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/round_pause_circle_outline_black_18" />
+                    android:src="@drawable/ic_pause_circle_outline_black_36" />
 
                 <ImageButton
                     android:id="@+id/button_cancel_coffeesite"
@@ -133,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/g8477" />
+                    android:src="@drawable/ic_baseline_delete_outline_36" />
 
             </LinearLayout>
 

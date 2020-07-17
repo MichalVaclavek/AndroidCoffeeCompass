@@ -9,12 +9,18 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
 
+import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
@@ -31,10 +37,16 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
@@ -149,7 +161,7 @@ public class MainActivity extends ActivityWithLocationService
         // lets show progress bar as it can take some time, when the
         // MainActivity runs for the first time
         // Progress bar is hidden in onLocationServiceConnected()
-        showProgressbar();
+        //showProgressbar();
 
         // Get current serachDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
@@ -542,11 +554,13 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (Utils.isOnline()) {
-//            new GetSitesInRangeAsyncTask(this,
-//                                         location.getLatitude(),
-//                                         location.getLongitude(),
-//                                         searchRange,
-//                                "espresso").execute();
+//            Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+//
+//                csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
+//                csListIntent.putExtra("searchRange", searchRange);
+//                csListIntent.putExtra("coffeeSort", "espresso");
+//
+//                startActivity(csListIntent);
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -676,6 +690,8 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     protected void onPause() {
+        super.onPause();
+
         unregisterReceiver(networkChangeStateReceiver);
 
         searchKafeButton.setEnabled(false);
@@ -688,8 +704,6 @@ public class MainActivity extends ActivityWithLocationService
         }
 
         doUnbindCoffeeSiteLoadOperationsService();
-
-        super.onPause();
     }
 
 

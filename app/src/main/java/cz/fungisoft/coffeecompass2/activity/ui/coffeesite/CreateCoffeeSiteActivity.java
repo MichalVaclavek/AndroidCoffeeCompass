@@ -298,7 +298,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             imageDeleteMenuItem.setEnabled(!currentCoffeeSite.getMainImageURL().isEmpty());
 
             if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-                Picasso.get().load(currentCoffeeSite.getMainImageURL()).into(siteFotoView);
+//                Picasso.get().load(currentCoffeeSite.getMainImageURL()).fit().into(siteFotoView);
+                Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
             }
         }
 
@@ -555,7 +556,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         Log.e(TAG, "Failed to compress photo file from camera.");
                     }
                     // Show it in View
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
+                    Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
                     imageDeleteMenuItem.setEnabled(true);
                 }
                 break;
@@ -568,7 +569,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress image file from gallery.");
                     }
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
+                    Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
                     imageDeleteMenuItem.setEnabled(true);
                 }
                 break;
@@ -978,8 +979,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // shown image, but as aproval, that it was saved correctly)
         currentCoffeeSite.setMainImageURL(imageSaveResult);
         if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-            Picasso.get().invalidate(Uri.parse(currentCoffeeSite.getMainImageURL()));
-            Picasso.get().load(currentCoffeeSite.getMainImageURL()).into(siteFotoView);
+            Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
         }
     }
 
@@ -1506,7 +1506,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
 
-    /***** Requesting PERMISIONS on User's action demand ******************/
+    /***** Requesting PERMISSIONS on User's action demand ******************/
 
     /** From https://androidwave.com/capture-image-from-camera-gallery/ */
     /**
@@ -1516,9 +1516,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     private void requestStoragePermission(boolean isCamera) {
         Dexter.withActivity(this)
-                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+              .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
-                .withListener(new MultiplePermissionsListener() {
+              .withListener(new MultiplePermissionsListener() {
 
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -1541,12 +1541,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                                    PermissionToken token) {
                         token.continuePermissionRequest();
                     }
-                })
-                .withErrorListener(
-                        error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT)
+              })
+              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT)
                                 .show())
-                .onSameThread()
-                .check();
+              .onSameThread()
+              .check();
     }
 
     /**
@@ -1566,6 +1565,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         builder.setNegativeButton(R.string.permissions_camera_storage_canel, (dialog, which) -> dialog.cancel());
         builder.show();
     }
+
     // navigating user to app settings
     private void openSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);

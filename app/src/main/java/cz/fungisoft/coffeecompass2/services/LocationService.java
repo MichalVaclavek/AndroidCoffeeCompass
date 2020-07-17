@@ -123,15 +123,8 @@ public class LocationService extends Service {
             }
         };
 
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        //startServiceOrStopIfNotPermitted();
 
-            this.stopSelf();
-        }
-
-        locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
     }
 
     /**
@@ -179,17 +172,22 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
 
+        startServiceOrStopIfNotPermitted();
+
+        return START_NOT_STICKY;
+    }
+
+    private void startServiceOrStopIfNotPermitted() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             this.stopSelf();
+            return;
         }
 
         locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
         locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, POLLING, MIN_VZDALENOST, locListener);
-
-        return START_NOT_STICKY;
     }
 
     @Override
@@ -204,6 +202,7 @@ public class LocationService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        startServiceOrStopIfNotPermitted();
         location = posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         return mBinder;
     }
