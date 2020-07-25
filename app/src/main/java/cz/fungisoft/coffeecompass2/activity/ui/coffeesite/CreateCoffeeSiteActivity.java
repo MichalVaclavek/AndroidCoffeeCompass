@@ -556,7 +556,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         Log.e(TAG, "Failed to compress photo file from camera.");
                     }
                     // Show it in View
-                    Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
+                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
                     imageDeleteMenuItem.setEnabled(true);
                 }
                 break;
@@ -569,7 +569,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress image file from gallery.");
                     }
-                    Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
+                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
                     imageDeleteMenuItem.setEnabled(true);
                 }
                 break;
@@ -1016,7 +1016,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         toast.show();
         // No image here, disable delete button
         imageDeleteMenuItem.setEnabled(false);
-        siteFotoView.setImageDrawable(getDrawable(R.drawable.outline_add_photo_alternate_white_36));
+        siteFotoView.setImageDrawable(getDrawable(R.drawable.ic_outline_add_photo_alternate_36));
     }
 
     @Override
@@ -1094,7 +1094,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         imageFile.delete();
         imageDeleteMenuItem.setEnabled(false); // nothing to delete now
         // set a default icon to the siteFotoView
-        siteFotoView.setImageDrawable(getDrawable(R.drawable.outline_add_photo_alternate_white_36));
+        siteFotoView.setImageDrawable(getDrawable(R.drawable.ic_outline_add_photo_alternate_36));
     }
 
 

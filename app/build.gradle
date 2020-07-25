@@ -10,13 +10,13 @@ android {
             keyPassword 'Sicilia.2'
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 27
-        versionName "3.21"
+        targetSdkVersion 29
+        versionCode 31
+        versionName "3.23"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
