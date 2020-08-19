@@ -28,8 +28,6 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 
-import static cz.fungisoft.coffeecompass2.utils.Utils.convertSearchDistance;
-
 
 /**
  * An activity representing a list of CoffeeSites.

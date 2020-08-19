@@ -6,9 +6,12 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-public class AverageStarsWithNumOfHodnoceni implements Parcelable {
+public class AverageStarsWithNumOfHodnoceni extends CoffeeSiteEntity implements Parcelable {
 
     @Expose
     @SerializedName("avgStars")
@@ -30,13 +33,15 @@ public class AverageStarsWithNumOfHodnoceni implements Parcelable {
         this.common = common;
     }
 
-    protected AverageStarsWithNumOfHodnoceni(Parcel in) {
+    protected AverageStarsWithNumOfHodnoceni(@NotNull Parcel in) {
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
         common = in.readString();
     }
 
     public static final Creator<AverageStarsWithNumOfHodnoceni> CREATOR = new Creator<AverageStarsWithNumOfHodnoceni>() {
+        @NotNull
+        @Contract("_ -> new")
         @Override
         public AverageStarsWithNumOfHodnoceni createFromParcel(Parcel in) {
             return new AverageStarsWithNumOfHodnoceni(in);
@@ -84,7 +89,7 @@ public class AverageStarsWithNumOfHodnoceni implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
         dest.writeFloat(avgStars);
         dest.writeInt(numOfHodnoceni);
         dest.writeString(common);

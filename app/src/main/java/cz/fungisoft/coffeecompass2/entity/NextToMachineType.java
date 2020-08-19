@@ -12,7 +12,6 @@ import com.google.gson.annotations.SerializedName;
 public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
 
     public NextToMachineType(int id, String entityValue) {
-
         super(id);
         this.type = entityValue;
     }

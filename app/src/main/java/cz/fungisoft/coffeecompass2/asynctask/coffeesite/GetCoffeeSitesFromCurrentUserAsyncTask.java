@@ -81,7 +81,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(55, TimeUnit.SECONDS)
                     .addInterceptor(headerAuthorizationInterceptor)
                     //.addInterceptor(logging)
                     .build();

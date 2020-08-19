@@ -83,7 +83,6 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setName(coffeeSite.getName());
         this.setDistance(coffeeSite.getDistance());
 
-
         this.setLatitude(coffeeSite.getLatitude());
         this.setLongitude(coffeeSite.getLongitude());
 

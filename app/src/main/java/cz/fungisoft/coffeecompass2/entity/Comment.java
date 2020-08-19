@@ -15,11 +15,11 @@ import java.util.Date;
  * A Comment belonging to a CoffeeSite.
  * Used for reading Comments from server.
  */
-public class Comment implements Serializable, Parcelable {
+public class Comment extends CoffeeSiteEntity implements Serializable, Parcelable {
 
-    @Expose
-    @SerializedName("id")
-    private int id;
+//    @Expose
+//    @SerializedName("id")
+//    private int id;
 
     @Expose
     @SerializedName("text")
@@ -136,14 +136,21 @@ public class Comment implements Serializable, Parcelable {
         return coffeeSiteID;
     }
 
+    public void setCoffeeSiteID(int coffeeSiteID) {
+        this.coffeeSiteID = coffeeSiteID;
+    }
+
     public String getUserName() {
         return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public int getUserId() {
         return userId;
     }
-
 
     public void setUserId(int userId) {
         this.userId = userId;

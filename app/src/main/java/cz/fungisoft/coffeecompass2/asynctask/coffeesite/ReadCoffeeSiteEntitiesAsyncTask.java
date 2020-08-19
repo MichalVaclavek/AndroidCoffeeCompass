@@ -113,6 +113,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
         operationError = "";
 
         Call<T> call = null;
+
         //1. Get all CoffeeSiteStatus
         if (entityClass == CoffeeSiteStatus.class) {
             call = (Call<T>) api.getAllCoffeeSiteSiteStatuses();

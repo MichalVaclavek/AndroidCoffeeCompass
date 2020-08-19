@@ -1,12 +1,7 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.util.Log;
-
-import org.json.JSONArray;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
@@ -19,7 +14,6 @@ import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
-import retrofit2.Response;
 
 /**
  * Class to hold instancies of CoffeeSite entities readed from server
@@ -32,7 +26,7 @@ public class CoffeeSiteEntitiesRepository {
      *  needed to correct function of creating/updating CoffeeSite instancies
      */
     public static final Class<? extends CoffeeSiteEntity>[] COFFEE_SITE_ENTITY_CLASSES
-            = new Class[]{CoffeeSiteRecordStatus.class, CoffeeSiteStatus.class, CoffeeSiteType.class,
+            = new Class[] { CoffeeSiteRecordStatus.class, CoffeeSiteStatus.class, CoffeeSiteType.class,
             CoffeeSort.class, CupType.class, NextToMachineType.class, OtherOffer.class, PriceRange.class,
             SiteLocationType.class, StarsQualityDescription.class};
 
@@ -68,7 +62,6 @@ public class CoffeeSiteEntitiesRepository {
 
     // Indication that data are available in the repository i.e. where readed from server
     private static boolean dataReadedFromServer = false;
-
 
 
     private static CoffeeSiteEntitiesRepository instance;
@@ -160,7 +153,6 @@ public class CoffeeSiteEntitiesRepository {
             if (response.get(0) instanceof StarsQualityDescription) {
                 setAllStarsQualityDescriptions((List<StarsQualityDescription>) response);
             }
-
         }
     }
 

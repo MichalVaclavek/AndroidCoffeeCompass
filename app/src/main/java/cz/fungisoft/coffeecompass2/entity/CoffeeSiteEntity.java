@@ -4,6 +4,9 @@ package cz.fungisoft.coffeecompass2.entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Base class for classes, which instancies are to be persisted into DB.
+ */
 public abstract class CoffeeSiteEntity {
 
     @Expose
@@ -18,19 +21,11 @@ public abstract class CoffeeSiteEntity {
         this.id = id;
     }
 
-//    protected String entityValue;
-//
-//    public abstract String getEntityValue();
-//
-//    public abstract void setEntityValue(String entityValue);
-
     public CoffeeSiteEntity(int id) {
         this.id = id;
-        //this.entityValue = entityValue;
     }
 
     public CoffeeSiteEntity() {
         this.id = 0;
-        //this.entityValue = "";
     }
 }

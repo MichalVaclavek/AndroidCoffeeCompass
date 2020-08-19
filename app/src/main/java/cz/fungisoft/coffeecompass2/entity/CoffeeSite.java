@@ -17,11 +17,11 @@ import java.util.Objects;
 /**
  * A CoffeeSite, main app. entity
  */
-public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcelable
+public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable
 {
-    @Expose
-    @SerializedName("id")
-    protected int id;
+//    @Expose
+//    @SerializedName("id")
+//    protected int id;
 
     @Expose
     @SerializedName("siteName")
@@ -31,13 +31,13 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @SerializedName("distFromSearchPoint")
     protected long distance;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+//    public int getId() {
+//        return id;
+//    }
+//
+//    public void setId(int id) {
+//        this.id = id;
+//    }
 
     public String getName() {
         return name;
@@ -81,7 +81,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         mesto = in.readString();
         uliceCP = in.readString();
-//        hodnoceni = in.readString();
         hodnoceni = in.readParcelable(AverageStarsWithNumOfHodnoceni.class.getClassLoader());
 
         createdByUserName = in.readString();
@@ -139,7 +138,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
         dest.writeString(mesto);
         dest.writeString(uliceCP);
-        //dest.writeString(hodnoceni);
         dest.writeParcelable(hodnoceni, flags);
 
         dest.writeString(createdByUserName);
@@ -202,7 +200,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
-        //this.createdOnString = format.format(this.createdOn);
     }
 
     protected String createdOnString;
@@ -245,7 +242,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @SerializedName("mainImageURL")
     protected String mainImageURL = ""; // default empty, means image not available
 
-    //protected String statusZarizeni;
     @Expose
     @SerializedName("statusZarizeni")
     protected CoffeeSiteStatus statusZarizeni;
@@ -274,7 +270,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
     @SerializedName("cena")
     protected PriceRange cena;
 
-    //protected String hodnoceni;
     @Expose
     @SerializedName("averageStarsWithNumOfHodnoceni")
     protected AverageStarsWithNumOfHodnoceni hodnoceni;
@@ -610,27 +605,6 @@ public class CoffeeSite implements Serializable, Comparable<CoffeeSite>, Parcela
         isAnyOtherSiteActiveOnSamePosition = anyOtherSiteActiveOnSamePosition;
     }
 
-
-    /*
-    @Override
-    public String toString() {
-        StringBuilder details = new StringBuilder();
-        details.append("Jméno: " + name + "\n");
-        details.append("Vzdálenost: " + distance + " m\n");
-        details.append("Druhy kávy: " + coffeeSorts + "\n");
-        details.append("Typ zařízení: " + typPodniku + "\n");
-        details.append("Typ lokality: " + typLokality + "\n");
-        details.append("Ulice: " + uliceCP + "\n");
-        details.append("Cenový rozsah: " + cena + "\n");
-        details.append("Další nabídka: " + otherOffers + "\n");
-        details.append("Další nabídka: " + uvodniKoment + "\n");
-        details.append("Další nabídka: " + hodnoceni + "\n");
-        details.append("Zem. šířka: " + latitude + "\n");
-        details.append("Zem. délka: " + longitude + "\n");
-
-        return details.toString();
-    }
-    */
 
     @Override
     public int compareTo(CoffeeSite o) {

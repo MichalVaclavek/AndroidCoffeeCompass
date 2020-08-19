@@ -298,7 +298,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             imageDeleteMenuItem.setEnabled(!currentCoffeeSite.getMainImageURL().isEmpty());
 
             if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-//                Picasso.get().load(currentCoffeeSite.getMainImageURL()).fit().into(siteFotoView);
                 Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
             }
         }
@@ -330,13 +329,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                     // Check if locationType and sourceType are selected
                                     boolean errorInInput = false;
                                     if (locationTypeEditText.getText().toString().isEmpty()) {
-                                        //locationTypeEditText.setBackgroundColor(R.color.design_default_color_error);
                                         locationTypeTextInputLayout.setError(getString(R.string.invalid_locationType));
                                         errorInInput = true;
                                     }
                                     if (sourceTypeEditText.getText().toString().isEmpty()) {
-                                        //sourceTypeEditText.setBackgroundColor(R.color.design_default_color_error);
-                                        //sourceTypeTextInputLayout.setEr
                                         sourceTypeTextInputLayout.setError(getString(R.string.invalid_coffeesite_type));
                                         errorInInput = true;
                                     }
@@ -965,7 +961,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void onImageSaveSuccess(String imageSaveResult) {
         hideProgressbar();
         if (mode == MODE_MODIFY) {
-            //startCoffeeSiteServiceOperation(currentCoffeeSite, COFFEE_SITE_UPDATE);
             // If we are in MODIFY MODE, the Image was saved first, now
             // the CoffeeSite itself has to be updated/saved
             if (coffeeSiteCUDOperationsService != null) {

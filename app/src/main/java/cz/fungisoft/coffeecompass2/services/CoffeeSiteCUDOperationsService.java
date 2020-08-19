@@ -128,10 +128,10 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             returnedCoffeeSite = ((Result.Success<CoffeeSite>) result).getData();
             informClientAboutCoffeeSiteOperationResult(oper, returnedCoffeeSite, "");
 
-        } else {
+        } else if (result instanceof Result.Error) {
             RestError error = ((Result.Error) result).getRestError();
             informClientAboutCoffeeSiteOperationResult(oper, null, error.getDetail());
-            Log.e(TAG, "Error when returning coffee sites." + error.getDetail());
+            Log.e(TAG, "Error when returning coffee site." + error.getDetail());
         }
     }
 
