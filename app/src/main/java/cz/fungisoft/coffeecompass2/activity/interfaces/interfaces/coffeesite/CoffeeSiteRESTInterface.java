@@ -54,7 +54,7 @@ public interface CoffeeSiteRESTInterface {
 
     /**
      * REST call for obtaining all CoffeeSites created by userId
-     * https://coffeecompass.cz/rest/site/5
+     *
      * @param userId
      * @return
      */
@@ -62,12 +62,20 @@ public interface CoffeeSiteRESTInterface {
     Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") long userId);
 
     /**
-     * REST call for obtaining all CoffeeSites created by userId
+     * REST call for obtaining all CoffeeSites created by current user
      * https://coffeecompass.cz/rest/site/mySites
      * @return
      */
     @GET("mySites")
     Call<List<CoffeeSite>> getAllCoffeeSitesByCurrentUser();
+
+    /**
+     * REST call for obtaining all CoffeeSites
+     * https://coffeecompass.cz/rest/site/allSites/
+     * @return
+     */
+    @GET("allSites/")
+    Call<List<CoffeeSite>> getAllCoffeeSites();
 
     /**
      * REST call for obtaining number of CoffeeSites created by current User

@@ -30,4 +30,10 @@
         android:title="@string/action_about"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_offline_mode"
+        android:checkable="true"
+        android:title="@string/action_offline"
+        app:showAsAction="never" />
+
 </menu>

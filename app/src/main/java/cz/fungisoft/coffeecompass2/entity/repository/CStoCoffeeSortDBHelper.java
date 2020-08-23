@@ -67,6 +67,7 @@ public class CStoCoffeeSortDBHelper extends SQLiteHelperBase<CStoCoffeeSortDBHel
      * Holder class to hold relation between CoffeeSite ID and Coffee sort ID
      */
     class CStoCoffeeSort extends CoffeeSiteEntity {
+
         public int getCoffeeSiteId() {
             return coffeeSiteId;
         }

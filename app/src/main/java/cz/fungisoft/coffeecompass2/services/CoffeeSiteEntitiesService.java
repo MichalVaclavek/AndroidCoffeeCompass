@@ -15,6 +15,7 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
+import cz.fungisoft.coffeecompass2.entity.repository.DBManager;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 
 /**
@@ -74,7 +75,7 @@ public class CoffeeSiteEntitiesService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
-        entitiesRepository = CoffeeSiteEntitiesRepository.getInstance();
+        entitiesRepository = CoffeeSiteEntitiesRepository.getInstance(new DBManager(this));
         Log.d(TAG, "Service started.");
     }
 

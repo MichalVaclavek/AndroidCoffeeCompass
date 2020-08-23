@@ -16,4 +16,6 @@ public interface CoffeeSiteLoadServiceOperationsListener {
     default void onCoffeeSiteListFromUserLoaded(List<CoffeeSite> coffeeSites, String error) {}
     default void onCoffeeSiteListFromLoggedInUserLoaded(List<CoffeeSite> coffeeSites, String error) {}
     default void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {}
+
+    default void onAllCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
 }

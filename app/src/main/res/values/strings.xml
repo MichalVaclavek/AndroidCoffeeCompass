@@ -182,5 +182,6 @@
     <string name="permissions_location_request">Pro správné fungování aplikace je nutný přístup k poloze zařízení.</string>
     <string name="permissions_location_settings">NASTAVENÍ</string>
     <string name="permissions_location_cancel">Zrušit</string>
+    <string name="action_offline">Offline</string>
 
 </resources>

@@ -6,19 +6,21 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.Comment;
-import cz.fungisoft.coffeecompass2.entity.PriceRange;
 
 public class DBManager {
 
     private SQLiteHelperBase dbHelper;
 
     private Context context;
+
+    public Context getContext() {
+        return context;
+    }
 
     private SQLiteDatabase database;
 

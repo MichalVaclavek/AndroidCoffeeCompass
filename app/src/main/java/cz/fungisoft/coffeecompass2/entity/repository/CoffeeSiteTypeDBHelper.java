@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 
 public class CoffeeSiteTypeDBHelper extends SQLiteHelperBase<CoffeeSiteType> {
@@ -56,4 +55,5 @@ public class CoffeeSiteTypeDBHelper extends SQLiteHelperBase<CoffeeSiteType> {
         coffeeSiteType.setCoffeeSiteType(getColumnStringValue(cursor, COL_SITE_TYPE));
         return coffeeSiteType;
     }
+
 }

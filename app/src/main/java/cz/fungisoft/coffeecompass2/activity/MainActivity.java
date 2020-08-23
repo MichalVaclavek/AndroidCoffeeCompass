@@ -51,6 +51,9 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDBHelper;
+import cz.fungisoft.coffeecompass2.entity.repository.DBManager;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -148,6 +151,15 @@ public class MainActivity extends ActivityWithLocationService
      */
     private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
 
+    /**
+     * To idetify if Offline mode is selected
+     */
+    private boolean isOfflineChecked = false;
+
+    private DBManager dbManager;
+
+
+    /* ************* METHODS START ********************* */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,6 +265,9 @@ public class MainActivity extends ActivityWithLocationService
             }
         });
         fab.setVisibility(View.VISIBLE);
+
+        // Activates DBManger
+        dbManager = new DBManager(this);
     }
 
 
@@ -357,6 +372,52 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
+    /**
+     * Serves event of finished loading of ALL CoffeeSites
+     *
+     * @param coffeeSites
+     * @param error
+     */
+    @Override
+    public void onAllCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {
+        hideProgressbar();
+
+        if (error.isEmpty()) {
+            //TODO - save into DB
+            CoffeeSiteDBHelper coffeeSiteDBHelper = new CoffeeSiteDBHelper(this, dbManager);
+            dbManager.open(coffeeSiteDBHelper);
+
+            for (CoffeeSite coffeeSite : coffeeSites) {
+                dbManager.insert(coffeeSite);
+            }
+
+            dbManager.close();
+
+        } else {
+            //TODO - show info, that loading of All sites failed
+        }
+    }
+
+    public void startNumberOfCoffeeSitesFromUserService() {
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
+        }
+    }
+
+    /**
+     * Starts Loading of all CoffeeSites (for offline mode)
+     */
+    private void startAllCoffeeSitesLoadOperation() {
+        if (Utils.isOnline()) {
+            if (coffeeSiteLoadOperationsService != null) {
+                showProgressbar();
+                coffeeSiteLoadOperationsService.getAllCoffeeSites();
+            }
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
     @Override
     public void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {
         hideProgressbar();
@@ -370,12 +431,6 @@ public class MainActivity extends ActivityWithLocationService
                     myCoffeeSitesMenuItem.setVisible(true);
                 }
             }
-        }
-    }
-
-    public void startNumberOfCoffeeSitesFromUserService() {
-        if (coffeeSiteLoadOperationsService != null) {
-            coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
         }
     }
 
@@ -447,6 +502,13 @@ public class MainActivity extends ActivityWithLocationService
 //                return true;
             case R.id.action_about:
                 showAbout();
+                return true;
+            case R.id.action_offline_mode:
+                isOfflineChecked = !item.isChecked();
+                item.setChecked(isOfflineChecked);
+                if (isOfflineChecked) {
+                    startAllCoffeeSitesLoadOperation();
+                }
                 return true;
             case R.id.action_map:
                 if (Utils.isOnline()) {

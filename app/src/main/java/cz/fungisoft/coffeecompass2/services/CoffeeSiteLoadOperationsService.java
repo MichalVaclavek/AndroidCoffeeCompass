@@ -13,6 +13,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
@@ -115,6 +116,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             coffeeSites = ((Result.Success<List<CoffeeSite>>) result).getData();
             switch (oper) {
                 case COFFEE_SITES_FROM_USER_LOAD:
+                case COFFEE_SITE_LOAD_ALL:
                 case COFFEE_SITES_FROM_CURRENT_USER_LOAD: informClientAboutLoadedCoffeeSitesList(oper, coffeeSites, "");
                    break;
             }
@@ -167,8 +169,12 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         }
     }
 
-    public void findCoffeeSiteById(long coffeeSiteId) {
+    public void getAllCoffeeSites() {
+        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
+        new GetAllCoffeeSitesAsyncTask(requestedRESTOperation, this).execute();
+    }
 
+    public void findCoffeeSiteById(long coffeeSiteId) {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD;
         new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, coffeeSiteId).execute();
     }
@@ -196,6 +202,8 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 case COFFEE_SITES_FROM_CURRENT_USER_LOAD: listener.onCoffeeSiteListFromLoggedInUserLoaded(coffeeSites, error);
                     break;
                 case COFFEE_SITE_LOAD_ALL_FROM_RANGE: listener.onCoffeeSitesFromRangeLoaded(coffeeSites, error);
+                    break;
+                case COFFEE_SITE_LOAD_ALL: listener.onAllCoffeeSitesLoaded(coffeeSites, error);
                     break;
                 default: break;
             }

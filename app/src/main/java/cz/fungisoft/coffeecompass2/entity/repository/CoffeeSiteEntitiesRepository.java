@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.entity.repository;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -63,15 +64,18 @@ public class CoffeeSiteEntitiesRepository {
     // Indication that data are available in the repository i.e. where readed from server
     private static boolean dataReadedFromServer = false;
 
+    private DBManager dbManager;
+
 
     private static CoffeeSiteEntitiesRepository instance;
 
-    private CoffeeSiteEntitiesRepository() {
+    private CoffeeSiteEntitiesRepository(DBManager dbManager) {
+        this.dbManager = dbManager;
     }
 
-    public static CoffeeSiteEntitiesRepository getInstance() {
+    public static CoffeeSiteEntitiesRepository getInstance(DBManager dbManager) {
         if (instance == null) {
-            instance = new CoffeeSiteEntitiesRepository();
+            instance = new CoffeeSiteEntitiesRepository(dbManager);
         }
         return instance;
     }
@@ -81,42 +85,123 @@ public class CoffeeSiteEntitiesRepository {
 
     public void setAllCoffeeSiteTypes(List<CoffeeSiteType> allCoffeeSiteTypes) {
         this.allCoffeeSiteTypes = allCoffeeSiteTypes;
+
+        CoffeeSiteTypeDBHelper coffeeSiteTypeDBHelper = new CoffeeSiteTypeDBHelper(dbManager.getContext());
+        dbManager.open(coffeeSiteTypeDBHelper);
+        for (CoffeeSiteType coffeeSiteType : this.allCoffeeSiteTypes) {
+            dbManager.insert(coffeeSiteType);
+        }
+
+        dbManager.close();
     }
 
     public void setAllCoffeeSiteRecordStatuses(List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses) {
         this.allCoffeeSiteRecordStatuses = allCoffeeSiteRecordStatuses;
+
+        CoffeeSiteRecordStatusDBHelper recordStatusDBHelper = new CoffeeSiteRecordStatusDBHelper(dbManager.getContext());
+        dbManager.open(recordStatusDBHelper);
+        for (CoffeeSiteRecordStatus recordStatus : this.allCoffeeSiteRecordStatuses) {
+            dbManager.insert(recordStatus);
+        }
+
+        dbManager.close();
     }
 
     public void setAllCoffeeSiteStatuses(List<CoffeeSiteStatus> allCoffeeSiteStatuses) {
         this.allCoffeeSiteStatuses = allCoffeeSiteStatuses;
+
+        CoffeeSiteStatusDBHelper coffeeSiteStatusDBHelper = new CoffeeSiteStatusDBHelper(dbManager.getContext());
+        dbManager.open(coffeeSiteStatusDBHelper);
+        for (CoffeeSiteStatus siteStatus : this.allCoffeeSiteStatuses) {
+            dbManager.insert(siteStatus);
+        }
+
+        dbManager.close();
     }
 
     public void setAllCoffeeSorts(List<CoffeeSort> allCoffeeSorts) {
         this.allCoffeeSorts = allCoffeeSorts;
+
+        CoffeeSortDBHelper coffeeSortDBHelper = new CoffeeSortDBHelper(dbManager.getContext());
+        dbManager.open(coffeeSortDBHelper);
+        for (CoffeeSort coffeeSort : this.allCoffeeSorts) {
+            dbManager.insert(coffeeSort);
+        }
+
+        dbManager.close();
     }
 
     public void setAllCupTypes(List<CupType> allCupTypes) {
+
         this.allCupTypes = allCupTypes;
+
+        CupTypeDBHelper cupTypeDBHelper = new CupTypeDBHelper(dbManager.getContext());
+        dbManager.open(cupTypeDBHelper);
+        for (CupType cupType : this.allCupTypes) {
+            dbManager.insert(cupType);
+        }
+
+        dbManager.close();
     }
 
     public void setAllNextToMachineTypes(List<NextToMachineType> allNextToMachineTypes) {
         this.allNextToMachineTypes = allNextToMachineTypes;
+
+        NextToMachineTypeDBHelper nextToMachineTypeDBHelper = new NextToMachineTypeDBHelper(dbManager.getContext());
+        dbManager.open(nextToMachineTypeDBHelper);
+        for (NextToMachineType nextToMachineType : this.allNextToMachineTypes) {
+            dbManager.insert(nextToMachineType);
+        }
+
+        dbManager.close();
     }
 
     public void setAllOtherOffers(List<OtherOffer> allOtherOffers) {
         this.allOtherOffers = allOtherOffers;
+
+        OtherOfferDBHelper otherOfferDBHelper = new OtherOfferDBHelper(dbManager.getContext());
+        dbManager.open(otherOfferDBHelper);
+        for (OtherOffer otherOffer : this.allOtherOffers) {
+            dbManager.insert(otherOffer);
+        }
+
+        dbManager.close();
     }
 
     public void setAllPriceRanges(List<PriceRange> allPriceRanges) {
         this.allPriceRanges = allPriceRanges;
+
+        PriceRangeDBHelper priceRangeDBHelper = new PriceRangeDBHelper(dbManager.getContext());
+        dbManager.open(priceRangeDBHelper);
+        for (PriceRange priceRange : this.allPriceRanges) {
+            dbManager.insert(priceRange);
+        }
+
+        dbManager.close();
     }
 
     public void setAllSiteLocationTypes(List<SiteLocationType> allSiteLocationTypes) {
         this.allSiteLocationTypes = allSiteLocationTypes;
+
+        SiteLocationTypeDBHelper siteLocationTypeDBHelper = new SiteLocationTypeDBHelper(dbManager.getContext());
+        dbManager.open(siteLocationTypeDBHelper);
+        for (SiteLocationType locationType : this.allSiteLocationTypes) {
+            dbManager.insert(locationType);
+        }
+
+        dbManager.close();
     }
 
-    public static void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
+    public void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
         CoffeeSiteEntitiesRepository.allStarsQualityDescriptions = allStarsQualityDescriptions;
+
+        StarsQualityDescriptionDBHelper qualityDescriptionDBHelper = new StarsQualityDescriptionDBHelper(dbManager.getContext());
+        dbManager.open(qualityDescriptionDBHelper);
+        for (StarsQualityDescription qualityDescription : CoffeeSiteEntitiesRepository.allStarsQualityDescriptions) {
+            dbManager.insert(qualityDescription);
+        }
+
+        dbManager.close();
     }
 
 
