@@ -69,9 +69,9 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
             }
         });
 
-        loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
+        loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormValidationState>() {
             @Override
-            public void onChanged(@Nullable LoginFormState loginFormState) {
+            public void onChanged(@Nullable LoginFormValidationState loginFormState) {
             if (loginFormState == null) {
                 return;
             }
@@ -137,8 +137,6 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
-
-        //userAccountServiceConnector = new UserAccountServiceConnector(this);
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
 

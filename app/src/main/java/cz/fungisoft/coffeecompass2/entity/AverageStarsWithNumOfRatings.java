@@ -3,6 +3,8 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.Entity;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-public class AverageStarsWithNumOfHodnoceni extends CoffeeSiteEntity implements Parcelable {
+@Entity
+public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Parcelable {
 
     @Expose
     @SerializedName("avgStars")
@@ -25,31 +28,31 @@ public class AverageStarsWithNumOfHodnoceni extends CoffeeSiteEntity implements 
     @SerializedName("common")
     private String common;
 
-    public AverageStarsWithNumOfHodnoceni() {}
+    public AverageStarsWithNumOfRatings() {}
 
-    public AverageStarsWithNumOfHodnoceni(float avgStars, int numOfHodnoceni, String common) {
+    public AverageStarsWithNumOfRatings(float avgStars, int numOfHodnoceni, String common) {
         this.avgStars = avgStars;
         this.numOfHodnoceni = numOfHodnoceni;
         this.common = common;
     }
 
-    protected AverageStarsWithNumOfHodnoceni(@NotNull Parcel in) {
+    protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
         common = in.readString();
     }
 
-    public static final Creator<AverageStarsWithNumOfHodnoceni> CREATOR = new Creator<AverageStarsWithNumOfHodnoceni>() {
+    public static final Creator<AverageStarsWithNumOfRatings> CREATOR = new Creator<AverageStarsWithNumOfRatings>() {
         @NotNull
         @Contract("_ -> new")
         @Override
-        public AverageStarsWithNumOfHodnoceni createFromParcel(Parcel in) {
-            return new AverageStarsWithNumOfHodnoceni(in);
+        public AverageStarsWithNumOfRatings createFromParcel(Parcel in) {
+            return new AverageStarsWithNumOfRatings(in);
         }
 
         @Override
-        public AverageStarsWithNumOfHodnoceni[] newArray(int size) {
-            return new AverageStarsWithNumOfHodnoceni[size];
+        public AverageStarsWithNumOfRatings[] newArray(int size) {
+            return new AverageStarsWithNumOfRatings[size];
         }
     };
 

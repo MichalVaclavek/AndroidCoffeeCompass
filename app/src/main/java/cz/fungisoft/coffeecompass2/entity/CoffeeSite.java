@@ -3,6 +3,10 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -17,6 +21,7 @@ import java.util.Objects;
 /**
  * A CoffeeSite, main app. entity
  */
+@Entity
 public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable
 {
 //    @Expose
@@ -25,11 +30,184 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     @Expose
     @SerializedName("siteName")
+    @ColumnInfo(name = "siteName")
     protected String name;
 
     @Expose(serialize = false)
     @SerializedName("distFromSearchPoint")
+    @Ignore
     protected long distance;
+
+    @Expose
+    @SerializedName("createdOn")
+    @Ignore
+    protected Date createdOn;
+
+    @ColumnInfo(name = "createdOnString")
+    private String createdOnString;
+
+    @Ignore
+    private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+
+    @Expose
+    @SerializedName("numOfCoffeeAutomatyVedleSebe")
+    @ColumnInfo(name = "numOfCoffeeAutomatyVedleSebe")
+    protected int numOfCoffeeAutomatyVedleSebe = 0;
+
+    @Expose
+    @SerializedName("zemSirka")
+    @ColumnInfo(name = "zemSirka")
+    protected double latitude;
+
+    @Expose
+    @SerializedName("zemDelka")
+    @ColumnInfo(name = "zemDelka")
+    protected double longitude;
+
+    /**
+     * URL of the main image of this CoffeeSite
+     */
+    @Expose(serialize = false)
+    @SerializedName("mainImageURL")
+    @ColumnInfo(name = "mainImageURL")
+    protected String mainImageURL = ""; // default empty, means image not available
+
+    @Expose
+    @SerializedName("uliceCP")
+    @ColumnInfo(name = "uliceCP")
+    protected String uliceCP;
+
+    @Expose
+    @SerializedName("mesto")
+    @ColumnInfo(name = "mesto")
+    protected String mesto;
+
+    @Expose
+    @SerializedName("originalUserName")
+    @ColumnInfo(name = "originalUserName")
+    protected String createdByUserName;
+
+    @Expose
+    @SerializedName("lastEditUserName")
+    @ColumnInfo(name = "lastEditUserName")
+    protected String lastEditUserName;
+
+    @Expose
+    @SerializedName("initialComment")
+    @ColumnInfo(name = "initialComment")
+    protected String uvodniKoment;
+
+    @Expose
+    @SerializedName("pristupnostDny")
+    @ColumnInfo(name = "opening_days")
+    protected String oteviraciDobaDny;
+
+    @Expose
+    @SerializedName("pristupnostHod")
+    @ColumnInfo(name = "pristupnostHod")
+    protected String oteviraciDobaHod;
+
+    /* Many to One relations */
+
+    @Expose
+    @SerializedName("typPodniku")
+    @Ignore
+    protected CoffeeSiteType typPodniku;
+
+    @Expose
+    @SerializedName("typLokality")
+    @Ignore
+    protected SiteLocationType typLokality;
+
+    @Expose
+    @SerializedName("statusZarizeni")
+    @Ignore
+    protected CoffeeSiteStatus statusZarizeni;
+
+    @Expose
+    @SerializedName("recordStatus")
+    @Ignore
+    protected CoffeeSiteRecordStatus statusZaznamu;
+
+    @Expose
+    @SerializedName("cena")
+    @Ignore
+    protected PriceRange cena;
+
+    @Expose
+    @SerializedName("averageStarsWithNumOfHodnoceni")
+    @Ignore
+    protected AverageStarsWithNumOfRatings hodnoceni;
+
+    /* Many to Many relations */
+
+    @Expose
+    @SerializedName("cupTypes")
+    @Ignore
+    protected List<CupType> cupTypes;
+
+    @Expose
+    @SerializedName("coffeeSorts")
+    @Ignore
+    protected List<CoffeeSort> coffeeSorts;
+
+    @Expose
+    @SerializedName("otherOffers")
+    @Ignore
+    protected List<OtherOffer> otherOffers;
+
+    @Expose
+    @SerializedName("nextToMachineTypes")
+    @Ignore
+    protected List<NextToMachineType> nextToMachineTypes;
+
+
+    /** Properties of CoffeeSiteDTO which describes allowed operations **/
+    /** with CoffeeSite **/
+
+    @Expose(serialize = false)
+    @SerializedName("canBeModified")
+    @Ignore
+    protected boolean canBeModified = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeActivated")
+    @Ignore
+    protected boolean canBeActivated = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeDeactivated")
+    @Ignore
+    protected boolean canBeDeactivated = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeCanceled")
+    @Ignore
+    protected boolean canBeCanceled = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeDeleted")
+    @Ignore
+    protected boolean canBeDeleted = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeCommented")
+    @Ignore
+    protected boolean canBeCommented = false;
+
+    @Expose(serialize = false)
+    @SerializedName("canBeRatedByStars")
+    @Ignore
+    protected boolean canBeRatedByStars = false;
+
+    @Expose(serialize = false)
+    @SerializedName("isAnyOtherSiteActiveOnSamePosition")
+    @Ignore
+    protected boolean isAnyOtherSiteActiveOnSamePosition = false;
+
+    //@Expose(serialize = false , deserialize = false)
+    @Ignore
+    protected List<Comment> comments;
 
 //    public int getId() {
 //        return id;
@@ -81,7 +259,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
         mesto = in.readString();
         uliceCP = in.readString();
-        hodnoceni = in.readParcelable(AverageStarsWithNumOfHodnoceni.class.getClassLoader());
+        hodnoceni = in.readParcelable(AverageStarsWithNumOfRatings.class.getClassLoader());
 
         createdByUserName = in.readString();
         lastEditUserName = in.readString();
@@ -188,12 +366,6 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
         this.distance = distance;
     }
 
-    private final SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
-
-    @Expose
-    @SerializedName("createdOn")
-    protected Date createdOn;
-
     public Date getCreatedOn() {
         return createdOn;
     }
@@ -201,147 +373,6 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
-
-    protected String createdOnString;
-
-    public String getCreatedOnString() {
-        if (createdOn != null) {
-            this.createdOnString = format.format(this.createdOn);
-        }
-        return createdOnString;
-    }
-
-    public void setCreatedOnString(String createdOnString) {
-        this.createdOnString = createdOnString;
-        Date created;
-
-        try {
-            created  = format.parse ( this.createdOnString);
-        } catch (ParseException e) {
-            created = new Date();
-        }
-
-        this.createdOn = created;
-    }
-
-    @Expose
-    @SerializedName("numOfCoffeeAutomatyVedleSebe")
-    protected int numOfCoffeeAutomatyVedleSebe = 0;
-
-    @Expose
-    @SerializedName("zemSirka")
-    protected double latitude;
-    @Expose
-    @SerializedName("zemDelka")
-    protected double longitude;
-
-    /**
-     * URL of the main image of this CoffeeSite
-     */
-    @Expose(serialize = false)
-    @SerializedName("mainImageURL")
-    protected String mainImageURL = ""; // default empty, means image not available
-
-    @Expose
-    @SerializedName("statusZarizeni")
-    protected CoffeeSiteStatus statusZarizeni;
-
-    @Expose
-    @SerializedName("recordStatus")
-    protected CoffeeSiteRecordStatus statusZaznamu;
-
-    @Expose
-    @SerializedName("uliceCP")
-    protected String uliceCP;
-
-    @Expose
-    @SerializedName("mesto")
-    protected String mesto;
-
-    @Expose
-    @SerializedName("typPodniku")
-    protected CoffeeSiteType typPodniku;
-
-    @Expose
-    @SerializedName("typLokality")
-    protected SiteLocationType typLokality;
-
-    @Expose
-    @SerializedName("cena")
-    protected PriceRange cena;
-
-    @Expose
-    @SerializedName("averageStarsWithNumOfHodnoceni")
-    protected AverageStarsWithNumOfHodnoceni hodnoceni;
-
-    @Expose
-    @SerializedName("originalUserName")
-    protected String createdByUserName;
-
-    @Expose
-    @SerializedName("lastEditUserName")
-    protected String lastEditUserName;
-
-    @Expose
-    @SerializedName("initialComment")
-    protected String uvodniKoment;
-
-    @Expose
-    @SerializedName("cupTypes")
-    protected List<CupType> cupTypes;
-
-    @Expose
-    @SerializedName("coffeeSorts")
-    protected List<CoffeeSort> coffeeSorts;
-
-    @Expose
-    @SerializedName("otherOffers")
-    protected List<OtherOffer> otherOffers;
-
-    @Expose
-    @SerializedName("nextToMachineTypes")
-    protected List<NextToMachineType> nextToMachineTypes;
-
-    @Expose
-    @SerializedName("pristupnostDny")
-    protected String oteviraciDobaDny;
-
-    @Expose
-    @SerializedName("pristupnostHod")
-    protected String oteviraciDobaHod;
-
-    /** Properties of CoffeeSiteDTO which describes allowed operations **/
-    /** with CoffeeSite **/
-
-    @Expose(serialize = false)
-    @SerializedName("canBeModified")
-    protected boolean canBeModified = false;
-
-    @Expose(serialize = false)
-    @SerializedName("canBeActivated")
-    protected boolean canBeActivated = false;
-    @Expose(serialize = false)
-    @SerializedName("canBeDeactivated")
-    protected boolean canBeDeactivated = false;
-    @Expose(serialize = false)
-    @SerializedName("canBeCanceled")
-    protected boolean canBeCanceled = false;
-    @Expose(serialize = false)
-    @SerializedName("canBeDeleted")
-    protected boolean canBeDeleted = false;
-    @Expose(serialize = false)
-    @SerializedName("canBeCommented")
-    protected boolean canBeCommented = false;
-    @Expose(serialize = false)
-    @SerializedName("canBeRatedByStars")
-    protected boolean canBeRatedByStars = false;
-
-    @Expose(serialize = false)
-    @SerializedName("isAnyOtherSiteActiveOnSamePosition")
-    protected boolean isAnyOtherSiteActiveOnSamePosition = false;
-
-    //@Expose(serialize = false , deserialize = false)
-    protected List<Comment> comments;
 
     public List<Comment> getComments() {
         return comments;
@@ -379,11 +410,11 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
         this.lastEditUserName = lastEditUserName;
     }
 
-    public AverageStarsWithNumOfHodnoceni getHodnoceni() {
+    public AverageStarsWithNumOfRatings getHodnoceni() {
         return hodnoceni;
     }
 
-    public void setHodnoceni(AverageStarsWithNumOfHodnoceni hodnoceni) {
+    public void setHodnoceni(AverageStarsWithNumOfRatings hodnoceni) {
         this.hodnoceni = hodnoceni;
     }
 
@@ -603,6 +634,33 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     public void setAnyOtherSiteActiveOnSamePosition(boolean anyOtherSiteActiveOnSamePosition) {
         isAnyOtherSiteActiveOnSamePosition = anyOtherSiteActiveOnSamePosition;
+    }
+
+    public void setCreated(Date created) {
+        this.createdOn = created;
+        this.createdOnString = dateFormater.format(this.createdOn);
+    }
+
+    public String getCreatedOnString() {
+        if (createdOnString == null) {
+            setCreated(createdOn);
+        }
+        return createdOnString;
+    }
+
+    public void setCreatedOnString(String createdOnString) {
+
+        this.createdOnString = createdOnString;
+
+        Date created;
+        //SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+        try {
+            created = dateFormater.parse( this.createdOnString);
+        } catch (ParseException e) {
+            created = new Date();
+        }
+
+        this.createdOn = created;
     }
 
 

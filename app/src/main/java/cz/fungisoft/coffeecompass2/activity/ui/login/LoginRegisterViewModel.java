@@ -10,10 +10,10 @@ import cz.fungisoft.coffeecompass2.activity.ui.register.RegisterFormState;
 
 public class LoginRegisterViewModel extends ViewModel {
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
+    private MutableLiveData<LoginFormValidationState> loginFormState = new MutableLiveData<>();
     private MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
 
-    public LiveData<LoginFormState> getLoginFormState() {
+    public LiveData<LoginFormValidationState> getLoginFormState() {
         return loginFormState;
     }
 
@@ -24,11 +24,11 @@ public class LoginRegisterViewModel extends ViewModel {
     public void loginDataChanged(String username, String password) {
 
         if (!isUserNameValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null));
+            loginFormState.setValue(new LoginFormValidationState(R.string.invalid_username, null));
         } else if (!isPasswordValid(password)) {
-            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password));
+            loginFormState.setValue(new LoginFormValidationState(null, R.string.invalid_password));
         } else {
-            loginFormState.setValue(new LoginFormState(true));
+            loginFormState.setValue(new LoginFormValidationState(true));
         }
     }
 

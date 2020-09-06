@@ -3,9 +3,13 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity
 public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelable {
 
     public CoffeeSiteRecordStatus() {

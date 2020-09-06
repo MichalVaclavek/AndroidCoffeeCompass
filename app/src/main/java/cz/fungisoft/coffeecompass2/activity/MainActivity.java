@@ -10,17 +10,13 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
 
-import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
@@ -37,23 +33,14 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.MultiplePermissionsReport;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDBHelper;
-import cz.fungisoft.coffeecompass2.entity.repository.DBManager;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -155,8 +142,6 @@ public class MainActivity extends ActivityWithLocationService
      * To idetify if Offline mode is selected
      */
     private boolean isOfflineChecked = false;
-
-    private DBManager dbManager;
 
 
     /* ************* METHODS START ********************* */
@@ -266,8 +251,6 @@ public class MainActivity extends ActivityWithLocationService
         });
         fab.setVisibility(View.VISIBLE);
 
-        // Activates DBManger
-        dbManager = new DBManager(this);
     }
 
 
@@ -372,31 +355,6 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
-    /**
-     * Serves event of finished loading of ALL CoffeeSites
-     *
-     * @param coffeeSites
-     * @param error
-     */
-    @Override
-    public void onAllCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {
-        hideProgressbar();
-
-        if (error.isEmpty()) {
-            //TODO - save into DB
-            CoffeeSiteDBHelper coffeeSiteDBHelper = new CoffeeSiteDBHelper(this, dbManager);
-            dbManager.open(coffeeSiteDBHelper);
-
-            for (CoffeeSite coffeeSite : coffeeSites) {
-                dbManager.insert(coffeeSite);
-            }
-
-            dbManager.close();
-
-        } else {
-            //TODO - show info, that loading of All sites failed
-        }
-    }
 
     public void startNumberOfCoffeeSitesFromUserService() {
         if (coffeeSiteLoadOperationsService != null) {
@@ -404,19 +362,6 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
-    /**
-     * Starts Loading of all CoffeeSites (for offline mode)
-     */
-    private void startAllCoffeeSitesLoadOperation() {
-        if (Utils.isOnline()) {
-            if (coffeeSiteLoadOperationsService != null) {
-                showProgressbar();
-                coffeeSiteLoadOperationsService.getAllCoffeeSites();
-            }
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
-        }
-    }
 
     @Override
     public void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {
@@ -507,7 +452,8 @@ public class MainActivity extends ActivityWithLocationService
                 isOfflineChecked = !item.isChecked();
                 item.setChecked(isOfflineChecked);
                 if (isOfflineChecked) {
-                    startAllCoffeeSitesLoadOperation();
+                    showProgressbar();
+                    coffeeSiteEntitiesService.readAndSaveAllCoffeeSitesFromServer();
                 }
                 return true;
             case R.id.action_map:
@@ -520,6 +466,16 @@ public class MainActivity extends ActivityWithLocationService
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * Returned from read and save operation of All CoffeeSites from server, when OFFLINE mode is switched-on
+     *
+     * @param result
+     */
+    @Override
+    public void onAllCoffeeSitesLoaded(boolean result) {
+        hideProgressbar();
     }
 
     /**

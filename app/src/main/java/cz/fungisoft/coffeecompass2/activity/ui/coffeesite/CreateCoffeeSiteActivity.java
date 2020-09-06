@@ -62,6 +62,9 @@ import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
+import cz.fungisoft.coffeecompass2.entity.PriceRange;
+import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
@@ -79,7 +82,6 @@ import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
 
 //import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService.StatusChangeOperation.COFFEE_SITE_ACTIVATE;
@@ -142,7 +144,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     TextInputLayout locationTypeTextInputLayout;
 
     @BindView(R.id.druhy_kavy_chip_group)
-    ChipGroup coffeeTypesChipGroup;
+    ChipGroup coffeeSortsChipGroup;
     @BindView(R.id.dalsi_nabidka_chip_group)
     ChipGroup otherOfferChipGroup;
 
@@ -200,6 +202,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private String[] SITE_TYPES;
     private String[] LOCATION_TYPES;
 
+    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
+
     /**
      * To detect if the CoffeeSite/Activity is in
      * mode for Creation of a new CoffeeSite or
@@ -249,6 +253,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_coffee_site);
+
+        coffeeSiteEntitiesViewModel = ViewModelProviders.of(this).get(CoffeeSiteEntitiesViewModel.class);
 
         ButterKnife.bind(this);
 
@@ -714,14 +720,24 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Typ zdroje
         SITE_TYPES = getResources().getStringArray(R.array.coffee_site_type);
 
-        ArrayAdapter<String> siteTypesAdapter;
-        if (CoffeeSiteEntitiesRepository.getAllCoffeeSiteTypes().size() > 0) {
-            siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    CoffeeSiteEntitiesRepository.getAllCoffeeSiteTypes());
-        } else {
-            siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    SITE_TYPES);
-        }
+        final ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+                SITE_TYPES);
+
+        coffeeSiteEntitiesViewModel.getAllCoffeeSiteTypes().observe(this, new Observer<List<CoffeeSiteType>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSiteType> coffeeSiteTypes) {
+                // Update the cached copy of the words in the adapter.
+                siteTypesAdapter.clear();
+                for (CoffeeSiteType cst : coffeeSiteTypes) {
+                    siteTypesAdapter.add(cst.getCoffeeSiteType());
+                }
+            }
+        });
+
+//        if (CoffeeSiteEntityRepositories.getAllCoffeeSiteTypes().size() > 0) {
+//            siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+//                    CoffeeSiteEntityRepositories.getAllCoffeeSiteTypes());
+//        }
 
         AutoCompleteTextView siteTypeDropdown = findViewById(R.id.site_type_dropdown);
         siteTypeDropdown.setAdapter(siteTypesAdapter);
@@ -732,15 +748,26 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void showLocationTypes() {
         // Typ lokality
         LOCATION_TYPES = getResources().getStringArray(R.array.location_type);
-        ArrayAdapter<String> locationTypesAdapter;
+        final ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+                LOCATION_TYPES);
 
-        if (CoffeeSiteEntitiesRepository.getAllSiteLocationTypes().size() > 0) {
-            locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    CoffeeSiteEntitiesRepository.getAllSiteLocationTypes());
-        } else {
-            locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    LOCATION_TYPES);
-        }
+        coffeeSiteEntitiesViewModel.getAllSiteLocationTypes().observe(this, new Observer<List<SiteLocationType>>() {
+            @Override
+            public void onChanged(@Nullable final List<SiteLocationType> siteLocationTypes) {
+                // Update the cached copy of the words in the adapter.
+                locationTypesAdapter.clear();
+                for (SiteLocationType cslt : siteLocationTypes) {
+                    locationTypesAdapter.add(cslt.getLocationType());
+                }
+            }
+        });
+
+//        if (CoffeeSiteEntityRepositories.getAllSiteLocationTypes().size() > 0) {
+//            locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+//                    CoffeeSiteEntityRepositories.getAllSiteLocationTypes());
+//        } else {
+//            locationTypesAdapter =
+//        }
 
         AutoCompleteTextView locationTypesDropdown = findViewById(R.id.location_type_dropdown);
         locationTypesDropdown.setAdapter(locationTypesAdapter);
@@ -752,14 +779,27 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void showPriceRanges() {
         // Cenovy rozsah
         String[] PRICE_RANGES = getResources().getStringArray(R.array.cena_range);
-        ArrayAdapter<String> priceRangesAdapter;
-        if (CoffeeSiteEntitiesRepository.getAllPriceRanges().size() > 0) {
-            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    CoffeeSiteEntitiesRepository.getAllPriceRanges());
-        } else {
-            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                    PRICE_RANGES);
-        }
+        ArrayAdapter<String> priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+                PRICE_RANGES);
+
+        coffeeSiteEntitiesViewModel.getAllPriceRanges().observe(this, new Observer<List<PriceRange>>() {
+            @Override
+            public void onChanged(@Nullable final List<PriceRange> priceRanges) {
+                // Update the cached copy of the words in the adapter.
+                priceRangesAdapter.clear();
+                for (PriceRange priceRange : priceRanges) {
+                    priceRangesAdapter.add(priceRange.getPriceRange());
+                }
+            }
+        });
+
+//        if (CoffeeSiteEntityRepositories.getAllPriceRanges().size() > 0) {
+//            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+//                    CoffeeSiteEntityRepositories.getAllPriceRanges());
+//        } else {
+//            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
+//                    PRICE_RANGES);
+//        }
 
         AutoCompleteTextView priceRangesDropdown = findViewById(R.id.price_range_dropdown);
         priceRangesDropdown.setAdapter(priceRangesAdapter);
@@ -1243,7 +1283,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             priceRangeEditText.setText(coffeeSite.getCena().toString());
         }
 
-        selectChipsInGroupAccordingText(coffeeTypesChipGroup, coffeeSite.getCoffeeSorts());
+        selectChipsInGroupAccordingText(coffeeSortsChipGroup, coffeeSite.getCoffeeSorts());
 
         selectChipsInGroupAccordingText(otherOfferChipGroup, coffeeSite.getOtherOffers());
 
@@ -1295,25 +1335,47 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         String typPodniku = sourceTypeEditText.getText().toString();
         typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES[0];
-        coffeeSite.setTypPodniku(CoffeeSiteEntitiesRepository.getCoffeeSiteType(typPodniku));
+        //coffeeSite.setTypPodniku(CoffeeSiteEntityRepositories.getCoffeeSiteType(typPodniku));
+        coffeeSite.setTypPodniku(coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku));
 
         String typLokality = locationTypeEditText.getText().toString();
         typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES[0];
-        coffeeSite.setTypLokality(CoffeeSiteEntitiesRepository.getSiteLocationType(typLokality));
+//        coffeeSite.setTypLokality(CoffeeSiteEntityRepositories.getSiteLocationType(typLokality));
+        coffeeSite.setTypLokality(coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality));
 
-        coffeeSite.setCena(CoffeeSiteEntitiesRepository.getPriceRange(priceRangeEditText.getText().toString()));
+        //coffeeSite.setCena(CoffeeSiteEntityRepositories.getPriceRange(priceRangeEditText.getText().toString()));
+        coffeeSite.setCena(coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString()));
 
-        String[] selectedCoffeeType = getSelectedChipsStrings(coffeeTypesChipGroup);
-        coffeeSite.setCoffeeSorts(CoffeeSiteEntitiesRepository.getCoffeeSortsList(selectedCoffeeType));
+        String[] selectedCoffeeSorts = getSelectedChipsStrings(coffeeSortsChipGroup);
+//        coffeeSite.setCoffeeSorts(CoffeeSiteEntityRepositories.getCoffeeSortsList(selectedCoffeeSorts));
+        coffeeSite.setCoffeeSorts(coffeeSiteEntitiesViewModel.createCoffeeSortsList(selectedCoffeeSorts));
+
+//        coffeeSiteEntitiesViewModel.getAllCoffeeSorts().observe(this, new Observer<List<CoffeeSort>>() {
+//            @Override
+//            public void onChanged(@Nullable final List<CoffeeSort> coffeeSorts) {
+//                // Update the cached copy of the words in the adapter.
+//                    coffeeSite.setCoffeeSorts(coffeeSorts);
+//            }
+//        });
 
         String[] selectedOtherOffer = getSelectedChipsStrings(otherOfferChipGroup);
-        coffeeSite.setOtherOffers(CoffeeSiteEntitiesRepository.getOtherOffersList(selectedOtherOffer));
+        //coffeeSite.setOtherOffers(CoffeeSiteEntityRepositories.getOtherOffersList(selectedOtherOffer));
+        coffeeSite.setOtherOffers(coffeeSiteEntitiesViewModel.createOtherOffersList(selectedOtherOffer));
+
+//        coffeeSiteEntitiesViewModel.getAllOtherOffers().observe(this, new Observer<List<OtherOffer>>() {
+//            @Override
+//            public void onChanged(@Nullable final List<OtherOffer> otherOffers) {
+//                // Update the cached copy of the words in the adapter.
+//                coffeeSite.setOtherOffers(otherOffers);
+//            }
+//        });
 
         coffeeSite.setOteviraciDobaDny(openingDaysEditText.getText().toString());
         coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
 
         if (mode == MODE_CREATE) {
-            coffeeSite.setStatusZarizeni(CoffeeSiteEntitiesRepository.getCoffeeSiteStatus("V provozu"));
+//            coffeeSite.setStatusZarizeni(CoffeeSiteEntityRepositories.getCoffeeSiteStatus("V provozu"));
+            coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
         }
 
         Log.i(TAG, "CoffeeSite created/updated");

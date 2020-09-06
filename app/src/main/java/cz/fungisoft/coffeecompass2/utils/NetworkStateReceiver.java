@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 
 /**
  * Receiver of events indicating change of network connectivity.
@@ -128,7 +128,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;
-                if (!CoffeeSiteEntitiesRepository.isDataReadedFromServer()) {
+                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()) {
                     ma.startLoadingCoffeeSiteEntities();
                 }
             }

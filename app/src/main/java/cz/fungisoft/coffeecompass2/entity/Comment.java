@@ -3,6 +3,9 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -15,11 +18,8 @@ import java.util.Date;
  * A Comment belonging to a CoffeeSite.
  * Used for reading Comments from server.
  */
+@Entity
 public class Comment extends CoffeeSiteEntity implements Serializable, Parcelable {
-
-//    @Expose
-//    @SerializedName("id")
-//    private int id;
 
     @Expose
     @SerializedName("text")
@@ -27,13 +27,14 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("created")
+    @Ignore
     private Date created;
 
     private String createdOnString;
 
     @Expose
     @SerializedName("coffeeSiteID")
-    private Integer coffeeSiteID;
+    private int coffeeSiteID;
 
     @Expose
     @SerializedName("userName")
@@ -53,23 +54,17 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("canBeDeleted")
+    @Ignore
     private boolean canBeDeleted;
 
+    @Ignore
     private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
 
     protected Comment(Parcel in) {
-//        if (in.readByte() == 0) {
-//            id = null;
-//        } else {
-            id = in.readInt();
-//        }
+        id = in.readInt();
         text = in.readString();
         createdOnString = in.readString();
-        if (in.readByte() == 0) {
-            coffeeSiteID = null;
-        } else {
-            coffeeSiteID = in.readInt();
-        }
+        coffeeSiteID = in.readInt();
         userName = in.readString();
         userId = in.readInt();
         starsFromUser = in.readInt();
@@ -95,20 +90,10 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-//        if (id == null) {
-//            dest.writeByte((byte) 0);
-//        } else {
-//            dest.writeByte((byte) 1);
-            dest.writeInt(id);
-//        }
+        dest.writeInt(id);
         dest.writeString(text);
         dest.writeString(createdOnString);
-        if (coffeeSiteID == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(coffeeSiteID);
-        }
+        dest.writeInt(coffeeSiteID);
         dest.writeString(userName);
         dest.writeInt(userId);
         dest.writeInt(starsFromUser);

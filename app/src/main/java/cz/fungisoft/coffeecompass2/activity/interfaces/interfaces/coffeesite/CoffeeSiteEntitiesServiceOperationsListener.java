@@ -11,4 +11,7 @@ public interface CoffeeSiteEntitiesServiceOperationsListener {
     // are saved by CoffeeSiteEntitiesRepository and Activity
     // need not to react to finis the load action
     default void onCoffeeSiteEntitiesLoaded(boolean result) {}
+
+
+    default void onAllCoffeeSitesLoaded(boolean result) {}
 }

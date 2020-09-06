@@ -25,7 +25,7 @@ import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,7 +33,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository.COFFEE_SITE_ENTITY_CLASSES;
+import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories.COFFEE_SITE_ENTITY_CLASSES;
 
 /**
  * AsyncTask to load/create all CoffeeSiteEntity instancies from server.
@@ -42,7 +42,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
 
     static final String REQ_ENTITIES_TAG = "GetCoffeeSiteEntities";
 
-    private CoffeeSiteEntitiesRepository entitiesRepository;
+    private CoffeeSiteEntityRepositories entitiesRepository;
 
     private String operationError = "";
 
@@ -67,7 +67,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
 
     public ReadCoffeeSiteEntitiesAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
                                            CoffeeSiteEntitiesLoadRESTResultListener callingListenerService,
-                                           CoffeeSiteEntitiesRepository entitiesRepository) {
+                                           CoffeeSiteEntityRepositories entitiesRepository) {
         this.entitiesRepository = entitiesRepository;
         this.callingListenerService = callingListenerService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;

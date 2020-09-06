@@ -13,10 +13,15 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntitiesRepository;
-import cz.fungisoft.coffeecompass2.entity.repository.DBManager;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
+
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ENTITIES_LOAD;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
 
 /**
  * A Service class to hold CoffeeSite entities classes.
@@ -27,7 +32,8 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRES
  * CoffeeSiteServices with their common service connector.
  */
 public class CoffeeSiteEntitiesService extends Service
-                                       implements CoffeeSiteEntitiesLoadRESTResultListener {
+                                       implements CoffeeSiteEntitiesLoadRESTResultListener,
+                                                  CoffeeSitesRESTResultListener {
 
     static final String TAG = "CoffeeSiteServiceBase";
 
@@ -47,7 +53,6 @@ public class CoffeeSiteEntitiesService extends Service
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteEntitiesService.LocalBinder();
 
-
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -65,9 +70,9 @@ public class CoffeeSiteEntitiesService extends Service
         return mBinder;
     }
 
-    private static CoffeeSiteEntitiesRepository entitiesRepository;
+    private static CoffeeSiteEntityRepositories entitiesRepository;
 
-    public CoffeeSiteEntitiesRepository getEntitiesRepository() {
+    public CoffeeSiteEntityRepositories getEntitiesRepository() {
        return entitiesRepository;
     }
 
@@ -75,7 +80,9 @@ public class CoffeeSiteEntitiesService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
-        entitiesRepository = CoffeeSiteEntitiesRepository.getInstance(new DBManager(this));
+
+        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(getApplicationContext());
+
         Log.d(TAG, "Service started.");
     }
 
@@ -85,7 +92,7 @@ public class CoffeeSiteEntitiesService extends Service
      **/
 
     public void readAndSaveAllEntitiesFromServer() {
-        new ReadCoffeeSiteEntitiesAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
+        new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
     }
 
     @Override
@@ -100,5 +107,43 @@ public class CoffeeSiteEntitiesService extends Service
             listener.onCoffeeSiteEntitiesLoaded(result);
         }
     }
+
+    /**
+     * Methods to start running AsyncTask
+     **/
+
+    public void readAndSaveAllCoffeeSitesFromServer() {
+        new GetAllCoffeeSitesAsyncTask(COFFEE_SITE_LOAD_ALL, this).execute();
+    }
+
+    @Override
+    public void onCoffeeSitesReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
+        if (result instanceof Result.Success) {
+
+//            CoffeeSiteDBHelper coffeeSiteDBHelper = new CoffeeSiteDBHelper(this, dbManager);
+//            dbManager.open(coffeeSiteDBHelper);
+//
+//            for (CoffeeSite coffeeSite : ((Result.Success<List<CoffeeSite>>) result).getData()) {
+//                dbManager.insert(coffeeSite);
+//            }
+//
+//            dbManager.close();
+
+
+            informClientAboutAllCoffeeSitesLoadResult(true);
+
+        } else {
+            //TODO - show info, that loading of All sites failed
+            informClientAboutAllCoffeeSitesLoadResult(false);
+        }
+
+    }
+
+    private void informClientAboutAllCoffeeSitesLoadResult(Boolean result) {
+        for (CoffeeSiteEntitiesServiceOperationsListener listener : coffeeSiteEntitiesOperationsListeners) {
+            listener.onAllCoffeeSitesLoaded(result);
+        }
+    }
+
 
 }
