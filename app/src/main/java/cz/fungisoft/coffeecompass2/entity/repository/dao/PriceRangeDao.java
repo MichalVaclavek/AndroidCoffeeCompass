@@ -19,11 +19,14 @@ public interface PriceRangeDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM PriceRange")
+    @Query("SELECT * FROM price_range_table")
     LiveData<List<PriceRange>> getAllPriceRanges();
 
-    @Query("SELECT * FROM PriceRange WHERE priceRange LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM price_range_table WHERE priceRange LIKE :stringValue  LIMIT 1")
     Flowable<PriceRange> getPriceRange(String stringValue);
+
+    @Query("DELETE FROM price_range_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<PriceRange> priceRanges);

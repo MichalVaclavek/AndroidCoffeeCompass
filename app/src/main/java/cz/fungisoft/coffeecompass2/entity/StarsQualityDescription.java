@@ -8,11 +8,11 @@ import androidx.room.Entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Entity
+@Entity(tableName = "stars_quality_description_table")
 public class StarsQualityDescription extends CoffeeSiteEntity implements Parcelable {
 
     public StarsQualityDescription(int id, String entityValue, int numOfStars) {
-        super(id);
+        super(numOfStars);
         this.quality = entityValue;
         this.setNumOfStars(numOfStars);
     }

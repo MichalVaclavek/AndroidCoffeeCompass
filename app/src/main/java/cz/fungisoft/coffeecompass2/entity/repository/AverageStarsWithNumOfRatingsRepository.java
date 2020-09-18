@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -10,13 +9,13 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.AverageStarsWithNumOfRatingsDao;
 
-public class AverageStarsWithNumOfRatingsRepository {
+public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepositoryBase {
 
     private AverageStarsWithNumOfRatingsDao averageStarsWithNumOfHodnoceniDao;
     private LiveData<List<AverageStarsWithNumOfRatings>> mAllCoffeeSiteTypes;
 
-    AverageStarsWithNumOfRatingsRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    AverageStarsWithNumOfRatingsRepository(CoffeeSiteDatabase db) {
+        super(db);
         averageStarsWithNumOfHodnoceniDao = db.averageStarsWithNumOfHodnoceniDao();
         mAllCoffeeSiteTypes = averageStarsWithNumOfHodnoceniDao.getAllAverageStarsWithNumOfHodnoceni();
     }

@@ -1,24 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.OtherOfferDao;
 import io.reactivex.Flowable;
 
-public class OtherOfferRepository {
+public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
 
     private OtherOfferDao otherOfferDao;
     private LiveData<List<OtherOffer>> mAllOtherOffers;
 
-    OtherOfferRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    OtherOfferRepository(CoffeeSiteDatabase db) {
+        super(db);
         otherOfferDao = db.otherOfferDao();
         mAllOtherOffers = otherOfferDao.getAllOtherOffers();
     }

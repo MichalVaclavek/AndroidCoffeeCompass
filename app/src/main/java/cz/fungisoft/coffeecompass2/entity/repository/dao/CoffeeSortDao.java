@@ -18,11 +18,14 @@ public interface CoffeeSortDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM CoffeeSort")
+    @Query("SELECT * FROM coffee_sort_table")
     LiveData<List<CoffeeSort>> getAllCoffeeSorts();
 
-    @Query("SELECT * FROM CoffeeSort WHERE coffeeSort LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM coffee_sort_table WHERE coffeeSort LIKE :stringValue  LIMIT 1")
     Flowable<CoffeeSort> getCoffeeSort(String stringValue);
+
+    @Query("DELETE FROM coffee_sort_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<CoffeeSort> coffeeSorts);

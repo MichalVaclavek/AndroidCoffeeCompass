@@ -12,13 +12,13 @@ import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CommentDao;
 import io.reactivex.Flowable;
 
-public class CommentRepository {
+public class CommentRepository extends CoffeeSiteRepositoryBase {
 
     private CommentDao commentDao;
     private LiveData<List<Comment>> mAllComments;
 
-    CommentRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    CommentRepository(CoffeeSiteDatabase db) {
+        super(db);
         commentDao = db.commentDao();
         mAllComments = commentDao.getAllComments();
     }

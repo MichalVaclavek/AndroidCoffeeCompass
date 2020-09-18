@@ -1,24 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescriptionDao;
 import io.reactivex.Flowable;
 
-public class StarsQualityDescriptionRepository {
+public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase {
 
     private StarsQualityDescriptionDao starsQualityDescriptionDao;
     private LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
 
-    StarsQualityDescriptionRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    StarsQualityDescriptionRepository(CoffeeSiteDatabase db) {
+        super(db);
         starsQualityDescriptionDao = db.starsQualityDescriptionDao();
         mAllStarsQualityDescriptions = starsQualityDescriptionDao.getAllStarsQualityDescriptions();
     }

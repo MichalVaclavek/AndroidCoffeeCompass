@@ -1,7 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.app.Application;
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -9,17 +7,19 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
-public class CoffeeSiteRepository {
+import static cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao.ONE_METER_IN_DEGREE;
+
+public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSiteDao coffeeSiteDao;
     private LiveData<List<CoffeeSite>> mAllCoffeeSites;
 
-    CoffeeSiteRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    public CoffeeSiteRepository(CoffeeSiteDatabase db) {
+        super(db);
         coffeeSiteDao = db.coffeeSiteDao();
         mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
     }
@@ -28,9 +28,18 @@ public class CoffeeSiteRepository {
         return mAllCoffeeSites;
     }
 
+    LiveData<List<CoffeeSite>> getCoffeeSitesInRectangle(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
+        double searchRangeAsDegreePart = searchRangeInMeters * ONE_METER_IN_DEGREE;
+        return coffeeSiteDao.getCoffeeSitesInRectangle(searchRangeAsDegreePart);
+    }
+
     public Flowable<CoffeeSite> getCoffeeSiteById(int siteId) {
         return coffeeSiteDao.getCoffeeSiteById(siteId);
     }
+    public Flowable<CoffeeSite> getCoffeeSiteByName(String coffeeSiteName) {
+        return coffeeSiteDao.getCoffeeSiteByName(coffeeSiteName);
+    }
+
 
     public void insert (CoffeeSite coffeeSite) {
         new insertAsyncTask(coffeeSiteDao).execute(coffeeSite);

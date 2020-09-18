@@ -19,12 +19,14 @@ public interface StarsQualityDescriptionDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM StarsQualityDescription")
+    @Query("SELECT * FROM stars_quality_description_table")
     LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions();
 
-    @Query("SELECT * FROM StarsQualityDescription WHERE numOfStars = :number  LIMIT 1")
+    @Query("SELECT * FROM stars_quality_description_table WHERE numOfStars = :number  LIMIT 1")
     Flowable<StarsQualityDescription> getStarsQualityDescriptionByNumber(int number);
 
+    @Query("DELETE FROM stars_quality_description_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<StarsQualityDescription> starsQualityDescriptions);

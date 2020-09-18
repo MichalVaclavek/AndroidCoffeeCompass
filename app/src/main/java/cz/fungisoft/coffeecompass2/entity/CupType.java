@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Not used yet in mobile app
  */
-@Entity
+@Entity(tableName = "cup_type_table")
 public class CupType extends CoffeeSiteEntity implements Parcelable {
 
     public CupType(int id, String entityValue) {

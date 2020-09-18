@@ -1,10 +1,16 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -38,12 +44,28 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-          version = 1, exportSchema = false)
+                      version = 1, exportSchema = false)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
     private static CoffeeSiteDatabase DB_INSTANCE;
 
+    public interface DbDeleteEndListener {
+        void onDbDeletedEnd();
+    }
+
+    private List<DbDeleteEndListener> dbDeleteEndListeners = new ArrayList<>();
+
+    public synchronized void addDbDeleteEndListener(DbDeleteEndListener dbDeleteEndListener) {
+        dbDeleteEndListeners.add(dbDeleteEndListener);
+    }
+
+    public synchronized void removeDbDeleteEndListener(DbDeleteEndListener dbDeleteEndListener) {
+        dbDeleteEndListeners.remove(dbDeleteEndListener);
+    }
+
+
     public static CoffeeSiteDatabase getDatabase(final Context context) {
+
         if (DB_INSTANCE == null) {
             synchronized (CoffeeSiteDatabase.class) {
                 if (DB_INSTANCE == null) {
@@ -53,11 +75,96 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                             // Wipes and rebuilds instead of migrating
                             // if no Migration object.
                             .fallbackToDestructiveMigration()
+                            .addCallback(sCoffeeSiteDatabaseCallback)
                             .build();
                 }
             }
         }
         return DB_INSTANCE;
+    }
+
+    private static CoffeeSiteDatabase.Callback sCoffeeSiteDatabaseCallback =
+            new CoffeeSiteDatabase.Callback() {
+
+                @Override
+                public void onOpen (@NonNull SupportSQLiteDatabase db) {
+                    super.onOpen(db);
+                    new PopulateDbAsync(DB_INSTANCE).execute();
+                }
+            };
+
+
+    private void fireDbContentDeleted() {
+        for (DbDeleteEndListener listener : dbDeleteEndListeners) {
+            listener.onDbDeletedEnd();
+        }
+    }
+
+
+    /**
+     * Populate the database in the background.
+     */
+    private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
+
+        private CoffeeSiteDatabase mDB;
+
+        private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfRatingsDao;
+        private final CoffeeSiteDao coffeeSiteDao;
+        private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
+        private final CoffeeSiteStatusDao coffeeSiteStatusDao;
+        private final CoffeeSiteTypeDao coffeeSiteTypeDao;
+        private final CoffeeSortDao coffeeSortDao;
+        private final CommentDao commentDao;
+        private final CupTypeDao cupTypeDao;
+        private final NextToMachineTypeDao nextToMachineTypeDao;
+        private final OtherOfferDao otherOfferDao;
+        private final PriceRangeDao priceRangeDao;
+        private final SiteLocationTypeDao siteLocationTypeDao;
+        private final StarsQualityDescriptionDao starsQualityDescriptionDao;
+
+
+        PopulateDbAsync(CoffeeSiteDatabase db) {
+            this.mDB = db;
+
+            averageStarsWithNumOfRatingsDao = db.averageStarsWithNumOfHodnoceniDao();
+            coffeeSiteDao = db.coffeeSiteDao();
+            coffeeSiteRecordStatusDao = db.coffeeSiteRecordStatusDao();
+            coffeeSiteStatusDao = db.coffeeSiteStatusDao();
+            coffeeSiteTypeDao = db.coffeeSiteTypeDao();
+            coffeeSortDao = db.coffeeSortDao();
+            commentDao = db.commentDao();
+            cupTypeDao = db.cupTypeDao();
+            nextToMachineTypeDao = db.nextToMachineTypeDao();
+            otherOfferDao = db.otherOfferDao();
+            priceRangeDao = db.priceRangeDao();
+            siteLocationTypeDao = db.siteLocationTypeDao();
+            starsQualityDescriptionDao = db.starsQualityDescriptionDao();
+        }
+
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            // Start the app with a clean database every time.
+            // Not needed if you only populate the database
+            // when it is first created
+            averageStarsWithNumOfRatingsDao.deleteAll();
+            coffeeSiteDao.deleteAll();
+            coffeeSiteRecordStatusDao.deleteAll();
+            coffeeSiteStatusDao.deleteAll();
+            coffeeSiteTypeDao.deleteAll();
+            coffeeSortDao.deleteAll();
+            commentDao.deleteAll();
+            cupTypeDao.deleteAll();
+            nextToMachineTypeDao.deleteAll();
+            otherOfferDao.deleteAll();
+            priceRangeDao.deleteAll();
+            siteLocationTypeDao.deleteAll();
+            starsQualityDescriptionDao.deleteAll();
+
+            mDB.fireDbContentDeleted();
+
+            return null;
+        }
     }
 
     public abstract CoffeeSiteDao coffeeSiteDao();

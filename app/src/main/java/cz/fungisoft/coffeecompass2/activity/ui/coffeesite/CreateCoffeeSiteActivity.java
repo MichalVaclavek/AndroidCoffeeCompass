@@ -851,13 +851,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            startLoadingCoffeeSiteEntities();
+            //startLoadingCoffeeSiteEntities();
         }
     }
 
     public void startLoadingCoffeeSiteEntities() {
         if (coffeeSiteEntitiesService != null) {
-            coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
+            //coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
         }
     }
 

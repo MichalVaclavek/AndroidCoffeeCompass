@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -8,17 +7,16 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteRecordStatusDao;
 import io.reactivex.Flowable;
 
-public class CoffeeSiteRecordStatusRepository {
+public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
     private LiveData<List<CoffeeSiteRecordStatus>> mAllCoffeeSiteRecordStatuss;
 
-    CoffeeSiteRecordStatusRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    CoffeeSiteRecordStatusRepository(CoffeeSiteDatabase db) {
+        super(db);
         coffeeSiteRecordStatusDao = db.coffeeSiteRecordStatusDao();
         mAllCoffeeSiteRecordStatuss = coffeeSiteRecordStatusDao.getAllCSRecordStatuses();
     }

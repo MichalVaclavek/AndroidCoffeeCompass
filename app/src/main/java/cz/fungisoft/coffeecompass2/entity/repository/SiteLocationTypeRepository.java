@@ -1,24 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.SiteLocationTypeDao;
 import io.reactivex.Flowable;
 
-public class SiteLocationTypeRepository {
+public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
     private SiteLocationTypeDao siteLocationTypeDao;
     private LiveData<List<SiteLocationType>> mAllSiteLocationTypes;
 
-    SiteLocationTypeRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    SiteLocationTypeRepository(CoffeeSiteDatabase db) {
+        super(db);
         siteLocationTypeDao = db.siteLocationTypeDao();
         mAllSiteLocationTypes = siteLocationTypeDao.getAllSiteLocationTypes();
     }

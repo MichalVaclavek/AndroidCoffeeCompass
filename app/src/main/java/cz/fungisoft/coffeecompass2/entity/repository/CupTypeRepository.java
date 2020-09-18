@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -11,13 +10,13 @@ import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CupTypeDao;
 import io.reactivex.Flowable;
 
-public class CupTypeRepository {
+public class CupTypeRepository extends CoffeeSiteRepositoryBase {
 
     private CupTypeDao cupTypeDao;
     private LiveData<List<CupType>> mAllCupTypes;
 
-    CupTypeRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    CupTypeRepository(CoffeeSiteDatabase db) {
+        super(db);
         cupTypeDao = db.cupTypeDao();
         mAllCupTypes = cupTypeDao.getAllCupTypes();
     }

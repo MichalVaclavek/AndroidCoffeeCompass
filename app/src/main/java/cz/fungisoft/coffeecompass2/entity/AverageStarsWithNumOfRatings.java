@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-@Entity
+@Entity(tableName = "average_stars_with_numOfRatings_table")
 public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Parcelable {
 
     @Expose

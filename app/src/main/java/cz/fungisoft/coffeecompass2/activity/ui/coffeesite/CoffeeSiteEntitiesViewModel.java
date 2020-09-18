@@ -5,12 +5,10 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
@@ -21,6 +19,7 @@ import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 
 /**
@@ -54,6 +53,8 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
 
     private LiveData<List<StarsQualityDescription>> allStarsQualityDescriptions;
 
+    private CoffeeSiteDatabase db;
+
 
     /**
      * Standard constructor
@@ -62,7 +63,9 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
      */
     public CoffeeSiteEntitiesViewModel(@NonNull Application application) {
         super(application);
-        mRepositories = CoffeeSiteEntityRepositories.getInstance(application.getApplicationContext());
+
+        db = CoffeeSiteDatabase.getDatabase(application.getApplicationContext());
+        mRepositories = CoffeeSiteEntityRepositories.getInstance(db);
 
         allCoffeeSiteTypes = mRepositories.getCoffeeSiteTypesRepository().getAllCoffeeSiteTypes();
         allCoffeeSiteRecordStatuses = mRepositories.getCoffeeSiteRecordStatusRepository().getAllCoffeeSiteRecordStatuses();

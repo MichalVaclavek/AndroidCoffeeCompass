@@ -1,24 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
 import io.reactivex.Flowable;
 
-public class PriceRangeRepository {
+public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     private PriceRangeDao priceRangeDao;
     private LiveData<List<PriceRange>> mAllPriceRanges;
 
-    PriceRangeRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    PriceRangeRepository(CoffeeSiteDatabase db) {
+        super(db);
         priceRangeDao = db.priceRangeDao();
         mAllPriceRanges = priceRangeDao.getAllPriceRanges();
     }

@@ -8,7 +8,7 @@ import androidx.room.Entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Entity
+@Entity(tableName = "price_range_table")
 public class PriceRange extends CoffeeSiteEntity implements Parcelable {
 
     public PriceRange(int id, String entityValue) {

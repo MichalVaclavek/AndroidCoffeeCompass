@@ -285,7 +285,7 @@ public class MainActivity extends ActivityWithLocationService
         coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            startLoadingCoffeeSiteEntities();
+            //startLoadingCoffeeSiteEntities();
         }
     }
 
@@ -303,7 +303,7 @@ public class MainActivity extends ActivityWithLocationService
 
     public void startLoadingCoffeeSiteEntities() {
         if (coffeeSiteEntitiesService != null) {
-            coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
+            //coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
         }
     }
 

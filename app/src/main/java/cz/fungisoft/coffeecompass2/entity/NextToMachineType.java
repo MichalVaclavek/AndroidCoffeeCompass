@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Not used in mobile app, yet
  */
-@Entity
+@Entity(tableName = "next_to_machine_type_table")
 public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
 
     public NextToMachineType(int id, String entityValue) {

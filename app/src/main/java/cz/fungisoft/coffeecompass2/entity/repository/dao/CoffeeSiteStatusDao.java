@@ -18,14 +18,17 @@ import io.reactivex.Flowable;
 public interface CoffeeSiteStatusDao {
 
     @Transaction
-    @Query("SELECT * FROM CoffeeSite WHERE id LIKE :coffeeSiteId")
+    @Query("SELECT * FROM coffee_site_table WHERE id LIKE :coffeeSiteId")
     public List<CoffeeSiteWithCsStatus> getCoffeeSiteWithStatus(String coffeeSiteId);
 
-    @Query("SELECT * FROM CoffeeSiteStatus")
+    @Query("SELECT * FROM coffee_site_status_table")
     LiveData<List<CoffeeSiteStatus>> getAllCoffeeSiteStatuses();
 
-    @Query("SELECT * FROM CoffeeSiteStatus WHERE status LIKE :stringValue LIMIT 1")
+    @Query("SELECT * FROM coffee_site_status_table WHERE status LIKE :stringValue LIMIT 1")
     Flowable<CoffeeSiteStatus> getCoffeeSiteStatus(String stringValue);
+
+    @Query("DELETE FROM coffee_site_status_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<CoffeeSiteStatus> coffeeSiteStatuses);

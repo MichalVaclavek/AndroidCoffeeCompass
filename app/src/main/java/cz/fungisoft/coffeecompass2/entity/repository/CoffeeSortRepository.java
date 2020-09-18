@@ -12,13 +12,13 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSortDao;
 import io.reactivex.Flowable;
 
-public class CoffeeSortRepository {
+public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSortDao coffeeSortDao;
     private LiveData<List<CoffeeSort>> mAllCoffeeSorts;
 
-    CoffeeSortRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    CoffeeSortRepository(CoffeeSiteDatabase db) {
+        super(db);
         coffeeSortDao = db.coffeeSortDao();
         mAllCoffeeSorts = coffeeSortDao.getAllCoffeeSorts();
     }

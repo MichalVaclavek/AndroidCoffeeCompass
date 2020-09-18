@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * A CoffeeSite, main app. entity
  */
-@Entity
+@Entity(tableName = "coffee_site_table")
 public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable
 {
 //    @Expose

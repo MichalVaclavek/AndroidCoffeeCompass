@@ -1,7 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
-
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
@@ -114,26 +112,27 @@ public class CoffeeSiteEntityRepositories {
 
     private static CoffeeSiteEntityRepositories instance;
 
-    private CoffeeSiteEntityRepositories(final Context context) {
-        coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(context);
-        coffeeSiteRepository = new CoffeeSiteRepository(context);
-        averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(context);
-        coffeeSiteRepository = new CoffeeSiteRepository(context);
-        coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(context);
-        coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(context);
-        coffeeSortRepository = new CoffeeSortRepository(context);
-        commentRepository = new CommentRepository(context);
-        cupTypeRepository = new CupTypeRepository(context);
-        nextToMachineTypeRepository = new NextToMachineTypeRepository(context);
-        otherOfferRepository = new OtherOfferRepository(context);
-        priceRangeRepository = new PriceRangeRepository(context);
-        siteLocationTypeRepository = new SiteLocationTypeRepository(context);
-        starsQualityDescriptionRepository = new StarsQualityDescriptionRepository(context);
+    private CoffeeSiteEntityRepositories(final CoffeeSiteDatabase db) {
+        coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(db);
+        coffeeSiteRepository = new CoffeeSiteRepository(db);
+        averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(db);
+        coffeeSiteRepository = new CoffeeSiteRepository(db);
+        coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
+        coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
+        coffeeSortRepository = new CoffeeSortRepository(db);
+        commentRepository = new CommentRepository(db);
+        cupTypeRepository = new CupTypeRepository(db);
+        nextToMachineTypeRepository = new NextToMachineTypeRepository(db);
+        otherOfferRepository = new OtherOfferRepository(db);
+        priceRangeRepository = new PriceRangeRepository(db);
+        siteLocationTypeRepository = new SiteLocationTypeRepository(db);
+        starsQualityDescriptionRepository = new StarsQualityDescriptionRepository(db);
     }
 
-    public static CoffeeSiteEntityRepositories getInstance(final Context context) {
+    public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db) {
         if (instance == null) {
-            instance = new CoffeeSiteEntityRepositories(context);
+
+            instance = new CoffeeSiteEntityRepositories(db);
         }
         return instance;
     }
@@ -178,6 +177,9 @@ public class CoffeeSiteEntityRepositories {
     }
 
     public void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
+        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
+            stars.setId(stars.getNumOfStars());
+        }
         starsQualityDescriptionRepository.insertAll(allStarsQualityDescriptions);
     }
 

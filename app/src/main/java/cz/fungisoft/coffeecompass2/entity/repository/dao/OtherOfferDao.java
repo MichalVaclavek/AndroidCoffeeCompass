@@ -18,11 +18,14 @@ public interface OtherOfferDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM OtherOffer")
+    @Query("SELECT * FROM other_offer_table")
     LiveData<List<OtherOffer>> getAllOtherOffers();
 
-    @Query("SELECT * FROM OtherOffer WHERE offer LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM other_offer_table WHERE offer LIKE :stringValue  LIMIT 1")
     Flowable<OtherOffer> getOtherOffer(String stringValue);
+
+    @Query("DELETE FROM other_offer_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<OtherOffer> otherOffers);

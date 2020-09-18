@@ -18,14 +18,17 @@ public interface CommentDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM Comment")
+    @Query("SELECT * FROM comment_table")
     LiveData<List<Comment>> getAllComments();
 
-    @Query("SELECT * FROM Comment WHERE text LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM comment_table WHERE text LIKE :stringValue  LIMIT 1")
     Flowable<Comment> getComment(String stringValue);
 
-    @Query("SELECT * FROM Comment WHERE id = :commentId  LIMIT 1")
+    @Query("SELECT * FROM comment_table WHERE id = :commentId  LIMIT 1")
     Flowable<Comment> getCommentById(int commentId);
+
+    @Query("DELETE FROM comment_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<Comment> comments);

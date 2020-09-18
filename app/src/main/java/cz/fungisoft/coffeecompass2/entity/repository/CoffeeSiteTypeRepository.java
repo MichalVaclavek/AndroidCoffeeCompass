@@ -11,13 +11,13 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteTypeDao;
 import io.reactivex.Flowable;
 
-public class CoffeeSiteTypeRepository {
+public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSiteTypeDao coffeeSiteTypeDao;
     private LiveData<List<CoffeeSiteType>> mAllCoffeeSiteTypes;
 
-    CoffeeSiteTypeRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    CoffeeSiteTypeRepository(CoffeeSiteDatabase db) {
+        super(db);
         coffeeSiteTypeDao = db.coffeeSiteTypeDao();
         mAllCoffeeSiteTypes = coffeeSiteTypeDao.getAllCoffeeSiteTypes();
     }

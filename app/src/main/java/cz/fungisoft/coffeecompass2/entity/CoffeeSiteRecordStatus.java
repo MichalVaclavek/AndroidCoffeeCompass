@@ -9,7 +9,7 @@ import androidx.room.Entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Entity
+@Entity(tableName = "coffee_site_record_status_table")
 public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelable {
 
     public CoffeeSiteRecordStatus() {

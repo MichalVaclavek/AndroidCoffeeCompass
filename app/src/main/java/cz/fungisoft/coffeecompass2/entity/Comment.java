@@ -18,7 +18,7 @@ import java.util.Date;
  * A Comment belonging to a CoffeeSite.
  * Used for reading Comments from server.
  */
-@Entity
+@Entity(tableName = "comment_table")
 public class Comment extends CoffeeSiteEntity implements Serializable, Parcelable {
 
     @Expose

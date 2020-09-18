@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -10,15 +11,24 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
+import io.reactivex.Flowable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ENTITIES_LOAD;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
@@ -33,7 +43,8 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
  */
 public class CoffeeSiteEntitiesService extends Service
                                        implements CoffeeSiteEntitiesLoadRESTResultListener,
-                                                  CoffeeSitesRESTResultListener {
+                                                  CoffeeSitesRESTResultListener,
+                                                  CoffeeSiteDatabase.DbDeleteEndListener {
 
     static final String TAG = "CoffeeSiteServiceBase";
 
@@ -52,6 +63,7 @@ public class CoffeeSiteEntitiesService extends Service
 
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteEntitiesService.LocalBinder();
+
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -72,26 +84,39 @@ public class CoffeeSiteEntitiesService extends Service
 
     private static CoffeeSiteEntityRepositories entitiesRepository;
 
+    private static CoffeeSiteRepository coffeeSiteRepository;
+
     public CoffeeSiteEntityRepositories getEntitiesRepository() {
        return entitiesRepository;
     }
 
+    private CoffeeSiteDatabase db;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(getApplicationContext());
+        db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
+        db.addDbDeleteEndListener(this);
+        db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
+
+        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
+
+        coffeeSiteRepository = new CoffeeSiteRepository(db);
 
         Log.d(TAG, "Service started.");
     }
 
+    @Override
+    public void onDbDeletedEnd() {
+        readAndSaveAllEntitiesFromServer();
+    }
 
     /**
      * Methods to start running AsyncTask
      **/
 
-    public void readAndSaveAllEntitiesFromServer() {
+    private void readAndSaveAllEntitiesFromServer() {
         new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
     }
 
@@ -119,16 +144,14 @@ public class CoffeeSiteEntitiesService extends Service
     @Override
     public void onCoffeeSitesReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
         if (result instanceof Result.Success) {
+            //TODO save CoffeeSites into the DB
 
-//            CoffeeSiteDBHelper coffeeSiteDBHelper = new CoffeeSiteDBHelper(this, dbManager);
-//            dbManager.open(coffeeSiteDBHelper);
-//
-//            for (CoffeeSite coffeeSite : ((Result.Success<List<CoffeeSite>>) result).getData()) {
-//                dbManager.insert(coffeeSite);
-//            }
-//
-//            dbManager.close();
+            coffeeSiteRepository.insertAll(((Result.Success<List<CoffeeSite>>) result).getData());
 
+            Disposable dis = coffeeSiteRepository.getCoffeeSiteByName("Bistro Hello")
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(cs ->  Log.i("test1", "Id: " + cs.getId() + " " + cs.getCreatedByUserName())
+                            , e -> Log.e("test1", e.getMessage()));
 
             informClientAboutAllCoffeeSitesLoadResult(true);
 
@@ -144,6 +167,5 @@ public class CoffeeSiteEntitiesService extends Service
             listener.onAllCoffeeSitesLoaded(result);
         }
     }
-
 
 }

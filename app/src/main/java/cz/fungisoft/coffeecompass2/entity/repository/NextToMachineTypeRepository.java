@@ -1,24 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.NextToMachineTypeDao;
 import io.reactivex.Flowable;
 
-public class NextToMachineTypeRepository {
+public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
     private NextToMachineTypeDao nextToMachineTypeDao;
     private LiveData<List<NextToMachineType>> mAllNextToMachineTypes;
 
-    NextToMachineTypeRepository(Context context) {
-        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(context);
+    NextToMachineTypeRepository(CoffeeSiteDatabase db) {
+        super(db);
         nextToMachineTypeDao = db.nextToMachineTypeDao();
         mAllNextToMachineTypes = nextToMachineTypeDao.getAllNextToMachineTypes();
     }

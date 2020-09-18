@@ -8,7 +8,7 @@ import androidx.room.Entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Entity
+@Entity(tableName = "site_location_type_table")
 public class SiteLocationType extends CoffeeSiteEntity implements Parcelable {
 
     public SiteLocationType(int id, String entityValue) {

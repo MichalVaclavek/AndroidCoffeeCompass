@@ -19,11 +19,14 @@ public interface SiteLocationTypeDao {
 //    @Query("SELECT * FROM CoffeeSite")
 //    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
-    @Query("SELECT * FROM SiteLocationType")
+    @Query("SELECT * FROM site_location_type_table")
     LiveData<List<SiteLocationType>> getAllSiteLocationTypes();
 
-    @Query("SELECT * FROM SiteLocationType WHERE locationType LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM site_location_type_table WHERE locationType LIKE :stringValue  LIMIT 1")
     Flowable<SiteLocationType> getSiteLocationType(String stringValue);
+
+    @Query("DELETE FROM site_location_type_table")
+    void deleteAll();
 
     @Insert
     void insertAll(List<SiteLocationType> siteLocationTypes);
