@@ -100,8 +100,6 @@ public class CoffeeSiteEntitiesService extends Service
         db.addDbDeleteEndListener(this);
         db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
 
-        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
-
         coffeeSiteRepository = new CoffeeSiteRepository(db);
 
         Log.d(TAG, "Service started.");
@@ -117,6 +115,7 @@ public class CoffeeSiteEntitiesService extends Service
      **/
 
     private void readAndSaveAllEntitiesFromServer() {
+        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
         new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
     }
 
@@ -148,10 +147,10 @@ public class CoffeeSiteEntitiesService extends Service
 
             coffeeSiteRepository.insertAll(((Result.Success<List<CoffeeSite>>) result).getData());
 
-            Disposable dis = coffeeSiteRepository.getCoffeeSiteByName("Bistro Hello")
-                    .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(cs ->  Log.i("test1", "Id: " + cs.getId() + " " + cs.getCreatedByUserName())
-                            , e -> Log.e("test1", e.getMessage()));
+//            Disposable dis = coffeeSiteRepository.getCoffeeSiteByName("Bistro Hello")
+//                    .subscribeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(cs ->  Log.i("test1", "Id: " + cs.getId() + " " + cs.getCreatedByUserName())
+//                            , e -> Log.e("test1", e.getMessage()));
 
             informClientAboutAllCoffeeSitesLoadResult(true);
 

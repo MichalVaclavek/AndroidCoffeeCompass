@@ -691,6 +691,8 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
      * @return
      */
     private String convertListToOneStringWithDelimiter(List<?> list, char delimiter) {
+        if (list == null) return "";
+
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < list.size(); i++) {
             sb.append(list.get(i).toString().trim());

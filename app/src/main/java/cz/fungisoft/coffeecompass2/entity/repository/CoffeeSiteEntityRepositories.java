@@ -131,7 +131,6 @@ public class CoffeeSiteEntityRepositories {
 
     public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db) {
         if (instance == null) {
-
             instance = new CoffeeSiteEntityRepositories(db);
         }
         return instance;

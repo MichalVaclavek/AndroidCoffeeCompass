@@ -209,4 +209,30 @@ public class Utils {
         return "- m";
     }
 
+    /**
+     * Pomocna metoda pro vypocet vzdalenosti mezi 2 body na mape/globu. Souradnice bodu ve formatu double.
+     * Prevzato ze stackoverflow.com
+     *
+     * @param lat1
+     * @param lon1
+     * @param lat2
+     * @param lon2
+     *
+     * @return vzdalenost 2 zadanych bodu v metrech
+     */
+    public static long countDistanceMetersFromSearchPoint(double lat1, double lon1, double lat2, double lon2) {
+        long eRadius = 6372000; // polomer Zeme v metrech, v CR?
+        long distance;
+        double c, a;
+
+        double latDist = Math.toRadians( lat2 - lat1 );
+        double lonDist = Math.toRadians( lon2 - lon1 );
+        a = Math.pow( Math.sin( latDist/2 ), 2 ) + Math.cos( Math.toRadians( lat1 ) ) * Math.cos( Math.toRadians( lat2 ) ) * Math.pow( Math.sin( lonDist / 2 ), 2 );
+        c  = 2 * Math.atan2( Math.sqrt( a ), Math.sqrt( 1 - a ) );
+
+        distance = Math.round(eRadius * c);
+
+        return distance;
+    }
+
 }

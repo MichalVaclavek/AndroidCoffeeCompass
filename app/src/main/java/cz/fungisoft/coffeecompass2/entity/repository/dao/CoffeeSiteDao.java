@@ -15,7 +15,7 @@ import io.reactivex.Flowable;
 @Dao
 public interface CoffeeSiteDao {
 
-    static final double ONE_METER_IN_DEGREE = 8.988764E-6; // one meter on Earth as a part of one degree
+    double ONE_METER_IN_DEGREE = 8.988764E-6; // one meter on Earth as a part of one degree
 
     @Transaction
     @Query("SELECT * FROM coffee_site_table")

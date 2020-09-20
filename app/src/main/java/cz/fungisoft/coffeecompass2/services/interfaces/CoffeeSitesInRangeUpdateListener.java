@@ -13,23 +13,6 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 public interface CoffeeSitesInRangeUpdateListener {
 
     /**
-     * Called, when searching of sites in range starts.
-     */
-    void onStartSearchingSitesInRange();
-
-    /**
-     * Called, when searching of sites in range finished.
-     */
-    void onSearchingSitesInRangeFinished();
-
-    /**
-     * Called, when one new CoffeeSite in current searching within range is read.
-     *
-     * @param numberOfSitesAlreadyRead number of CoffeeSites already read within reading list of CoffeeSites in range
-     */
-    void onNextSiteInRangeRead(int numberOfSitesAlreadyRead);
-
-    /**
      * Called, when there are new sites in range detected.
      *
      * @param newSitesInRange
@@ -50,5 +33,4 @@ public interface CoffeeSitesInRangeUpdateListener {
      */
     void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange);
 
-    void onCoffeeSitesInRangeUpdateServiceConnected();
 }

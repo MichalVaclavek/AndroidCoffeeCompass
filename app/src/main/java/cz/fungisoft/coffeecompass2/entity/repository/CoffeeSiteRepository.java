@@ -28,9 +28,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return mAllCoffeeSites;
     }
 
-    LiveData<List<CoffeeSite>> getCoffeeSitesInRectangle(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
+    public LiveData<List<CoffeeSite>> getCoffeeSitesInRectangle(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
         double searchRangeAsDegreePart = searchRangeInMeters * ONE_METER_IN_DEGREE;
-        return coffeeSiteDao.getCoffeeSitesInRectangle(searchRangeAsDegreePart);
+        return coffeeSiteDao.getCoffeeSitesInRectangle(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
     }
 
     public Flowable<CoffeeSite> getCoffeeSiteById(int siteId) {

@@ -28,6 +28,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivi
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
@@ -38,7 +39,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * item in the list.
  */
 public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-                                                      implements PropertyChangeListener {
+                                                      implements PropertyChangeListener,
+                                                                 CoffeeSitesInRangeUpdateListener {
 
     private static final String TAG = "CoffeeSiteListAdapter";
 
@@ -65,6 +67,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
     private boolean finishAnimation = false;
 
+
     /**
      * Checks if the order of CoffeeSiteMovable items in the list needs 're-ordering'<br>
      * caused by new distance event detected within one of the CoffeeSiteMovable in the list.<br>
@@ -79,6 +82,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             int toPosition = -1;
             boolean moveUp  = false;
             boolean moveDown = false;
+
             // 1. Find an item which is not in right position
             // only one item can be on a wrong position ??
             //TODO - to be sure, we should keep searching for wrong positions until end of list??
@@ -87,11 +91,11 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             for (int i = 0; i < mValues.size() ; i++) {
                 // check if dist. of this csm is higher then previous csm
                 if (i != 0) {
-                   if (mValues.get(i).getDistance() < mValues.get(i-1).getDistance()) { // wrong position
-                       fromPosition = i;
-                       moveUp = true;
-                       break;
-                   }
+                    if (mValues.get(i).getDistance() < mValues.get(i-1).getDistance()) { // wrong position
+                        fromPosition = i;
+                        moveUp = true;
+                        break;
+                    }
                 }
                 // check if dist. of this csm is lower then next csm
                 if (i != mValues.size() - 1) {
@@ -137,7 +141,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      *
      * @param newSites
      */
-    public void insertNewSites(List<CoffeeSiteMovable> newSites) {
+    @Override
+    public void onNewSitesInRange(List<CoffeeSiteMovable> newSites) {
+        // Listen to location change to allow correct sorting according distance
+        for (CoffeeSiteMovable csm : newSites) {
+            csm.addPropertyChangeListener(this);
+        }
 
         // If there are new CoffeeSites and there was 'Empty list card' or InitialDummy shown, remove it
         if (newSites.size() > 0 && mValues.size() >= 1
@@ -164,14 +173,21 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         }
     }
 
+    @Override
+    public void onNewSitesInRangeError(String error) {
+    }
+
     /**
      * Removes coffeeSites which are no longer in the search range.
      *
      * @param oldSites
      */
-    public void removeOldSites(List<CoffeeSiteMovable> oldSites) {
+    @Override
+    public void onSitesOutOfRange(List<CoffeeSiteMovable> oldSites) {
         //Go through all current sites and remove sites being out of range
         for (CoffeeSiteMovable csmToRemove : oldSites) {
+            csmToRemove.removePropertyChangeListener(this);
+
             for (int i = mValues.size() - 1; i >= 0  ; i--) {
                 if (mValues.get(i).getId() == csmToRemove.getId()) {
                     mValues.remove(i);
@@ -540,6 +556,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
 
+
     /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
@@ -623,5 +640,6 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             return (searchRange >= 1000) ?  searchRange/1000 + " km"
                                          : searchRange + " m";
         }
+
 
 }

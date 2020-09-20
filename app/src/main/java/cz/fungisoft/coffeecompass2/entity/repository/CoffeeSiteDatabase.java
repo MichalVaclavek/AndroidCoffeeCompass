@@ -89,7 +89,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                 @Override
                 public void onOpen (@NonNull SupportSQLiteDatabase db) {
                     super.onOpen(db);
-                    new PopulateDbAsync(DB_INSTANCE).execute();
+                    new DeleteDbAsync(DB_INSTANCE).execute();
                 }
             };
 
@@ -104,7 +104,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
     /**
      * Populate the database in the background.
      */
-    private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
+    private static class DeleteDbAsync extends AsyncTask<Void, Void, Void> {
 
         private CoffeeSiteDatabase mDB;
 
@@ -123,7 +123,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         private final StarsQualityDescriptionDao starsQualityDescriptionDao;
 
 
-        PopulateDbAsync(CoffeeSiteDatabase db) {
+        DeleteDbAsync(CoffeeSiteDatabase db) {
             this.mDB = db;
 
             averageStarsWithNumOfRatingsDao = db.averageStarsWithNumOfHodnoceniDao();

@@ -5,11 +5,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import cz.fungisoft.coffeecompass2.services.LocationService;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * CoffeeSite which is able to listen locationService changes
@@ -108,6 +111,17 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setNextToMachineTypes(coffeeSite.getNextToMachineTypes());
         this.setCoffeeSorts(coffeeSite.getCoffeeSorts());
         this.setOtherOffers(coffeeSite.getOtherOffers());
+    }
+
+    /**
+     * Constructor capable to create instance of CoffeeSiteMovable
+     * from its CoffeeSite ancestor instance and counts distance from search location
+     * @param coffeeSite
+     */
+    public CoffeeSiteMovable(CoffeeSite coffeeSite, LatLng searchLocationFrom) {
+
+        this(coffeeSite);
+        this.setDistance(Utils.countDistanceMetersFromSearchPoint(coffeeSite.getLatitude(), coffeeSite.getLongitude(), searchLocationFrom.latitude, searchLocationFrom.longitude));
     }
 
     public CoffeeSiteMovable(int id, String name, long dist) {
