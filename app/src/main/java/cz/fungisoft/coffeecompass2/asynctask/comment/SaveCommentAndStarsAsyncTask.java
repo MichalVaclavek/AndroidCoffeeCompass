@@ -15,7 +15,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -127,13 +127,7 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
         }
-        //return retVal;
         return null;
     }
-
-   // @Override
-    //protected void onPostExecute(List<Comment> result) {
-      //  commentsActivity.processComments(result);
-    //}
 
 }

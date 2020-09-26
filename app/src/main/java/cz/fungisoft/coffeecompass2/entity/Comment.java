@@ -54,7 +54,6 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("canBeDeleted")
-    @Ignore
     private boolean canBeDeleted;
 
     @Ignore
@@ -143,6 +142,10 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     public boolean isCanBeDeleted() {
         return canBeDeleted;
+    }
+
+    public void setCanBeDeleted(boolean canBeDeleted) {
+        this.canBeDeleted = canBeDeleted;
     }
 
     public void setCreated(Date created) {

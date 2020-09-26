@@ -8,7 +8,7 @@ import com.google.gson.GsonBuilder;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,7 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 
 /**
  * REST user login or register request to be sent to server coffeecompass.cz

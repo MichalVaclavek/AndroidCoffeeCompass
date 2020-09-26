@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.data.model;
+package cz.fungisoft.coffeecompass2.activity.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,13 +6,14 @@ import android.content.SharedPreferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 
 /**
  * Saves logged-in user data into "Preferences" to use it
  * after application is closed and opened again.
  */
-public class UserPreferenceHelper {
+public class UserPreferencesHelper {
 
     private final String INTRO = "intro";
 
@@ -26,6 +27,9 @@ public class UserPreferenceHelper {
     private final String NUM_OF_CREATED_SITES = "numOfCreatedSites";
     private final String NUM_OF_UPDATED_SITES = "numOfUpdatedSites";
     private final String NUM_OF_DELETED_SITES = "numOfDeletedSites";
+    // Number of created sites minus number of canceled sites, i.e. Active or Inactive sites
+    private final String NUM_OF_NOT_CANCELED_SITES = "numOfNotCanceledSites";
+
 
     private final String FIRST_NAME = "firstName";
     private final String LAST_NAME = "lastName";
@@ -45,7 +49,7 @@ public class UserPreferenceHelper {
 
     private final String nameOfSharedPreferences = "sharedUser2";
 
-    public UserPreferenceHelper(Context context) {
+    public UserPreferencesHelper(Context context) {
         app_prefs = context.getSharedPreferences(nameOfSharedPreferences,
                 Context.MODE_PRIVATE);
         this.context = context;
@@ -104,6 +108,16 @@ public class UserPreferenceHelper {
     private int getNumOfCreatedSites() {
         return app_prefs.getInt(NUM_OF_CREATED_SITES, 0);
     }
+
+    public void putNumOfNotCanceledSites(int numOfNotCanceledSites) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(NUM_OF_NOT_CANCELED_SITES, numOfNotCanceledSites);
+        edit.apply();
+    }
+    public int getNumOfNotCanceledSites() {
+        return app_prefs.getInt(NUM_OF_NOT_CANCELED_SITES, 0);
+    }
+
 
     private void putNumOfUpdatedSites(int numOfUpdatedSites) {
         SharedPreferences.Editor edit = app_prefs.edit();

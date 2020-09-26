@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.data;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
 
 /**
  * Class that holds data about LoggedInUser. Also requests authentication attempts and user information
@@ -12,19 +11,19 @@ public class UserAccountRepository {
     private static volatile UserAccountRepository instance;
 
     private UserAccountDataSource dataSource;
-    private UserPreferenceHelper preferenceHelper;
+    private UserPreferencesHelper preferenceHelper;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore
     private LoggedInUser user = null;
 
     // private constructor : singleton access
-    private UserAccountRepository(UserAccountDataSource dataSource, UserPreferenceHelper preferenceHelper) {
+    private UserAccountRepository(UserAccountDataSource dataSource, UserPreferencesHelper preferenceHelper) {
         this.dataSource = dataSource;
         this.preferenceHelper = preferenceHelper;
     }
 
-    public static UserAccountRepository getInstance(UserAccountDataSource dataSource, UserPreferenceHelper preferenceHelper) {
+    public static UserAccountRepository getInstance(UserAccountDataSource dataSource, UserPreferencesHelper preferenceHelper) {
         if (instance == null) {
             instance = new UserAccountRepository(dataSource, preferenceHelper);
         }

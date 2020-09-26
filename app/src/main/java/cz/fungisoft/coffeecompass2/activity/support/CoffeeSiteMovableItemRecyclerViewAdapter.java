@@ -30,6 +30,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
@@ -45,6 +46,8 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final FoundCoffeeSitesListActivity mParentActivity;
+    // Need to offline mode on/off to load CoffeeSite's image from URL or from file
+    private final boolean offlineModeOn;
     private List<CoffeeSiteMovable> mValues = new ArrayList<>();
     private CoffeeSiteMovableListContent content;
 
@@ -236,9 +239,11 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
     public CoffeeSiteMovableItemRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
                                                     CoffeeSiteMovableListContent content,
                                                     int currentSearchRange,
+                                                    boolean offlineModeOn,
                                                     boolean twoPane) {
         this.content = content;
         this.currentSearchRange = currentSearchRange;
+        this.offlineModeOn = offlineModeOn;
         mParentActivity = parent;
         mTwoPane = twoPane;
 
@@ -393,6 +398,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         if (emptyCardViewHolder != null &&
                 mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))  {
             finishAnimation = true;
+            emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
         }
 
         // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
@@ -545,8 +551,18 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         this.mValues.get(position).addPropertyChangeListener(viewHolder1.distanceView);
         Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
+
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL()).fit().placeholder(R.drawable.kafe_backround_120x160).into(viewHolder1.siteFoto);
+            if (!offlineModeOn) {
+                Picasso.get().load(this.mValues.get(position).getMainImageURL())
+                             .fit()
+                             .placeholder(R.drawable.kafe_backround_120x160)
+                             .into(viewHolder1.siteFoto);
+            } else {
+                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
+                             .fit().placeholder(R.drawable.kafe_backround_120x160)
+                             .into(viewHolder1.siteFoto);
+            }
         } else {
             viewHolder1.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
         }

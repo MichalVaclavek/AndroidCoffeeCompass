@@ -10,7 +10,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResu
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;

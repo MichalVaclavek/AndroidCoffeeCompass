@@ -68,7 +68,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment.
      */
-    private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
+    //private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
 
 
     private LiveData<List<CoffeeSite>> foundSites;
@@ -192,7 +192,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
             if (!offlinemode) {
                 startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             } else {
-                foundSites = coffeeSiteRepository.getCoffeeSitesInRectangle(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                foundSites = coffeeSiteRepository.getCoffeeSitesInRange(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             }
         }
     }
@@ -216,7 +216,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         if (!offlinemode) {
             startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
         } else {
-            foundSites = coffeeSiteRepository.getCoffeeSitesInRectangle(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            foundSites = coffeeSiteRepository.getCoffeeSitesInRange(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
         }
     }
 
@@ -248,24 +248,21 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
-
-        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesInRangeFinished();
-        }
-
         if (coffeeSites.size() > 0) {
             for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
                 listener.onSitesInRangeFound(coffeeSites);
             }
         }
-
+        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+            listener.onSearchingSitesInRangeFinished();
+        }
     }
 
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesInRangeFinished();
             listener.onSearchingSitesInRangeError(error);
+            listener.onSearchingSitesInRangeFinished();
         }
     }
 

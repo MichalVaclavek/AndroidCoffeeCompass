@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.ui;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.app.Application;
 import android.util.Log;
@@ -7,10 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
@@ -72,12 +72,12 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * Location service needed to update coffeeSitesMovable listeners
      * LocationService is provided by CoffeeSitesInRangeFoundService
      */
-    private LocationService locationService;
+    private WeakReference<LocationService> locationService;
 
     /**
      * Service to return coffee sites in range
      */
-    private CoffeeSitesInRangeFoundService sitesInRangeUpdateService;
+    private WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService;
 
     private List<CoffeeSitesInRangeUpdateListener>  sitesInRangeUpdateListeners = new ArrayList<>();
 
@@ -97,10 +97,10 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
                                      @NonNull LocationService locationService,
                                      @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
         super(application);
-        this.locationService = locationService;
-        this.sitesInRangeUpdateService = sitesInRangeUpdateService;
-        this.sitesInRangeUpdateService.addSitesInRangeFoundListener(this);
-        foundCoffeeSitesInDB = this.sitesInRangeUpdateService.getFoundSites();
+        this.locationService = new WeakReference<>(locationService);
+        this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
+        this.sitesInRangeUpdateService.get().addSitesInRangeFoundListener(this);
+        foundCoffeeSitesInDB = this.sitesInRangeUpdateService.get().getFoundSites();
     }
 
 
@@ -116,8 +116,8 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
 
         for (CoffeeSiteMovable csm : newSitesInRange) {
             // First add new CoffeeSites as locationService listeners
-            csm.setLocationService(locationService);
-            locationService.addPropertyChangeListener(csm);
+            csm.setLocationService(locationService.get());
+            locationService.get().addPropertyChangeListener(csm);
         }
 
         // 1. Find oldSites, i.e. sites not included in the coffeeSites
@@ -126,7 +126,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         goneSitesOutOfRange.removeAll(coffeeSites);
 
         for (CoffeeSiteMovable csm : goneSitesOutOfRange) {
-            locationService.removePropertyChangeListener(csm);
+            locationService.get().removePropertyChangeListener(csm);
         }
 
         currentSitesInRange = coffeeSites;

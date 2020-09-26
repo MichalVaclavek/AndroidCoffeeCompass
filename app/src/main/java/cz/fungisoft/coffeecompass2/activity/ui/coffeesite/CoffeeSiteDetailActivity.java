@@ -21,7 +21,7 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
@@ -157,12 +157,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     public void startCoffeeSiteLoad() {
-
-        if (Utils.isOnline()) {
-            showProgressbar();
-            coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
+        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            if (Utils.isOnline()) {
+                showProgressbar();
+                coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
+            } else{
+                Utils.showNoInternetToast(getApplicationContext());
+            }
         }
     }
 

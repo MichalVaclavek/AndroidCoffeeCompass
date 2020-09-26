@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -21,6 +22,7 @@ public class PriceRange extends CoffeeSiteEntity implements Parcelable {
         super();
     }
 
+    @Ignore
     protected PriceRange(Parcel in) {
         this.id = in.readInt();
         priceRange = in.readString();

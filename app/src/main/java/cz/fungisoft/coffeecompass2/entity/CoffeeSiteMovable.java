@@ -90,6 +90,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setLongitude(coffeeSite.getLongitude());
 
         this.setMainImageURL(coffeeSite.getMainImageURL());
+        this.setMainImageFileName(coffeeSite.getMainImageFileName());
 
         this.setCena(coffeeSite.getCena());
 

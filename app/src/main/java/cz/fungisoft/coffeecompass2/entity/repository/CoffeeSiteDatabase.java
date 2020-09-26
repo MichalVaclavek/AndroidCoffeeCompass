@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.ArrayList;
@@ -44,13 +45,16 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-                      version = 1, exportSchema = false)
+                      version = 6, exportSchema = false)
+@TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
     private static CoffeeSiteDatabase DB_INSTANCE;
 
     public interface DbDeleteEndListener {
-        void onDbDeletedEnd();
+        default void onCSEntitiesDeletedEnd() {}
+        default void onCoffeeSitesDeletedEnd() {}
+        default void onCommentsDeletedEnd() {}
     }
 
     private List<DbDeleteEndListener> dbDeleteEndListeners = new ArrayList<>();
@@ -89,32 +93,52 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                 @Override
                 public void onOpen (@NonNull SupportSQLiteDatabase db) {
                     super.onOpen(db);
-                    new DeleteDbAsync(DB_INSTANCE).execute();
+                    //new DeleteCSEntitiesAsync(DB_INSTANCE).execute();
                 }
             };
 
 
-    private void fireDbContentDeleted() {
+    private void fireCSEntitiesContentDeleted() {
         for (DbDeleteEndListener listener : dbDeleteEndListeners) {
-            listener.onDbDeletedEnd();
+            listener.onCSEntitiesDeletedEnd();
         }
+    }
+    private void fireCoffeeSitesContentDeleted() {
+        for (DbDeleteEndListener listener : dbDeleteEndListeners) {
+            listener.onCoffeeSitesDeletedEnd();
+        }
+    }
+    private void fireCommentsContentDeleted() {
+        for (DbDeleteEndListener listener : dbDeleteEndListeners) {
+            listener.onCommentsDeletedEnd();
+        }
+    }
+
+    public void deleteCSEntitiesAsync() {
+        new DeleteCSEntitiesAsync(DB_INSTANCE).execute();
+    }
+    public void deleteCoffeeSitesAsync() {
+        new DeleteCoffeeSitesAsync(DB_INSTANCE).execute();
+    }
+    public void deleteCommentsAsync() {
+        new DeleteCommentsAsync(DB_INSTANCE).execute();
     }
 
 
     /**
-     * Populate the database in the background.
+     * Deletes the database in the background.
      */
-    private static class DeleteDbAsync extends AsyncTask<Void, Void, Void> {
+    private static class DeleteCSEntitiesAsync extends AsyncTask<Void, Void, Void> {
 
         private CoffeeSiteDatabase mDB;
 
         private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfRatingsDao;
-        private final CoffeeSiteDao coffeeSiteDao;
+//        private final CoffeeSiteDao coffeeSiteDao;
         private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
         private final CoffeeSiteStatusDao coffeeSiteStatusDao;
         private final CoffeeSiteTypeDao coffeeSiteTypeDao;
         private final CoffeeSortDao coffeeSortDao;
-        private final CommentDao commentDao;
+//        private final CommentDao commentDao;
         private final CupTypeDao cupTypeDao;
         private final NextToMachineTypeDao nextToMachineTypeDao;
         private final OtherOfferDao otherOfferDao;
@@ -123,16 +147,16 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         private final StarsQualityDescriptionDao starsQualityDescriptionDao;
 
 
-        DeleteDbAsync(CoffeeSiteDatabase db) {
+        DeleteCSEntitiesAsync(CoffeeSiteDatabase db) {
             this.mDB = db;
 
             averageStarsWithNumOfRatingsDao = db.averageStarsWithNumOfHodnoceniDao();
-            coffeeSiteDao = db.coffeeSiteDao();
+//            coffeeSiteDao = db.coffeeSiteDao();
             coffeeSiteRecordStatusDao = db.coffeeSiteRecordStatusDao();
             coffeeSiteStatusDao = db.coffeeSiteStatusDao();
             coffeeSiteTypeDao = db.coffeeSiteTypeDao();
             coffeeSortDao = db.coffeeSortDao();
-            commentDao = db.commentDao();
+//            commentDao = db.commentDao();
             cupTypeDao = db.cupTypeDao();
             nextToMachineTypeDao = db.nextToMachineTypeDao();
             otherOfferDao = db.otherOfferDao();
@@ -148,12 +172,12 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             // Not needed if you only populate the database
             // when it is first created
             averageStarsWithNumOfRatingsDao.deleteAll();
-            coffeeSiteDao.deleteAll();
+//            coffeeSiteDao.deleteAll();
             coffeeSiteRecordStatusDao.deleteAll();
             coffeeSiteStatusDao.deleteAll();
             coffeeSiteTypeDao.deleteAll();
             coffeeSortDao.deleteAll();
-            commentDao.deleteAll();
+//            commentDao.deleteAll();
             cupTypeDao.deleteAll();
             nextToMachineTypeDao.deleteAll();
             otherOfferDao.deleteAll();
@@ -161,11 +185,65 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             siteLocationTypeDao.deleteAll();
             starsQualityDescriptionDao.deleteAll();
 
-            mDB.fireDbContentDeleted();
+            mDB.fireCSEntitiesContentDeleted();
 
             return null;
         }
     }
+
+    /**
+     * Deletes the CoffeeSites database in the background.
+     */
+    private static class DeleteCoffeeSitesAsync extends AsyncTask<Void, Void, Void> {
+
+        private CoffeeSiteDatabase mDB;
+
+        private final CoffeeSiteDao coffeeSiteDao;
+
+        DeleteCoffeeSitesAsync(CoffeeSiteDatabase db) {
+            this.mDB = db;
+            coffeeSiteDao = db.coffeeSiteDao();
+        }
+
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            // Start the app with a clean database every time.
+            // Not needed if you only populate the database
+            // when it is first created
+            coffeeSiteDao.deleteAll();
+            mDB.fireCoffeeSitesContentDeleted();
+
+            return null;
+        }
+    }
+
+    /**
+     * Deletes the Comments database in the background.
+     */
+    private static class DeleteCommentsAsync extends AsyncTask<Void, Void, Void> {
+
+        private CoffeeSiteDatabase mDB;
+
+        private final CommentDao commentDao;
+
+        DeleteCommentsAsync(CoffeeSiteDatabase db) {
+            this.mDB = db;
+            commentDao = db.commentDao();
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            // Start the app with a clean database every time.
+            // Not needed if you only populate the database
+            // when it is first created
+            commentDao.deleteAll();
+            mDB.fireCommentsContentDeleted();
+
+            return null;
+        }
+    }
+
 
     public abstract CoffeeSiteDao coffeeSiteDao();
 

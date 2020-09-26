@@ -11,14 +11,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.Headers;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;

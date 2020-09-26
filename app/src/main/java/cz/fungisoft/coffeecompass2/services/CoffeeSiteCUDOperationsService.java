@@ -11,7 +11,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteCreateUpdateAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteDeleteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;

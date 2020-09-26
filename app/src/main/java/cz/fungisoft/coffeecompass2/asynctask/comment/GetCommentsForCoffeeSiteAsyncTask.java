@@ -27,7 +27,7 @@ import cz.fungisoft.coffeecompass2.entity.Comment;
  * Class to asynchronously load all the comments for the
  * specified CoffeeSite
  */
-public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
+public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String, String>  {
 
     private static final String TAG = "Read comments async.";
 
@@ -40,7 +40,7 @@ public class GetCommentsAsyncTask extends AsyncTask<String, String, String>  {
 
     private int coffeeSiteID;
 
-    public GetCommentsAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
+    public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
         this.parentActivity = new WeakReference<>(parentActivity);
         this.coffeeSiteID = coffeeSiteID;
 

@@ -268,7 +268,7 @@
                             android:layout_height="149dp"
                             android:background="@drawable/button_espresso_unfocused"
                             android:enabled="false"
-                            android:onClick="onHledejKafeClick"
+                            android:onClick="onSearchCoffeeClick"
                             android:text="Button"
                             android:textSize="22sp" />
 

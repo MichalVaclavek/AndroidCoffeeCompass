@@ -9,6 +9,7 @@ import android.util.Log;
 
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 
 /**
  * Receiver of events indicating change of network connectivity.
@@ -124,12 +125,19 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param isOnline status of internet connectivity
      * @param context calling context, usually Activity which registered this Receiver
      */
-    private void startLoadEntitiesInMainActivity(boolean isOnline, Context context) {
+    private void startLoadCSEntities(boolean isOnline, Context context) {
         if (isOnline) {
-            if (context instanceof MainActivity) {
-                MainActivity ma = (MainActivity) context;
-                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()) {
-                    ma.startLoadingCoffeeSiteEntities();
+//            if (context instanceof MainActivity) {
+//                MainActivity ma = (MainActivity) context;
+//                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()) {
+//                    //ma.startLoadingCoffeeSiteEntities();
+//                }
+//            }
+            if (context instanceof CoffeeSiteEntitiesService) {
+                CoffeeSiteEntitiesService coffeeSiteEntitiesService = (CoffeeSiteEntitiesService) context;
+                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()
+                      && !Utils.isOfflineModeOn(context)) {
+                    coffeeSiteEntitiesService.populateCSEntities();
                 }
             }
         }
@@ -159,7 +167,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     public void accept(Boolean internet) {
         online = internet;
         startReadStatisticsInMainActivity(online, this.context);
-        startLoadEntitiesInMainActivity(online, this.context);
+        startLoadCSEntities(online, this.context);
         startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
     }
 

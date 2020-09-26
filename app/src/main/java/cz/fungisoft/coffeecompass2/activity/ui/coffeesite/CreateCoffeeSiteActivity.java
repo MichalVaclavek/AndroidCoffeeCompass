@@ -59,9 +59,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
@@ -823,7 +823,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // (and thus won't be supporting component replacement by other
         // applications).
         coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
-        coffeeSiteEntitiesServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
+        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
                 coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindCoffeeSiteEntitiesService = true;
@@ -839,7 +839,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
             }
             // Release information about the service's state.
-            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteImageServiceConnectionListener(this);
+            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
             unbindService( coffeeSiteEntitiesServiceConnector);
             mShouldUnbindCoffeeSiteEntitiesService = false;
         }
@@ -848,7 +848,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onCoffeeSiteEntitiesServiceConnected() {
-        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
+        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
             //startLoadingCoffeeSiteEntities();

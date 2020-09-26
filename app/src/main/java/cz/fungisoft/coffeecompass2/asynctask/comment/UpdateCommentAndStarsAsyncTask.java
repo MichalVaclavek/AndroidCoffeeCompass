@@ -8,11 +8,10 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.utils.Utils;

@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.images;
+package cz.fungisoft.coffeecompass2.activity.interfaces.images;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import okhttp3.MultipartBody;

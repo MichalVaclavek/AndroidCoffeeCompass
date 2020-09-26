@@ -103,7 +103,8 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String result) {
         if (parentActivity.get() != null) {
-            parentActivity.get().zobrazStatistiky(stats);
+            parentActivity.get().showAndSaveStatistics(stats);
         }
+
     }
 }

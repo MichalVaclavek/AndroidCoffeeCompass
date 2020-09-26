@@ -120,7 +120,7 @@ public class CoffeeSiteEntityRepositories {
         coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
         coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
         coffeeSortRepository = new CoffeeSortRepository(db);
-        commentRepository = new CommentRepository(db);
+        commentRepository = CommentRepository.getInstance(db);
         cupTypeRepository = new CupTypeRepository(db);
         nextToMachineTypeRepository = new NextToMachineTypeRepository(db);
         otherOfferRepository = new OtherOfferRepository(db);

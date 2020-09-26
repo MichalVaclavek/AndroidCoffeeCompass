@@ -9,12 +9,11 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteIdRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -25,8 +24,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_DELETE;
 
 /**
  * AsyncTasky pro Create, Update operace s CoffeeSite

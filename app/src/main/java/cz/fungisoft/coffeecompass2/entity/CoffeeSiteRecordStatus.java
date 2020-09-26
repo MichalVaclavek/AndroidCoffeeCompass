@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -25,6 +26,7 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
     @SerializedName("status")
     private String status;
 
+    @Ignore
     protected CoffeeSiteRecordStatus(Parcel in) {
         id = in.readInt();
         status = in.readString();

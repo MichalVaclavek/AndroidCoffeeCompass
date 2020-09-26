@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
+import androidx.room.TypeConverters;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -18,15 +19,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import cz.fungisoft.coffeecompass2.entity.repository.DbDataConverters;
+import cz.fungisoft.coffeecompass2.entity.repository.DbDataListsConverters;
+
 /**
  * A CoffeeSite, main app. entity
  */
 @Entity(tableName = "coffee_site_table")
-public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable
-{
-//    @Expose
-//    @SerializedName("id")
-//    protected int id;
+public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable {
 
     @Expose
     @SerializedName("siteName")
@@ -72,6 +72,12 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     @ColumnInfo(name = "mainImageURL")
     protected String mainImageURL = ""; // default empty, means image not available
 
+    /**
+     * File name of the CoffeeSite image saved
+     */
+    @ColumnInfo(name = "mainImageFileName")
+    protected String mainImageFileName = ""; // default empty, means image not available
+
     @Expose
     @SerializedName("uliceCP")
     @ColumnInfo(name = "uliceCP")
@@ -111,55 +117,59 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     @Expose
     @SerializedName("typPodniku")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected CoffeeSiteType typPodniku;
 
     @Expose
     @SerializedName("typLokality")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected SiteLocationType typLokality;
 
     @Expose
     @SerializedName("statusZarizeni")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected CoffeeSiteStatus statusZarizeni;
 
     @Expose
     @SerializedName("recordStatus")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected CoffeeSiteRecordStatus statusZaznamu;
 
     @Expose
     @SerializedName("cena")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected PriceRange cena;
 
     @Expose
     @SerializedName("averageStarsWithNumOfHodnoceni")
-    @Ignore
+    @TypeConverters(DbDataConverters.class)
     protected AverageStarsWithNumOfRatings hodnoceni;
 
     /* Many to Many relations */
 
     @Expose
     @SerializedName("cupTypes")
-    @Ignore
+    @TypeConverters(DbDataListsConverters.class)
     protected List<CupType> cupTypes;
 
     @Expose
     @SerializedName("coffeeSorts")
-    @Ignore
+    @TypeConverters(DbDataListsConverters.class)
     protected List<CoffeeSort> coffeeSorts;
 
     @Expose
     @SerializedName("otherOffers")
-    @Ignore
+    @TypeConverters(DbDataListsConverters.class)
     protected List<OtherOffer> otherOffers;
 
     @Expose
     @SerializedName("nextToMachineTypes")
-    @Ignore
+    @TypeConverters(DbDataListsConverters.class)
     protected List<NextToMachineType> nextToMachineTypes;
+
+    /* One to Many relation */
+    @Ignore
+    protected List<Comment> comments;
 
 
     /** Properties of CoffeeSiteDTO which describes allowed operations **/
@@ -167,55 +177,36 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     @Expose(serialize = false)
     @SerializedName("canBeModified")
-    @Ignore
     protected boolean canBeModified = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeActivated")
-    @Ignore
     protected boolean canBeActivated = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeDeactivated")
-    @Ignore
     protected boolean canBeDeactivated = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeCanceled")
-    @Ignore
     protected boolean canBeCanceled = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeDeleted")
-    @Ignore
     protected boolean canBeDeleted = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeCommented")
-    @Ignore
     protected boolean canBeCommented = false;
 
     @Expose(serialize = false)
     @SerializedName("canBeRatedByStars")
-    @Ignore
     protected boolean canBeRatedByStars = false;
 
     @Expose(serialize = false)
     @SerializedName("isAnyOtherSiteActiveOnSamePosition")
-    @Ignore
     protected boolean isAnyOtherSiteActiveOnSamePosition = false;
 
-    //@Expose(serialize = false , deserialize = false)
-    @Ignore
-    protected List<Comment> comments;
-
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public void setId(int id) {
-//        this.id = id;
-//    }
 
     public String getName() {
         return name;
@@ -251,6 +242,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
         longitude = in.readDouble();
 
         mainImageURL = in.readString();
+        mainImageFileName = in.readString();
 
         statusZarizeni = in.readParcelable(CoffeeSiteStatus.class.getClassLoader());
         typPodniku = in.readParcelable(CoffeeSiteType.class.getClassLoader());
@@ -308,6 +300,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
         dest.writeDouble(longitude);
 
         dest.writeString(mainImageURL);
+        dest.writeString(mainImageFileName);
 
         dest.writeParcelable(statusZarizeni, flags);
         dest.writeParcelable(typPodniku, flags);
@@ -392,6 +385,14 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     public void setMainImageURL(String mainImageURL) {
         this.mainImageURL = mainImageURL;
+    }
+
+    public String getMainImageFileName() {
+        return mainImageFileName;
+    }
+
+    public void setMainImageFileName(String mainImageFileName) {
+        this.mainImageFileName = mainImageFileName;
     }
 
     public String getCreatedByUserName() {

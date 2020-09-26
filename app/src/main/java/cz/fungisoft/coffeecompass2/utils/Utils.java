@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -233,6 +234,19 @@ public class Utils {
         distance = Math.round(eRadius * c);
 
         return distance;
+    }
+
+    // Reading OFFLINE mode status
+    private static OfflineModePreferenceHelper offlineModePreferenceHelper;
+
+    /**
+     * Finds from Preferences if the OFFLINE mode is switched ON or OFF
+     *
+     * @return
+     */
+    public static boolean isOfflineModeOn(Context context) {
+        offlineModePreferenceHelper = new OfflineModePreferenceHelper(context);
+        return offlineModePreferenceHelper.getOfflineMode();
     }
 
 }

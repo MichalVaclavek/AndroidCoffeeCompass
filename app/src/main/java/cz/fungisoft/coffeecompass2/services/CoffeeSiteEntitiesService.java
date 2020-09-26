@@ -2,19 +2,20 @@ package cz.fungisoft.coffeecompass2.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -23,12 +24,9 @@ import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositorie
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
+import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ENTITIES_LOAD;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
@@ -48,6 +46,12 @@ public class CoffeeSiteEntitiesService extends Service
 
     static final String TAG = "CoffeeSiteServiceBase";
 
+    /**
+     * Detector of internet connection change
+     */
+    private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
+
+
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about resutl later, as all the operations are Async
     private List<CoffeeSiteEntitiesServiceOperationsListener> coffeeSiteEntitiesOperationsListeners = new ArrayList<>();
@@ -57,6 +61,7 @@ public class CoffeeSiteEntitiesService extends Service
             coffeeSiteEntitiesOperationsListeners.add(listener);
         }
     }
+
     public void removeCoffeeSiteEntitiesOperationsListener(CoffeeSiteEntitiesServiceOperationsListener listener) {
         coffeeSiteEntitiesOperationsListeners.remove(listener);
     }
@@ -96,18 +101,39 @@ public class CoffeeSiteEntitiesService extends Service
     public void onCreate() {
         super.onCreate();
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkChangeStateReceiver, filter);
+
         db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
         db.addDbDeleteEndListener(this);
-        db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
-
         coffeeSiteRepository = new CoffeeSiteRepository(db);
+        db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
 
         Log.d(TAG, "Service started.");
     }
 
     @Override
-    public void onDbDeletedEnd() {
-        readAndSaveAllEntitiesFromServer();
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeStateReceiver);
+        db.removeDbDeleteEndListener(this);
+        Log.d(TAG, "Service destroyed.");
+    }
+
+
+    /**
+     * Deletes current CS entities data from DB and loads and saves new ones
+     */
+    public void populateCSEntities() {
+        db.deleteCSEntitiesAsync();
+    }
+
+    @Override
+    public void onCSEntitiesDeletedEnd() {
+//        if (Utils.isOfflineModeOn(getApplicationContext())) {
+            readAndSaveAllEntitiesFromServer();
+//        }
     }
 
     /**
@@ -115,42 +141,69 @@ public class CoffeeSiteEntitiesService extends Service
      **/
 
     private void readAndSaveAllEntitiesFromServer() {
-        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
-        new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
+        if (Utils.isOnline()) {
+            entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
+            new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
+        }
     }
 
     @Override
     public void onCoffeeSiteEntitiesLoaded(Result<Boolean> result) {
         if (result instanceof Result.Success) {
-            informClientAboutResult( ((Result.Success<Boolean>) result).getData());
+            informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
         }
     }
 
-    private void informClientAboutResult(Boolean result) {
+    private void informClientAboutCSEntitiesLoadResult(Boolean result) {
         for (CoffeeSiteEntitiesServiceOperationsListener listener : coffeeSiteEntitiesOperationsListeners) {
             listener.onCoffeeSiteEntitiesLoaded(result);
         }
     }
 
     /**
-     * Methods to start running AsyncTask
+     * Methods to start AsyncTasks for deleting/loading/and saving of CoffeeSites
      **/
 
-    public void readAndSaveAllCoffeeSitesFromServer() {
-        new GetAllCoffeeSitesAsyncTask(COFFEE_SITE_LOAD_ALL, this).execute();
+    /**
+     * Deletes current CoffeeSites data from DB and loads and saves new ones
+     */
+    public void populateCoffeeSites() {
+        db.deleteCoffeeSitesAsync();
     }
 
     @Override
+    public void onCoffeeSitesDeletedEnd() {
+        readAndSaveAllCoffeeSitesFromServer();
+    }
+
+    private void readAndSaveAllCoffeeSitesFromServer() {
+        if (Utils.isOnline()) {
+            new GetAllCoffeeSitesAsyncTask(COFFEE_SITE_LOAD_ALL, this).execute();
+        }
+    }
+
+    /**
+     * On all CoffeeSites returned from server.
+     *
+     * @param oper identifier of REST operation which lead to call this method
+     * @param result - success or error result of the operation. If success, then List<CoffeeSite> is returned in result = new Result.Success<>(coffeeSites);
+     */
+    @Override
     public void onCoffeeSitesReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
         if (result instanceof Result.Success) {
-            //TODO save CoffeeSites into the DB
 
-            coffeeSiteRepository.insertAll(((Result.Success<List<CoffeeSite>>) result).getData());
+            List<CoffeeSite> allCoffeeSites = ((Result.Success<List<CoffeeSite>>) result).getData();
 
-//            Disposable dis = coffeeSiteRepository.getCoffeeSiteByName("Bistro Hello")
-//                    .subscribeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(cs ->  Log.i("test1", "Id: " + cs.getId() + " " + cs.getCreatedByUserName())
-//                            , e -> Log.e("test1", e.getMessage()));
+            coffeeSiteRepository.insertAll(allCoffeeSites);
+
+            for (CoffeeSite cs : allCoffeeSites) {
+                if (!cs.getMainImageURL().isEmpty()) {
+                    String imageFileName = "photo_site_" + cs.getId();
+                    cs.setMainImageFileName(imageFileName);
+                    //ImageUtil.saveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                    //Picasso.get().load(cs.getMainImageURL()).into(ImageUtil.picassoImageTarget(getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, imageFileName));
+                }
+            }
 
             informClientAboutAllCoffeeSitesLoadResult(true);
 

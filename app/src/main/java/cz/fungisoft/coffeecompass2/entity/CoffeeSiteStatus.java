@@ -3,16 +3,15 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "coffee_site_status_table")
 public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
-
-    public long coffeeSiteId; // for DB usage only
 
     public CoffeeSiteStatus() {
         super();
@@ -23,6 +22,7 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
         this.status = entityValue;
     }
 
+    @Ignore
     protected CoffeeSiteStatus(Parcel in) {
         this.id = in.readInt();
         status = in.readString();

@@ -10,7 +10,7 @@ import java.lang.ref.WeakReference;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.images.ImageRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImageRESTInterface;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;

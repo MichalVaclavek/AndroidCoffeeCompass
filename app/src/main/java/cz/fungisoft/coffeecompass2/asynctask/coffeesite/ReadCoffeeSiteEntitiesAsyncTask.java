@@ -13,7 +13,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;

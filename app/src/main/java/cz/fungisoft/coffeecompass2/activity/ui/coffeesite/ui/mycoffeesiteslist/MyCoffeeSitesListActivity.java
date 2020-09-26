@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -20,15 +19,14 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.squareup.picasso.Picasso;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;

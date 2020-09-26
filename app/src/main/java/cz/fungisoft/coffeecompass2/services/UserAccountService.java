@@ -18,8 +18,8 @@ import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import cz.fungisoft.coffeecompass2.activity.data.model.UserPreferenceHelper;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LogoutOrDeleteResult;
@@ -42,7 +42,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     // Repository to check if a user is logen in
     private static UserAccountRepository userLoginAndRegisterRepository;
 
-    private static UserPreferenceHelper preferenceHelper;
+    private static UserPreferencesHelper userPreferenceHelper;
 
     private static MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
     private static MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
@@ -149,8 +149,8 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     @Override
     public void onCreate() {
         super.onCreate();
-        preferenceHelper = new UserPreferenceHelper(this);
-        userLoginAndRegisterRepository = UserAccountRepository.getInstance(new UserAccountDataSource(this), preferenceHelper);
+        userPreferenceHelper = new UserPreferencesHelper(this);
+        userLoginAndRegisterRepository = UserAccountRepository.getInstance(new UserAccountDataSource(this), userPreferenceHelper);
         Log.d(TAG, "Service started.");
     }
 

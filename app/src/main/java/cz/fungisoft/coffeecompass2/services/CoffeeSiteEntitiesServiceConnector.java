@@ -9,14 +9,14 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 
-public class CoffeeSiteEntitiesServiceConnector implements ServiceConnection
-{
+public class CoffeeSiteEntitiesServiceConnector implements ServiceConnection {
+
         private List<CoffeeSiteEntitiesServiceConnectionListener> connectionListenerList = new ArrayList<>();
 
-        public void addCoffeeSiteImageServiceConnectionListener( CoffeeSiteEntitiesServiceConnectionListener listener) {
+        public void addCoffeeSiteEntitiesServiceConnectionListener(CoffeeSiteEntitiesServiceConnectionListener listener) {
             this.connectionListenerList.add(listener);
         }
-        public void removeCoffeeSiteImageServiceConnectionListener(CoffeeSiteEntitiesServiceConnectionListener listener) {
+        public void removeCoffeeSiteEntitiesServiceConnectionListener(CoffeeSiteEntitiesServiceConnectionListener listener) {
             this.connectionListenerList.remove(listener);
         }
 
@@ -24,7 +24,7 @@ public class CoffeeSiteEntitiesServiceConnector implements ServiceConnection
         // is not null.
         private CoffeeSiteEntitiesService mBoundService;
 
-        public CoffeeSiteEntitiesService getCoffeeSiteImageService() {
+        public CoffeeSiteEntitiesService getCoffeeSiteEntitiesService() {
             return mBoundService;
         }
 

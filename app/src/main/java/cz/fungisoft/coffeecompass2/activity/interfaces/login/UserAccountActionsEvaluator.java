@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.login;
+package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 

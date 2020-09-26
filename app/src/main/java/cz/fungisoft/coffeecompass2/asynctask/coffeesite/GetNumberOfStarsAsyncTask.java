@@ -9,7 +9,7 @@ import java.lang.ref.WeakReference;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

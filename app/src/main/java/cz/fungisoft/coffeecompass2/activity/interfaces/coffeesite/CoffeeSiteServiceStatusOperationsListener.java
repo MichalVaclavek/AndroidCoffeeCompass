@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite;
+package cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 

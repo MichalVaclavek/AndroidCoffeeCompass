@@ -9,17 +9,11 @@ import androidx.room.Transaction;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.repository.relations.CoffeeSiteWithCsStatus;
+import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
 
 @Dao
 public interface CoffeeSiteDao {
-
-    double ONE_METER_IN_DEGREE = 8.988764E-6; // one meter on Earth as a part of one degree
-
-    @Transaction
-    @Query("SELECT * FROM coffee_site_table")
-    LiveData<List<CoffeeSiteWithCsStatus>> loadCoffeeSiteWithCsStatuses();
 
     @Query("SELECT * FROM coffee_site_table")
     LiveData<List<CoffeeSite>> getAllCoffeeSites();
@@ -35,8 +29,17 @@ public interface CoffeeSiteDao {
             "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart)")
     LiveData<List<CoffeeSite>> getCoffeeSitesInRectangle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
+    /**
+     *
+     * @param userName
+     * @return
+     */
+    @Query("SELECT * FROM coffee_site_table WHERE originalUserName LIKE :userName")
+    LiveData<List<CoffeeSite>> getCoffeeSitesFromUser(String userName);
+
+
     @Query("SELECT * FROM coffee_site_table WHERE id = :id LIMIT 1")
-    Flowable<CoffeeSite> getCoffeeSiteById(int id);
+    LiveData<CoffeeSite> getCoffeeSiteById(long id);
 
     @Query("SELECT * FROM coffee_site_table WHERE siteName = :coffeeSiteName LIMIT 1")
     Flowable<CoffeeSite> getCoffeeSiteByName(String coffeeSiteName);
@@ -49,5 +52,18 @@ public interface CoffeeSiteDao {
 
     @Insert
     void insertCoffeeSite(CoffeeSite coffeeSite);
+
+    @Transaction
+    @Query("SELECT * FROM coffee_site_table")
+    List<CoffeeSiteWithComments> getCoffeeSitesWithComments();
+
+    @Transaction
+    @Query("SELECT * FROM coffee_site_table WHERE id = :coffeeSiteId LIMIT 1")
+    List<CoffeeSiteWithComments> getCoffeeSiteWithComments(long coffeeSiteId);
+
+//    @Transaction
+//    @Insert
+//    long setCoffeeSiteWithComments(CoffeeSiteWithComments coffeeSiteWithComments);
+
 
 }

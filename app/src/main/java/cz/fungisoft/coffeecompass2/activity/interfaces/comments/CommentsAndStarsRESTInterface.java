@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.comments;
+package cz.fungisoft.coffeecompass2.activity.interfaces.comments;
 
 import java.util.List;
 
@@ -26,6 +26,14 @@ public interface CommentsAndStarsRESTInterface {
     String GET_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_PUBLIC_URL;
 
     String DELETE_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_SECURED_URL;
+
+    /**
+     * REST call for obtaining all Comments from server. Used when activating OFFLINE mode.
+     *
+     * @return - list of all Comments saved on server.
+     */
+    @GET("comments/all")
+    Call<List<Comment>> getAllComments();
 
     /**
      * Calls saving of Comment and Stars for CoffeeSiteID=siteID. Returns list of all
@@ -56,6 +64,15 @@ public interface CommentsAndStarsRESTInterface {
      */
     @GET("comments/number/{siteID}")
     Call<Integer> getNumberOfComments(@Path("siteID") int siteID);
+
+    /**
+     * REST call for obtaining Comments for the CoffeeSite with id=siteID
+     *
+     * @param siteID
+     * @return
+     */
+    @GET("comments/{siteID}")
+    Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") long siteID);
 
     /**
      * Deletes comment of commentID. Return commentID back or 0? if the delete request failed

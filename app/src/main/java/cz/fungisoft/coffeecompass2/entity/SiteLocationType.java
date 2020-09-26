@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -16,11 +17,11 @@ public class SiteLocationType extends CoffeeSiteEntity implements Parcelable {
         this.locationType = entityValue;
     }
 
-
     public SiteLocationType() {
         super();
     }
 
+    @Ignore
     protected SiteLocationType(Parcel in) {
         this.id = in.readInt();
         locationType = in.readString();

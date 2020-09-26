@@ -19,4 +19,5 @@ public class Statistics {
         this.numOfSitesToday = sitesToday;
         this.numOfUsers = users;
     }
+
 }

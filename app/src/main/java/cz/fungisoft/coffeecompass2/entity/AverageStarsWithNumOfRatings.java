@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -36,6 +37,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
         this.common = common;
     }
 
+    @Ignore
     protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
@@ -43,6 +45,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     }
 
     public static final Creator<AverageStarsWithNumOfRatings> CREATOR = new Creator<AverageStarsWithNumOfRatings>() {
+
         @NotNull
         @Contract("_ -> new")
         @Override

@@ -23,7 +23,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;

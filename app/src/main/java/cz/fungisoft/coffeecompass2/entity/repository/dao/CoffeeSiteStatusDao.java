@@ -8,18 +8,15 @@ import androidx.room.Transaction;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
-import cz.fungisoft.coffeecompass2.entity.repository.relations.CoffeeSiteWithCsStatus;
 import io.reactivex.Flowable;
 
 @Dao
 public interface CoffeeSiteStatusDao {
 
-    @Transaction
-    @Query("SELECT * FROM coffee_site_table WHERE id LIKE :coffeeSiteId")
-    public List<CoffeeSiteWithCsStatus> getCoffeeSiteWithStatus(String coffeeSiteId);
+//    @Transaction
+//    @Query("SELECT * FROM coffee_site_table WHERE id LIKE :coffeeSiteId")
+//    public List<CoffeeSiteWithCsStatus> getCoffeeSiteWithStatus(String coffeeSiteId);
 
     @Query("SELECT * FROM coffee_site_status_table")
     LiveData<List<CoffeeSiteStatus>> getAllCoffeeSiteStatuses();

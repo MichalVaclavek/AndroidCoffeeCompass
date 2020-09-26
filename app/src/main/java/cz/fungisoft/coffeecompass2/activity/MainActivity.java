@@ -39,9 +39,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.interfaces.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
+import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CommentRepository;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -119,6 +123,12 @@ public class MainActivity extends ActivityWithLocationService
     private OfflineModePreferenceHelper offlineModePreferenceHelper;
     private boolean offlineModeOn = false;
 
+    // Saves Statistics
+    private StatisticsPrefencesHelper statisticsPrefencesHelper;
+
+    // Saves number of Not canceled sites created by user
+    private UserPreferencesHelper userPreferencesHelper;
+
 
     private ProgressBar mainActivityProgressBar;
 
@@ -161,6 +171,9 @@ public class MainActivity extends ActivityWithLocationService
 
         offlineModePreferenceHelper = new OfflineModePreferenceHelper(this);
         offlineModeOn = offlineModePreferenceHelper.getOfflineMode();
+
+        statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
+        userPreferencesHelper = new UserPreferencesHelper(this);
 
         // there is an attempt to connect to LocationService in super Activity
         // lets show progress bar as it can take some time, when the
@@ -257,7 +270,9 @@ public class MainActivity extends ActivityWithLocationService
                 }
             }
         });
-        fab.setVisibility(View.VISIBLE);
+        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            fab.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -278,7 +293,7 @@ public class MainActivity extends ActivityWithLocationService
         // (and thus won't be supporting component replacement by other
         // applications).
         coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
-        coffeeSiteEntitiesServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
+        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
                 coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbindCoffeeSiteEntitiesService = true;
@@ -290,10 +305,12 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     public void onCoffeeSiteEntitiesServiceConnected() {
-        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteImageService();
+        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            //startLoadingCoffeeSiteEntities();
+            if (!Utils.isOfflineModeOn(getApplicationContext())) {
+                coffeeSiteEntitiesService.populateCSEntities();
+            }
         }
     }
 
@@ -303,15 +320,9 @@ public class MainActivity extends ActivityWithLocationService
                 coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
             }
             // Release information about the service's state.
-            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteImageServiceConnectionListener(this);
+            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
             unbindService( coffeeSiteEntitiesServiceConnector);
             mShouldUnbindCoffeeSiteEntitiesService = false;
-        }
-    }
-
-    public void startLoadingCoffeeSiteEntities() {
-        if (coffeeSiteEntitiesService != null) {
-            //coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
         }
     }
 
@@ -347,7 +358,11 @@ public class MainActivity extends ActivityWithLocationService
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            startNumberOfCoffeeSitesFromUserService();
+            if (!Utils.isOfflineModeOn(getApplicationContext())) {
+                startNumberOfCoffeeSitesFromUserService();
+            } else {
+                onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
+            }
         }
     }
 
@@ -378,6 +393,8 @@ public class MainActivity extends ActivityWithLocationService
         if (error.isEmpty()) {
             numberOfCoffeeSitesCreatedByLoggedInUser = coffeeSitesNumber;
             numberOfCoffeeSitesCreatedByLoggedInUserChecked = true;
+            userPreferencesHelper.putNumOfNotCanceledSites(numberOfCoffeeSitesCreatedByLoggedInUser);
+
             MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
             if (myCoffeeSitesMenuItem != null) {
                 if (numberOfCoffeeSitesCreatedByLoggedInUser > 0) {
@@ -412,7 +429,7 @@ public class MainActivity extends ActivityWithLocationService
         locationImageView.setBackground(locIndic);
     }
 
-    private void zobrazPresnostPolohy(Location location) {
+    private void showLocationAccuracy(Location location) {
         if (location != null && location.hasAccuracy()) {
             setAccuracyTextColor(barvaBlack);
             accuracy.setText("(\u00B1 "  + Math.round(location.getAccuracy()) + " m)");
@@ -465,7 +482,10 @@ public class MainActivity extends ActivityWithLocationService
                 offlineModePreferenceHelper.putOfflineMode(isOfflineChecked);
                 if (isOfflineChecked) {
                     showProgressbar();
-                    coffeeSiteEntitiesService.readAndSaveAllCoffeeSitesFromServer();
+                    coffeeSiteEntitiesService.populateCoffeeSites();
+                    CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
+                    CommentRepository commentRepository = CommentRepository.getInstance(db);
+                    commentRepository.populateComments();
                 }
                 return true;
             case R.id.action_map:
@@ -549,7 +569,11 @@ public class MainActivity extends ActivityWithLocationService
      *
      * @param stats
      */
-    public void zobrazStatistiky(Statistics stats) {
+    public void showAndSaveStatistics(Statistics stats) {
+
+        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            statisticsPrefencesHelper.saveStatistics(stats);
+        }
 
         if (stats != null) {
 
@@ -596,12 +620,12 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
-    public void onHledejKafeClick(View view) {
+    public void onSearchCoffeeClick(View view) {
 
         if (location == null) {
             return;
         }
-        //if (Utils.isOnline()) {
+        if (Utils.isOnline() || Utils.isOfflineModeOn(getApplicationContext())) {
 
                 Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
 
@@ -610,9 +634,9 @@ public class MainActivity extends ActivityWithLocationService
                 csListIntent.putExtra("coffeeSort", "");
 
                 startActivity(csListIntent);
-        //} else {
+        } else {
             Utils.showNoInternetToast(getApplicationContext());
-        //}
+        }
     }
 
 
@@ -649,7 +673,7 @@ public class MainActivity extends ActivityWithLocationService
         location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         locationService.addPropertyChangeListener(this);
 
-        zobrazPresnostPolohy(location);
+        showLocationAccuracy(location);
         updateAccuracyIndicator(location);
         if (location != null) {
             searchKafeButton.setEnabled(true);
@@ -666,11 +690,16 @@ public class MainActivity extends ActivityWithLocationService
 
         // Read stats if internet is available
         // Can be read later after internet becomes available, see NetworkStateReceiver
-        if (Utils.isOnline()) {
-            startReadStatistics();
-            //startNumberOfCoffeeSitesFromUserService();
+        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            if (Utils.isOnline()) {
+                    startReadStatistics();
+                    startNumberOfCoffeeSitesFromUserService();
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
         } else {
-            Utils.showNoInternetToast(getApplicationContext());
+            showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
+            onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
         }
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -683,7 +712,7 @@ public class MainActivity extends ActivityWithLocationService
         if (locationService != null) {
             location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
-            zobrazPresnostPolohy(location);
+            showLocationAccuracy(location);
             updateAccuracyIndicator(location);
             if (location != null) {
 //                searchEspressoButton.setEnabled(true);
@@ -759,7 +788,7 @@ public class MainActivity extends ActivityWithLocationService
 
         if (locationService != null) {
             location = locationService.getCurrentLocation();
-            zobrazPresnostPolohy(location);
+            showLocationAccuracy(location);
             updateAccuracyIndicator(location);
 //            searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
