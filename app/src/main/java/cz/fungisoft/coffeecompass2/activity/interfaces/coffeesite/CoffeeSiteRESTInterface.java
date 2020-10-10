@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -64,18 +65,38 @@ public interface CoffeeSiteRESTInterface {
     /**
      * REST call for obtaining all CoffeeSites created by current user
      * https://coffeecompass.cz/rest/site/mySites
+     *
      * @return
      */
     @GET("mySites")
     Call<List<CoffeeSite>> getAllCoffeeSitesByCurrentUser();
 
     /**
+     * REST call for obtaining all CoffeeSites created by current user
+     * https://coffeecompass.cz/rest/site/mySites
+     *
+     * @return
+     */
+    @GET("mySitesPaginated/")
+    Call<CoffeeSitePageEnvelope> getAllCoffeeSitesFromCurrentUserPaginated(@Query("page") int page, @Query("size") int size);
+
+    /**
      * REST call for obtaining all CoffeeSites
      * https://coffeecompass.cz/rest/site/allSites/
+     *
      * @return
      */
     @GET("allSites/")
     Call<List<CoffeeSite>> getAllCoffeeSites();
+
+    /**
+     * REST call for obtaining all CoffeeSites
+     * https://coffeecompass.cz/rest/site/allSites/
+     *
+     * @return
+     */
+    @GET("allSitesPaginated/")
+    Call<CoffeeSitePageEnvelope> getAllCoffeeSitesPaginated(@Query("page") int page, @Query("size") int size);
 
     /**
      * REST call for obtaining number of CoffeeSites created by current User

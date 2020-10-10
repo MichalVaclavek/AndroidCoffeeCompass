@@ -158,11 +158,10 @@ public class ImageUtil {
     }
 
 
-    /* https://stackoverflow.com/questions/53479820/save-image-in-external-storage-by-using-picasso-from-url-how-to-download-image */
-
     /**
      * Loading image bytes by Picaso and saving it into file system app's work directory
      * as image JPG file.
+     * Taken from https://stackoverflow.com/questions/53479820/save-image-in-external-storage-by-using-picasso-from-url-how-to-download-image
      *
      * @param context
      * @param myUrl

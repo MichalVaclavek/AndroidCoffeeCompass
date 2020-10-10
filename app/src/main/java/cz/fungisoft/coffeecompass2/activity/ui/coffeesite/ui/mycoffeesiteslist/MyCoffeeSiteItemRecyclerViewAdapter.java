@@ -20,9 +20,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
@@ -69,7 +74,31 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private CoffeeSite modifiedCoffeeSite;
 
     private final MyCoffeeSitesListActivity mParentActivity;
-    private List<CoffeeSite> mValues;
+
+    /**
+     * List of CoffeeSites to show in RecyclerView
+     */
+    private List<CoffeeSite> mValues = new ArrayList<>();
+
+    public void setCoffeeSites(List<CoffeeSite> mValues) {
+        this.mValues = removeCanceledElements(mValues); // Only CoffeeSites not in CANCELED state are to be shown;
+        notifyDataSetChanged();
+    }
+
+    public void addCoffeeSites(List<CoffeeSite> newSites) {
+        this.mValues.addAll( removeCanceledElements(newSites));
+        notifyDataSetChanged();
+    }
+
+    public void addCoffeeSitesFirstPage(@NotNull CoffeeSitePageEnvelope firstPage) {
+        this.mValues.addAll(firstPage.getContent());
+        notifyDataSetChanged();
+    }
+
+    public void addCoffeeSitesNextPage(@NotNull CoffeeSitePageEnvelope nextPage) {
+        this.mValues.addAll(nextPage.getContent());
+        notifyDataSetChanged();
+    }
 
     /**
      * Used for opening CoffeeSiteDetailActivity
@@ -87,10 +116,21 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
 
+    public void setCoffeeSiteStatusChangeService(CoffeeSiteStatusChangeService coffeeSiteStatusChangeService) {
+        this.coffeeSiteStatusChangeService = coffeeSiteStatusChangeService;
+        if (this.coffeeSiteStatusChangeService != null) {
+            this.coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
+        }
+    }
+
     /**
      * Used for saving selected CoffeeSite after inserting CoffeeSite's creator initial coment
      */
     private CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
+
+    public void setCoffeeSiteCUDOperationsService(CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService) {
+        this.coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsService;
+    }
 
     /**
      * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
@@ -103,23 +143,10 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
      */
-    public MyCoffeeSiteItemRecyclerViewAdapter(MyCoffeeSitesListActivity parent,
-                                               CoffeeSiteStatusChangeService coffeeSiteStatusChangeService,
-                                               CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService,
-                                               List<CoffeeSite> content) {
+    public MyCoffeeSiteItemRecyclerViewAdapter(MyCoffeeSitesListActivity parent) {
         mParentActivity = parent;
-        mValues = content;
-
         mOnClickListenerToCoffeeSiteDetailActivityStart = createOnClickListenerForDetailActivityStart();
-
         mOnClickListenerToCoffeeSiteImageActivityStart = createOnClickListenerForShowImageActivityStart();
-
-        this.coffeeSiteStatusChangeService = coffeeSiteStatusChangeService;
-        if (this.coffeeSiteStatusChangeService != null) {
-            this.coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
-        }
-
-        this.coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsService;
     }
 
     /**
@@ -190,7 +217,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return (mValues != null) ? mValues.size() : 0;
     }
 
     /**
@@ -407,7 +434,27 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-        /**
+    /**
+     * Pomocna metoda to remove CANCELED elements from the list
+     */
+    private List<CoffeeSite> removeCanceledElements(List<CoffeeSite> inputCoffeeSiteList) {
+        Iterator<CoffeeSite> iter = inputCoffeeSiteList.iterator();
+        while (iter.hasNext()) {
+            CoffeeSite p = iter.next();
+            if (p.getStatusZaznamu().toString().equalsIgnoreCase("CANCELED")) {
+                iter.remove();
+            }
+        }
+        return inputCoffeeSiteList;
+    }
+
+    /**
+     * Adds Footer to get know, that other items are available to load
+     */
+    public void addFooter() {
+    }
+
+    /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
         class ViewHolder extends RecyclerView.ViewHolder {
@@ -646,7 +693,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * Called by parent Activity when destroyed
      */
     public void onDestroy() {
-        this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+        if (this.coffeeSiteStatusChangeService != null) {
+            this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+        }
     }
 
 }

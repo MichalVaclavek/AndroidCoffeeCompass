@@ -51,6 +51,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -721,7 +722,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         SITE_TYPES = getResources().getStringArray(R.array.coffee_site_type);
 
         final ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                SITE_TYPES);
+                new ArrayList<>(Arrays.asList(SITE_TYPES)));
 
         coffeeSiteEntitiesViewModel.getAllCoffeeSiteTypes().observe(this, new Observer<List<CoffeeSiteType>>() {
             @Override
@@ -734,11 +735,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             }
         });
 
-//        if (CoffeeSiteEntityRepositories.getAllCoffeeSiteTypes().size() > 0) {
-//            siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-//                    CoffeeSiteEntityRepositories.getAllCoffeeSiteTypes());
-//        }
-
         AutoCompleteTextView siteTypeDropdown = findViewById(R.id.site_type_dropdown);
         siteTypeDropdown.setAdapter(siteTypesAdapter);
         siteTypeDropdown.setValidator(new SiteTypeValidator());
@@ -749,7 +745,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Typ lokality
         LOCATION_TYPES = getResources().getStringArray(R.array.location_type);
         final ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                LOCATION_TYPES);
+                new ArrayList<>(Arrays.asList(LOCATION_TYPES)));
 
         coffeeSiteEntitiesViewModel.getAllSiteLocationTypes().observe(this, new Observer<List<SiteLocationType>>() {
             @Override
@@ -762,13 +758,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             }
         });
 
-//        if (CoffeeSiteEntityRepositories.getAllSiteLocationTypes().size() > 0) {
-//            locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-//                    CoffeeSiteEntityRepositories.getAllSiteLocationTypes());
-//        } else {
-//            locationTypesAdapter =
-//        }
-
         AutoCompleteTextView locationTypesDropdown = findViewById(R.id.location_type_dropdown);
         locationTypesDropdown.setAdapter(locationTypesAdapter);
         locationTypesDropdown.setValidator(new LocationTypeValidator());
@@ -780,7 +769,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Cenovy rozsah
         String[] PRICE_RANGES = getResources().getStringArray(R.array.cena_range);
         ArrayAdapter<String> priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                PRICE_RANGES);
+                new ArrayList<>(Arrays.asList(PRICE_RANGES)));
 
         coffeeSiteEntitiesViewModel.getAllPriceRanges().observe(this, new Observer<List<PriceRange>>() {
             @Override
@@ -792,14 +781,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 }
             }
         });
-
-//        if (CoffeeSiteEntityRepositories.getAllPriceRanges().size() > 0) {
-//            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-//                    CoffeeSiteEntityRepositories.getAllPriceRanges());
-//        } else {
-//            priceRangesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-//                    PRICE_RANGES);
-//        }
 
         AutoCompleteTextView priceRangesDropdown = findViewById(R.id.price_range_dropdown);
         priceRangesDropdown.setAdapter(priceRangesAdapter);

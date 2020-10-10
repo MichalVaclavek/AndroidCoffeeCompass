@@ -555,8 +555,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
             if (!offlineModeOn) {
                 Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                             .fit()
-                             .placeholder(R.drawable.kafe_backround_120x160)
+                             .fit().placeholder(R.drawable.kafe_backround_120x160)
                              .into(viewHolder1.siteFoto);
             } else {
                 Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))

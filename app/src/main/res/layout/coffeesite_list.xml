@@ -6,8 +6,8 @@
     android:name="cz.fungisoft.coffeecompass.activity.CoffeeSiteListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
     tools:context=".activity.ui.coffeesite.FoundCoffeeSitesListActivity"
     tools:listitem="@layout/coffeesite_list_content" />

@@ -27,8 +27,19 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
+        android:id="@+id/my_coffeesite_frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+
+        android:background="@color/activityBackround"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <include layout="@layout/my_coffeesites_list" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center">
 
         <ProgressBar
@@ -38,17 +49,6 @@
             android:layout_centerInParent="false"
             android:layout_gravity="center"
             android:visibility="gone" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/my_coffeesite_frameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        android:background="@color/activityBackround"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <include layout="@layout/my_coffeesites_list" />
     </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

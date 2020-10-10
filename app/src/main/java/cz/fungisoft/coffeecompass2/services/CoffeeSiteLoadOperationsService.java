@@ -11,15 +11,20 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
+
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
 
 /**
  * Service to perform CoffeeSite load operations i.e. loading of one CoffeeSite,
@@ -68,6 +73,12 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         return mBinder;
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "Service started.");
+    }
+
 
     @Override
     public void onNumberOfCoffeeSitesReturned(CoffeeSiteRESTOper oper, Result<Integer> result) {
@@ -109,15 +120,29 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     @Override
     public void onCoffeeSitesReturned(CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
 
-        List<CoffeeSite> coffeeSites;
         if (result instanceof Result.Success) {
-            coffeeSites = ((Result.Success<List<CoffeeSite>>) result).getData();
-            switch (oper) {
-                case COFFEE_SITES_FROM_USER_LOAD:
-                case COFFEE_SITE_LOAD_ALL:
-                case COFFEE_SITES_FROM_CURRENT_USER_LOAD: informClientAboutLoadedCoffeeSitesList(oper, coffeeSites, "");
-                   break;
+            if (((Result.Success<List<CoffeeSite>>) result).getData() instanceof List<?>) {
+                List<CoffeeSite> coffeeSites = ((Result.Success<List<CoffeeSite>>) result).getData();
+
+                switch (oper) {
+                    case COFFEE_SITES_FROM_USER_LOAD:
+                    case COFFEE_SITE_LOAD_ALL:
+                    case COFFEE_SITES_FROM_CURRENT_USER_LOAD:
+                        informClientAboutLoadedCoffeeSitesList(oper, coffeeSites, "");
+                        break;
+                }
             }
+            if (((Result.Success<List<CoffeeSite>>) result).getData() instanceof CoffeeSitePageEnvelope) {
+                CoffeeSitePageEnvelope coffeeSitePage =  ((Result.Success<CoffeeSitePageEnvelope>) result).getData();
+
+                switch (oper) {
+                    case COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD:
+                    case COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD:
+                        informClientAboutLoadedCoffeeSitesPage(oper, coffeeSitePage, "");
+                        break;
+                }
+            }
+
         } else {
             RestError error = ((Result.Error) result).getRestError();
             if (error != null) {
@@ -125,16 +150,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 Log.e(TAG, "Error when obtaining coffee sites." + error.getDetail());
             }
         }
-
     }
-
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "Service started.");
-    }
-
 
     public void findAllCoffeeSitesByUserId(long userId) {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_USER_LOAD;
@@ -157,11 +173,26 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     }
 
     public void findAllCoffeeSitesFromCurrentUser() {
-
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_LOAD;
         currentUser = getCurrentUser();
         if (currentUser != null) {
             new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
+        } else {
+            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+        }
+    }
+
+    public void findCoffeeSitesPageFromCurrentUser(int pageNumber, int pageSize) {
+        if (pageNumber == 1) {
+            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+        } else if (pageNumber > 1) {
+            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
+        } else {
+            return;
+        }
+        currentUser = getCurrentUser();
+        if (currentUser != null) {
+            new GetCoffeeSitesFromCurrentUserPaginatedAsyncTask(requestedRESTOperation, pageNumber, pageSize, currentUser, this).execute();
         } else {
             Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
@@ -207,6 +238,19 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
         }
     }
+
+    private void informClientAboutLoadedCoffeeSitesPage(CoffeeSiteRESTOper operation, CoffeeSitePageEnvelope coffeeSites, String error) {
+        for (CoffeeSiteLoadServiceOperationsListener listener : loadOperationsListeners) {
+            switch (operation) {
+                case COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD: listener.onCoffeeSiteFirstPageFromLoggedInUserLoaded(coffeeSites, error);
+                    break;
+                case COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD: listener.onCoffeeSiteNextPageFromLoggedInUserLoaded(coffeeSites, error);
+                    break;
+                default: break;
+            }
+        }
+    }
+
 
     /**
      * Expects that operationResult and operationError are set by
