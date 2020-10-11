@@ -11,9 +11,22 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 
+/**
+ * Repository to work with CoffeeSite's DAO.<br>
+ * Provides LiveData<List<CoffeeSite>> of all CoffeeSites, found CoffeeSites in range
+ * and CoffeeSites created by a User.
+ */
 public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
 
     final double ONE_METER_IN_DEGREE = 1/(40_070_000d/360); // one meter on Earth as a part of one degree 6372000
+
+    /**
+     * A multiply factor, found by experiment, which has to be used,
+     * when searching from current location within circle range, when
+     * the searching itself in DB can be only performed like searching
+     * within square
+     */
+    final double MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE = 1.4;
 
     private CoffeeSiteDao coffeeSiteDao;
     private LiveData<List<CoffeeSite>> mAllCoffeeSites;
@@ -28,8 +41,10 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return mAllCoffeeSites;
     }
 
-
-    static class SearchParamsDataInput {
+    /**
+     * Inner class to hold input data of CoffeeSites LiveData searching parameters.
+     */
+    class SearchParamsDataInput {
 
         public double getLatitudeFrom() {
             return latitudeFrom;
@@ -43,9 +58,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             return searchRangeAsDegreePart;
         }
 
-        private double latitudeFrom;
-        private double longitudeFrom;
-        private double searchRangeAsDegreePart;
+        private final double latitudeFrom;
+        private final double longitudeFrom;
+        private final double searchRangeAsDegreePart;
 
         public SearchParamsDataInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
             this.latitudeFrom = latitudeFrom;
@@ -63,13 +78,16 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         searchParamsInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart));
     }
 
-    private LiveData<List<CoffeeSite>> coffeeSitesInRange =
+    private final LiveData<List<CoffeeSite>> coffeeSitesInRange =
             Transformations.switchMap(searchParamsInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangle(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
 
 
-    public LiveData<List<CoffeeSite>> getCoffeeSitesInRange(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
-        double searchRangeAsDegreePart = searchRangeInMeters * 1.5 * ONE_METER_IN_DEGREE;
+    public void setNewSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
+        double searchRangeAsDegreePart = searchRangeInMeters * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
         setInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+    }
+
+    public LiveData<List<CoffeeSite>> getCoffeeSitesInRange() {
         return coffeeSitesInRange;
     }
 
@@ -82,7 +100,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         coffeeSiteIdInput.setValue(coffeeSiteId);
     }
 
-    LiveData<CoffeeSite> coffeeSiteLive = Transformations.switchMap(coffeeSiteIdInput, csId -> coffeeSiteDao.getCoffeeSiteById(csId.longValue()));
+    LiveData<CoffeeSite> coffeeSiteLive = Transformations.switchMap(coffeeSiteIdInput, csId -> coffeeSiteDao.getCoffeeSiteById(csId));
 
     public LiveData<CoffeeSite> getCoffeeSiteById(long siteId) {
         setCoffeeSiteIdInput(siteId);
@@ -139,8 +157,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
+        @SafeVarargs
         @Override
-        protected Void doInBackground(List<CoffeeSite>... lists) {
+        protected final Void doInBackground(List<CoffeeSite>... lists) {
             mAsyncTaskDao.insertAll(lists[0]);
             return null;
         }

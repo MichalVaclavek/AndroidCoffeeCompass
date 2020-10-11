@@ -89,10 +89,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         return commentsOfCoffeeSite;
     }
 
-//    public Flowable<Comment> getCommentById(int commentId) {
-//        return commentDao.getCommentById(commentId);
-//    }
-
     public void insert (Comment comment) {
         new InsertAsyncTask(commentDao).execute(comment);
     }

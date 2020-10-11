@@ -76,7 +76,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
                 }
             } else if (isMobile) {
                 if (isConnected) {
-
                     if (!online) { // We've become online. But is the internet connection available?
                         internetCheckAsyncTask.execute();
                     }
@@ -87,7 +86,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
                 }
             } else {
                 if (isConnected) {
-
                     if (!online) { // We've become online. But is the internet connection available?
                         internetCheckAsyncTask.execute();
                     }
@@ -127,12 +125,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      */
     private void startLoadCSEntities(boolean isOnline, Context context) {
         if (isOnline) {
-//            if (context instanceof MainActivity) {
-//                MainActivity ma = (MainActivity) context;
-//                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()) {
-//                    //ma.startLoadingCoffeeSiteEntities();
-//                }
-//            }
             if (context instanceof CoffeeSiteEntitiesService) {
                 CoffeeSiteEntitiesService coffeeSiteEntitiesService = (CoffeeSiteEntitiesService) context;
                 if (!CoffeeSiteEntityRepositories.isDataReadFromServer()
@@ -150,6 +142,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context calling context, usually Activity which registered this Receiver
      */
     private void startLoadNumberOfSitesOfUserInMainActivity(boolean isOnline, Context context) {
+        //TODO zohlednit OFFLINE mode
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;

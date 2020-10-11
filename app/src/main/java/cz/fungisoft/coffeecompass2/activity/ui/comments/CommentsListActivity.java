@@ -81,9 +81,13 @@ public class CommentsListActivity extends AppCompatActivity
 
     private CommentOperation currentCommentOperation = CommentOperation.SAVE;
 
+    private boolean offLineModeOn = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
+
         setContentView(R.layout.activity_comments);
 
         CommentsViewModel viewModel = new CommentsViewModel(getApplication());
@@ -140,8 +144,11 @@ public class CommentsListActivity extends AppCompatActivity
             }
         });
 
-        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+
+        if (!offLineModeOn) {
             fab.setVisibility(View.VISIBLE);
+        } else {
+            fab.setVisibility(GONE);
         }
 
         doBindUserAccountService();
@@ -177,7 +184,6 @@ public class CommentsListActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-
             this.onBackPressed();
             return true;
         }
@@ -185,7 +191,7 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerViewAdapter = new CommentsListActivity.CommentItemRecyclerViewAdapter( this);
+        recyclerViewAdapter = new CommentsListActivity.CommentItemRecyclerViewAdapter( this, offLineModeOn);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
@@ -400,8 +406,9 @@ public class CommentsListActivity extends AppCompatActivity
 
     /* *********** RecyclerViewAdapter ************* */
 
-        public static class CommentItemRecyclerViewAdapter extends RecyclerView.Adapter<CommentItemRecyclerViewAdapter.ViewHolder>
-        {
+        public static class CommentItemRecyclerViewAdapter extends RecyclerView.Adapter<CommentItemRecyclerViewAdapter.ViewHolder> {
+
+            private final boolean offLineModeOn;
             private List<Comment> mValues;
             private CommentsListActivity parenActivity;
 
@@ -414,8 +421,9 @@ public class CommentsListActivity extends AppCompatActivity
             private int commentIdToDelete;
             private Comment selectedComment;
 
-             CommentItemRecyclerViewAdapter(CommentsListActivity parenActivity) {
-                this.parenActivity = parenActivity;
+             CommentItemRecyclerViewAdapter(CommentsListActivity parenActivity, boolean offLineModeOn) {
+                 this.offLineModeOn = offLineModeOn;
+                 this.parenActivity = parenActivity;
             }
 
             @Override
@@ -458,8 +466,11 @@ public class CommentsListActivity extends AppCompatActivity
 
                         holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
 
-                        if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())) {
+                        if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())
+                           && !this.offLineModeOn) {
                             showButtons(holder);
+                        } else {
+                            hideButtons(holder);
                         }
 
                         holder.deleteButtonIcon.setOnClickListener(
@@ -482,8 +493,10 @@ public class CommentsListActivity extends AppCompatActivity
                             }
                         };
 
-                        holder.commentTextView.setOnClickListener(editCommentClickListener);
-                        holder.editButtonIcon.setOnClickListener(editCommentClickListener);
+                        if (!offLineModeOn) {
+                            holder.commentTextView.setOnClickListener(editCommentClickListener);
+                            holder.editButtonIcon.setOnClickListener(editCommentClickListener);
+                        }
                     }
                 }
             }

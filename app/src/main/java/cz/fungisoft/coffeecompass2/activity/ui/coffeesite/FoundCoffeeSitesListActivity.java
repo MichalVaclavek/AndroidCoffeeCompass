@@ -20,9 +20,13 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
@@ -298,18 +302,12 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         coffeeSitesViewModel = new FoundCoffeeSitesViewModel(getApplication(), locationService, sitesInRangeUpdateService);
         coffeeSitesViewModel.addSitesInRangeUpdateListener(recyclerViewAdapter);
 
-        if (coffeeSitesViewModel.getFoundCoffeeSites() != null && offlineModeOn) {
-            coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSite>>() {
+        if (offlineModeOn) {
+            coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {
                 @Override
-                public void onChanged(@Nullable final List<CoffeeSite> coffeeSitesInRectangle) {
-                    // Update the cached copy of the coffeeSitesInRectangle in the adapter.
-                    List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
-                    for (CoffeeSite cs : coffeeSitesInRectangle) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
-                        if (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), currentSearchFromLocation.latitude, currentSearchFromLocation.longitude) <= currentSearchRange) {
-                            coffeeSiteMovables.add(new CoffeeSiteMovable(cs, currentSearchFromLocation));
-                        }
-                    }
-                    coffeeSitesViewModel = coffeeSitesViewModel.processFoundCoffeeSites(coffeeSiteMovables);
+                public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
+                    // Update the cached copy of the coffeeSitesInRange in the adapter.
+                    coffeeSitesViewModel = coffeeSitesViewModel.processFoundCoffeeSites(coffeeSitesInRange);
                     recyclerViewAdapter.onNewSitesInRange(coffeeSitesViewModel.getNewSitesInRange());
                     recyclerViewAdapter.onSitesOutOfRange(coffeeSitesViewModel.getGoneSitesOutOfRange());
                     onSearchingSitesInRangeFinished();

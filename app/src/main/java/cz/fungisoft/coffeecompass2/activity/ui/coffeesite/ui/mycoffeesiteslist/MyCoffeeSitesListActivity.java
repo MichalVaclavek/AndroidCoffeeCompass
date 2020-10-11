@@ -1,9 +1,11 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +29,7 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.MyCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
@@ -92,9 +95,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     private ProgressBar loadMyCoffeeSitesProgressBar;
 
-    private MenuItem addCoffeeSiteMenuItem;
-    private MenuItem reloadMyCoffeeSitesMenuItem;
-
     /**
      * Used to change selected CoffeeSite's status (ACTIVE, INACTIVE, CANCELED)
      */
@@ -126,6 +126,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private int currentPage = 1;
     public static final int PAGE_SIZE = 20;
 
+    private MyCoffeeSitesViewModel myCoffeeSitesViewModel;
+
+    private boolean offLineModeOn = false;
+
     /**
      * Getter and setter to be synchronized to update status correctly when
      * CoffeeSites load async task is running.
@@ -144,11 +148,16 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_my_coffee_sites_list);
 
         contextView = findViewById(R.id.my_coffeesite_frameLayout);
 
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
+
+        offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
+
+        myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
 
         /* If called from MainActivity, we can pass the number of CoffeeSites from user
          * to be shown/loaded
@@ -159,11 +168,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Load content CoffeeSites in case of returnign back to this activity?
         // Usually the content is loaded after the UserAccountService is connected
         content = getIntent().getParcelableExtra("myCoffeeSites");
-
-        // Only CoffeeSites not in CANCELED state are to be shown
-//        if (content != null) {
-//            content = removeCanceledElements(content);
-//        }
 
         if (savedInstanceState != null) { // i.e. after orientation was changed
             Collections.sort(content);
@@ -178,16 +182,14 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         prepareAndActivateRecyclerView();
 
-        // Pagination
-        recyclerView.addOnScrollListener(recyclerViewOnScrollListener);
-
         /*
          Must be called here, in onCreate(), as after successful connection to UserAccountService
          loading of users CoffeeSites starts. We need this loading only if this Activity
          is created, not in case we returned to it from another Activity
          */
         doBindUserAccountService();
-        // Starts loading of all CoffeeSites related services, see onCoffeeSiteServiceConnected to see next steps
+
+        // Starts loading of all CoffeeSites related services, see onCoffeeSiteServiceConnected() to see next steps
         doBindCoffeeSiteStatusChangeService();
     }
 
@@ -203,8 +205,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present
         getMenuInflater().inflate(R.menu.menu_my_coffeesites_list, menu);
 
-        addCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_create_coffeesite);
-        reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
+        MenuItem addCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_create_coffeesite);
+        addCoffeeSiteMenuItem.setVisible(!offLineModeOn);
+        MenuItem reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
 
         /* Disable menu options when the list of user's sites
          is being loaded, otherwise enable.
@@ -237,12 +240,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             return true;
         }
         if (id == R.id.action_refresh_list) {
-            if (currentUser != null) {
+            if (currentUser != null && !offLineModeOn) {
                 if (recyclerViewAdapter != null) {
                     // Delete current list
                     recyclerViewAdapter.clearList();
                 }
-                // Load list again
+                // Load list again, only if not in OFFLINE mode
                 startMyCoffeeSitesLoadOperation();
             }
             return true;
@@ -286,6 +289,15 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
+        if (offLineModeOn) {
+            myCoffeeSitesViewModel.getUsersCoffeeSites(currentUser).observe(this, new Observer<List<CoffeeSite>>() {
+                @Override
+                public void onChanged(@Nullable final List<CoffeeSite> myCoffeeSites) {
+                    // Update the cached copy of the CoffeeSites in the adapter.
+                    recyclerViewAdapter.setCoffeeSites(myCoffeeSites);
+                }
+            });
+        }
     }
 
     /** UnBind UserAccountService ****/
@@ -347,8 +359,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this);
+        recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this, offLineModeOn);
         recyclerView.setAdapter(recyclerViewAdapter);
+        // Pagination
+        recyclerView.addOnScrollListener(recyclerViewOnScrollListener);
         if (content != null) {
             recyclerViewAdapter.setCoffeeSites(content);
         }
@@ -357,14 +371,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     private void startMyCoffeeSitesLoadOperation() {
         if (Utils.isOnline()) {
-            if (coffeeSiteLoadOperationsService != null) {
-                if (!isLoadingPage()) {
-                    showProgressbarAndDisableMenuItems();
-                    setLoadingPage(true);
-                    //coffeeSiteLoadOperationsService.findAllCoffeeSitesFromCurrentUser();
-                    coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(1, PAGE_SIZE);
-                    setLoadingPage(true);
-                }
+            if (coffeeSiteLoadOperationsService != null && !isLoadingPage()) {
+                showProgressbarAndDisableMenuItems();
+                setLoadingPage(true);
+                //coffeeSiteLoadOperationsService.findAllCoffeeSitesFromCurrentUser();
+                coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(1, PAGE_SIZE);
             }
         } else {
             Utils.showNoInternetToast(getApplicationContext());
@@ -459,7 +470,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
                 coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
                 // All services ready, start loading all coffeesites
-                startMyCoffeeSitesLoadOperation();
+                if (!offLineModeOn) {
+                    startMyCoffeeSitesLoadOperation();
+                }
             }
         }
     }
@@ -502,13 +515,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         if (!error.isEmpty()) {
             showMyCoffeeSitesLoadFailure(error);
-            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Error: " + error);
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD. Error: " + error);
         }
         else {
             showMyCoffeeSitesLoadSuccess();
-            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + "OK");
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
-                recyclerViewAdapter.addCoffeeSitesFirstPage(coffeeSitesPage);
+                recyclerViewAdapter.addCoffeeSitesFirstPage(coffeeSitesPage.getContent());
             }
             if (coffeeSitesPage.getContent().size() >= PAGE_SIZE) {
                 recyclerViewAdapter.addFooter();
@@ -525,13 +538,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         if (!error.isEmpty()) {
             showMyCoffeeSitesLoadFailure(error);
-            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Error: " + error);
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD. Error: " + error);
         }
         else {
             showMyCoffeeSitesLoadSuccess();
-            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + "OK");
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
-                recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage);
+                recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage.getContent());
             }
             if(coffeeSitesPage.getContent().size() >= PAGE_SIZE){
                 recyclerViewAdapter.addFooter();
@@ -558,7 +571,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0
                         && totalItemCount >= PAGE_SIZE) {
-                    loadMoreItems();
+                    if (!offLineModeOn) {
+                        loadMoreItems();
+                    }
                 }
             }
         }
@@ -623,13 +638,14 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             }
         }
         // Check which request we're responding to
-        if (requestCode == CREATE_COFFEESITE_REQUEST) {
-            // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                // User created new CoffeeSite
-                if (currentUser != null) {
-                    startMyCoffeeSitesLoadOperation();
+        if (requestCode == CREATE_COFFEESITE_REQUEST && resultCode == RESULT_OK) {
+            // User created new CoffeeSite, refresh the whole list of MyCoffeeSites
+            if (currentUser != null && !offLineModeOn) {
+                if (recyclerViewAdapter != null) {
+                    // Delete current list
+                    recyclerViewAdapter.clearList();
                 }
+                startMyCoffeeSitesLoadOperation();
             }
         }
 
@@ -721,7 +737,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-
+        offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
         }

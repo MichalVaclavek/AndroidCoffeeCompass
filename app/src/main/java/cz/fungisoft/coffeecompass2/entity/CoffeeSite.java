@@ -40,7 +40,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
 
     @Expose
     @SerializedName("createdOn")
-    @Ignore
+//    @Ignore
     protected Date createdOn;
 
     @ColumnInfo(name = "createdOnString")

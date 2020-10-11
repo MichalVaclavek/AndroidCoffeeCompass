@@ -27,11 +27,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
@@ -50,6 +50,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private CoffeeSite selectedCoffeeSite;
     private int selectedPosition;
+
+    private final boolean offlineModeOn;
 
     /**
      * To indicate, that update Author's comment function was selected by user.
@@ -90,13 +92,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         notifyDataSetChanged();
     }
 
-    public void addCoffeeSitesFirstPage(@NotNull CoffeeSitePageEnvelope firstPage) {
-        this.mValues.addAll(firstPage.getContent());
+    public void addCoffeeSitesFirstPage(@NotNull List<CoffeeSite> firstPage) {
+        this.mValues.addAll(firstPage);
         notifyDataSetChanged();
     }
 
-    public void addCoffeeSitesNextPage(@NotNull CoffeeSitePageEnvelope nextPage) {
-        this.mValues.addAll(nextPage.getContent());
+    public void addCoffeeSitesNextPage(@NotNull List<CoffeeSite> nextPage) {
+        this.mValues.addAll(nextPage);
         notifyDataSetChanged();
     }
 
@@ -140,10 +142,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Standard constructor of the class MyCoffeeSiteItemRecyclerViewAdapter
      *
-     * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
+     * @param offlineModeOn
+     * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      */
-    public MyCoffeeSiteItemRecyclerViewAdapter(MyCoffeeSitesListActivity parent) {
+    public MyCoffeeSiteItemRecyclerViewAdapter( MyCoffeeSitesListActivity parent, boolean offlineModeOn) {
+        this.offlineModeOn = offlineModeOn;
         mParentActivity = parent;
         mOnClickListenerToCoffeeSiteDetailActivityStart = createOnClickListenerForDetailActivityStart();
         mOnClickListenerToCoffeeSiteImageActivityStart = createOnClickListenerForShowImageActivityStart();
@@ -185,11 +189,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         retVal = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CoffeeSite item = (CoffeeSite) view.getTag();
-                if (item != null) {
+                CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
+                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) item);
+                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
                     context.startActivity(intent);
                 }
             }
@@ -210,7 +214,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-
         ViewHolder viewHolder1 = (ViewHolder) viewHolder;
         setupBasicViewHolder(position, viewHolder1);
     }
@@ -246,8 +249,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
         // Prelozeni jmen statusu CoffeeSitu
         String status = this.mValues.get(position).getStatusZaznamu().toString();
-        switch(status)
-        {
+        switch(status) {
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
                 viewHolder.statusView.setText(R.string.status_active);
@@ -285,10 +287,19 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             viewHolder.cityView.setText(this.mValues.get(position).getMesto());
         }
 
+        // Set CoffeeSite's image
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL()).fit().placeholder(R.drawable.kafe_backround_120x160).into(viewHolder.siteFoto);
+            if (!offlineModeOn) {
+                Picasso.get().load(this.mValues.get(position).getMainImageURL())
+                             .fit().placeholder(R.drawable.kafe_backround_120x160)
+                             .into(viewHolder.siteFoto);
+            } else {
+                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
+                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .into(viewHolder.siteFoto);
+            }
         } else {
-            viewHolder.siteFoto.setImageDrawable(viewHolder.siteFoto.getContext().getResources().getDrawable(R.drawable.kafe_backround_120x160)); // @drawable/kafe_backround_120x160
+            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
         }
 
         // Set CoffeeSite instance of this RecyclerView item as a tag to all buttons
@@ -310,16 +321,16 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
 
-        if (this.mValues.get(position).canBeActivated()) {
-            viewHolder.activateCoffeeSiteButton.setEnabled(true);
-        } else {
-            viewHolder.activateCoffeeSiteButton.setEnabled(false);
-        }
+        viewHolder.activateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeActivated());
+        viewHolder.deactivateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeDeactivated());
 
-        if (this.mValues.get(position).canBeDeactivated()) {
-            viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
-        } else {
-            viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
+        // If OFFLINE mode is on, all buttons are INVISIBLE/GONE
+        if (offlineModeOn) {
+            viewHolder.editCoffeeSiteButton.setVisibility(View.GONE);
+            viewHolder.activateCoffeeSiteButton.setVisibility(View.GONE);
+            viewHolder.deactivateCoffeeSiteButton.setVisibility(View.GONE);
+            viewHolder.cancelCoffeeSiteButton.setVisibility(View.GONE);
+            viewHolder.insertCommentButton.setVisibility(View.GONE);
         }
     }
 
@@ -450,82 +461,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     /**
      * Adds Footer to get know, that other items are available to load
+     * or that Error during load appeared
      */
     public void addFooter() {
     }
 
-    /**
-         * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
-         */
-        class ViewHolder extends RecyclerView.ViewHolder {
-
-            final TextView csNameView; // to show name of CoffeeSite
-            final TextView locAndTypeView; // to show type of the CoffeeSite and location type
-            final TextView createdOnView; // to show created date of this CoffeeSite
-            final TextView statusView; // to show record status of the CoffeeSite
-            final TextView cityView; // to show city name of the CoffeeSite
-            /**
-             * To insert listener to whole group of TextViews
-             */
-            final LinearLayout createdOnLinearLayout;
-            final LinearLayout locationAndStatusLinearLayout;
-
-            final ImageView siteFoto;
-
-            /* Buttons */
-            final AppCompatImageButton editCoffeeSiteButton;
-            final AppCompatImageButton activateCoffeeSiteButton;
-            final AppCompatImageButton deactivateCoffeeSiteButton;
-            final AppCompatImageButton cancelCoffeeSiteButton;
-            final AppCompatImageButton insertCommentButton;
-
-            /**
-             * Standard constructor for ViewHolder.
-             *
-             * @param view
-             */
-            ViewHolder(View view) {
-                super(view);
-                csNameView = (TextView) view.findViewById(R.id.cs_name_TextView);
-                locAndTypeView = (TextView) view.findViewById(R.id.cs_loc_and_type_TextView);
-                createdOnView = (TextView) view.findViewById(R.id.cs_createdOn_TextView);
-
-                statusView = (TextView) view.findViewById(R.id.cs_status_TextView);
-                cityView = (TextView) view.findViewById(R.id.city_TextView);
-                siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
-
-                editCoffeeSiteButton = view.findViewById(R.id.button_edit_coffeesite);
-                editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
-
-                activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
-                // set original icon
-                activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
-                activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
-
-                deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
-                deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
-                deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
-
-                cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
-                cancelCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onCancelButtonClick);
-
-                insertCommentButton = view.findViewById(R.id.insert_creator_comment_ImageButton);
-                insertCommentButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onInsertCommentButtonClick);
-
-                createdOnLinearLayout = view.findViewById(R.id.created_on_linear_layout);
-                locationAndStatusLinearLayout = view.findViewById(R.id.location_and_status_linear_layout);
-            }
-        }
-
-
-    private CoffeeSite findCoffeeSiteFromListById(int id) {
-        for (CoffeeSite coffeeSite : mValues) {
-            if (coffeeSite.getId() == id) {
-                return coffeeSite;
-            }
-        }
-        return null;
-    }
 
     /**
      * Called from parent activity (MyCoffeeSitesListActivity), when the CreateCoffeeSiteActivity
@@ -695,6 +635,71 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     public void onDestroy() {
         if (this.coffeeSiteStatusChangeService != null) {
             this.coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+        }
+    }
+
+
+    /**
+     * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
+     */
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        final TextView csNameView; // to show name of CoffeeSite
+        final TextView locAndTypeView; // to show type of the CoffeeSite and location type
+        final TextView createdOnView; // to show created date of this CoffeeSite
+        final TextView statusView; // to show record status of the CoffeeSite
+        final TextView cityView; // to show city name of the CoffeeSite
+
+        /**
+         * To insert listener to whole group of TextViews
+         */
+        final LinearLayout createdOnLinearLayout;
+        final LinearLayout locationAndStatusLinearLayout;
+
+        final ImageView siteFoto;
+
+        /* Buttons */
+        final AppCompatImageButton editCoffeeSiteButton;
+        final AppCompatImageButton activateCoffeeSiteButton;
+        final AppCompatImageButton deactivateCoffeeSiteButton;
+        final AppCompatImageButton cancelCoffeeSiteButton;
+        final AppCompatImageButton insertCommentButton;
+
+        /**
+         * Standard constructor for ViewHolder.
+         *
+         * @param view
+         */
+        ViewHolder(View view) {
+            super(view);
+            csNameView = (TextView) view.findViewById(R.id.cs_name_TextView);
+            locAndTypeView = (TextView) view.findViewById(R.id.cs_loc_and_type_TextView);
+            createdOnView = (TextView) view.findViewById(R.id.cs_createdOn_TextView);
+
+            statusView = (TextView) view.findViewById(R.id.cs_status_TextView);
+            cityView = (TextView) view.findViewById(R.id.city_TextView);
+            siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+
+            editCoffeeSiteButton = view.findViewById(R.id.button_edit_coffeesite);
+            editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
+
+            activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
+            // set original icon
+            activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+            activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
+
+            deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
+            deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
+            deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
+
+            cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
+            cancelCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onCancelButtonClick);
+
+            insertCommentButton = view.findViewById(R.id.insert_creator_comment_ImageButton);
+            insertCommentButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onInsertCommentButtonClick);
+
+            createdOnLinearLayout = view.findViewById(R.id.created_on_linear_layout);
+            locationAndStatusLinearLayout = view.findViewById(R.id.location_and_status_linear_layout);
         }
     }
 

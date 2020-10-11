@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.function.Consumer;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
@@ -32,7 +33,9 @@ import kotlin.jvm.functions.Function1;
  */
 public class Utils {
 
-    private static String TAG = "Utils";
+    private static final String TAG = "Utils";
+
+    private static final String COMMAND_TO_DETECT_ONLINE = BuildConfig.ONLINE_DETECTION_COMMAND;
 
     /**
      * Checks if the connection to internet is available.
@@ -43,12 +46,12 @@ public class Utils {
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8"); // 8.8.8.8 is google.com
+            Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
             int     exitValue = ipProcess.waitFor();
             return (exitValue == 0);
         }
         catch (IOException e)          { Log.e(TAG," Problem during internet connection check."); }
-        catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check"); }
+        catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check."); }
 
         return false;
     }

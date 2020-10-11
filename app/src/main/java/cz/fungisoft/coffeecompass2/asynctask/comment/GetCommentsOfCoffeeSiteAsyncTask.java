@@ -67,9 +67,7 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.i(REQ_TAG, "onResponse() success");
-                        //result.setValue(response.body());
                         if (resultListener.get() != null) {
-                            //resultListener.get().onCommentsLoaded(response.body());
                             resultListener.get().onCommentsForCoffeeSiteLoaded(response.body(), coffeeSite);
                         }
                     } else {

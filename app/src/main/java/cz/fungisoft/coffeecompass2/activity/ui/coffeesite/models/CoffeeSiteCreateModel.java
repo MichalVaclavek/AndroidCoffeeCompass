@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel;
 
 import cz.fungisoft.coffeecompass2.R;
 
+/**
+ * Model for creation of CoffeeSite in {@link cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity}
+ */
 public class CoffeeSiteCreateModel extends ViewModel {
 
     private MutableLiveData<CoffeeSiteCreateFormState> coffeeSiteFormState = new MutableLiveData<>();

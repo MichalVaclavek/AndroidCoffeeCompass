@@ -26,7 +26,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 {
     private static final String TAG = "CoffeeSiteImageAct";
 
-    //private CoffeeSiteMovable cs;
     private CoffeeSite cs;
 
     private DistanceChangeTextView distLabel;
@@ -74,6 +73,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
         fragment.setCoffeeSite(cs);
+        fragment.setOffLineModeOn(Utils.isOfflineModeOn(getApplicationContext()));
 
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {

@@ -45,7 +45,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-                      version = 6, exportSchema = false)
+                      version = 7, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
@@ -133,12 +133,10 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         private CoffeeSiteDatabase mDB;
 
         private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfRatingsDao;
-//        private final CoffeeSiteDao coffeeSiteDao;
         private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
         private final CoffeeSiteStatusDao coffeeSiteStatusDao;
         private final CoffeeSiteTypeDao coffeeSiteTypeDao;
         private final CoffeeSortDao coffeeSortDao;
-//        private final CommentDao commentDao;
         private final CupTypeDao cupTypeDao;
         private final NextToMachineTypeDao nextToMachineTypeDao;
         private final OtherOfferDao otherOfferDao;
@@ -151,12 +149,10 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             this.mDB = db;
 
             averageStarsWithNumOfRatingsDao = db.averageStarsWithNumOfHodnoceniDao();
-//            coffeeSiteDao = db.coffeeSiteDao();
             coffeeSiteRecordStatusDao = db.coffeeSiteRecordStatusDao();
             coffeeSiteStatusDao = db.coffeeSiteStatusDao();
             coffeeSiteTypeDao = db.coffeeSiteTypeDao();
             coffeeSortDao = db.coffeeSortDao();
-//            commentDao = db.commentDao();
             cupTypeDao = db.cupTypeDao();
             nextToMachineTypeDao = db.nextToMachineTypeDao();
             otherOfferDao = db.otherOfferDao();
@@ -172,12 +168,10 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             // Not needed if you only populate the database
             // when it is first created
             averageStarsWithNumOfRatingsDao.deleteAll();
-//            coffeeSiteDao.deleteAll();
             coffeeSiteRecordStatusDao.deleteAll();
             coffeeSiteStatusDao.deleteAll();
             coffeeSiteTypeDao.deleteAll();
             coffeeSortDao.deleteAll();
-//            commentDao.deleteAll();
             cupTypeDao.deleteAll();
             nextToMachineTypeDao.deleteAll();
             otherOfferDao.deleteAll();

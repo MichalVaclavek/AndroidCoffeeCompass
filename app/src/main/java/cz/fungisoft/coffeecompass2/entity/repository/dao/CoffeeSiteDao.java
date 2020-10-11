@@ -34,7 +34,7 @@ public interface CoffeeSiteDao {
      * @param userName
      * @return
      */
-    @Query("SELECT * FROM coffee_site_table WHERE originalUserName LIKE :userName")
+    @Query("SELECT * FROM coffee_site_table WHERE originalUserName LIKE :userName ORDER BY createdOn DESC")
     LiveData<List<CoffeeSite>> getCoffeeSitesFromUser(String userName);
 
 

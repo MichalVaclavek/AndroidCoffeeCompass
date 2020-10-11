@@ -55,6 +55,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
+    private Button imageButton;
+
     /**
      * To show snackbar
      */
@@ -101,12 +103,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
 
         if (coffeeSite != null) {
-            boolean imageAvail = !coffeeSite.getMainImageURL().isEmpty();
-
-            if (imageAvail) {
-                Button imageButton = (Button) findViewById(R.id.imageButton);
+            imageButton = (Button) findViewById(R.id.imageButton);
+            if (!coffeeSite.getMainImageURL().isEmpty()) {
                 imageButton.setVisibility(View.VISIBLE);
                 imageButton.setEnabled(true);
+            } else {
+                imageButton.setVisibility(View.GONE);
             }
         }
         // savedInstanceState is non-null when there is fragment state

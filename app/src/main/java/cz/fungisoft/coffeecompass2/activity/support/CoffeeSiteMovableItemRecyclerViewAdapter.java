@@ -68,7 +68,14 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
     private EmptyCardViewHolder emptyCardViewHolder;
 
-    private boolean finishAnimation = false;
+    /**
+     * Indicates, that searching of CoffeeSites is in progress
+     */
+    private boolean searchingInProgress = false;
+    /**
+     * Indicates, that animation "vyhledavam" on EmptyCardViewHolder is in progress
+     */
+    private boolean animationRunning = false;
 
 
     /**
@@ -383,11 +390,13 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      * Start animation of text on Empty card, when new searching of CoffeeSites started again
      */
     public void newSitesInRangeSearchingStarted() {
+        searchingInProgress = true;
         if (emptyCardViewHolder != null &&
                 mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy"))) {
-            finishAnimation = false;
-            emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
-            emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
+            if (!animationRunning) {
+                emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
+                emptyCardViewHolder.searchingInfoLabel.startAnimation(animation1);
+            }
         }
     }
 
@@ -395,10 +404,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      * Finish animations or replace Initial Empty card by standard Dummy card
      */
     public void newSitesInRangeSearchingFinished() {
+        searchingInProgress = false;
         if (emptyCardViewHolder != null &&
                 mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))  {
-            finishAnimation = true;
-            emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
+            if (!animationRunning) {
+                emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
+            }
         }
 
         // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
@@ -451,7 +462,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
             @Override
             public void onAnimationStart(Animation arg0) {
-                finishAnimation = false;
+                animationRunning = true;
                 emptyCardViewHolder.searchingInfoLabel.setText(R.string.still_searching);
             }
         });
@@ -462,9 +473,10 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             @Override
             public void onAnimationEnd(Animation arg0) {
                 // start animation1 when animation2 ends (repeat)
-                if (!finishAnimation) {
+                if (searchingInProgress) {
                     viewHolder.searchingInfoLabel.startAnimation(animation1);
                 } else {
+                    animationRunning = false;
                     emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
                 }
             }
@@ -477,6 +489,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             public void onAnimationStart(Animation arg0) {
             }
         });
+        animationRunning = false;
     }
 
 
@@ -538,6 +551,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         viewHolder.searchingInfoLabel.startAnimation(animation1);
     }
 
+    /**
+     * Setup of ViewHolder holding info about found CoffeeSite
+     *
+     * @param position
+     * @param viewHolder1
+     */
     private void setupBasicViewHolder(int position, ViewHolder1 viewHolder1) {
 
         viewHolder1.csNameView.setText(this.mValues.get(position).getName());
@@ -568,6 +587,10 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
         viewHolder1.itemView.setTag(this.mValues.get(position));
         viewHolder1.itemView.setOnClickListener(this.mOnClickListener);
+
+        // Needs to be reseted, when this holder creation interupts animation of the EmptyCardViewHolder,
+        // so it cannot be reseted by animation itself
+        animationRunning = false;
     }
 
 

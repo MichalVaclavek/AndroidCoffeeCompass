@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import android.app.Application;
 
@@ -31,7 +31,6 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
      * Common repository
      */
     private CoffeeSiteEntityRepositories mRepositories;
-
 
     private LiveData<List<CoffeeSiteType>> allCoffeeSiteTypes;
 

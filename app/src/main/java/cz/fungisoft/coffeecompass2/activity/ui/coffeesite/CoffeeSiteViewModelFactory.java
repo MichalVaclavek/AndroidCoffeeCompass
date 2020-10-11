@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteCreateModel;
 
 public class CoffeeSiteViewModelFactory implements ViewModelProvider.Factory {
 

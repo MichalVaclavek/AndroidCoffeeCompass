@@ -75,7 +75,7 @@
 
                     <TextView
                         android:id="@+id/all_sites_TextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
                         android:textAlignment="viewEnd"
@@ -84,6 +84,7 @@
                         android:textStyle="bold"
                         tools:layout_editor_absoluteX="37dp"
                         tools:layout_editor_absoluteY="239dp" />
+
                 </TableRow>
 
                 <TableRow
@@ -102,7 +103,7 @@
 
                     <TextView
                         android:id="@+id/TodaySitesTextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
                         android:textAlignment="viewEnd"
@@ -129,7 +130,7 @@
 
                     <TextView
                         android:id="@+id/AllSites7TextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
                         android:textAlignment="viewEnd"
@@ -159,10 +160,10 @@
 
                     <TextView
                         android:id="@+id/AllUsersTextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
-                        android:textAlignment="viewEnd"
+                        android:textAlignment="textEnd"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="18sp"
                         android:textStyle="bold" />

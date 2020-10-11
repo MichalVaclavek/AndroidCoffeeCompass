@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import android.app.Application;
 import android.util.Log;
@@ -11,6 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
@@ -31,7 +32,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * Actual list of CoffeeSites in the search range from current position of the equipment as
      * found in DB.
      */
-    private LiveData<List<CoffeeSite>> foundCoffeeSitesInDB;
+    private final LiveData<List<CoffeeSiteMovable>> foundCoffeeSitesInDB;
 
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment
@@ -40,7 +41,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
     private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
 
 
-    public LiveData<List<CoffeeSite>> getFoundCoffeeSites() {
+    public LiveData<List<CoffeeSiteMovable>> getFoundCoffeeSites() {
         return foundCoffeeSitesInDB;
     }
 
@@ -50,7 +51,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * are included in the current sites in Range. i.e. "plus" difference between current
      * and old sites in Range)
      */
-    private List<CoffeeSiteMovable> newSitesInRange = new ArrayList<>();
+    private final List<CoffeeSiteMovable> newSitesInRange = new ArrayList<>();
     public List<CoffeeSiteMovable> getNewSitesInRange() {
         return newSitesInRange;
     }
@@ -62,7 +63,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * not included in the current sites in Range. i.e. "minus" difference between current
      * and old sites in Range)
      */
-    private List<CoffeeSiteMovable> goneSitesOutOfRange = new ArrayList<>();
+    private final List<CoffeeSiteMovable> goneSitesOutOfRange = new ArrayList<>();
     public List<CoffeeSiteMovable> getGoneSitesOutOfRange() {
         return goneSitesOutOfRange;
     }
@@ -72,7 +73,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * Location service needed to update coffeeSitesMovable listeners
      * LocationService is provided by CoffeeSitesInRangeFoundService
      */
-    private WeakReference<LocationService> locationService;
+    private final WeakReference<LocationService> locationService;
 
     /**
      * Service to return coffee sites in range
@@ -90,8 +91,6 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         sitesInRangeUpdateListeners.remove(sitesInRangeUpdateListener);
         Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeUpdateListeners.size());
     }
-
-    private FoundCoffeeSitesListActivity mParentActivity;
 
     public FoundCoffeeSitesViewModel(@NonNull Application application,
                                      @NonNull LocationService locationService,

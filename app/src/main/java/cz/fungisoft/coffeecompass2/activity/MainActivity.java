@@ -158,6 +158,8 @@ public class MainActivity extends ActivityWithLocationService
      */
     private boolean isOfflineChecked = false;
 
+    FloatingActionButton fab;
+
 
     /* ************* METHODS START ********************* */
 
@@ -256,7 +258,7 @@ public class MainActivity extends ActivityWithLocationService
         locationImageView.setBackground(locBad);
 
         // Floating action button to open Activity for creating new CoffeeSite
-        FloatingActionButton fab = findViewById(R.id.add_site_floatingActionButton);
+        fab = findViewById(R.id.add_site_floatingActionButton);
 
         // effective final this activity instance for anonymous onClick() handler
         fab.setOnClickListener(new View.OnClickListener() {
@@ -272,6 +274,8 @@ public class MainActivity extends ActivityWithLocationService
         });
         if (!Utils.isOfflineModeOn(getApplicationContext())) {
             fab.setVisibility(View.VISIBLE);
+        } else {
+            fab.setVisibility(View.GONE);
         }
 
     }
@@ -481,11 +485,14 @@ public class MainActivity extends ActivityWithLocationService
                 item.setChecked(isOfflineChecked);
                 offlineModePreferenceHelper.putOfflineMode(isOfflineChecked);
                 if (isOfflineChecked) {
+                    fab.setVisibility(View.GONE);
                     showProgressbar();
                     coffeeSiteEntitiesService.populateCoffeeSites();
                     CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
                     CommentRepository commentRepository = CommentRepository.getInstance(db);
                     commentRepository.populateComments();
+                } else {
+                    fab.setVisibility(View.VISIBLE);
                 }
                 return true;
             case R.id.action_map:
@@ -710,6 +717,7 @@ public class MainActivity extends ActivityWithLocationService
         }
 
         if (locationService != null) {
+            locationService.addPropertyChangeListener(this);
             location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
             showLocationAccuracy(location);
@@ -761,7 +769,7 @@ public class MainActivity extends ActivityWithLocationService
 
             return;
         }
-
+        locationService.removePropertyChangeListener(this);
         doUnbindCoffeeSiteLoadOperationsService();
     }
 

@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import androidx.annotation.Nullable;
 
@@ -52,7 +52,7 @@ public class CoffeeSiteCreateFormState {
         return latitudeError;
     }
 
-    boolean isDataValid() {
+    public boolean isDataValid() {
         return isDataValid;
     }
 }
