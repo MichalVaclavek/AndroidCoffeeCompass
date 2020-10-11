@@ -8,13 +8,11 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
-import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsLoadOperationListener;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsPageLoadOperationListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -28,17 +26,22 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
  * by loged-in user.
  */
-public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetAllCommentsPaginatedAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    static final String REQ_TAG = "GetCommentsOfCSAsynT";
+    static final String REQ_TAG = "GetAllCommentsPageAsnT";
 
-    private final WeakReference<CommentsLoadOperationListener> resultListener;
+    private final WeakReference<CommentsPageLoadOperationListener> resultListener;
 
-    private final CoffeeSite coffeeSite;
+    private final int requestedPage;
 
-    public GetCommentsOfCoffeeSiteAsyncTask(CommentsLoadOperationListener resultListener, CoffeeSite coffeeSite) {
+    private final int pageSize;
+
+    public GetAllCommentsPaginatedAsyncTask(CommentsPageLoadOperationListener resultListener,
+                                            int requestedPage,
+                                            int pageSize) {
         this.resultListener = new WeakReference<>(resultListener);
-        this.coffeeSite = coffeeSite;
+        this.requestedPage = requestedPage;
+        this.pageSize = pageSize;
     }
 
     @Override
@@ -59,20 +62,25 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
 
         CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
-        Call<List<Comment>> call = api.getCommentsForCoffeeSite(this.coffeeSite.getId());
+        Call<CommentsPageEnvelope> call = api.getAllCommentsPaginated(requestedPage, pageSize);
 
-        call.enqueue(new Callback<List<Comment>>() {
+        call.enqueue(new Callback<CommentsPageEnvelope>() {
             @Override
-            public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+            public void onResponse(Call<CommentsPageEnvelope> call, Response<CommentsPageEnvelope> response) {
                 if (response.isSuccessful()) {
+                    int responseCode = response.code();
+                    if (responseCode == 504) {return;}
+
                     if (response.body() != null) {
                         Log.i(REQ_TAG, "onResponse() success");
+
+                        CommentsPageEnvelope commentsPage = response.body();
                         if (resultListener.get() != null) {
-                            resultListener.get().onCommentsForCoffeeSiteLoaded(response.body(), coffeeSite);
+                            resultListener.get().onCommentsPageLoaded(commentsPage);
                         }
                     } else {
-                        Log.i(REQ_TAG, "Returned empty response for saving comment request.");
-                        Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
+                        Log.i(REQ_TAG, "Returned empty response for loading comments page request.");
+                        Result.Error error = new Result.Error(new IOException("Error loading comments page. Response empty."));
                         if (resultListener.get() != null) {
                             resultListener.get().onRESTCallError(error);
                         }
@@ -84,8 +92,8 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
                             resultListener.get().onRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
                         }
                     } catch (IOException e) {
-                        Log.e(REQ_TAG, "Error saving comment." + e.getMessage());
-                        Result.Error error = new Result.Error(new IOException("Error saving comment.", e));
+                        Log.e(REQ_TAG, "Error loading comments page." + e.getMessage());
+                        Result.Error error = new Result.Error(new IOException("Error loading comments page.", e));
                         if (resultListener.get() != null) {
                             resultListener.get().onRESTCallError(error);
                         }
@@ -94,9 +102,9 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
             }
 
             @Override
-            public void onFailure(Call<List<Comment>> call, Throwable t) {
-                Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
-                Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
+            public void onFailure(Call<CommentsPageEnvelope> call, Throwable t) {
+                Log.e(REQ_TAG, "Error loading comment REST request." + t.getMessage());
+                Result.Error error = new Result.Error(new IOException("Error loading comment.", t));
                 if (resultListener.get() != null) {
                     resultListener.get().onRESTCallError(error);
                 }

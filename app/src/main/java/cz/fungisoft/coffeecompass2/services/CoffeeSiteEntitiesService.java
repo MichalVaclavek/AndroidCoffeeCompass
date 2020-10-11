@@ -1,27 +1,34 @@
 package cz.fungisoft.coffeecompass2.services;
 
-import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-
-import com.squareup.picasso.Picasso;
+import androidx.lifecycle.LifecycleService;
+import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsPageLoadOperationListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
+import cz.fungisoft.coffeecompass2.entity.repository.CommentRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
@@ -30,6 +37,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ENTITIES_LOAD;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL_FIRST_PAGE;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL_NEXT_PAGE;
 
 /**
  * A Service class to hold CoffeeSite entities classes.
@@ -39,10 +48,11 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
  * It has its own Service connector and is not part of other
  * CoffeeSiteServices with their common service connector.
  */
-public class CoffeeSiteEntitiesService extends Service
+public class CoffeeSiteEntitiesService extends LifecycleService
                                        implements CoffeeSiteEntitiesLoadRESTResultListener,
                                                   CoffeeSitesRESTResultListener,
-                                                  CoffeeSiteDatabase.DbDeleteEndListener {
+                                                  CoffeeSiteDatabase.DbDeleteEndListener,
+                                                  CommentsPageLoadOperationListener {
 
     static final String TAG = "CoffeeSiteServiceBase";
 
@@ -69,7 +79,6 @@ public class CoffeeSiteEntitiesService extends Service
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteEntitiesService.LocalBinder();
 
-
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -84,6 +93,7 @@ public class CoffeeSiteEntitiesService extends Service
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        super.onBind(intent);
         return mBinder;
     }
 
@@ -131,9 +141,7 @@ public class CoffeeSiteEntitiesService extends Service
 
     @Override
     public void onCSEntitiesDeletedEnd() {
-//        if (Utils.isOfflineModeOn(getApplicationContext())) {
-            readAndSaveAllEntitiesFromServer();
-//        }
+        readAndSaveAllEntitiesFromServer();
     }
 
     /**
@@ -161,24 +169,59 @@ public class CoffeeSiteEntitiesService extends Service
     }
 
     /**
-     * Methods to start AsyncTasks for deleting/loading/and saving of CoffeeSites
-     **/
+     * If images should be read with CoffeeSites
+     */
+    private boolean includingImages;
 
     /**
-     * Deletes current CoffeeSites data from DB and loads and saves new ones
+     * To show progress bar of the download
      */
-    public void populateCoffeeSites() {
+    private ProgressBar downloadProgressBar;
+
+    private TextView downloadingStatusTextView;
+
+
+    /**
+     * Deletes current CoffeeSites data from DB and loads and saves new ones.
+     * CoffeeSite's data includes images (if requested) and Comments, which are
+     * downloaded subsequently after main CoffeeSite data.
+     */
+    public void populateCoffeeSites(boolean includingImages, ProgressBar downloadProgressBar, TextView downloadingStatusTextView) {
+        this.includingImages = includingImages;
+        this.downloadProgressBar = downloadProgressBar;
+        this.downloadingStatusTextView = downloadingStatusTextView;
         db.deleteCoffeeSitesAsync();
     }
 
     @Override
     public void onCoffeeSitesDeletedEnd() {
-        readAndSaveAllCoffeeSitesFromServer();
+        //readAndSaveAllCoffeeSitesFromServer();
+        readAndSaveAllCoffeeSitesPaginatedFromServer();
     }
 
     private void readAndSaveAllCoffeeSitesFromServer() {
         if (Utils.isOnline()) {
             new GetAllCoffeeSitesAsyncTask(COFFEE_SITE_LOAD_ALL, this).execute();
+        }
+    }
+
+    private int requestedPage;
+    private boolean isLastPage = false;;
+    public static final int PAGE_SIZE = 20;
+    private int alreadyDownloaded = 0;
+
+    private int alreadyDownloadedSavedImages = 0;
+    private int numOfSitesWithImages = 0;
+
+
+    private void readAndSaveAllCoffeeSitesPaginatedFromServer() {
+        if (Utils.isOnline()) {
+            requestedPage = 1;
+            alreadyDownloaded = 0;
+            alreadyDownloadedSavedImages = 0;
+            numOfSitesWithImages = 0;
+            this.downloadingStatusTextView.setText("Stahování dat o lokacích ...");
+            new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_FIRST_PAGE, requestedPage, PAGE_SIZE, this).execute();
         }
     }
 
@@ -196,12 +239,15 @@ public class CoffeeSiteEntitiesService extends Service
 
             coffeeSiteRepository.insertAll(allCoffeeSites);
 
-            for (CoffeeSite cs : allCoffeeSites) {
-                if (!cs.getMainImageURL().isEmpty()) {
-                    String imageFileName = "photo_site_" + cs.getId();
-                    cs.setMainImageFileName(imageFileName);
-                    //ImageUtil.saveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
-                    //Picasso.get().load(cs.getMainImageURL()).into(ImageUtil.picassoImageTarget(getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, imageFileName));
+            // We do not need to wait until insertAll() finishes as it is faster then downloading the first image
+            if (this.includingImages) {
+                for (CoffeeSite cs : allCoffeeSites) {
+                    if (!cs.getMainImageURL().isEmpty()) {
+                        numOfSitesWithImages++;
+                        String imageFileName = "photo_site_" + cs.getId();
+                        cs.setMainImageFileName(imageFileName);
+                        ImageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                    }
                 }
             }
 
@@ -211,7 +257,111 @@ public class CoffeeSiteEntitiesService extends Service
             //TODO - show info, that loading of All sites failed
             informClientAboutAllCoffeeSitesLoadResult(false);
         }
+    }
 
+    /**
+     * On CoffeeSites Page returned from server.
+     *
+     * @param oper identifier of REST operation which lead to call this method
+     * @param result - success or error result of the operation. If success, then List<CoffeeSite> is returned in result = new Result.Success<>(coffeeSites);
+     */
+    @Override
+    public void onCoffeeSitesPageReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
+
+        if (result instanceof Result.Success) {
+            if (((Result.Success<List<CoffeeSite>>) result).getData() instanceof CoffeeSitePageEnvelope) {
+
+                CoffeeSitePageEnvelope coffeeSitesPage = ((Result.Success<CoffeeSitePageEnvelope>) result).getData();
+
+                if (coffeeSitesPage != null) {
+                    List<CoffeeSite> coffeeSitesList = coffeeSitesPage.getContent();
+
+                    for (CoffeeSite cs : coffeeSitesList) {
+                        numOfSitesWithImages += !cs.getMainImageURL().isEmpty() ? 1 : 0;
+                    }
+
+                    isLastPage = coffeeSitesPage.getLast();
+
+                    coffeeSiteRepository.insertAll(coffeeSitesList);
+
+                    // Update progress bar
+                    if (coffeeSitesPage.getFirst()) {
+                        downloadProgressBar.setMax(coffeeSitesPage.getTotalElements());
+                    }
+                    alreadyDownloaded += coffeeSitesPage.getNumberOfElements();
+                    downloadProgressBar.setProgress(alreadyDownloaded);
+
+                    // We do not need to wait until insertAll() finishes as it is faster then downloading the first image
+                    if (!isLastPage) {
+                        requestedPage++;
+                        new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_NEXT_PAGE, requestedPage, PAGE_SIZE, this).execute();
+                    } else { // all pages downloaded
+                        downloadComments();
+                    }
+                }
+            }
+        } else {
+            RestError error = ((Result.Error) result).getRestError();
+            if (error != null) {
+                informClientAboutAllCoffeeSitesLoadResult(false);
+                Log.e(TAG, "Error when obtaining coffee sites. " + error.getDetail());
+            }
+        }
+    }
+
+    private void downloadImages() {
+        this.downloadingStatusTextView.setText("Stahování fotek lokací ...");
+        downloadProgressBar.setProgress(0);
+        downloadProgressBar.setMax(numOfSitesWithImages);
+        ImageUtil.setProgressBar(downloadProgressBar);
+        ImageUtil.resetAlreadySavedImagesCounter();
+
+        coffeeSiteRepository.getAllCoffeeSitesWithImage().observe(this, new Observer<List<CoffeeSite>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
+                // Update the cached copy of the coffeeSitesInRange in the adapter.
+                //int loadedCount = coffeeSitesWithImage.getLoadedCount();
+                if (includingImages) {
+                    for (CoffeeSite cs : coffeeSitesWithImage) {
+                        if (cs != null && !cs.getMainImageURL().isEmpty() && cs.getMainImageFileName().isEmpty()) { // not saved yet
+                            String imageFileName = "photo_site_" + cs.getId();
+                            cs.setMainImageFileName(imageFileName);
+                            ImageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                        }
+                    }
+                    //informClientAboutAllCoffeeSitesLoadResult(true);
+                }
+            }
+        });
+    }
+
+    private CommentRepository commentRepository;
+
+    private final int COMMENTS_PAGE_SIZE = 10;
+
+    private int alreadyDownloadedComments = 0;
+
+    private void downloadComments() {
+
+        this.downloadingStatusTextView.setText("Stahování komentářů k lokacím ...");
+        downloadProgressBar.setProgress(0);
+        alreadyDownloadedComments = 0;
+
+        commentRepository = CommentRepository.getInstance(db);
+        commentRepository.populateCommentsByPages(this, COMMENTS_PAGE_SIZE);
+        Log.i(TAG, "Start of Comments download.");
+    }
+
+
+    @Override
+    public void onCommentsPageLoaded(CommentsPageEnvelope comments) {
+        downloadProgressBar.setMax(comments.getTotalElements());
+        alreadyDownloadedComments += comments.getNumberOfElements();
+        downloadProgressBar.setProgress(alreadyDownloadedComments);
+
+        if (comments.getLast()) {
+            downloadImages();
+        }
     }
 
     private void informClientAboutAllCoffeeSitesLoadResult(Boolean result) {

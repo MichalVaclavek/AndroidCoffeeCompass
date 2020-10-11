@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsLoadOperationListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsPageLoadOperationListener;
 import cz.fungisoft.coffeecompass2.asynctask.comment.GetAllCommentsAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.comment.GetAllCommentsPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.GetCommentsOfCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
@@ -23,6 +26,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWit
  * Provides LiveData<Comment> objects to be used in data model.
  */
 public class CommentRepository extends CoffeeSiteRepositoryBase implements CommentsLoadOperationListener,
+                                                                           CommentsPageLoadOperationListener,
                                                                            CoffeeSiteDatabase.DbDeleteEndListener {
 
     /**
@@ -68,13 +72,37 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         db.deleteCommentsAsync();
     }
 
+    boolean loadAllByPages = false;
+
+    int pageSize = 20;
+    int requestedPage = 1;
+
+    private CommentsPageLoadOperationListener commentsPageLoadResultListener;
+
+    /**
+     * Deletes current Comments data from DB and loads and saves new ones
+     */
+    public void populateCommentsByPages(CommentsPageLoadOperationListener resultListener, int pageSize) {
+        this.loadAllByPages = true;
+        this.pageSize = pageSize;
+        this.commentsPageLoadResultListener = resultListener;
+        db.deleteCommentsAsync();
+    }
+
+
+
     /**
      * Starts Async task loading Comments from server, after the current Comments
      * are deleted from DB.
      */
     @Override
     public void onCommentsDeletedEnd() {
-        new GetAllCommentsAsyncTask(this).execute();
+        if (!this.loadAllByPages) {
+            new GetAllCommentsAsyncTask(this).execute();
+        } else {
+            requestedPage = 1;
+            new GetAllCommentsPaginatedAsyncTask(this, requestedPage, this.pageSize).execute();
+        }
     }
 
     public LiveData<List<Comment>> getAllComments() {
@@ -98,6 +126,17 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         insertAll(comments);
     }
 
+    @Override
+    public void onCommentsPageLoaded(CommentsPageEnvelope comments) {
+        insertAll(comments.getContent());
+        this.commentsPageLoadResultListener.onCommentsPageLoaded(comments);
+
+        if (!comments.getLast()) {
+            requestedPage++;
+            new GetAllCommentsPaginatedAsyncTask(this, requestedPage, this.pageSize).execute();
+        }
+    }
+
     private final MutableLiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSiteFromServer = new MutableLiveData<>();
 
     /**
@@ -117,7 +156,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     }
 
     @Override
-    public void showRESTCallError(Result.Error error) {
+    public void onRESTCallError(Result.Error error) {
 
     }
 

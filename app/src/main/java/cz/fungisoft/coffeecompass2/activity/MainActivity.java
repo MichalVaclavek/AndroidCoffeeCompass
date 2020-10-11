@@ -104,7 +104,6 @@ public class MainActivity extends ActivityWithLocationService
 
     private Location location;
 
-//    private Button searchEspressoButton;
     private Button searchKafeButton;
 
     private Toolbar mainToolbar;
@@ -272,11 +271,8 @@ public class MainActivity extends ActivityWithLocationService
                 }
             }
         });
-        if (!Utils.isOfflineModeOn(getApplicationContext())) {
-            fab.setVisibility(View.VISIBLE);
-        } else {
-            fab.setVisibility(View.GONE);
-        }
+
+        fab.setVisibility(!Utils.isOfflineModeOn(getApplicationContext()) ? View.VISIBLE : View.GONE);
 
     }
 
@@ -474,26 +470,25 @@ public class MainActivity extends ActivityWithLocationService
                     goToMyCoffeeSitesActivity();
                 }
                 return true;
-//            case R.id.action_settings:
-//                aktivujNastaveni();
-//                return true;
             case R.id.action_about:
                 showAbout();
                 return true;
             case R.id.action_offline_mode:
-                isOfflineChecked = !item.isChecked();
-                item.setChecked(isOfflineChecked);
-                offlineModePreferenceHelper.putOfflineMode(isOfflineChecked);
-                if (isOfflineChecked) {
-                    fab.setVisibility(View.GONE);
-                    showProgressbar();
-                    coffeeSiteEntitiesService.populateCoffeeSites();
-                    CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
-                    CommentRepository commentRepository = CommentRepository.getInstance(db);
-                    commentRepository.populateComments();
-                } else {
-                    fab.setVisibility(View.VISIBLE);
-                }
+                openOfflineSettingsActivity();
+//
+//                isOfflineChecked = !item.isChecked();
+//                item.setChecked(isOfflineChecked);
+//                offlineModePreferenceHelper.putOfflineMode(isOfflineChecked);
+//                if (isOfflineChecked) {
+//                    fab.setVisibility(View.GONE);
+//                    showProgressbar();
+//                    coffeeSiteEntitiesService.populateCoffeeSites();
+//                    CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
+//                    CommentRepository commentRepository = CommentRepository.getInstance(db);
+//                    commentRepository.populateComments();
+//                } else {
+//                    fab.setVisibility(View.VISIBLE);
+//                }
                 return true;
             case R.id.action_map:
                 if (Utils.isOnline()) {
@@ -555,6 +550,15 @@ public class MainActivity extends ActivityWithLocationService
         this.startActivity(activityIntent);
     }
 
+    private void openOfflineSettingsActivity() {
+        Intent activityIntent = new Intent(this, OfflineModeSelectionActivity.class);
+        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activityIntent.putExtra("currentUserProfile", userAccountService.getLoggedInUser());
+        this.startActivity(activityIntent);
+    }
+
+
     private void showAbout() {
         Intent i = new Intent(this, AboutActivity.class);
         this.startActivity(i);
@@ -608,24 +612,6 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
-    // Currently not needed as only one Button i used to search for any type of coffee
-    public void onHledejEspressoClick(View view) {
-
-        if (location == null) {
-            return;
-        }
-        if (Utils.isOnline()) {
-//            Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
-//
-//                csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
-//                csListIntent.putExtra("searchRange", searchRange);
-//                csListIntent.putExtra("coffeeSort", "espresso");
-//
-//                startActivity(csListIntent);
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
-        }
-    }
 
     public void onSearchCoffeeClick(View view) {
 
@@ -722,13 +708,8 @@ public class MainActivity extends ActivityWithLocationService
 
             showLocationAccuracy(location);
             updateAccuracyIndicator(location);
-            if (location != null) {
-//                searchEspressoButton.setEnabled(true);
-                searchKafeButton.setEnabled(true);
-            } else {
-//                searchEspressoButton.setEnabled(false);
-                searchKafeButton.setEnabled(false);
-            }
+
+            searchKafeButton.setEnabled(location != null);
         }
 
         // Suppose we do not know actual status of loading CoffeeSites number from user
@@ -798,7 +779,6 @@ public class MainActivity extends ActivityWithLocationService
             location = locationService.getCurrentLocation();
             showLocationAccuracy(location);
             updateAccuracyIndicator(location);
-//            searchEspressoButton.setEnabled(true);
             searchKafeButton.setEnabled(true);
         }
     }
@@ -832,7 +812,6 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
-        //startNumberOfCoffeeSitesFromUserService();
         evaluateLoginMenuIcon();
         evaluateMyCoffeeSitesIcon();
     }

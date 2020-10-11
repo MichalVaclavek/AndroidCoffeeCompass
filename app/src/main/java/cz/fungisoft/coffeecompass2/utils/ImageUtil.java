@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -105,51 +106,51 @@ public class ImageUtil {
     /* https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/ */
 
     public static final String COFFEESITE_IMAGE_DIR = "coffeesitephotos";
-
-    public static Target picassoImageTarget(Context context, final String imageDir, final String imageName) {
-        ContextWrapper cw = new ContextWrapper(context);
-        final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE); // path to /data/data/yourapp/app_imageDir
-        Log.d("picassoImageTarget: ", directory.getAbsolutePath() + imageName);
-        return new Target() {
-            @Override
-            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-                Log.d("onBitmapLoaded() ", imageDir + "/" + imageName);
-                new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Log.d("ImageTarget run() ", imageDir + "/" + imageName);
-                        final File myImageFile = new File(directory, imageName); // Create image file
-                        FileOutputStream fos = null;
-                        try {
-                            fos = new FileOutputStream(myImageFile);
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                        } catch (IOException e) {
-                            Log.e(TAG, e.getMessage());
-                        } finally {
-                            try {
-                                fos.close();
-                            } catch (IOException e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                        }
-                        Log.i(TAG, "image saved to >>>" + myImageFile.getAbsolutePath());
-
-                    }
-                }).start();
-            }
-
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                if (placeHolderDrawable != null) {}
-            }
-        };
-    }
+//
+//    public static Target picassoImageTarget(Context context, final String imageDir, final String imageName) {
+//        ContextWrapper cw = new ContextWrapper(context);
+//        final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE); // path to /data/data/yourapp/app_imageDir
+//        Log.d("picassoImageTarget: ", directory.getAbsolutePath() + imageName);
+//        return new Target() {
+//            @Override
+//            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+//                Log.d("onBitmapLoaded() ", imageDir + "/" + imageName);
+//                new Thread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        Log.d("ImageTarget run() ", imageDir + "/" + imageName);
+//                        final File myImageFile = new File(directory, imageName); // Create image file
+//                        FileOutputStream fos = null;
+//                        try {
+//                            fos = new FileOutputStream(myImageFile);
+//                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+//                        } catch (IOException e) {
+//                            Log.e(TAG, e.getMessage());
+//                        } finally {
+//                            try {
+//                                fos.close();
+//                            } catch (IOException e) {
+//                                Log.e(TAG, e.getMessage());
+//                            }
+//                        }
+//                        Log.i(TAG, "image saved to >>>" + myImageFile.getAbsolutePath());
+//
+//                    }
+//                }).start();
+//            }
+//
+//            @Override
+//            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+//
+//            }
+//
+//            @Override
+//            public void onPrepareLoad(Drawable placeHolderDrawable) {
+//                if (placeHolderDrawable != null) {}
+//            }
+//        };
+//    }
 
     public static File getImageFile(Context appContext, String imageDir, String imageFileName) {
         ContextWrapper cw = new ContextWrapper(appContext);
@@ -157,20 +158,48 @@ public class ImageUtil {
         return new File(directory, imageFileName);
     }
 
+    /* ============== DOWNLOAD and SAVING IMAGE using Picasso and FileOutputStream =========== */
+
+    private static int alreadySavedImagesCounter = 0;
+    private static int readyToSaveImagesCounter = 0;
+
+    private static ProgressBar mProgressBar;
+
+    public static void resetAlreadySavedImagesCounter() {
+        alreadySavedImagesCounter = 0;
+        readyToSaveImagesCounter = 0;
+    }
+
+    public static int getAlreadySavedImagesCounter() {
+        return alreadySavedImagesCounter;
+    }
+
+    public static int getReadyToSaveImagesCounter() {
+        return readyToSaveImagesCounter;
+    }
 
     /**
-     * Loading image bytes by Picaso and saving it into file system app's work directory
-     * as image JPG file.
+     * To indicate number of already saved image files. Expects, that max is already set
+     * in this progressBar.
+     *
+     * @param progressBar
+     */
+    public static void setProgressBar(ProgressBar progressBar) {
+        mProgressBar = progressBar;
+    }
+
+    /**
+     * Loading image bytes by Picasso and saving it into file system app's work directory
+     * as image JPG file.<br>
      * Taken from https://stackoverflow.com/questions/53479820/save-image-in-external-storage-by-using-picasso-from-url-how-to-download-image
+     * and adjusted.
      *
      * @param context
      * @param myUrl
      * @param imageDir
      * @param imageFileName
      */
-    public static void saveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
-
-        //final ProgressDialog progress = new ProgressDialog(context);
+    public static void downloadAndSaveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
 
         class SaveThisImage extends AsyncTask<Void, Void, Void> {
 
@@ -178,18 +207,13 @@ public class ImageUtil {
 
             @Override
             protected void onPreExecute() {
-//                super.onPreExecute();
-//                progress.setTitle("Processing");
-//                progress.setMessage("Please Wait...");
-//                progress.setCancelable(false);
-//                progress.show();
+                readyToSaveImagesCounter++;
             }
 
             @Override
             protected Void doInBackground(Void... arg0) {
 
                 try {
-
                     File sdCard = Environment.getExternalStorageDirectory();
                     //@SuppressLint("DefaultLocale")
                     //String fileName = String.format("%d.jpg", System.currentTimeMillis());
@@ -206,6 +230,7 @@ public class ImageUtil {
 
                         fos = new FileOutputStream(myImageFile);
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                        alreadySavedImagesCounter++;
 
 //                       Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
 //                       intent.setData(Uri.fromFile(myImageFile));
@@ -224,18 +249,17 @@ public class ImageUtil {
                 }
                 return null;
             }
+
             @Override
             protected void onPostExecute(Void result) {
-//                super.onPostExecute(result);
-//                if(progress.isShowing()){
-//                    progress.dismiss();
-//                }
-//                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+                super.onPostExecute(result);
+                mProgressBar.setProgress(alreadySavedImagesCounter);
                 Log.i(TAG, "image saved to >>> " + myImageFileName);
             }
         }
-        SaveThisImage shareimg = new SaveThisImage();
-        shareimg.execute();
+
+        SaveThisImage saveThisImage = new SaveThisImage();
+        saveThisImage.execute();
     }
 
 }

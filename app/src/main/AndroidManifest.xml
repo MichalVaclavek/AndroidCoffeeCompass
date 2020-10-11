@@ -30,6 +30,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activity.OfflineModeSelectionActivity"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

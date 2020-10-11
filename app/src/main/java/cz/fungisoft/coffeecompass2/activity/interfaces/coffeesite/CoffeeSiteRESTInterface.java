@@ -91,7 +91,7 @@ public interface CoffeeSiteRESTInterface {
 
     /**
      * REST call for obtaining all CoffeeSites
-     * https://coffeecompass.cz/rest/site/allSites/
+     * https://coffeecompass.cz/rest/site/allSitesPaginated/
      *
      * @return
      */

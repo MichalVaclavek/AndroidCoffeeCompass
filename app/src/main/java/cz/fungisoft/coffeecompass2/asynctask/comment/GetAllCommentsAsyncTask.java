@@ -70,20 +70,20 @@ public class GetAllCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                         Log.i(REQ_TAG, "Returned empty response for loading comment request.");
                         Result.Error error = new Result.Error(new IOException("Error loading comment. Response empty."));
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(error);
+                            resultListener.get().onRESTCallError(error);
                         }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            resultListener.get().onRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
                         }
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error loading comment." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error loading comment.", e));
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(error);
+                            resultListener.get().onRESTCallError(error);
                         }
                     }
                 }
@@ -94,7 +94,7 @@ public class GetAllCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                 Log.e(REQ_TAG, "Error loading comment REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error loading comment.", t));
                 if (resultListener.get() != null) {
-                    resultListener.get().showRESTCallError(error);
+                    resultListener.get().onRESTCallError(error);
                 }
             }
         });

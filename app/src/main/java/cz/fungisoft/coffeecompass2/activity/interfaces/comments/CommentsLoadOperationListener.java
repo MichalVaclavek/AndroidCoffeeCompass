@@ -4,6 +4,7 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.comments;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
@@ -17,5 +18,5 @@ public interface CommentsLoadOperationListener {
 
     default void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {}
 
-    default void showRESTCallError(Result.Error error) {};
+    default void onRESTCallError(Result.Error error) {};
 }

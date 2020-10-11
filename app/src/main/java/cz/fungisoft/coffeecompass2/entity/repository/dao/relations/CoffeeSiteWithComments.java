@@ -8,6 +8,9 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
+/**
+ * Class to get data combining CoffeeSite with its Comments from DB.
+ */
 public class CoffeeSiteWithComments {
 
     @Embedded

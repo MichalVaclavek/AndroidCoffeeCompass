@@ -75,7 +75,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     private String coffeeSort;
 
     /**
-     * Cislo vetsi nez 0 a menzi nez 1, vyjadrujici kdy se ma provest
+     * Cislo vetsi nez 0 a menzi nez 1, vyjadrujici, kdy se ma provest
      * novy dotaz na server pro aktualni CoffeeSites.
      * Pri zmene lokace se vypocita o jakou vzdalenost se telefon posunul
      * a pokud je tato zmenu vetsi jako moveToRangeNewSearchRatio * currentSearchRange

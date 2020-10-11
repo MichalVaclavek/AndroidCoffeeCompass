@@ -5,11 +5,14 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
 
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
+import io.reactivex.Flowable;
 
 /**
  * Repository to work with CoffeeSite's DAO.<br>
@@ -29,22 +32,39 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     final double MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE = 1.4;
 
     private CoffeeSiteDao coffeeSiteDao;
-    private LiveData<List<CoffeeSite>> mAllCoffeeSites;
+
+    private final LiveData<List<CoffeeSite>> mAllCoffeeSites;
+    private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
+    //private final LiveData<PagedList<CoffeeSite>> coffeeSitesWithImage;
+
+    private final Flowable<Integer> numberOfSitesWithImage;
 
     public CoffeeSiteRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSiteDao = db.coffeeSiteDao();
         mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
+//        coffeeSitesWithImage = new LivePagedListBuilder<>( coffeeSiteDao.getAllCoffeeSitesWithImage(), 20)
+//                                                         .build();
+        coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
+        numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
     }
 
     public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
         return mAllCoffeeSites;
     }
 
+    public LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage() {
+        return coffeeSitesWithImage;
+    }
+
+    public  Flowable<Integer> getNumberOfAllCoffeeSitesWithImage() {
+        return numberOfSitesWithImage;
+    }
+
     /**
      * Inner class to hold input data of CoffeeSites LiveData searching parameters.
      */
-    class SearchParamsDataInput {
+    static class SearchParamsDataInput {
 
         public double getLatitudeFrom() {
             return latitudeFrom;

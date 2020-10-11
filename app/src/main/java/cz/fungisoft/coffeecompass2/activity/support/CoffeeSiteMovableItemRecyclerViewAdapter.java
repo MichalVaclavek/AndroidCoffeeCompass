@@ -53,18 +53,18 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
     private final boolean mTwoPane;
 
-    private View.OnClickListener mOnClickListener;
+    private final View.OnClickListener mOnClickListener;
 
     private int currentSearchRange;
 
-    private static CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
-    private static CoffeeSiteMovable initialDummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "InitialDummy", 0);
+    private static final CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
+    private static final CoffeeSiteMovable initialDummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "InitialDummy", 0);
 
     // Animations for vyhledavam text
     private AlphaAnimation animation1;
     private AlphaAnimation animation2;
 
-    private String searchingDistanceLabel;
+    private final String searchingDistanceLabel;
 
     private EmptyCardViewHolder emptyCardViewHolder;
 
@@ -489,7 +489,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             public void onAnimationStart(Animation arg0) {
             }
         });
-        animationRunning = false;
+        animationRunning = false; // init value
     }
 
 
@@ -678,6 +678,5 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             return (searchRange >= 1000) ?  searchRange/1000 + " km"
                                          : searchRange + " m";
         }
-
 
 }

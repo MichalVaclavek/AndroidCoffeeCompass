@@ -182,6 +182,12 @@
     <string name="permissions_location_request">Pro správné fungování aplikace je nutný přístup k poloze zařízení.</string>
     <string name="permissions_location_settings">NASTAVENÍ</string>
     <string name="permissions_location_cancel">Zrušit</string>
-    <string name="action_offline">Offline</string>
+
+    <string name="action_offline">Offline ...</string>
+    <string name="offline_seetings_description">Stažení dat o lokacích do telefonu vám umožní vyhledávat kávové lokace i bez připojení k internetu. V budoucnu by mělo být možné i zadávání nových lokací.</string>
+    <string name="offline_seetings_main_label"> OFFLINE</string>
+    <string name="offline_seetings_includes_photos"> včetně obrázků</string>
+    <string name="offline_seetings_download_button"> Stáhnout</string>
+
 
 </resources>

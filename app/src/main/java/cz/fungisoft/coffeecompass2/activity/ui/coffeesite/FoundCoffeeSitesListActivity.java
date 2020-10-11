@@ -199,8 +199,10 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
             }
         }
 
-        doUnBindSitesInRangeService();
         coffeeSitesViewModel.removeSitesInRangeUpdateListener(recyclerViewAdapter);
+        sitesInRangeUpdateService.removeSitesInRangeFoundListener(coffeeSitesViewModel);
+
+        doUnBindSitesInRangeService();
         super.onDestroy();
     }
 
@@ -300,6 +302,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort, offlineModeOn);
 
         coffeeSitesViewModel = new FoundCoffeeSitesViewModel(getApplication(), locationService, sitesInRangeUpdateService);
+        sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
         coffeeSitesViewModel.addSitesInRangeUpdateListener(recyclerViewAdapter);
 
         if (offlineModeOn) {

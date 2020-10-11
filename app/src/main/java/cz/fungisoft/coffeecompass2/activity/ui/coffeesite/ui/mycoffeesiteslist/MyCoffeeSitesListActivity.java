@@ -546,7 +546,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage.getContent());
             }
-            if(coffeeSitesPage.getContent().size() >= PAGE_SIZE){
+            if (coffeeSitesPage.getContent().size() >= PAGE_SIZE){
                 recyclerViewAdapter.addFooter();
             } else {
                 isLastPage = true;
