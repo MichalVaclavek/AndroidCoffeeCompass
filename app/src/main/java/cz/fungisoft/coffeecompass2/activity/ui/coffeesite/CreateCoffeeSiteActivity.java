@@ -1319,46 +1319,24 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         String typPodniku = sourceTypeEditText.getText().toString();
         typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES[0];
-        //coffeeSite.setTypPodniku(CoffeeSiteEntityRepositories.getCoffeeSiteType(typPodniku));
         coffeeSite.setTypPodniku(coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku));
 
         String typLokality = locationTypeEditText.getText().toString();
         typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES[0];
-//        coffeeSite.setTypLokality(CoffeeSiteEntityRepositories.getSiteLocationType(typLokality));
         coffeeSite.setTypLokality(coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality));
 
-        //coffeeSite.setCena(CoffeeSiteEntityRepositories.getPriceRange(priceRangeEditText.getText().toString()));
         coffeeSite.setCena(coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString()));
 
         String[] selectedCoffeeSorts = getSelectedChipsStrings(coffeeSortsChipGroup);
-//        coffeeSite.setCoffeeSorts(CoffeeSiteEntityRepositories.getCoffeeSortsList(selectedCoffeeSorts));
         coffeeSite.setCoffeeSorts(coffeeSiteEntitiesViewModel.createCoffeeSortsList(selectedCoffeeSorts));
 
-//        coffeeSiteEntitiesViewModel.getAllCoffeeSorts().observe(this, new Observer<List<CoffeeSort>>() {
-//            @Override
-//            public void onChanged(@Nullable final List<CoffeeSort> coffeeSorts) {
-//                // Update the cached copy of the words in the adapter.
-//                    coffeeSite.setCoffeeSorts(coffeeSorts);
-//            }
-//        });
-
         String[] selectedOtherOffer = getSelectedChipsStrings(otherOfferChipGroup);
-        //coffeeSite.setOtherOffers(CoffeeSiteEntityRepositories.getOtherOffersList(selectedOtherOffer));
         coffeeSite.setOtherOffers(coffeeSiteEntitiesViewModel.createOtherOffersList(selectedOtherOffer));
-
-//        coffeeSiteEntitiesViewModel.getAllOtherOffers().observe(this, new Observer<List<OtherOffer>>() {
-//            @Override
-//            public void onChanged(@Nullable final List<OtherOffer> otherOffers) {
-//                // Update the cached copy of the words in the adapter.
-//                coffeeSite.setOtherOffers(otherOffers);
-//            }
-//        });
 
         coffeeSite.setOteviraciDobaDny(openingDaysEditText.getText().toString());
         coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
 
         if (mode == MODE_CREATE) {
-//            coffeeSite.setStatusZarizeni(CoffeeSiteEntityRepositories.getCoffeeSiteStatus("V provozu"));
             coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
         }
 

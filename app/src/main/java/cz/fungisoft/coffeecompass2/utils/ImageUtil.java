@@ -1,24 +1,18 @@
 package cz.fungisoft.coffeecompass2.utils;
 
-import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +26,21 @@ public class ImageUtil {
     private static final String TAG = "ImageUtil: ";
 
     private ImageUtil() {
+    }
+
+    private static ImageUtil instance;
+
+    /**
+     * If instance is requiered
+     *
+     * @return
+     */
+    public static ImageUtil getInstance() {
+        if (instance == null) {
+            instance = new ImageUtil();
+        }
+
+        return instance;
     }
 
     static File compressImage(File imageFile, int reqWidth, int reqHeight,
@@ -103,54 +112,8 @@ public class ImageUtil {
         return inSampleSize;
     }
 
-    /* https://www.codexpedia.com/android/android-download-and-save-image-through-picasso/ */
 
     public static final String COFFEESITE_IMAGE_DIR = "coffeesitephotos";
-//
-//    public static Target picassoImageTarget(Context context, final String imageDir, final String imageName) {
-//        ContextWrapper cw = new ContextWrapper(context);
-//        final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE); // path to /data/data/yourapp/app_imageDir
-//        Log.d("picassoImageTarget: ", directory.getAbsolutePath() + imageName);
-//        return new Target() {
-//            @Override
-//            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-//                Log.d("onBitmapLoaded() ", imageDir + "/" + imageName);
-//                new Thread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        Log.d("ImageTarget run() ", imageDir + "/" + imageName);
-//                        final File myImageFile = new File(directory, imageName); // Create image file
-//                        FileOutputStream fos = null;
-//                        try {
-//                            fos = new FileOutputStream(myImageFile);
-//                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-//                        } catch (IOException e) {
-//                            Log.e(TAG, e.getMessage());
-//                        } finally {
-//                            try {
-//                                fos.close();
-//                            } catch (IOException e) {
-//                                Log.e(TAG, e.getMessage());
-//                            }
-//                        }
-//                        Log.i(TAG, "image saved to >>>" + myImageFile.getAbsolutePath());
-//
-//                    }
-//                }).start();
-//            }
-//
-//            @Override
-//            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-//
-//            }
-//
-//            @Override
-//            public void onPrepareLoad(Drawable placeHolderDrawable) {
-//                if (placeHolderDrawable != null) {}
-//            }
-//        };
-//    }
 
     public static File getImageFile(Context appContext, String imageDir, String imageFileName) {
         ContextWrapper cw = new ContextWrapper(appContext);
@@ -160,22 +123,42 @@ public class ImageUtil {
 
     /* ============== DOWNLOAD and SAVING IMAGE using Picasso and FileOutputStream =========== */
 
-    private static int alreadySavedImagesCounter = 0;
-    private static int readyToSaveImagesCounter = 0;
+    /**
+     * To indicate, that number of images already downloaded reached the number
+     * of images requested to download.
+     */
+    public interface BunchOfImagesDownloadListener {
+        void onRequestedNumberOfImagesToDownloadReached();
+    }
 
-    private static ProgressBar mProgressBar;
+    public void setNumberOfDownloadsListener(BunchOfImagesDownloadListener aNumberOfDownloadsListener) {
+        numberOfDownloadsListener = aNumberOfDownloadsListener;
+    }
 
-    public static void resetAlreadySavedImagesCounter() {
+    /**
+     * Only one listener is enough to listen, that all requested images has been downloaded.
+     * It is expected, that only one process will react on this event
+     */
+    private BunchOfImagesDownloadListener numberOfDownloadsListener;
+
+    private int alreadySavedImagesCounter = 0;
+
+    private int numberOfImagesRequestedToDownload = 0;
+
+    public void setNumberOfImagesRequestedToDownload(int numberOfImagesRequestedToDownload) {
+        this.numberOfImagesRequestedToDownload = numberOfImagesRequestedToDownload;
+    }
+
+
+    private ProgressBar mProgressBar;
+
+    public void resetAlreadySavedImagesCounter() {
         alreadySavedImagesCounter = 0;
-        readyToSaveImagesCounter = 0;
+        numberOfImagesRequestedToDownload = 0;
     }
 
-    public static int getAlreadySavedImagesCounter() {
+    public int getAlreadySavedImagesCounter() {
         return alreadySavedImagesCounter;
-    }
-
-    public static int getReadyToSaveImagesCounter() {
-        return readyToSaveImagesCounter;
     }
 
     /**
@@ -184,7 +167,7 @@ public class ImageUtil {
      *
      * @param progressBar
      */
-    public static void setProgressBar(ProgressBar progressBar) {
+    public void setProgressBar(ProgressBar progressBar) {
         mProgressBar = progressBar;
     }
 
@@ -199,7 +182,7 @@ public class ImageUtil {
      * @param imageDir
      * @param imageFileName
      */
-    public static void downloadAndSaveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
+    public void downloadAndSaveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
 
         class SaveThisImage extends AsyncTask<Void, Void, Void> {
 
@@ -207,7 +190,6 @@ public class ImageUtil {
 
             @Override
             protected void onPreExecute() {
-                readyToSaveImagesCounter++;
             }
 
             @Override
@@ -255,6 +237,9 @@ public class ImageUtil {
                 super.onPostExecute(result);
                 mProgressBar.setProgress(alreadySavedImagesCounter);
                 Log.i(TAG, "image saved to >>> " + myImageFileName);
+                if (numberOfImagesRequestedToDownload == alreadySavedImagesCounter) {
+                    numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
+                }
             }
         }
 

@@ -52,9 +52,32 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                                        implements CoffeeSiteEntitiesLoadRESTResultListener,
                                                   CoffeeSitesRESTResultListener,
                                                   CoffeeSiteDatabase.DbDeleteEndListener,
-                                                  CommentsPageLoadOperationListener {
+                                                  CommentsPageLoadOperationListener,
+                                                  ImageUtil.BunchOfImagesDownloadListener {
 
     static final String TAG = "CoffeeSiteServiceBase";
+
+    private static ImageUtil imageUtil = ImageUtil.getInstance();
+
+    /**
+     * To indicate, that downloading of all data needed for OFFLINE mode finished
+     */
+    public interface DataDownloadIndicatorListener {
+        void onAllDataForOfflineModeDownloaded();
+        //TODO ??? implement, if an action is required by listener in case of failed data download
+        void onDataForOfflineModeDownloadFailed();
+    }
+
+    private List<DataDownloadIndicatorListener> dataDownloadFinishedListeners = new ArrayList<>();
+
+    public void addDataDownloadFinishedListener(DataDownloadIndicatorListener listener) {
+        if (!dataDownloadFinishedListeners.contains(listener)) {
+            dataDownloadFinishedListeners.add(listener);
+        }
+    }
+    public void removeDataDownloadFinishedListener(DataDownloadIndicatorListener listener) {
+        dataDownloadFinishedListeners.remove(listener);
+    }
 
     /**
      * Detector of internet connection change
@@ -63,7 +86,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
 
     // Listeners, usually Activities, which called respective service method
-    // and wants to be informed about resutl later, as all the operations are Async
+    // and wants to be informed about result later, as all the operations are Async
     private List<CoffeeSiteEntitiesServiceOperationsListener> coffeeSiteEntitiesOperationsListeners = new ArrayList<>();
 
     public void addCoffeeSiteEntitiesOperationsListener(CoffeeSiteEntitiesServiceOperationsListener listener) {
@@ -100,10 +123,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private static CoffeeSiteEntityRepositories entitiesRepository;
 
     private static CoffeeSiteRepository coffeeSiteRepository;
-
-    public CoffeeSiteEntityRepositories getEntitiesRepository() {
-       return entitiesRepository;
-    }
 
     private CoffeeSiteDatabase db;
 
@@ -210,7 +229,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     public static final int PAGE_SIZE = 20;
     private int alreadyDownloaded = 0;
 
-    private int alreadyDownloadedSavedImages = 0;
     private int numOfSitesWithImages = 0;
 
 
@@ -218,7 +236,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         if (Utils.isOnline()) {
             requestedPage = 1;
             alreadyDownloaded = 0;
-            alreadyDownloadedSavedImages = 0;
             numOfSitesWithImages = 0;
             this.downloadingStatusTextView.setText("Stahování dat o lokacích ...");
             new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_FIRST_PAGE, requestedPage, PAGE_SIZE, this).execute();
@@ -246,7 +263,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                         numOfSitesWithImages++;
                         String imageFileName = "photo_site_" + cs.getId();
                         cs.setMainImageFileName(imageFileName);
-                        ImageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
                     }
                 }
             }
@@ -277,7 +294,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     List<CoffeeSite> coffeeSitesList = coffeeSitesPage.getContent();
 
                     for (CoffeeSite cs : coffeeSitesList) {
-                        numOfSitesWithImages += !cs.getMainImageURL().isEmpty() ? 1 : 0;
+                        if (!cs.getMainImageURL().isEmpty() ) {
+                            numOfSitesWithImages++;
+                            String imageFileName = "photo_site_" + cs.getId();
+                            cs.setMainImageFileName(imageFileName);
+                        }
                     }
 
                     isLastPage = coffeeSitesPage.getLast();
@@ -313,23 +334,22 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         this.downloadingStatusTextView.setText("Stahování fotek lokací ...");
         downloadProgressBar.setProgress(0);
         downloadProgressBar.setMax(numOfSitesWithImages);
-        ImageUtil.setProgressBar(downloadProgressBar);
-        ImageUtil.resetAlreadySavedImagesCounter();
+
+        imageUtil.setProgressBar(downloadProgressBar);
+        imageUtil.resetAlreadySavedImagesCounter();
+        imageUtil.setNumberOfImagesRequestedToDownload(numOfSitesWithImages);
+        imageUtil.setNumberOfDownloadsListener(this);
 
         coffeeSiteRepository.getAllCoffeeSitesWithImage().observe(this, new Observer<List<CoffeeSite>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
-                // Update the cached copy of the coffeeSitesInRange in the adapter.
-                //int loadedCount = coffeeSitesWithImage.getLoadedCount();
+                // Download images
                 if (includingImages) {
                     for (CoffeeSite cs : coffeeSitesWithImage) {
-                        if (cs != null && !cs.getMainImageURL().isEmpty() && cs.getMainImageFileName().isEmpty()) { // not saved yet
-                            String imageFileName = "photo_site_" + cs.getId();
-                            cs.setMainImageFileName(imageFileName);
-                            ImageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                        if (cs != null && !cs.getMainImageFileName().isEmpty()) {
+                            imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
                         }
                     }
-                    //informClientAboutAllCoffeeSitesLoadResult(true);
                 }
             }
         });
@@ -352,15 +372,36 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         Log.i(TAG, "Start of Comments download.");
     }
 
-
+    /**
+     * Called by CommentsRepository
+     *
+     * @param comments
+     */
     @Override
     public void onCommentsPageLoaded(CommentsPageEnvelope comments) {
         downloadProgressBar.setMax(comments.getTotalElements());
         alreadyDownloadedComments += comments.getNumberOfElements();
         downloadProgressBar.setProgress(alreadyDownloadedComments);
 
+        // Continue loading images
         if (comments.getLast()) {
-            downloadImages();
+            if (includingImages) {
+                downloadImages();
+            } else { // all Comments downloaded, we can return to OfflineModeSelectionActivity as download of images were not requested
+                for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
+                    listener.onAllDataForOfflineModeDownloaded();
+                }
+            }
+        }
+    }
+
+    /**
+     * This should finish all downloads (if images download was also requested), we can indicate successful download and return to OfflineModeSelectionActivity
+     */
+    @Override
+    public void onRequestedNumberOfImagesToDownloadReached() {
+        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
+            listener.onAllDataForOfflineModeDownloaded();
         }
     }
 

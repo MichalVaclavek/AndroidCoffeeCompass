@@ -62,7 +62,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         distLabel = (DistanceChangeTextView) findViewById(R.id.distTextView);
         if (cs instanceof CoffeeSiteMovable) {
             distLabel.setVisibility(View.VISIBLE);
-            //distLabel.setText(String.valueOf(cs.getDistance()) + " m");
             distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
             distLabel.setTag(TAG + ". DistanceTextView for " + cs.getName());
             distLabel.setCoffeeSite((CoffeeSiteMovable) cs);

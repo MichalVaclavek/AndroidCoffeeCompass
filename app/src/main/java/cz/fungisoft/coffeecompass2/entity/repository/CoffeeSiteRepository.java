@@ -12,6 +12,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
+import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
 
 /**
@@ -35,16 +36,15 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
 
     private final LiveData<List<CoffeeSite>> mAllCoffeeSites;
     private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
-    //private final LiveData<PagedList<CoffeeSite>> coffeeSitesWithImage;
-
+    // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
+
+
 
     public CoffeeSiteRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSiteDao = db.coffeeSiteDao();
         mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
-//        coffeeSitesWithImage = new LivePagedListBuilder<>( coffeeSiteDao.getAllCoffeeSitesWithImage(), 20)
-//                                                         .build();
         coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
         numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
     }
@@ -126,6 +126,15 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         setCoffeeSiteIdInput(siteId);
         return coffeeSiteLive;
     }
+
+    /** Get CoffeeSites With Comments */
+
+//    LiveData<CoffeeSiteWithComments> coffeeSiteWithComments = Transformations.switchMap(coffeeSiteIdInput, csId -> coffeeSiteDao.getCoffeeSiteWithComments(csId));
+//
+//    public LiveData<CoffeeSiteWithComments> getCoffeeSiteWithCommentsById(long siteId) {
+//        setCoffeeSiteIdInput(siteId);
+//        return coffeeSiteWithComments;
+//    }
 
     /**
      * LiveData input holder for CoffeeSite creator user name

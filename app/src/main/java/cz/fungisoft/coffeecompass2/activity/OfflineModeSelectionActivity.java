@@ -1,22 +1,33 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CommentRepository;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
@@ -24,12 +35,25 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-public class OfflineModeSelectionActivity extends AppCompatActivity implements CoffeeSiteEntitiesServiceConnectionListener {
+public class OfflineModeSelectionActivity extends AppCompatActivity implements CoffeeSiteEntitiesServiceConnectionListener,
+                                                                               CoffeeSiteEntitiesService.DataDownloadIndicatorListener {
 
     private static final String TAG = "OfflineModeSelectionAct";
 
+    // Saves OFFLINE mode status
+    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
+    private boolean offlineModeOn = false;
+
+    @BindView(R.id.mainOfflineLayout)
+    ConstraintLayout mainOfflineLayout;
+
+    @BindView(R.id.offlineActivityMainLinearLayout)
+    LinearLayout mainLinearLayout;
+
     @BindView(R.id.textOfflineDownloadStatus)
     TextView downloadingStatusTextView;
+
+    ColorStateList origStatusColor;
 
     @BindView(R.id.buttonOfflineDownload)
     Button downloadButton;
@@ -45,20 +69,23 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_offline_mode_selection);
 
+        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+
         ButterKnife.bind(this);
+
+        origStatusColor =  downloadingStatusTextView.getTextColors(); //save original colors
+
+        downloadButton.setEnabled(true);
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Utils.isOnline()) {
                     downloadProgressBar.setVisibility(View.VISIBLE);
-
+                    downloadButton.setEnabled(false);
+                    downloadingStatusTextView.setTextColor(origStatusColor);
+                    coffeeSiteEntitiesService.addDataDownloadFinishedListener(OfflineModeSelectionActivity.this);
                     coffeeSiteEntitiesService.populateCoffeeSites(withImagesCheckBox.isChecked(), downloadProgressBar, downloadingStatusTextView);
-
-                    //Comments are always downloaded
-//                    CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
-//                    CommentRepository commentRepository = CommentRepository.getInstance(db);
-//                    commentRepository.populateComments();
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }
@@ -107,6 +134,37 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     }
 
     @Override
+    public void onAllDataForOfflineModeDownloaded() {
+        // Info () and return to MainActivity, i.e. go back
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Data stažena úspěšně.",
+                Toast.LENGTH_LONG);
+        toast.show();
+        //Snackbar.make(mainLinearLayout, "Data stažena úspěšně.", Snackbar.LENGTH_LONG).show();
+        dataDownloadPreferenceHelper.putDownloaded(true);
+        dataDownloadPreferenceHelper.putDownloadDate(new Date());
+
+        this.onBackPressed();
+    }
+
+    @Override
+    public void onDataForOfflineModeDownloadFailed() {
+        //Info in RED with note that download can be repeated later - stay on this Activity
+        downloadingStatusTextView.setTextColor(Color.RED);
+        downloadingStatusTextView.setText("Data se nepodařilo stáhnout. Zkontrolujte připojení k internetu nebo zkuste později ...");
+        // Allow download button
+        downloadButton.setEnabled(true);
+    }
+
+    private void goToMainActivity() {
+        // go to MainActivity
+        Intent i = new Intent(OfflineModeSelectionActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(i);
+        finish();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         doBindCoffeeSiteEntitiesService();
@@ -116,6 +174,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     protected void onStop() {
         doUnbindCoffeeSiteEntitiesService();
+        coffeeSiteEntitiesService.removeDataDownloadFinishedListener(this);
         super.onStop();
     }
 

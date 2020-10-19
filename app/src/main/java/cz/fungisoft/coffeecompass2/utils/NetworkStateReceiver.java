@@ -147,7 +147,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;
                 if (!ma.isNumberOfCoffeeSitesCreatedByLoggedInUserChecked()) {
-                    ma.startNumberOfCoffeeSitesFromUserService();
+                    ma.startNumberOfCoffeeSitesFromUserCall();
                 }
             }
         }

@@ -144,12 +144,7 @@ public class CommentsListActivity extends AppCompatActivity
             }
         });
 
-
-        if (!offLineModeOn) {
-            fab.setVisibility(View.VISIBLE);
-        } else {
-            fab.setVisibility(GONE);
-        }
+        fab.setVisibility(!offLineModeOn ? View.VISIBLE : GONE);
 
         doBindUserAccountService();
 

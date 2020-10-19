@@ -64,15 +64,6 @@ public interface CoffeeSiteDao {
 
     @Transaction
     @Query("SELECT * FROM coffee_site_table")
-    List<CoffeeSiteWithComments> getCoffeeSitesWithComments();
-
-    @Transaction
-    @Query("SELECT * FROM coffee_site_table WHERE id = :coffeeSiteId LIMIT 1")
-    List<CoffeeSiteWithComments> getCoffeeSiteWithComments(long coffeeSiteId);
-
-//    @Transaction
-//    @Insert
-//    long setCoffeeSiteWithComments(CoffeeSiteWithComments coffeeSiteWithComments);
-
+    List<CoffeeSiteWithComments> getAllCoffeeSitesWithComments();
 
 }

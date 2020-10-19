@@ -19,14 +19,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
  * Utility class.
@@ -240,7 +237,7 @@ public class Utils {
     }
 
     // Reading OFFLINE mode status
-    private static OfflineModePreferenceHelper offlineModePreferenceHelper;
+    private static DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper;
 
     /**
      * Finds from Preferences if the OFFLINE mode is switched ON or OFF
@@ -248,8 +245,9 @@ public class Utils {
      * @return
      */
     public static boolean isOfflineModeOn(Context context) {
-        offlineModePreferenceHelper = new OfflineModePreferenceHelper(context);
-        return offlineModePreferenceHelper.getOfflineMode();
+        offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
+        return !isOnline() && offlineModePreferenceHelper.getDownloaded();
+//        return offlineModePreferenceHelper.getOfflineMode();
     }
 
 }

@@ -41,10 +41,12 @@ public class CoffeeSiteImageFragment extends Fragment {
             if (!offLineModeOn) {
                 Picasso.get().load(coffeeSite.getMainImageURL())
                              .resize(0, pictureImageView.getMaxHeight())
+                             .placeholder(R.drawable.kafe_backround_120x160)
                              .into(pictureImageView);
             } else {
                 Picasso.get().load(ImageUtil.getImageFile(Objects.requireNonNull(this.getContext()).getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSite.getMainImageFileName()))
-                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .resize(0, pictureImageView.getMaxHeight())
+                        .placeholder(R.drawable.kafe_backround_120x160)
                         .into(pictureImageView);
             }
         }

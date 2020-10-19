@@ -90,7 +90,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     }
 
 
-
     /**
      * Starts Async task loading Comments from server, after the current Comments
      * are deleted from DB.
@@ -118,7 +117,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     }
 
     public void insert (Comment comment) {
-        new InsertAsyncTask(commentDao).execute(comment);
+        new InsertCommentAsyncTask(commentDao).execute(comment);
     }
 
     @Override
@@ -126,6 +125,11 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         insertAll(comments);
     }
 
+    /**
+     * Called by AsyncTask
+     *
+     * @param comments
+     */
     @Override
     public void onCommentsPageLoaded(CommentsPageEnvelope comments) {
         insertAll(comments.getContent());
@@ -140,8 +144,9 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     private final MutableLiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSiteFromServer = new MutableLiveData<>();
 
     /**
-     * Processes the list of Comments belonging to CoffeeSite as returned from server. Comments
-     * are not saved to DB, but returned as LiveData<List<CoffeeSiteWithComments>>> field.
+     * Processes the list of Comments belonging to CoffeeSite as returned from server.
+     * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>>> field.
+     *
      * @param comments
      * @param coffeeSite
      */
@@ -160,11 +165,13 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
     }
 
-    private static class InsertAsyncTask extends AsyncTask<Comment, Void, Void> {
+    /** Helper inner classes to create AsyncTasks for inserting Comments */
+
+    private static class InsertCommentAsyncTask extends AsyncTask<Comment, Void, Void> {
 
         private CommentDao mAsyncTaskDao;
 
-        InsertAsyncTask(CommentDao dao) {
+        InsertCommentAsyncTask(CommentDao dao) {
             mAsyncTaskDao = dao;
         }
 
@@ -176,20 +183,21 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     }
 
     public void insertAll (List<Comment> comments) {
-        new InsertAllAsyncTask(commentDao).execute(comments);
+        new InsertAllCommentsAsyncTask(commentDao).execute(comments);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<Comment>, Void, Void> {
+
+    private static class InsertAllCommentsAsyncTask extends AsyncTask<List<Comment>, Void, Void> {
 
         private CommentDao mAsyncTaskDao;
 
-        InsertAllAsyncTask(CommentDao dao) {
+        InsertAllCommentsAsyncTask(CommentDao dao) {
             mAsyncTaskDao = dao;
         }
 
         @Override
         protected Void doInBackground(List<Comment>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
+            mAsyncTaskDao.insertAllComments(lists[0]);
             return null;
         }
     }

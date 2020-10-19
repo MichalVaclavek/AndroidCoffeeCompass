@@ -25,7 +25,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * created by one user.
  */
 public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG = "GetSitesFromUserAsnTsk";
+
+    private static final String TAG = "GetNumSitesFromUserAT";
 
     private final LoggedInUser currentUser;
 

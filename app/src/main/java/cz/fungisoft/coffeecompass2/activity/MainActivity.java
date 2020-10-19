@@ -38,14 +38,11 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
-import cz.fungisoft.coffeecompass2.entity.repository.CommentRepository;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -118,10 +115,6 @@ public class MainActivity extends ActivityWithLocationService
     // Saves selected search distance range
     private SearchDistancePreferenceHelper searchRangePreferenceHelper;
 
-    // Saves OFFLINE mode status
-    private OfflineModePreferenceHelper offlineModePreferenceHelper;
-    private boolean offlineModeOn = false;
-
     // Saves Statistics
     private StatisticsPrefencesHelper statisticsPrefencesHelper;
 
@@ -155,7 +148,7 @@ public class MainActivity extends ActivityWithLocationService
     /**
      * To idetify if Offline mode is selected
      */
-    private boolean isOfflineChecked = false;
+    //private boolean isOfflineChecked = false;
 
     FloatingActionButton fab;
 
@@ -170,8 +163,7 @@ public class MainActivity extends ActivityWithLocationService
 
         mainActivityProgressBar = findViewById(R.id.progress_main_activity);
 
-        offlineModePreferenceHelper = new OfflineModePreferenceHelper(this);
-        offlineModeOn = offlineModePreferenceHelper.getOfflineMode();
+        //offlineModeOn = offlineModePreferenceHelper.getOfflineMode();
 
         statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
         userPreferencesHelper = new UserPreferencesHelper(this);
@@ -359,7 +351,7 @@ public class MainActivity extends ActivityWithLocationService
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             if (!Utils.isOfflineModeOn(getApplicationContext())) {
-                startNumberOfCoffeeSitesFromUserService();
+                startNumberOfCoffeeSitesFromUserCall();
             } else {
                 onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
             }
@@ -379,7 +371,7 @@ public class MainActivity extends ActivityWithLocationService
     }
 
 
-    public void startNumberOfCoffeeSitesFromUserService() {
+    public void startNumberOfCoffeeSitesFromUserCall() {
         if (coffeeSiteLoadOperationsService != null) {
             coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
         }
@@ -448,9 +440,6 @@ public class MainActivity extends ActivityWithLocationService
         // Default icon for this action
         menu.findItem(R.id.action_login).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
 
-        // set current saved OFFLINE mode status
-        menu.findItem(R.id.action_offline_mode).setChecked(offlineModeOn);
-
         return true;
     }
 
@@ -475,20 +464,6 @@ public class MainActivity extends ActivityWithLocationService
                 return true;
             case R.id.action_offline_mode:
                 openOfflineSettingsActivity();
-//
-//                isOfflineChecked = !item.isChecked();
-//                item.setChecked(isOfflineChecked);
-//                offlineModePreferenceHelper.putOfflineMode(isOfflineChecked);
-//                if (isOfflineChecked) {
-//                    fab.setVisibility(View.GONE);
-//                    showProgressbar();
-//                    coffeeSiteEntitiesService.populateCoffeeSites();
-//                    CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
-//                    CommentRepository commentRepository = CommentRepository.getInstance(db);
-//                    commentRepository.populateComments();
-//                } else {
-//                    fab.setVisibility(View.VISIBLE);
-//                }
                 return true;
             case R.id.action_map:
                 if (Utils.isOnline()) {
@@ -686,7 +661,7 @@ public class MainActivity extends ActivityWithLocationService
         if (!Utils.isOfflineModeOn(getApplicationContext())) {
             if (Utils.isOnline()) {
                     startReadStatistics();
-                    startNumberOfCoffeeSitesFromUserService();
+                    startNumberOfCoffeeSitesFromUserCall();
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }

@@ -8,17 +8,12 @@ import androidx.room.Transaction;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
 
 @Dao
 public interface CommentDao {
-
-//    @Query("SELECT * FROM CoffeeSite")
-//    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
 
     @Query("SELECT * FROM comment_table")
     LiveData<List<Comment>> getAllComments();
@@ -37,8 +32,9 @@ public interface CommentDao {
     void deleteAll();
 
     @Insert
-    void insertAll(List<Comment> comments);
+    void insertAllComments(List<Comment> comments);
 
+    @Transaction
     @Insert
     void insertComment(Comment comment);
 
