@@ -130,7 +130,7 @@ public class CommentsListActivity extends AppCompatActivity
 
         // Adds Floating Action Button if a user is loged-in
         FloatingActionButton fab = findViewById(R.id.fab_new_comment);
-
+        fab.setVisibility(!offLineModeOn ? View.VISIBLE : GONE);
         fab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,8 +143,6 @@ public class CommentsListActivity extends AppCompatActivity
                 }
             }
         });
-
-        fab.setVisibility(!offLineModeOn ? View.VISIBLE : GONE);
 
         doBindUserAccountService();
 

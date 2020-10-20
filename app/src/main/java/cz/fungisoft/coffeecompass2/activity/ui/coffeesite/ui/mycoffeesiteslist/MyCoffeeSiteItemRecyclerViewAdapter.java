@@ -105,12 +105,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Used for opening CoffeeSiteDetailActivity
      */
-    private View.OnClickListener mOnClickListenerToCoffeeSiteDetailActivityStart;
+    private final View.OnClickListener mOnClickListenerToCoffeeSiteDetailActivityStart;
 
     /**
      * Used for opening CoffeeSiteImageActivity
      */
-    private View.OnClickListener mOnClickListenerToCoffeeSiteImageActivityStart;
+    private final View.OnClickListener mOnClickListenerToCoffeeSiteImageActivityStart;
 
     /**
      * Used for changing status of selected CoffeeSite from/to ACTIVE/INACTIVE/CANCEL

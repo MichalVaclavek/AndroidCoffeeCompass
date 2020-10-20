@@ -208,6 +208,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         MenuItem addCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_create_coffeesite);
         addCoffeeSiteMenuItem.setVisible(!offLineModeOn);
         MenuItem reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
+        reloadMyCoffeeSitesMenuItem.setVisible(!offLineModeOn);
 
         /* Disable menu options when the list of user's sites
          is being loaded, otherwise enable.
@@ -523,7 +524,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesFirstPage(coffeeSitesPage.getContent());
             }
-            if (coffeeSitesPage.getContent().size() >= PAGE_SIZE) {
+            if (!coffeeSitesPage.getLast()) {
                 recyclerViewAdapter.addFooter();
             } else {
                 isLastPage = true;
@@ -546,7 +547,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage.getContent());
             }
-            if (coffeeSitesPage.getContent().size() >= PAGE_SIZE){
+            if (!coffeeSitesPage.getLast()) {
                 recyclerViewAdapter.addFooter();
             } else {
                 isLastPage = true;

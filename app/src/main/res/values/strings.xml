@@ -188,6 +188,7 @@
     <string name="offline_seetings_main_label"> OFFLINE</string>
     <string name="offline_seetings_includes_photos"> včetně obrázků</string>
     <string name="offline_seetings_download_button"> Stáhnout</string>
+    <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
 
 
 </resources>

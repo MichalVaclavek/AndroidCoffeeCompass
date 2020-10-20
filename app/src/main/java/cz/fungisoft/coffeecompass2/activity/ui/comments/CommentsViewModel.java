@@ -46,25 +46,13 @@ public class CommentsViewModel extends AndroidViewModel {
         }
     }
 
-    private final MutableLiveData<CommentsLiveDataInput> commentsInput = new MutableLiveData<>();
-
-    private void setInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
-        commentsInput.setValue(new CommentsLiveDataInput(offlineModeOn, coffeeSite));
-    }
 
     private CommentRepository commentRepository;
-
-    /**
-     * Actual list of all Comments belonging to one CoffeeSite
-     */
-    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
-            Transformations.switchMap(commentsInput, (ci) -> commentRepository.getCommentsForCoffeeSite(ci.coffeeSite, ci.offlineModeOn));
 
     /**
      * Actual list of all Comments
      */
     private LiveData<List<Comment>> allComments;
-
 
     public CommentsViewModel(@NonNull Application application) {
         super(application);
@@ -72,6 +60,18 @@ public class CommentsViewModel extends AndroidViewModel {
         commentRepository = CommentRepository.getInstance(db);
         allComments  = commentRepository.getAllComments();
     }
+
+    private final MutableLiveData<CommentsLiveDataInput> commentsInput = new MutableLiveData<>();
+
+    private void setInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
+        commentsInput.setValue(new CommentsLiveDataInput(offlineModeOn, coffeeSite));
+    }
+
+    /**
+     * Actual list of all Comments belonging to one CoffeeSite
+     */
+    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
+            Transformations.switchMap(commentsInput, (ci) -> commentRepository.getCommentsForCoffeeSite(ci.coffeeSite, ci.offlineModeOn));
 
 
     public LiveData<List<Comment>> getAllComments(boolean offlineModeOn) {

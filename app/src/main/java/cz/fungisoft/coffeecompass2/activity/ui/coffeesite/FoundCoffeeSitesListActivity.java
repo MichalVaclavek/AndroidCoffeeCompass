@@ -165,7 +165,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     @Override
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
-
         // Retrieve CoffeeSites list state and item positions
         if (state != null) {
             mListState = state.getParcelable(LIST_STATE_KEY);
@@ -221,7 +220,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
                     openMap();
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(),
-                            "No Internet connection.",
+                            R.string.map_available_online_only,
                             Toast.LENGTH_SHORT);
                     toast.show();
                 }

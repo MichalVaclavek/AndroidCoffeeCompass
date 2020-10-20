@@ -31,6 +31,9 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnect
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 /**
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
@@ -55,7 +58,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
-    private Button imageButton;
+    private Button mapButton;
 
     /**
      * To show snackbar
@@ -73,17 +76,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         commentsButton = (Button) findViewById(R.id.commentsButton);
 
+        mapButton = (Button) findViewById(R.id.mapButton);
+        mapButton.setVisibility(Utils.isOfflineModeOn(getApplicationContext()) ? GONE : VISIBLE);
+
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-
-        // Show the Up button in the action bar.
-//        ActionBar actionBar = getSupportActionBar();
-//        if (actionBar != null) {
-//            actionBar.setDisplayHomeAsUpEnabled(true);
-//            actionBar.setDisplayShowHomeEnabled(true);
-//        }
 
         // Read coffee site data from calling activity
         Intent intent = this.getIntent();
@@ -103,12 +102,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
 
         if (coffeeSite != null) {
-            imageButton = (Button) findViewById(R.id.imageButton);
+            Button imageButton = (Button) findViewById(R.id.imageButton);
             if (!coffeeSite.getMainImageURL().isEmpty()) {
                 imageButton.setVisibility(View.VISIBLE);
                 imageButton.setEnabled(true);
             } else {
-                imageButton.setVisibility(View.GONE);
+                imageButton.setVisibility(GONE);
             }
         }
         // savedInstanceState is non-null when there is fragment state
@@ -180,7 +179,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void hideProgressbar() {
-        loadCoffeeSiteProgressBar.setVisibility(View.GONE);
+        loadCoffeeSiteProgressBar.setVisibility(GONE);
     }
 
 

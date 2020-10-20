@@ -34,21 +34,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
      */
     private CommentDao commentDao;
 
-    /**
-     * LiveData input holder for coffeeSite for whom the Comments are to be returned
-     */
-    private final MutableLiveData<CoffeeSite> commentsInput = new MutableLiveData<>();
-
-    private LiveData<List<Comment>> mAllComments;
-
-    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
-            Transformations.switchMap(commentsInput, (cs) -> commentDao.getCoffeeSiteWithComments(cs.getId()));
-
-
-    private void setInput(CoffeeSite coffeeSite) {
-        commentsInput.setValue(coffeeSite);
-    }
-
     private static CommentRepository repository;
 
     private CommentRepository(CoffeeSiteDatabase db) {
@@ -63,6 +48,20 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
             repository = new CommentRepository(db);
         }
         return repository;
+    }
+
+    /**
+     * LiveData input holder for coffeeSite for whom the Comments are to be returned
+     */
+    private final MutableLiveData<CoffeeSite> commentsInput = new MutableLiveData<>();
+
+    private LiveData<List<Comment>> mAllComments;
+
+    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
+            Transformations.switchMap(commentsInput, (cs) -> commentDao.getCoffeeSiteWithComments(cs.getId()));
+
+    private void setInput(CoffeeSite coffeeSite) {
+        commentsInput.setValue(coffeeSite);
     }
 
     /**
@@ -146,18 +145,21 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     /**
      * Processes the list of Comments belonging to CoffeeSite as returned from server.
      * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>>> field.
+     * Comments read during this online REST call, cannot be inserted, because they can be present
+     * already in DB because of previously activated OFFLINE mode.
      *
      * @param comments
      * @param coffeeSite
      */
     @Override
     public void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {
-
         List<CoffeeSiteWithComments> listOfCommentsForCoffeeSite = new ArrayList<>();
         CoffeeSiteWithComments coffeeSiteWithComments = new CoffeeSiteWithComments(coffeeSite, comments);
         listOfCommentsForCoffeeSite.add(coffeeSiteWithComments);
+
         commentsOfCoffeeSiteFromServer.setValue(listOfCommentsForCoffeeSite);
         commentsOfCoffeeSite = commentsOfCoffeeSiteFromServer;
+//        insertAll(comments);
     }
 
     @Override
