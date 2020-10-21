@@ -103,8 +103,8 @@ public class GetAllCommentsPaginatedAsyncTask extends AsyncTask<Void, Void, Void
 
             @Override
             public void onFailure(Call<CommentsPageEnvelope> call, Throwable t) {
-                Log.e(REQ_TAG, "Error loading comment REST request." + t.getMessage());
-                Result.Error error = new Result.Error(new IOException("Error loading comment.", t));
+                Log.e(REQ_TAG, "Error loading comment page REST request." + t.getMessage());
+                Result.Error error = new Result.Error(new IOException("Error loading comment page.", t));
                 if (resultListener.get() != null) {
                     resultListener.get().onRESTCallError(error);
                 }

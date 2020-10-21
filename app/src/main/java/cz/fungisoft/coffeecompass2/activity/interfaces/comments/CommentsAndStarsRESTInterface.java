@@ -25,9 +25,7 @@ import retrofit2.http.Query;
 public interface CommentsAndStarsRESTInterface {
 
     String SAVE_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_SECURED_URL;
-
     String GET_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_PUBLIC_URL;
-
     String DELETE_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_SECURED_URL;
 
     /**

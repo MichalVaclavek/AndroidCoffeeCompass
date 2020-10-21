@@ -107,8 +107,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                  SaveActivateCoffeeSiteDialogFragment.SaveActivateCoffeeSiteDialogListener,
                                                  DeleteCoffeeSiteImageDialogFragment.DeleteCoffeeSiteImageDialogListener,
                                                  PropertyChangeListener,
-                                                 CoffeeSiteEntitiesServiceConnectionListener,
-                                                 CoffeeSiteEntitiesServiceOperationsListener,
+                                                 //CoffeeSiteEntitiesServiceConnectionListener,
+                                                 //CoffeeSiteEntitiesServiceOperationsListener,
                                                  CoffeeSiteServicesConnectionListener,
                                                  CoffeeSiteServiceCUDOperationsListener,
                                                  CoffeeSiteServiceStatusOperationsListener {
@@ -196,8 +196,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
 
-    protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
-    private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
+    //protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
+    //private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
 
     private CoffeeSite currentCoffeeSite;
 
@@ -663,12 +663,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Lets bind CoffeeSiteEtitiesService and load all CoffeeSiteEntities
         // in onCoffeeSiteEntitiesConnected() method
         // TODO - Verify, if calling this in onResume() would be more convenient
-        doBindCoffeeSiteEntitiesService();
+        //doBindCoffeeSiteEntitiesService();
     }
 
     @Override
     protected void onStop() {
-        doUnbindCoffeeSiteEntitiesService();
+        //doUnbindCoffeeSiteEntitiesService();
         super.onStop();
     }
 
@@ -798,52 +798,45 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
-    private boolean mShouldUnbindCoffeeSiteEntitiesService;
+    //private boolean mShouldUnbindCoffeeSiteEntitiesService;
 
-    private void doBindCoffeeSiteEntitiesService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
-        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
-        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
-        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
-                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUnbindCoffeeSiteEntitiesService = true;
-        } else {
-            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
-                    "exist, or this client isn't allowed access to it.");
-        }
-    }
+//    private void doBindCoffeeSiteEntitiesService() {
+//        // Attempts to establish a connection with the service.  We use an
+//        // explicit class name because we want a specific service
+//        // implementation that we know will be running in our own process
+//        // (and thus won't be supporting component replacement by other
+//        // applications).
+//        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
+//        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
+//        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
+//                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
+//            mShouldUnbindCoffeeSiteEntitiesService = true;
+//        } else {
+//            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
+//                    "exist, or this client isn't allowed access to it.");
+//        }
+//    }
 
-    private void doUnbindCoffeeSiteEntitiesService() {
-        if (mShouldUnbindCoffeeSiteEntitiesService) {
-            if (coffeeSiteEntitiesService != null) {
-                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
-            }
-            // Release information about the service's state.
-            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
-            unbindService( coffeeSiteEntitiesServiceConnector);
-            mShouldUnbindCoffeeSiteEntitiesService = false;
-        }
-    }
+//    private void doUnbindCoffeeSiteEntitiesService() {
+//        if (mShouldUnbindCoffeeSiteEntitiesService) {
+//            if (coffeeSiteEntitiesService != null) {
+//                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
+//            }
+//            // Release information about the service's state.
+//            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
+//            unbindService( coffeeSiteEntitiesServiceConnector);
+//            mShouldUnbindCoffeeSiteEntitiesService = false;
+//        }
+//    }
 
 
-    @Override
-    public void onCoffeeSiteEntitiesServiceConnected() {
-        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
-        if (coffeeSiteEntitiesService != null) {
-            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            //startLoadingCoffeeSiteEntities();
-        }
-    }
-
-    public void startLoadingCoffeeSiteEntities() {
-        if (coffeeSiteEntitiesService != null) {
-            //coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
-        }
-    }
+//    @Override
+//    public void onCoffeeSiteEntitiesServiceConnected() {
+//        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
+//        if (coffeeSiteEntitiesService != null) {
+//            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
+//        }
+//    }
 
     /********* CoffeeSiteCUDOperationsService **************/
 

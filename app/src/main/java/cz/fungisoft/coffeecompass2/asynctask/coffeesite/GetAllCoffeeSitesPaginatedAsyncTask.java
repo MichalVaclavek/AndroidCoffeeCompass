@@ -134,7 +134,7 @@ public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, V
                 error = new Result.Error(new IOException("Error loading CoffeeSites from user REST request.", t));
                 operationError = error.toString();
                 if (callingListenerService != null) {
-                    callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                    callingListenerService.onCoffeeSitesPageReturned(requestedRESTOperationCode, error);
                 }
             }
         });

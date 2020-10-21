@@ -32,7 +32,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * Async Task to run REST api request to obtain all coffeeSites
  * created by current logged-in User
  */
-public class GetCoffeeSitesFromCurrentUserPaginatedAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "GetSitesFromUserPageAT";
 
@@ -50,11 +50,11 @@ public class GetCoffeeSitesFromCurrentUserPaginatedAsyncTask extends AsyncTask<V
     private int pageSize;
 
 
-    public GetCoffeeSitesFromCurrentUserPaginatedAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                                           int requestedPage,
-                                                           int pageSize,
-                                                           LoggedInUser user,
-                                                           CoffeeSitesRESTResultListener callingService) {
+    public GetCfSitesFromLoggedUserPaginatedAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                                      int requestedPage,
+                                                      int pageSize,
+                                                      LoggedInUser user,
+                                                      CoffeeSitesRESTResultListener callingService) {
         this.currentUser = user;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;

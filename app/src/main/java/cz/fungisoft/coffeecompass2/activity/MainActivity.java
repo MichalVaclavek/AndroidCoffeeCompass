@@ -64,6 +64,9 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 /**
  * Main activity to show:
  *
@@ -264,7 +267,7 @@ public class MainActivity extends ActivityWithLocationService
             }
         });
 
-        fab.setVisibility(!Utils.isOfflineModeOn(getApplicationContext()) ? View.VISIBLE : View.GONE);
+        fab.setVisibility(!Utils.isOfflineModeOn(getApplicationContext()) ? VISIBLE : GONE);
 
     }
 
@@ -482,10 +485,10 @@ public class MainActivity extends ActivityWithLocationService
      *
      * @param result
      */
-    @Override
-    public void onAllCoffeeSitesLoaded(boolean result) {
-        hideProgressbar();
-    }
+//    @Override
+//    public void onAllCoffeeSitesLoaded(boolean result) {
+//        hideProgressbar();
+//    }
 
     /**
      * Starts MyCoffeeSitesListActivity
@@ -825,14 +828,18 @@ public class MainActivity extends ActivityWithLocationService
      * Helper method ...
      */
     public void showProgressbar() {
-        mainActivityProgressBar.setVisibility(View.VISIBLE);
+        mainActivityProgressBar.setVisibility(VISIBLE);
     }
 
     /**
      * Helper method ...
      */
     public void hideProgressbar() {
-        mainActivityProgressBar.setVisibility(View.GONE);
+        mainActivityProgressBar.setVisibility(GONE);
+    }
+
+    public void enableFab(boolean isEnabled) {
+        fab.setVisibility(isEnabled ? VISIBLE : GONE);
     }
 
     private void doUnbindUserAccountService() {

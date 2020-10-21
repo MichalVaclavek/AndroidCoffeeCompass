@@ -61,7 +61,6 @@ public class Result<T> {
             this.detailToDisplay = error;
         }
         public Exception getException() {
-
             return this.exception;
         }
 

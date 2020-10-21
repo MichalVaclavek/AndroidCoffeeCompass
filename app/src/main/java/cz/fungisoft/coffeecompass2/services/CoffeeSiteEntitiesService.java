@@ -237,6 +237,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             requestedPage = 1;
             alreadyDownloaded = 0;
             numOfSitesWithImages = 0;
+            downloadProgressBar.setProgress(0);
             this.downloadingStatusTextView.setText("Stahování dat o lokacích ...");
             new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_FIRST_PAGE, requestedPage, PAGE_SIZE, this).execute();
         }
@@ -323,10 +324,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             }
         } else {
             RestError error = ((Result.Error) result).getRestError();
-            if (error != null) {
+            Exception ex = ((Result.Error) result).getException();
+            if (error != null || ex != null) {
                 informClientAboutAllCoffeeSitesLoadResult(false);
-                Log.e(TAG, "Error when obtaining coffee sites. " + error.getDetail());
             }
+            Log.e(TAG, "Error when obtaining coffee sites. " + (error != null ? error.getDetail() : ex.getMessage()));
         }
     }
 
@@ -408,6 +410,13 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void informClientAboutAllCoffeeSitesLoadResult(Boolean result) {
         for (CoffeeSiteEntitiesServiceOperationsListener listener : coffeeSiteEntitiesOperationsListeners) {
             listener.onAllCoffeeSitesLoaded(result);
+        }
+        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
+            if (result) {
+                listener.onAllDataForOfflineModeDownloaded();
+            } else {
+                listener.onDataForOfflineModeDownloadFailed();
+            }
         }
     }
 

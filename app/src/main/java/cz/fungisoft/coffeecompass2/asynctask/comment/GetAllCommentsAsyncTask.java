@@ -67,8 +67,8 @@ public class GetAllCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                             resultListener.get().onCommentsLoaded(response.body());
                         }
                     } else {
-                        Log.i(REQ_TAG, "Returned empty response for loading comment request.");
-                        Result.Error error = new Result.Error(new IOException("Error loading comment. Response empty."));
+                        Log.i(REQ_TAG, "Returned empty response for loading comments request.");
+                        Result.Error error = new Result.Error(new IOException("Error loading comments. Response empty."));
                         if (resultListener.get() != null) {
                             resultListener.get().onRESTCallError(error);
                         }
@@ -80,7 +80,7 @@ public class GetAllCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                             resultListener.get().onRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
                         }
                     } catch (IOException e) {
-                        Log.e(REQ_TAG, "Error loading comment." + e.getMessage());
+                        Log.e(REQ_TAG, "Error loading comments." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error loading comment.", e));
                         if (resultListener.get() != null) {
                             resultListener.get().onRESTCallError(error);
@@ -91,8 +91,8 @@ public class GetAllCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
 
             @Override
             public void onFailure(Call<List<Comment>> call, Throwable t) {
-                Log.e(REQ_TAG, "Error loading comment REST request." + t.getMessage());
-                Result.Error error = new Result.Error(new IOException("Error loading comment.", t));
+                Log.e(REQ_TAG, "Error loading comments REST request." + t.getMessage());
+                Result.Error error = new Result.Error(new IOException("Error loading comments.", t));
                 if (resultListener.get() != null) {
                     resultListener.get().onRESTCallError(error);
                 }

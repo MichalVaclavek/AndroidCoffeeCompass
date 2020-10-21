@@ -20,11 +20,8 @@ import retrofit2.http.Query;
 public interface CoffeeSiteRESTInterface {
 
     String COFFEESITE_API_PUBLIC_SEARCH_URL = BuildConfig.COFFEESITE_API_PUBLIC_SEARCH_URL;
-
     String GET_NUMBER_OF_STARS_URL = BuildConfig.STARS_API_PUBLIC_URL;
-
     String GET_COFFEE_SITE_URL = BuildConfig.COFFEESITE_API_PUBLIC_URL;
-
     String COFFEE_SITE_SECURED_URL = BuildConfig.COFFEESITE_API_SECURED_URL;
 
     /**

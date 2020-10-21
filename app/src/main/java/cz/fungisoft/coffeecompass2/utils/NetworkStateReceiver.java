@@ -41,6 +41,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context
      * @param intent
      */
+    @Override
     public void onReceive(Context context, Intent intent) {
 
         Log.d(TAG, "Network connectivity change");
@@ -97,6 +98,8 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             }
             if (intent.getExtras().getBoolean(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
                 online = false;
+                //accept(false);
+                internetCheckAsyncTask.execute(); // we need to if the connection was lost
                 Log.d(TAG, "There's no network connectivity");
             }
         }
@@ -142,7 +145,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context calling context, usually Activity which registered this Receiver
      */
     private void startLoadNumberOfSitesOfUserInMainActivity(boolean isOnline, Context context) {
-        //TODO zohlednit OFFLINE mode
+        //TODO zohlednit OFFLINE mode ???
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;
@@ -153,15 +156,31 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         }
     }
 
+    /**
+     * Calls MainActivity method to enable/disable FAB button (which runs CreateCoffeeSiteActivity)
+     *
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
+     */
+    private void enableDisableFabInMainActivity(boolean isOnline, Context context) {
+        if (context instanceof MainActivity) {
+            MainActivity ma = (MainActivity) context;
+                ma.enableFab(isOnline);
+        }
+    }
+
     // *** Methods implementing InternetCheckAsyncTask.Consumer interface * //
     // Needed to react on internet connectivity AsyncTask check result //
 
     @Override
     public void accept(Boolean internet) {
         online = internet;
-        startReadStatisticsInMainActivity(online, this.context);
-        startLoadCSEntities(online, this.context);
-        startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
+        if (online) {
+            startReadStatisticsInMainActivity(online, this.context);
+            startLoadCSEntities(online, this.context);
+            startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
+        }
+        enableDisableFabInMainActivity(online, this.context);
     }
 
     @Override

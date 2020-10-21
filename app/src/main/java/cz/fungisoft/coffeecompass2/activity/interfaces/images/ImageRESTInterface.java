@@ -18,7 +18,6 @@ import retrofit2.http.Query;
 public interface ImageRESTInterface {
 
     String UPLOAD_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
-
     String DELETE_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
 
     /**

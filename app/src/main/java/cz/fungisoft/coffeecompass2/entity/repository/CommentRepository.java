@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -153,6 +154,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
      */
     @Override
     public void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {
+        //Collections.sort(comments, Collections.reverseOrder());
         List<CoffeeSiteWithComments> listOfCommentsForCoffeeSite = new ArrayList<>();
         CoffeeSiteWithComments coffeeSiteWithComments = new CoffeeSiteWithComments(coffeeSite, comments);
         listOfCommentsForCoffeeSite.add(coffeeSiteWithComments);

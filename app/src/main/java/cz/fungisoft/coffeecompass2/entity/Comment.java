@@ -19,7 +19,7 @@ import java.util.Date;
  * Used for reading Comments from server.
  */
 @Entity(tableName = "comment_table")
-public class Comment extends CoffeeSiteEntity implements Serializable, Parcelable {
+public class Comment extends CoffeeSiteEntity implements Serializable, Parcelable,  Comparable<Comment> {
 
     @Expose
     @SerializedName("text")
@@ -211,4 +211,8 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         setCreatedOnString(createdOnString);
     }
 
+    @Override
+    public int compareTo(Comment o) {
+        return getCreated().compareTo(o.getCreated());
+    }
 }
