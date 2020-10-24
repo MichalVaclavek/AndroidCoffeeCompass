@@ -7,7 +7,6 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.Pageable;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.Sort;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 
 /**

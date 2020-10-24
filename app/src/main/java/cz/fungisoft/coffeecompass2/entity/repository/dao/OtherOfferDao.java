@@ -7,10 +7,7 @@ import androidx.room.Query;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
-import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 @Dao

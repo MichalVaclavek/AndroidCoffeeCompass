@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import cz.fungisoft.coffeecompass2.R;

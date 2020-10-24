@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ChangeStatusOfCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;

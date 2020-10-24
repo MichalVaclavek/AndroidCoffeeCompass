@@ -8,7 +8,6 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.OtherOfferDao;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 public class OtherOfferRepository extends CoffeeSiteRepositoryBase {

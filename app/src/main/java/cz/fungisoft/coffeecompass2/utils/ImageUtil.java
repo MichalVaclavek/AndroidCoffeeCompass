@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.ProgressBar;
 

@@ -1,24 +1,24 @@
 package cz.fungisoft.coffeecompass2.services;
 
 import android.app.Service;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountDataSource;
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
-import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;

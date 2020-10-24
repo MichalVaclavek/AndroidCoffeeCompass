@@ -9,14 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.res.ResourcesCompat;
-
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,6 +23,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,31 +36,31 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
-import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
-import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
-import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
+import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

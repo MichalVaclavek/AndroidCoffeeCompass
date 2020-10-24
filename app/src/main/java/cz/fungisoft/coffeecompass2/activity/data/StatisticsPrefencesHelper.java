@@ -3,11 +3,6 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 
 /**

@@ -8,7 +8,6 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {

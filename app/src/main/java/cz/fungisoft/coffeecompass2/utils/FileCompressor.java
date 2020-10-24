@@ -2,10 +2,12 @@ package cz.fungisoft.coffeecompass2.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import io.reactivex.Flowable;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import io.reactivex.Flowable;
 
 /**
  * Copy from https://androidwave.com/capture-image-from-camera-gallery/

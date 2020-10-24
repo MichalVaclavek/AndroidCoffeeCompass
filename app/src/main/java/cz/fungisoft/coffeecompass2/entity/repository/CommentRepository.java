@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;

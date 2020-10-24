@@ -1,17 +1,9 @@
 package cz.fungisoft.coffeecompass2.activity.ui.register;
 
 import android.app.Activity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-
-
-import cz.fungisoft.coffeecompass2.R;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,22 +16,29 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+
 import java.util.Objects;
 
-import butterknife.ButterKnife;
 import butterknife.BindView;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import butterknife.ButterKnife;
+import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModelFactory;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
-//import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
+
+//import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
 
 /**
  * Activity to register new user. Based on LoginActivity.

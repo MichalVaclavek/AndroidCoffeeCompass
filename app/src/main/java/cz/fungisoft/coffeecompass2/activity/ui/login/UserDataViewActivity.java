@@ -3,12 +3,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.login;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,18 +13,25 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServiceListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Activity to show logged-in user profile details.

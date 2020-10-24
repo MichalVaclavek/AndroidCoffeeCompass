@@ -7,19 +7,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.Date;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
-import cz.fungisoft.coffeecompass2.entity.PriceRange;
-import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 
 public class DbDataListsConverters implements Serializable {
 

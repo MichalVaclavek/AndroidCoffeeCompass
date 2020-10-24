@@ -8,7 +8,6 @@ import androidx.room.Query;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 @Dao

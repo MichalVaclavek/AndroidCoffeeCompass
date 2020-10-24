@@ -3,7 +3,6 @@ package cz.fungisoft.coffeecompass2.activity.ui.login;
 import androidx.annotation.Nullable;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
  * Authentication result : success (user details) or error message.

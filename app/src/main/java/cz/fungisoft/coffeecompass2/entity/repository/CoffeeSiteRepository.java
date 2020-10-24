@@ -5,14 +5,11 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
-import androidx.paging.LivePagedListBuilder;
-import androidx.paging.PagedList;
 
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
-import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
 
 /**
