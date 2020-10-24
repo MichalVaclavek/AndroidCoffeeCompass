@@ -54,7 +54,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                                                   CommentsPageLoadOperationListener,
                                                   ImageUtil.BunchOfImagesDownloadListener {
 
-    static final String TAG = "CoffeeSiteServiceBase";
+    static final String TAG = "CoffeeSiteEntitiesSrv";
 
     private static ImageUtil imageUtil = ImageUtil.getInstance();
 
@@ -208,12 +208,12 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         this.includingImages = includingImages;
         this.downloadProgressBar = downloadProgressBar;
         this.downloadingStatusTextView = downloadingStatusTextView;
+        this.downloadingStatusTextView.setText("Stahování dat o lokacích ...");
         db.deleteCoffeeSitesAsync();
     }
 
     @Override
     public void onCoffeeSitesDeletedEnd() {
-        //readAndSaveAllCoffeeSitesFromServer();
         readAndSaveAllCoffeeSitesPaginatedFromServer();
     }
 
@@ -237,7 +237,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             alreadyDownloaded = 0;
             numOfSitesWithImages = 0;
             downloadProgressBar.setProgress(0);
-            this.downloadingStatusTextView.setText("Stahování dat o lokacích ...");
             new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_FIRST_PAGE, requestedPage, PAGE_SIZE, this).execute();
         }
     }

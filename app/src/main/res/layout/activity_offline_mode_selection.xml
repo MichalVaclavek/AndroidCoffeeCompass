@@ -57,6 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginTop="5dp"
                 android:checked="true"
                 android:gravity="center"
                 android:text="včetně obrázků" />
@@ -67,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="40dp"
             android:layout_marginRight="20dp"
             android:background="@color/listOfDistancesBackround"
             android:text="Stáhnout" />
@@ -82,11 +83,10 @@
 
             <TextView
                 android:id="@+id/textOfflineDownloadStatus"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:ems="10"
-                android:inputType="textPersonName"
+                android:inputType="none"
                 android:textSize="12sp" />
 
             <ProgressBar

@@ -523,12 +523,14 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesFirstPage(coffeeSitesPage.getContent());
+
+                if (!coffeeSitesPage.getLast()) {
+                    recyclerViewAdapter.addFooter();
+                } else {
+                    isLastPage = true;
+                }
             }
-            if (!coffeeSitesPage.getLast()) {
-                recyclerViewAdapter.addFooter();
-            } else {
-                isLastPage = true;
-            }
+
         }
     }
 
@@ -546,11 +548,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage.getContent());
-            }
-            if (!coffeeSitesPage.getLast()) {
-                recyclerViewAdapter.addFooter();
-            } else {
-                isLastPage = true;
+
+                if (!coffeeSitesPage.getLast()) {
+                    recyclerViewAdapter.addFooter();
+                } else {
+                    isLastPage = true;
+                }
             }
         }
     }
@@ -570,8 +573,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
             if (!isLoadingPage() && !isLastPage) {
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
-                        && firstVisibleItemPosition >= 0
-                        && totalItemCount >= PAGE_SIZE) {
+                        && firstVisibleItemPosition >= 0) {
                     if (!offLineModeOn) {
                         loadMoreItems();
                     }

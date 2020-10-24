@@ -134,7 +134,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     public void onAllDataForOfflineModeDownloaded() {
         // Info () and return to MainActivity, i.e. go back
         Toast toast = Toast.makeText(getApplicationContext(),
-                "Data stažena úspěšně.",
+                R.string.data_download_success,
                 Toast.LENGTH_LONG);
         toast.show();
 
@@ -148,7 +148,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     public void onDataForOfflineModeDownloadFailed() {
         //Info in RED with note that download can be repeated later - stay on this Activity
         downloadingStatusTextView.setTextColor(Color.RED);
-        downloadingStatusTextView.setText("Data se nepodařilo stáhnout. Zkontrolujte připojení k internetu nebo zkuste později ...");
+        downloadingStatusTextView.setText(R.string.data_download_failure);
         // Allow download button
         downloadButton.setEnabled(true);
     }
