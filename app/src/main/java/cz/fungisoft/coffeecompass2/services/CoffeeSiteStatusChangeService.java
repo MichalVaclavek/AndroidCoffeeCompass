@@ -127,9 +127,11 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
             informClientAboutCoffeeSiteStatusChangeResult(oper, returnedCoffeeSite, "");
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            informClientAboutCoffeeSiteStatusChangeResult(oper, null, error.getDetail());
-            Log.e(TAG, "Error when obtaining coffee sites." + error.getDetail());
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                informClientAboutCoffeeSiteStatusChangeResult(oper, null, error.getDetail());
+                Log.e(TAG, "Error when obtaining coffee sites. " + error.getDetail());
+            }
         }
     }
 

@@ -88,17 +88,17 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     public void addCoffeeSites(List<CoffeeSite> newSites) {
-        this.mValues.addAll( removeCanceledElements(newSites));
+        this.mValues.addAll(removeCanceledElements(newSites));
         notifyDataSetChanged();
     }
 
     public void addCoffeeSitesFirstPage(@NotNull List<CoffeeSite> firstPage) {
-        this.mValues.addAll(firstPage);
+        this.mValues.addAll(removeCanceledElements(firstPage));
         notifyDataSetChanged();
     }
 
     public void addCoffeeSitesNextPage(@NotNull List<CoffeeSite> nextPage) {
-        this.mValues.addAll(nextPage);
+        this.mValues.addAll(removeCanceledElements(nextPage));
         notifyDataSetChanged();
     }
 
@@ -245,9 +245,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.locAndTypeView.setText(this.mValues.get(position).getTypPodniku().toString() + ", " +  this.mValues.get(position).getTypLokality().toString());
         viewHolder.createdOnView.setText(this.mValues.get(position).getCreatedOnString());
 
+        // Default enable all buttons
+        enableDisableAllButtons(viewHolder, true);
+
         // Set default color for CoffeeSite Status view
         viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
-        // Prelozeni jmen statusu CoffeeSitu
+        // Prelozeni jmen statusu CoffeeSitu a nastaveni active/inactive na obrazky tlacitek
         String status = this.mValues.get(position).getStatusZaznamu().toString();
         switch(status) {
             case "ACTIVE":
@@ -279,8 +282,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
                 viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
-            default:
+            default: // CANCELED too, all buttons disabled.
                 viewHolder.statusView.setText(this.mValues.get(position).getStatusZaznamu().toString());
+                enableDisableAllButtons(viewHolder, false);
         }
 
         if (!this.mValues.get(position).getMesto().isEmpty()) {
@@ -326,12 +330,16 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         // If OFFLINE mode is on, all buttons are INVISIBLE/GONE
         if (offlineModeOn) {
-            viewHolder.editCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.activateCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.deactivateCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.cancelCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.insertCommentButton.setVisibility(View.GONE);
+            enableDisableAllButtons(viewHolder, false);
         }
+    }
+
+    private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
+        viewHolder.editCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.activateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.deactivateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.cancelCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.insertCommentButton.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     /**

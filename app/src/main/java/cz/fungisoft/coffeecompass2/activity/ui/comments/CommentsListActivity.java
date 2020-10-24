@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -367,11 +368,8 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     public void showRESTCallError(Result.Error error) {
-        if (error.getRestError() != null) {
-            Toast.makeText(getApplicationContext(),
-                    error.getRestError().getDetail(),
-                    Toast.LENGTH_SHORT);
-        } else {
+        if (error != null) {
+            Log.e(TAG, "Error REST call. " + error.getDetail());
             Toast.makeText(getApplicationContext(),
                     error.getDetail(),
                     Toast.LENGTH_SHORT);

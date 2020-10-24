@@ -60,7 +60,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
-import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteCreateFormState;
@@ -70,13 +69,10 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
@@ -87,7 +83,11 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.M
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 
-//import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService.StatusChangeOperation.COFFEE_SITE_ACTIVATE;
 
 
@@ -107,13 +107,15 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                  SaveActivateCoffeeSiteDialogFragment.SaveActivateCoffeeSiteDialogListener,
                                                  DeleteCoffeeSiteImageDialogFragment.DeleteCoffeeSiteImageDialogListener,
                                                  PropertyChangeListener,
-                                                 //CoffeeSiteEntitiesServiceConnectionListener,
-                                                 //CoffeeSiteEntitiesServiceOperationsListener,
                                                  CoffeeSiteServicesConnectionListener,
                                                  CoffeeSiteServiceCUDOperationsListener,
                                                  CoffeeSiteServiceStatusOperationsListener {
 
     private static final String TAG = "CreateCoffeeSiteAct";
+
+    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
+    private CoffeeSiteCreateModel createCoffeeSiteViewModel;
+
 
     @BindView(R.id.time_od_input_editText)
     TextInputEditText openingFromTimeEditText;
@@ -128,8 +130,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     TextInputEditText latitudeEditText;
     @BindView(R.id.longitude_input_edittext)
     TextInputEditText longitudeEditText;
-
-    private CoffeeSiteCreateModel createCoffeeSiteViewModel;
 
     // All other View input elements needed to create CoffeeSite
     @BindView(R.id.city_edittext)
@@ -196,17 +196,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
 
-    //protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
-    //private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
-
     private CoffeeSite currentCoffeeSite;
 
     private int coffeeSitePositionInRecyclerView;
 
     private String[] SITE_TYPES;
     private String[] LOCATION_TYPES;
-
-    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
 
     /**
      * To detect if the CoffeeSite/Activity is in
@@ -252,6 +247,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @BindView(R.id.create_modify_progressBar)
     ProgressBar saveCoffeeSiteProgressBar;
+
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -660,15 +657,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onStart() {
         super.onStart();
-        // Lets bind CoffeeSiteEtitiesService and load all CoffeeSiteEntities
-        // in onCoffeeSiteEntitiesConnected() method
-        // TODO - Verify, if calling this in onResume() would be more convenient
-        //doBindCoffeeSiteEntitiesService();
     }
 
     @Override
     protected void onStop() {
-        //doUnbindCoffeeSiteEntitiesService();
         super.onStop();
     }
 
@@ -791,52 +783,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
     /** which can be selected by user during new CoffeeSite creation **/
+
     /* ----- END ------- */
 
-
-    /*** CoffeeSiteEntitiesService ***/
-
-    // Don't attempt to unbind from the service unless the client has received some
-    // information about the service's state.
-    //private boolean mShouldUnbindCoffeeSiteEntitiesService;
-
-//    private void doBindCoffeeSiteEntitiesService() {
-//        // Attempts to establish a connection with the service.  We use an
-//        // explicit class name because we want a specific service
-//        // implementation that we know will be running in our own process
-//        // (and thus won't be supporting component replacement by other
-//        // applications).
-//        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
-//        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
-//        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
-//                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
-//            mShouldUnbindCoffeeSiteEntitiesService = true;
-//        } else {
-//            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
-//                    "exist, or this client isn't allowed access to it.");
-//        }
-//    }
-
-//    private void doUnbindCoffeeSiteEntitiesService() {
-//        if (mShouldUnbindCoffeeSiteEntitiesService) {
-//            if (coffeeSiteEntitiesService != null) {
-//                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
-//            }
-//            // Release information about the service's state.
-//            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
-//            unbindService( coffeeSiteEntitiesServiceConnector);
-//            mShouldUnbindCoffeeSiteEntitiesService = false;
-//        }
-//    }
-
-
-//    @Override
-//    public void onCoffeeSiteEntitiesServiceConnected() {
-//        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
-//        if (coffeeSiteEntitiesService != null) {
-//            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-//        }
-//    }
 
     /********* CoffeeSiteCUDOperationsService **************/
 
@@ -955,7 +904,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
-        //saveCoffeeSite(currentCoffeeSite);
     }
 
     @Override
@@ -1312,13 +1260,29 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         String typPodniku = sourceTypeEditText.getText().toString();
         typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES[0];
-        coffeeSite.setTypPodniku(coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku));
+
+        Disposable subscribe = coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(coffeeSite::setTypPodniku,
+                           error -> Log.e(TAG, error.getMessage()));
+        mDisposable.add(subscribe);
 
         String typLokality = locationTypeEditText.getText().toString();
         typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES[0];
-        coffeeSite.setTypLokality(coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality));
+        subscribe = coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(coffeeSite::setTypLokality,
+                        error -> Log.e(TAG, error.getMessage()));
+        mDisposable.add(subscribe);
 
-        coffeeSite.setCena(coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString()));
+        subscribe = coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(coffeeSite::setCena,
+                        error -> Log.e(TAG, error.getMessage()));
+        mDisposable.add(subscribe);
 
         String[] selectedCoffeeSorts = getSelectedChipsStrings(coffeeSortsChipGroup);
         coffeeSite.setCoffeeSorts(coffeeSiteEntitiesViewModel.createCoffeeSortsList(selectedCoffeeSorts));
@@ -1330,7 +1294,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
 
         if (mode == MODE_CREATE) {
-            coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
+            subscribe = coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu")
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(coffeeSite::setStatusZarizeni,
+                            error -> Log.e(TAG, error.getMessage()));
+            mDisposable.add(subscribe);
         }
 
         Log.i(TAG, "CoffeeSite created/updated");
@@ -1474,6 +1443,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         doUnbindCoffeeSiteImageService();
         doUnbindCoffeeSiteCUDOperationsService();
         doUnbindCoffeeSiteStatusChangeService();
+
+        mDisposable.clear();
         super.onDestroy();
     }
 

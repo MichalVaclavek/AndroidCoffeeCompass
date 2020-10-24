@@ -184,8 +184,8 @@
     <string name="permissions_location_cancel">Zrušit</string>
 
     <string name="action_offline">Offline ...</string>
-    <string name="offline_seetings_description">Stažení dat o lokacích do telefonu vám umožní vyhledávat kávové lokace i bez připojení k internetu. V budoucnu by mělo být možné i zadávání nových lokací.</string>
-    <string name="offline_seetings_main_label"> OFFLINE</string>
+    <string name="offline_seetings_description">Stažení dat o lokacích vám umožní vyhledávat kávové lokace i bez připojení k internetu. Zatím neumožňuje zadávání nových lokací, ani zadávání komentářů.</string>
+    <string name="offline_seetings_main_label"> OFFLINE režim</string>
     <string name="offline_seetings_includes_photos"> včetně obrázků</string>
     <string name="offline_seetings_download_button"> Stáhnout</string>
     <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>

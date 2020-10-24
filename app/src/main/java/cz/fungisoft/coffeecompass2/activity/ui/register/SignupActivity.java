@@ -28,6 +28,7 @@ import java.util.Objects;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
@@ -239,13 +240,16 @@ public class SignupActivity extends AppCompatActivity
 
         if (registerResult.getError() != null) {
             showRegisterFailed(registerResult.getError().getDetail());
-            String errorParameter = registerResult.getError().getErrorParameter();
-            if (errorParameter != null) {
-                if (errorParameter.equals("userName")) {
-                    userNameEditText.setError(registerResult.getError().getErrorParameterValue());
-                }
-                if (errorParameter.equals("email")) {
-                    emailEditText.setError(registerResult.getError().getErrorParameterValue());
+            if (registerResult.getError().getRestError() != null) {
+                RestError restError = registerResult.getError().getRestError();
+                String errorParameter = restError.getErrorParameter();
+                if (errorParameter != null) {
+                    if (errorParameter.equals("userName")) {
+                        userNameEditText.setError(restError.getErrorParameterValue());
+                    }
+                    if (errorParameter.equals("email")) {
+                        emailEditText.setError(restError.getErrorParameterValue());
+                    }
                 }
             }
         }

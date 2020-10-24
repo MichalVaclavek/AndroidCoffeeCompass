@@ -18,7 +18,7 @@ public interface CommentDao {
     @Query("SELECT * FROM comment_table")
     LiveData<List<Comment>> getAllComments();
 
-    @Query("SELECT * FROM comment_table WHERE text LIKE :stringValue  LIMIT 1")
+    @Query("SELECT * FROM comment_table WHERE text = :stringValue  LIMIT 1")
     Flowable<Comment> getComment(String stringValue);
 
     @Query("SELECT * FROM comment_table WHERE id = :commentId  LIMIT 1")

@@ -323,12 +323,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 }
             }
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            Exception ex = ((Result.Error) result).getException();
-            if (error != null || ex != null) {
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
                 informClientAboutAllCoffeeSitesLoadResult(false);
+                Log.e(TAG, "Error when obtaining coffee sites. " +  error.getDetail());
             }
-            Log.e(TAG, "Error when obtaining coffee sites. " + (error != null ? error.getDetail() : ex.getMessage()));
         }
     }
 

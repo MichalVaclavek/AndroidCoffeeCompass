@@ -234,23 +234,21 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     /**
-     * Method to be called from async task after call to obtain number of comments for
+     * Method to be called from async task GetNumberOfCommentsAsyncTask after call to obtain number of comments for
      * the CoffeeSite within this Activity
+     *
      * @param numberOfComments
      */
-    // Not needed in current implementation as the Comments button is still visible/enabled
     public void processNumberOfComments(int numberOfComments) {
-//        this.comments = comments;
-//         Comments button is still available, even there is no comment or user is not logged in
-//        if (numberOfComments > 0) {
-//            enableCommentsButton();
-//        }
+        // Not needed to be implemented currently as the Comments button is still visible/enabled
+        // But we need it as it is really called from GetNumberOfCommentsAsyncTask
     }
 
     public void showRESTCallError(Result.Error error) {
-        if (error.getRestError() != null) {
+        if (error != null) {
+            Log.e(TAG, "REST call error: " + error.getDetail());
             Toast.makeText(getApplicationContext(),
-                    error.getRestError().getDetail(),
+                    error.getDetail(),
                     Toast.LENGTH_SHORT);
         } else {
             Toast.makeText(getApplicationContext(),

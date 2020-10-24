@@ -129,9 +129,11 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             informClientAboutCoffeeSiteOperationResult(oper, returnedCoffeeSite, "");
 
         } else if (result instanceof Result.Error) {
-            RestError error = ((Result.Error) result).getRestError();
-            informClientAboutCoffeeSiteOperationResult(oper, null, error.getDetail());
-            Log.e(TAG, "Error when returning coffee site." + error.getDetail());
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                informClientAboutCoffeeSiteOperationResult(oper, null, error.getDetail());
+                Log.e(TAG, "Error when returning coffee site. " + error.getDetail());
+            }
         }
     }
 
@@ -149,9 +151,11 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             informClientAboutCoffeeSiteIdOperationResult(oper, returnedCoffeeSiteId, "");
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            informClientAboutCoffeeSiteIdOperationResult(oper, 0, error.getDetail());
-            Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                informClientAboutCoffeeSiteIdOperationResult(oper, 0, error.getDetail());
+                Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+            }
         }
     }
 

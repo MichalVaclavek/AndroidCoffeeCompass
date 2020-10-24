@@ -1,16 +1,14 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSortDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
 
@@ -27,7 +25,7 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
         return mAllCoffeeSorts;
     }
 
-    public Flowable<CoffeeSort> getCoffeeSort(String coffeeSortValue) {
+    public Single<CoffeeSort> getCoffeeSort(String coffeeSortValue) {
         return coffeeSortDao.getCoffeeSort(coffeeSortValue);
     }
 

@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.entity.repository.dao;
 
 import androidx.lifecycle.LiveData;
-import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -12,7 +11,6 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
-import io.reactivex.Single;
 
 @Dao
 public interface CoffeeSiteDao {
@@ -22,7 +20,6 @@ public interface CoffeeSiteDao {
 
     @Query("SELECT * FROM coffee_site_table WHERE mainImageURL != \"\" ORDER BY createdOn ASC")
     LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage();
-    //DataSource.Factory<Integer, CoffeeSite> getAllCoffeeSitesWithImage();
 
     @Query("SELECT COUNT(*) FROM coffee_site_table WHERE mainImageURL != \"\"")
     Flowable<Integer> getAllCoffeeSitesWithImageNumber();

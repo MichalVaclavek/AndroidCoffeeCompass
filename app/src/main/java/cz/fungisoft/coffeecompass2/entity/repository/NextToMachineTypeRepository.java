@@ -9,6 +9,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.NextToMachineTypeDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
@@ -25,7 +26,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         return mAllNextToMachineTypes;
     }
 
-    public Flowable<NextToMachineType> getNextToMachineType(String nextToMachineTypeValue) {
+    public Single<NextToMachineType> getNextToMachineType(String nextToMachineTypeValue) {
         return nextToMachineTypeDao.getNextToMachineType(nextToMachineTypeValue);
     }
 

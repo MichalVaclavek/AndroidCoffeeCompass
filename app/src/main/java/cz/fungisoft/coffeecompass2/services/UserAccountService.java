@@ -197,8 +197,11 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(data);
             onUserLoggedInSuccess();
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            loginResult.setValue(new LoginOrRegisterResult(error));
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+                loginResult.setValue(new LoginOrRegisterResult(error));
+            }
             onUserLoggedInFailure();
         }
     }
@@ -216,8 +219,11 @@ public class UserAccountService extends Service implements UserAccountActionsEva
             userLoginAndRegisterRepository.setLoggedInUser(data);
             onUserRegisterSuccess();
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            registerResult.setValue(new LoginOrRegisterResult(error));
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+                registerResult.setValue(new LoginOrRegisterResult(error));
+            }
             onUserRegisterFailure();
         }
     }

@@ -13,9 +13,6 @@ import io.reactivex.Flowable;
 @Dao
 public interface StarsQualityDescriptionDao {
 
-//    @Query("SELECT * FROM CoffeeSite")
-//    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
-
     @Query("SELECT * FROM stars_quality_description_table")
     LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions();
 

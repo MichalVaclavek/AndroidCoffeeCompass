@@ -3,7 +3,6 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.comments;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;

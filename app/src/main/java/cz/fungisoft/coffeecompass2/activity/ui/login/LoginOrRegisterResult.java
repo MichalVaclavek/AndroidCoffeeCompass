@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.login;
 
 import androidx.annotation.Nullable;
 
+import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
@@ -12,9 +13,9 @@ public class LoginOrRegisterResult {
     @Nullable
     private LoggedInUserView success;
     @Nullable
-    private RestError error;
+    private Result.Error error;
 
-    public LoginOrRegisterResult(@Nullable RestError error) {
+    public LoginOrRegisterResult(@Nullable Result.Error error) {
         this.error = error;
     }
 
@@ -28,7 +29,7 @@ public class LoginOrRegisterResult {
     }
 
     @Nullable
-    public RestError getError() {
+    public Result.Error getError() {
         return error;
     }
 }

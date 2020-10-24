@@ -12,6 +12,5 @@ public interface CoffeeSiteEntitiesServiceOperationsListener {
     // need not to react to finis the load action
     default void onCoffeeSiteEntitiesLoaded(boolean result) {}
 
-
     default void onAllCoffeeSitesLoaded(boolean result) {}
 }

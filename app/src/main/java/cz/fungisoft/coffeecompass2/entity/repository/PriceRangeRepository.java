@@ -9,6 +9,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
@@ -25,7 +26,7 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
         return mAllPriceRanges;
     }
 
-    public Flowable<PriceRange> getPriceRange(String priceRangeValue) {
+    public Single<PriceRange> getPriceRange(String priceRangeValue) {
         return priceRangeDao.getPriceRange(priceRangeValue);
     }
 

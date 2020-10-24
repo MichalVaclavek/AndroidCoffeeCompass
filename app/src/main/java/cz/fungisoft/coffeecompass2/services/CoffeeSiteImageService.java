@@ -160,8 +160,9 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         if (result instanceof Result.Success) {
             onImageSaveSuccess(((Result.Success) result).getData().toString());
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
+                Log.e(TAG, "Error REST call. " + error.getDetail());
                 onImageSaveFailure(error.getDetail());
             }
         }
@@ -171,8 +172,9 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         if (result instanceof Result.Success) {
             onImageDeleteSuccess(((Result.Success) result).getData().toString());
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
+                Log.e(TAG, "Error REST call. " + error.getDetail());
                 onImageDeleteFailure(error.getDetail());
             }
         }

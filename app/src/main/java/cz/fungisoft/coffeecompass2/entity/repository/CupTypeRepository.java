@@ -8,7 +8,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CupTypeDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class CupTypeRepository extends CoffeeSiteRepositoryBase {
 
@@ -25,7 +25,7 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
         return mAllCupTypes;
     }
 
-    public Flowable<CupType> getCupType(String cupTypeValue) {
+    public Single<CupType> getCupType(String cupTypeValue) {
         return cupTypeDao.getCupType(cupTypeValue);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.SiteLocationTypeDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
@@ -25,7 +25,7 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
         return mAllSiteLocationTypes;
     }
 
-    public Flowable<SiteLocationType> getSiteLocationType(String siteLocationTypeValue) {
+    public Single<SiteLocationType> getSiteLocationType(String siteLocationTypeValue) {
         return siteLocationTypeDao.getSiteLocationType(siteLocationTypeValue);
     }
 

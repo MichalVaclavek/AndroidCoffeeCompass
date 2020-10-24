@@ -46,7 +46,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     private String createdOnString;
 
     @Ignore
-    private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+    private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
 
     @Expose
     @SerializedName("numOfCoffeeAutomatyVedleSebe")

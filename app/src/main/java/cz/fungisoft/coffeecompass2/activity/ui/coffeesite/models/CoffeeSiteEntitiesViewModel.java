@@ -21,6 +21,11 @@ import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Data Model to be connected to Activities, which needs CoffeeSiteEntity data available.
@@ -53,6 +58,8 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
     private LiveData<List<StarsQualityDescription>> allStarsQualityDescriptions;
 
     private CoffeeSiteDatabase db;
+
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
 
 
     /**
@@ -88,40 +95,40 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
      * @param value
      * @return
      */
-    public CoffeeSiteType getCoffeeSiteType(String value) {
-        return mRepositories.getCoffeeSiteTypesRepository().getCoffeeSiteType(value).blockingSingle();
+    public Single<CoffeeSiteType> getCoffeeSiteType(String value) {
+        return mRepositories.getCoffeeSiteTypesRepository().getCoffeeSiteType(value);
     }
 
-    public CoffeeSiteRecordStatus getCoffeeSiteRecordStatus(String value) {
-        return mRepositories.getCoffeeSiteRecordStatusRepository().getCoffeeSiteRecordStatus(value).blockingSingle();
+    public Single<CoffeeSiteRecordStatus> getCoffeeSiteRecordStatus(String value) {
+        return mRepositories.getCoffeeSiteRecordStatusRepository().getCoffeeSiteRecordStatus(value);
     }
 
-    public CoffeeSiteStatus getCoffeeSiteStatus(String value) {
-        return mRepositories.getCoffeeSiteStatusRepository().getCoffeeSiteStatus(value).blockingSingle();
+    public Single<CoffeeSiteStatus> getCoffeeSiteStatus(String value) {
+        return mRepositories.getCoffeeSiteStatusRepository().getCoffeeSiteStatus(value);
     }
 
-    public CoffeeSort getCoffeeSort(String value) {
-        return mRepositories.getCoffeeSortRepository().getCoffeeSort(value).blockingSingle();
+    public Single<CoffeeSort> getCoffeeSort(String value) {
+        return mRepositories.getCoffeeSortRepository().getCoffeeSort(value);
     }
 
-    public CupType getCupType(String value) {
-        return mRepositories.getCupTypeRepository().getCupType(value).blockingSingle();
+    public Single<CupType> getCupType(String value) {
+        return mRepositories.getCupTypeRepository().getCupType(value);
     }
 
-    public NextToMachineType getNextToMachineType(String value) {
-        return mRepositories.getNextToMachineTypeRepository().getNextToMachineType(value).blockingSingle();
+    public Single<NextToMachineType> getNextToMachineType(String value) {
+        return mRepositories.getNextToMachineTypeRepository().getNextToMachineType(value);
     }
 
-    public OtherOffer getOtherOffer(String value) {
-        return mRepositories.getOtherOfferRepository().getOtherOffer(value).blockingSingle();
+    public Single<OtherOffer> getOtherOffer(String value) {
+        return mRepositories.getOtherOfferRepository().getOtherOffer(value);
     }
 
-    public PriceRange getPriceRange(String value) {
-        return mRepositories.getPriceRangeRepository().getPriceRange(value).blockingSingle();
+    public Single<PriceRange> getPriceRange(String value) {
+        return mRepositories.getPriceRangeRepository().getPriceRange(value);
     }
 
-    public SiteLocationType getSiteLocationType(String value) {
-        return mRepositories.getSiteLocationTypeRepository().getSiteLocationType(value).blockingSingle();
+    public Single<SiteLocationType> getSiteLocationType(String value) {
+        return mRepositories.getSiteLocationTypeRepository().getSiteLocationType(value);
     }
 
 
@@ -134,7 +141,10 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
     public List<CoffeeSort> createCoffeeSortsList(String[] coffeeSortValues) {
         List<CoffeeSort> retVal = new ArrayList<>();
         for (String coffeeSortValue : coffeeSortValues) {
-            retVal.add(getCoffeeSort(coffeeSortValue));
+            mDisposable.add(getCoffeeSort(coffeeSortValue)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe((Consumer<CoffeeSort>) retVal::add));
         }
         return retVal;
     }
@@ -148,8 +158,11 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
      */
     public List<OtherOffer> createOtherOffersList(String[] otherOfferValues) {
         List<OtherOffer> retVal = new ArrayList<>();
-        for (String coffeeSortValue : otherOfferValues) {
-            retVal.add(getOtherOffer(coffeeSortValue));
+        for (String otherOfferVal : otherOfferValues) {
+            mDisposable.add(getOtherOffer(otherOfferVal)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe((Consumer<OtherOffer>) retVal::add));
         }
         return retVal;
     }
@@ -217,6 +230,13 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
 
     public LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions() {
         return allStarsQualityDescriptions;
+    }
+
+    @Override
+    public void onCleared() {
+        super.onCleared();
+        // clear all the Single observable subscriptions
+        mDisposable.clear();
     }
 
 }

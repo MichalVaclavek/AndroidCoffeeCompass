@@ -8,7 +8,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteStatusDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class CoffeeSiteStatusRepository extends CoffeeSiteRepositoryBase {
 
@@ -25,7 +25,7 @@ public class CoffeeSiteStatusRepository extends CoffeeSiteRepositoryBase {
         return mAllCoffeeSiteStatuses;
     }
 
-    public Flowable<CoffeeSiteStatus> getCoffeeSiteStatus(String siteStatus) {
+    public Single<CoffeeSiteStatus> getCoffeeSiteStatus(String siteStatus) {
         return coffeeSiteStatusDao.getCoffeeSiteStatus(siteStatus);
     }
 

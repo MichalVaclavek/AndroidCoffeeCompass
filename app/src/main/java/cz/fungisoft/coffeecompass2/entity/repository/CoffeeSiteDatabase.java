@@ -40,6 +40,10 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.SiteLocationTypeDao;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescriptionDao;
 
+/**
+ * RoomDatabase to save all CoffeeSites, Comments and all Coffee site related
+ * entities.
+ */
 @Database(entities = {CoffeeSite.class, CoffeeSiteStatus.class, CoffeeSiteRecordStatus.class,
                       CoffeeSiteType.class, CoffeeSort.class, CupType.class,
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
@@ -57,7 +61,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         default void onCommentsDeletedEnd() {}
     }
 
-    private List<DbDeleteEndListener> dbDeleteEndListeners = new ArrayList<>();
+    private final List<DbDeleteEndListener> dbDeleteEndListeners = new ArrayList<>();
 
     public synchronized void addDbDeleteEndListener(DbDeleteEndListener dbDeleteEndListener) {
         dbDeleteEndListeners.add(dbDeleteEndListener);
@@ -93,7 +97,6 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                 @Override
                 public void onOpen (@NonNull SupportSQLiteDatabase db) {
                     super.onOpen(db);
-                    //new DeleteCSEntitiesAsync(DB_INSTANCE).execute();
                 }
             };
 

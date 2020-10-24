@@ -35,6 +35,10 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
+/**
+ * Activity to download all CoffeeSites,their Comments and Images. All such items are saved into DB
+ * and used in case of OFFLINE mode.
+ */
 public class OfflineModeSelectionActivity extends AppCompatActivity implements CoffeeSiteEntitiesServiceConnectionListener,
                                                                                CoffeeSiteEntitiesService.DataDownloadIndicatorListener {
 
@@ -73,7 +77,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
         ButterKnife.bind(this);
 
-        origStatusColor =  downloadingStatusTextView.getTextColors(); //save original colors
+        origStatusColor =  downloadingStatusTextView.getTextColors(); //saves original color
 
         downloadButton.setEnabled(true);
 
@@ -140,7 +144,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
                 "Data stažena úspěšně.",
                 Toast.LENGTH_LONG);
         toast.show();
-        //Snackbar.make(mainLinearLayout, "Data stažena úspěšně.", Snackbar.LENGTH_LONG).show();
+
         dataDownloadPreferenceHelper.putDownloaded(true);
         dataDownloadPreferenceHelper.putDownloadDate(new Date());
 

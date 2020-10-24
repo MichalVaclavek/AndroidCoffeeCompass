@@ -86,10 +86,10 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 informClientAboutNumberOfCoffeeSitesFromLoggedInUser(oper, coffeeSitesNumber, "");
             }
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
                 informClientAboutNumberOfCoffeeSitesFromLoggedInUser(oper, 0, error.getDetail());
-                Log.e(TAG, "Error when obtaining number of coffee sites from user." + error.getDetail());
+                Log.e(TAG, "Error when obtaining number of coffee sites from user. " + error.getDetail());
             }
         }
     }
@@ -106,10 +106,10 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
                 informClientAboutLoadedCoffeeSite(null, error.getDetail());
-                Log.e(TAG, "Error when obtaining coffee site." + error.getDetail());
+                Log.e(TAG, "Error when obtaining coffee site. " + error.getDetail());
             }
         }
     }
@@ -141,10 +141,10 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
-                informClientAboutLoadedCoffeeSitesList(oper, null, error.getDetail());
                 Log.e(TAG, "Error when obtaining coffee sites." + error.getDetail());
+                informClientAboutLoadedCoffeeSitesList(oper, null, error.getDetail());
             }
         }
     }
