@@ -20,7 +20,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
 public abstract class CoffeeSiteWithUserAccountService extends Service
                                                        implements UserAccountServiceConnectionListener {
 
-    static final String TAG = "CoffeeSiteServiceBase";
+    static final String TAG = "CoffeSiteUserAccountSrv";
 
     /**
      *  Enum to identify different actions called by CoffeeSiteServices.
@@ -119,7 +119,6 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      * @return
      */
     protected LoggedInUser getCurrentUser() {
-
         if (userAccountService != null) {
             LoggedInUser currentUser = userAccountService.getLoggedInUser();
             return currentUser;

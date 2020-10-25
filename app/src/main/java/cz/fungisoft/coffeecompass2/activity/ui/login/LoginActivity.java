@@ -34,6 +34,9 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
+/**
+ * Activity to process register, login, logout of a User operations
+ */
 public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserAccountServiceConnectionListener {
 
     private LoginRegisterViewModel loginViewModel;

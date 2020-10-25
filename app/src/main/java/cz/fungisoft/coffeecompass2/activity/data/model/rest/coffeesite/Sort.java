@@ -3,6 +3,14 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class describing one component of the Page class returning from server
+ * when requesting CoffeeSite or Comment by Page.
+ * Used for JSON serialization/deserialization.
+ *
+ * @see CoffeeSitePageEnvelope
+ * @see Pageable
+ */
 public class Sort {
 
     @SerializedName("empty")

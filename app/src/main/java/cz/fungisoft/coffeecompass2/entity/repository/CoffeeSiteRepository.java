@@ -124,15 +124,6 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSiteLive;
     }
 
-    /** Get CoffeeSites With Comments */
-
-//    LiveData<CoffeeSiteWithComments> coffeeSiteWithComments = Transformations.switchMap(coffeeSiteIdInput, csId -> coffeeSiteDao.getCoffeeSiteWithComments(csId));
-//
-//    public LiveData<CoffeeSiteWithComments> getCoffeeSiteWithCommentsById(long siteId) {
-//        setCoffeeSiteIdInput(siteId);
-//        return coffeeSiteWithComments;
-//    }
-
     /**
      * LiveData input holder for CoffeeSite creator user name
      */

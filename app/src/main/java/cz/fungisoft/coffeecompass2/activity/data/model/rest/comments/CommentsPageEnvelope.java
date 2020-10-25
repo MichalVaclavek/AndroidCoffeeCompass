@@ -11,7 +11,7 @@ import cz.fungisoft.coffeecompass2.entity.Comment;
 
 /**
  * Class to map JSON response for Pageable CoffeeSites,
- * for example {@link CoffeeSiteRESTInterface.getAllCommentsPaginated() }
+ * for example {@link CoffeeSiteRESTInterface.getAllCommentsPaginated()}
  */
 public class CommentsPageEnvelope {
 

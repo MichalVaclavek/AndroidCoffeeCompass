@@ -9,6 +9,10 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.AverageStarsWithNumOfRatingsDao;
 
+/**
+ * Repository class for AverageStarsWithNumOfRating objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepositoryBase {
 
     private AverageStarsWithNumOfRatingsDao averageStarsWithNumOfHodnoceniDao;

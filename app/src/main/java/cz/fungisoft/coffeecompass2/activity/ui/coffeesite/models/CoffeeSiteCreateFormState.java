@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
  * Data validation state of the create CoffeeSite form.
  * Attributes hold either null or R.string.id of the
  * error message.
- *
+ * <p>
  * Contains validation for CoffeeSiteName, longitude
  * and latitude. Other fields within CoffeeSite create
  * form are selected from lists or other fixed

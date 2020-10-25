@@ -9,7 +9,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
  * Class to map JSON response for Pageable CoffeeSites,
- * for example {@link CoffeeSiteRESTInterface.getAllCoffeeSitesFromCurrentUserPaginated() }
+ * for example {@link CoffeeSiteRESTInterface#getAllCoffeeSitesFromCurrentUserPaginated() }
  */
 public class CoffeeSitePageEnvelope {
 

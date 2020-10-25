@@ -15,9 +15,9 @@ import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 
 /**
- * Class to hold instances of CoffeeSite entities repositories, whose content is read from server
- * and saved into DB.
- * Can return instances of any such type.<br></>
+ * Class to hold instances of CoffeeSite related entities repositories, whose content is read from server
+ * and saved into DB.<br>
+ * Can return instances of any such type.<br>
  */
 public class CoffeeSiteEntityRepositories {
 
@@ -49,9 +49,9 @@ public class CoffeeSiteEntityRepositories {
         return coffeeSiteTypesRepository;
     }
 
-    public CoffeeSiteRepository getCoffeeSiteRepository() {
-        return coffeeSiteRepository;
-    }
+//    public CoffeeSiteRepository getCoffeeSiteRepository() {
+//        return coffeeSiteRepository;
+//    }
 
     public CoffeeSiteRecordStatusRepository getCoffeeSiteRecordStatusRepository() {
         return coffeeSiteRecordStatusRepository;
@@ -65,9 +65,9 @@ public class CoffeeSiteEntityRepositories {
         return coffeeSortRepository;
     }
 
-    public CommentRepository getCommentRepository() {
-        return commentRepository;
-    }
+//    public CommentRepository getCommentRepository() {
+//        return commentRepository;
+//    }
 
     public CupTypeRepository getCupTypeRepository() {
         return cupTypeRepository;
@@ -94,33 +94,32 @@ public class CoffeeSiteEntityRepositories {
     }
 
     /* REPOSITORIES */
-    private AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
-    private CoffeeSiteTypeRepository coffeeSiteTypesRepository;
-    private CoffeeSiteRepository coffeeSiteRepository;
-    private CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
-    private CoffeeSiteStatusRepository coffeeSiteStatusRepository;
+    private final AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
+    private final CoffeeSiteTypeRepository coffeeSiteTypesRepository;
+    //private CoffeeSiteRepository coffeeSiteRepository;
+    private final CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
+    private final CoffeeSiteStatusRepository coffeeSiteStatusRepository;
 
-    private CoffeeSortRepository coffeeSortRepository;
-    private CommentRepository commentRepository;
-    private CupTypeRepository cupTypeRepository;
-    private NextToMachineTypeRepository nextToMachineTypeRepository;
-    private OtherOfferRepository otherOfferRepository;
-    private PriceRangeRepository priceRangeRepository;
-    private SiteLocationTypeRepository siteLocationTypeRepository;
-    private StarsQualityDescriptionRepository starsQualityDescriptionRepository;
+    private final CoffeeSortRepository coffeeSortRepository;
+    //private final CommentRepository commentRepository;
+    private final CupTypeRepository cupTypeRepository;
+    private final NextToMachineTypeRepository nextToMachineTypeRepository;
+    private final OtherOfferRepository otherOfferRepository;
+    private final PriceRangeRepository priceRangeRepository;
+    private final SiteLocationTypeRepository siteLocationTypeRepository;
+    private final StarsQualityDescriptionRepository starsQualityDescriptionRepository;
     /* REPOSITORIES */
 
     private static CoffeeSiteEntityRepositories instance;
 
     private CoffeeSiteEntityRepositories(final CoffeeSiteDatabase db) {
         coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(db);
-        coffeeSiteRepository = new CoffeeSiteRepository(db);
         averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(db);
-        coffeeSiteRepository = new CoffeeSiteRepository(db);
+        //coffeeSiteRepository = new CoffeeSiteRepository(db);
         coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
         coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
         coffeeSortRepository = new CoffeeSortRepository(db);
-        commentRepository = CommentRepository.getInstance(db);
+        //commentRepository = CommentRepository.getInstance(db);
         cupTypeRepository = new CupTypeRepository(db);
         nextToMachineTypeRepository = new NextToMachineTypeRepository(db);
         otherOfferRepository = new OtherOfferRepository(db);

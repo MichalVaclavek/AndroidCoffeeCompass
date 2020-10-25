@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteTypeDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for CoffeeSiteType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSiteTypeDao coffeeSiteTypeDao;

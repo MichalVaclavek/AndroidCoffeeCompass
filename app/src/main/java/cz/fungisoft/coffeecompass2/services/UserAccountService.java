@@ -52,11 +52,9 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     public LiveData<LoginOrRegisterResult> getLoginResult() {
         return loginResult;
     }
-
     public LiveData<LoginOrRegisterResult> getRegisterResult() {
         return registerResult;
     }
-
     public LiveData<LogoutOrDeleteResult> getLogoutResult() {
         return logoutResult;
     }

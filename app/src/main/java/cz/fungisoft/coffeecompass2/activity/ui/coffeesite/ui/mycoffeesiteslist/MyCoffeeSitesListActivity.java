@@ -128,8 +128,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     private MyCoffeeSitesViewModel myCoffeeSitesViewModel;
 
-    private boolean offLineModeOn = false;
-
     /**
      * Getter and setter to be synchronized to update status correctly when
      * CoffeeSites load async task is running.
@@ -154,8 +152,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         contextView = findViewById(R.id.my_coffeesite_frameLayout);
 
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
-
-        offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
 
         myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
 
@@ -205,6 +201,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present
         getMenuInflater().inflate(R.menu.menu_my_coffeesites_list, menu);
 
+        boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
+
         MenuItem addCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_create_coffeesite);
         addCoffeeSiteMenuItem.setVisible(!offLineModeOn);
         MenuItem reloadMyCoffeeSitesMenuItem = menu.findItem(R.id.action_refresh_list);
@@ -236,8 +234,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             goToMainActivity();
             return true;
         }
+        boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         if (id == R.id.action_go_to_create_coffeesite) {
-            goToCreateNewSiteActivity();
+            if (currentUser != null && !offLineModeOn) {
+                goToCreateNewSiteActivity();
+            }
             return true;
         }
         if (id == R.id.action_refresh_list) {
@@ -290,6 +291,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
+        boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         if (offLineModeOn) {
             myCoffeeSitesViewModel.getUsersCoffeeSites(currentUser).observe(this, new Observer<List<CoffeeSite>>() {
                 @Override
@@ -360,6 +362,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+        boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         recyclerViewAdapter = new MyCoffeeSiteItemRecyclerViewAdapter(this, offLineModeOn);
         recyclerView.setAdapter(recyclerViewAdapter);
         // Pagination
@@ -471,6 +474,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
                 coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
                 // All services ready, start loading all coffeesites
+                boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
                 if (!offLineModeOn) {
                     startMyCoffeeSitesLoadOperation();
                 }
@@ -530,7 +534,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                     isLastPage = true;
                 }
             }
-
         }
     }
 
@@ -574,6 +577,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (!isLoadingPage() && !isLastPage) {
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0) {
+                    boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
                     if (!offLineModeOn) {
                         loadMoreItems();
                     }
@@ -643,6 +647,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Check which request we're responding to
         if (requestCode == CREATE_COFFEESITE_REQUEST && resultCode == RESULT_OK) {
             // User created new CoffeeSite, refresh the whole list of MyCoffeeSites
+            boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
             if (currentUser != null && !offLineModeOn) {
                 if (recyclerViewAdapter != null) {
                     // Delete current list
@@ -740,7 +745,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
         }

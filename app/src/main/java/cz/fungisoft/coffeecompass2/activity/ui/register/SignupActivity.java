@@ -38,8 +38,6 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-//import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
-
 /**
  * Activity to register new user. Based on LoginActivity.
  * UserAccountServiceConnectionListener

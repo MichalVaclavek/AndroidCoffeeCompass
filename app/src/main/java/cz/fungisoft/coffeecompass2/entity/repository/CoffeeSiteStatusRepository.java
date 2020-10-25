@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteStatusDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for CoffeeSiteStatus objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class CoffeeSiteStatusRepository extends CoffeeSiteRepositoryBase {
 
     private CoffeeSiteStatusDao coffeeSiteStatusDao;

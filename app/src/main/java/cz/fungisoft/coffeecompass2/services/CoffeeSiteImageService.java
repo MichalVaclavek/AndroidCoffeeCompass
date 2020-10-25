@@ -31,7 +31,8 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     private static final String TAG = "CoffeeSiteImageService";
 
     /**
-     * List of listeneres for user login events.
+     * List of listeners for operations performed by CoffeeSiteImageService
+     * i.e. results of Save and Delete of CoffeeSite's image
      */
     private static List<CoffeeSiteImageServiceCallResultListener> imageOperationsResultListeners = new ArrayList<>();
 
@@ -85,8 +86,6 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
     private boolean mShouldUnbindUserLoginService = false;
-    // Don't attempt to bind from the service unless the client has received some
-    // information about the service's state.
     private boolean mShouldBindUserLoginService = true;
 
     private void doBindUserAccountService() {
@@ -143,6 +142,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
 
 
     /** Methods to be called by Activity **/
+
     public void uploadImage(File imageFile, int coffeeSiteId) {
         currentUser = getCurrentUser();
         new ImageUploadAsyncTask(this, currentUser, imageFile, coffeeSiteId).execute();
@@ -181,7 +181,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
 
     // Fire-up methods for login/register/logout events to be processed by listeners
 
-    /* ---- Image Save ----  */
+    /* ---- Om Image Save ----  */
     private void onImageSaveSuccess(String result) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
             listener.onImageSaveSuccess(result);
@@ -193,7 +193,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         }
     }
 
-    /* ---- Image Save ----  */
+    /* ---- On Image Delete ----  */
     private void onImageDeleteSuccess(String result) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
             listener.onImageDeleteSuccess(result);
@@ -204,7 +204,6 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
             listener.onImageDeleteFailure(error);
         }
     }
-
 
     @Override
     public void onDestroy() {

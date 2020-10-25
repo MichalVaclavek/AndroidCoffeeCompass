@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CupTypeDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for CupType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class CupTypeRepository extends CoffeeSiteRepositoryBase {
 
     private CupTypeDao cupTypeDao;

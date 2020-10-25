@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.SiteLocationTypeDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for SiteLocationType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
     private SiteLocationTypeDao siteLocationTypeDao;

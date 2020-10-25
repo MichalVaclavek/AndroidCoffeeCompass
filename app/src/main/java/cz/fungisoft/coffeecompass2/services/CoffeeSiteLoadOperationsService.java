@@ -25,7 +25,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultList
 /**
  * Service to perform CoffeeSite load operations i.e. loading of one CoffeeSite,
  * loading of all CoffeeSites created by user and so on.
- * It has to listen some interface, especialy those called by AsyncTasks when REST
+ * It has to listen some interface, especially those called by AsyncTasks when REST
  * calls are performed to load CoffeeSites
  */
 public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountService
@@ -35,8 +35,8 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     static final String TAG = "CoffeeSiteLoadService";
 
-    // Listeners, usualy Activities, which called respective service method
-    // and wants to be informed about resutl later, as all the operations are Async
+    // Listeners, usually Activities, which called respective service method
+    // and wants to be informed about result later, as all the operations are Async
     private List<CoffeeSiteLoadServiceOperationsListener> loadOperationsListeners = new ArrayList<>();
 
     public void addLoadOperationsListener(CoffeeSiteLoadServiceOperationsListener listener) {

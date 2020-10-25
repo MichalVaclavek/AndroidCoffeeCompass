@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for PriceRange objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     private PriceRangeDao priceRangeDao;

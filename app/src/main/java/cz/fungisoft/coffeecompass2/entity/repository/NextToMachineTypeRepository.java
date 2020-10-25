@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.NextToMachineTypeDao;
 import io.reactivex.Single;
 
+/**
+ * Repository class for NextToMachineType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
     private NextToMachineTypeDao nextToMachineTypeDao;

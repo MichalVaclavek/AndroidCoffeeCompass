@@ -8,6 +8,7 @@ import cz.fungisoft.coffeecompass2.R;
 
 /**
  * Model for creation of CoffeeSite in {@link cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity}
+ * Validation of some obligatory CoffeeSite attributes.
  */
 public class CoffeeSiteCreateModel extends ViewModel {
 
@@ -38,7 +39,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
     // A placeholder longitude validation check
     private boolean isLongitudeValid(String longitude) {
         try {
-            float delka = Float.valueOf(longitude);
+            float delka = Float.parseFloat(longitude);
             return delka >= -180 && delka <= 180;
         } catch (NumberFormatException ex) {
             return false;
@@ -48,7 +49,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
     // A placeholder latitude validation check
     private boolean isLatitudeValid(String latitude) {
         try {
-            float sirka = Float.valueOf(latitude);
+            float sirka = Float.parseFloat(latitude);
             return sirka >= -180 && sirka <= 180;
         } catch (NumberFormatException ex) {
             return false;

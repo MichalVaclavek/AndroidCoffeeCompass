@@ -10,6 +10,10 @@ import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescriptionDao;
 import io.reactivex.Flowable;
 
+/**
+ * Repository class for StarsQualityDescription objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase {
 
     private StarsQualityDescriptionDao starsQualityDescriptionDao;

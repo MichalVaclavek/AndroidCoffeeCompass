@@ -37,32 +37,27 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="2dp"
             android:foreground="?attr/selectableItemBackground"
             app:cardCornerRadius="6dp"
             app:cardElevation="4dp"
             app:contentPadding="2dp">
 
-            <TableLayout
-                android:id="@+id/tableLayout"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_margin="5dp"
                 android:background="@color/card_backround"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:baselineAligned="true"
+                android:orientation="horizontal"
+                android:padding="8dp">
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="10dp"
-                    android:paddingTop="10dp"
-                    android:paddingRight="10dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textView3"
@@ -72,6 +67,39 @@
                         android:textAlignment="viewStart"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/coffee_sites_today"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/num_all_sites7_label"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/num_all_users_label"
+
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp"
+                    android:gravity="right"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/all_sites_TextView"
@@ -85,22 +113,6 @@
                         tools:layout_editor_absoluteX="37dp"
                         tools:layout_editor_absoluteY="239dp" />
 
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp">
-
-                    <TextView
-                        android:id="@+id/textView8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/coffee_sites_today"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-
                     <TextView
                         android:id="@+id/TodaySitesTextView"
                         android:layout_width="match_parent"
@@ -112,21 +124,6 @@
                         android:textStyle="bold"
                         tools:layout_editor_absoluteX="37dp"
                         tools:layout_editor_absoluteY="175dp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp">
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_sites7_label"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/AllSites7TextView"
@@ -139,39 +136,18 @@
                         android:textStyle="bold"
                         tools:layout_editor_absoluteX="37dp"
                         tools:layout_editor_absoluteY="175dp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingBottom="10dp">
-
-                    <TextView
-                        android:id="@+id/textView6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_users_label"
-
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/AllUsersTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
-                        android:textAlignment="textEnd"
+                        android:textAlignment="viewEnd"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="18sp"
                         android:textStyle="bold" />
-
-                </TableRow>
-
-            </TableLayout>
-
+                </LinearLayout>
+            </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <LinearLayout
@@ -199,8 +175,6 @@
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:gravity="center_horizontal">
 
                     <TextView
@@ -227,7 +201,7 @@
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    android:layout_marginTop="5dp"
                     android:gravity="center_horizontal"
                     android:scrollbarThumbHorizontal="@drawable/cup_basic"
                     android:textAlignment="center">

@@ -56,14 +56,14 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     static final String TAG = "CoffeeSiteEntitiesSrv";
 
-    private static ImageUtil imageUtil = ImageUtil.getInstance();
+    private final ImageUtil imageUtil = ImageUtil.getInstance();
 
     /**
      * To indicate, that downloading of all data needed for OFFLINE mode finished
      */
     public interface DataDownloadIndicatorListener {
         void onAllDataForOfflineModeDownloaded();
-        //TODO ??? implement, if an action is required by listener in case of failed data download
+
         void onDataForOfflineModeDownloadFailed();
     }
 
@@ -265,12 +265,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                         imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
                     }
                 }
+            } else {
+                informClientAboutAllCoffeeSitesLoadResult(false);
             }
-
-            informClientAboutAllCoffeeSitesLoadResult(true);
-
         } else {
-            //TODO - show info, that loading of All sites failed
             informClientAboutAllCoffeeSitesLoadResult(false);
         }
     }
@@ -387,9 +385,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             if (includingImages) {
                 downloadImages();
             } else { // all Comments downloaded, we can return to OfflineModeSelectionActivity as download of images were not requested
-                for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
-                    listener.onAllDataForOfflineModeDownloaded();
-                }
+//                for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
+//                    listener.onAllDataForOfflineModeDownloaded();
+//                }
+                informClientAboutAllCoffeeSitesLoadResult(true);
             }
         }
     }
@@ -399,9 +398,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     @Override
     public void onRequestedNumberOfImagesToDownloadReached() {
-        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
-            listener.onAllDataForOfflineModeDownloaded();
-        }
+//        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
+//            listener.onAllDataForOfflineModeDownloaded();
+//        }
+        informClientAboutAllCoffeeSitesLoadResult(true);
     }
 
     private void informClientAboutAllCoffeeSitesLoadResult(Boolean result) {

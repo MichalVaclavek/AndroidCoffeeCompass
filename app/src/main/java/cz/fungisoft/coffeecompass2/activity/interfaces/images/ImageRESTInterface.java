@@ -11,7 +11,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
-* Retrofit interface for REST requests related to CoffeeSite's image object.
+* Retrofit interface for REST requests related to CoffeeSite's image object.<br>
 * Used by {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageUploadAsyncTask}
  * and {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageDeleteAsyncTask}
 */
