@@ -40,15 +40,15 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * especially the distance change event of any of the CoffeeSiteMovable
  * item in the list.
  */
-public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-                                                      implements PropertyChangeListener,
-                                                                 CoffeeSitesInRangeUpdateListener {
+public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+                                                 implements PropertyChangeListener,
+                                                            CoffeeSitesInRangeUpdateListener {
 
     private static final String TAG = "CoffeeSiteListAdapter";
 
     private final FoundCoffeeSitesListActivity mParentActivity;
-    // Need to offline mode on/off to load CoffeeSite's image from URL or from file
-    private final boolean offlineModeOn;
+
+
     private List<CoffeeSiteMovable> mValues = new ArrayList<>();
     private CoffeeSiteMovableListContent content;
 
@@ -170,12 +170,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         for (CoffeeSiteMovable csmToInsert : newSites) {
             int posToInsert = -1;
             for (int i = 0; i < mValues.size(); i++) {
-                if ((csmToInsert.getDistance() < mValues.get(i).getDistance()) ) {
+                if ((csmToInsert.getDistance() < mValues.get(i).getDistance())) {
                     posToInsert = i;
                     break;
                 }
             }
-            if ( posToInsert == - 1) { // add to the end of current list
+            if (posToInsert == -1) { // add to the end of current list
                 posToInsert = mValues.size();
             }
 
@@ -195,7 +195,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      */
     @Override
     public void onSitesOutOfRange(List<CoffeeSiteMovable> oldSites) {
-        //Go through all current sites and remove sites being out of range
+        // Go through all current sites and remove sites being out of range
         for (CoffeeSiteMovable csmToRemove : oldSites) {
             csmToRemove.removePropertyChangeListener(this);
 
@@ -244,14 +244,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
      * @param twoPane
      */
-    public CoffeeSiteMovableItemRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
-                                                    CoffeeSiteMovableListContent content,
-                                                    int currentSearchRange,
-                                                    boolean offlineModeOn,
-                                                    boolean twoPane) {
+    public FoundCoffeeSitesRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
+                                               CoffeeSiteMovableListContent content,
+                                               int currentSearchRange,
+                                               boolean twoPane) {
         this.content = content;
         this.currentSearchRange = currentSearchRange;
-        this.offlineModeOn = offlineModeOn;
         mParentActivity = parent;
         mTwoPane = twoPane;
 
@@ -307,19 +305,19 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             case 0:
                 View view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.coffeesite_list_content, parent, false);
-                retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.ViewHolder1(view);
+                retVal = new FoundCoffeeSitesRecyclerViewAdapter.ViewHolder1(view);
                 break;
             // Case -1 for 'Empty card'
             case -1:
                 View view2 = LayoutInflater.from(parent.getContext())
                              .inflate(R.layout.coffeesite_list_emptycard, parent, false);
-                retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.EmptyCardViewHolder(view2);
+                retVal = new FoundCoffeeSitesRecyclerViewAdapter.EmptyCardViewHolder(view2);
                 break;
             // Case -2 for 'Initial Empty card'
             case -2:
                 View view3 = LayoutInflater.from(parent.getContext())
                              .inflate(R.layout.coffeesite_list_emptycard_initial_search, parent, false);
-                retVal = new CoffeeSiteMovableItemRecyclerViewAdapter.InitialSearchingCardViewHolder(view3);
+                retVal = new FoundCoffeeSitesRecyclerViewAdapter.InitialSearchingCardViewHolder(view3);
                 break;
         }
         return retVal;
@@ -376,16 +374,6 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
         return mValues.size();
     }
 
-    /**
-     * Not yet implemented as the AsyncTasks are not ready to support it.
-     * @param numberOfSitesAlreadyRead
-     */
-    public void showNumberOfSitesAlreadyRead(int numberOfSitesAlreadyRead) {
-        // Update label to show how many sites where already read when new reading of Sites in range
-        if (mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy")))  {
-            //TODO - number of already read CoffeeSites on standard Empty or InitialDummy card
-        }
-    }
 
     /**
      * Start animation of text on Empty card, when new searching of CoffeeSites started again
@@ -413,12 +401,12 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
             }
         }
 
-        // If there is no newSites returned, after initial Empty card was shown, show standard Empty card
+        // If there is no newSites returned, after Initial Empty card was shown, show Standard Empty card
         if (mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
             // Remove Initial Empty card
             mValues.remove(0);
             this.notifyItemRemoved(0);
-            // Replace by standard Empty card
+            // Replace by Standard Empty card
             mValues.add(0, dummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
         }
@@ -573,7 +561,7 @@ public class CoffeeSiteMovableItemRecyclerViewAdapter extends RecyclerView.Adapt
 
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            if (!offlineModeOn) {
+            if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {
                 Picasso.get().load(this.mValues.get(position).getMainImageURL())
                              .fit().placeholder(R.drawable.kafe_backround_120x160)
                              .into(viewHolder1.siteFoto);

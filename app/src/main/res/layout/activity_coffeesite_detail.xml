@@ -18,29 +18,22 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/coffee_site_detail_app_bar"
             android:layout_width="match_parent"
-            android:layout_height="96dp"
+            android:layout_height="72dp"
             android:background="@color/colorPrimary2"
-            android:fitsSystemWindows="true"
+            android:fitsSystemWindows="false"
+            android:textAlignment="center"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/detail_toolbar_layout"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:toolbarId="@+id/sitesListToolbar">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/detail_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    app:layout_collapseMode="pin"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
+                android:textAlignment="center"
+                app:contentInsetStart="8dp"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleMargin="2dp"
+                app:titleTextAppearance="@style/Toolbar.TitleText" />
 
         </com.google.android.material.appbar.AppBarLayout>
 

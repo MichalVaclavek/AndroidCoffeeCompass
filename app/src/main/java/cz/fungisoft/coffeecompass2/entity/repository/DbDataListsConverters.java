@@ -14,6 +14,9 @@ import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 
+/**
+ * Converters used for saving CoffeeSite fields as JSON formatted strings into DB
+ */
 public class DbDataListsConverters implements Serializable {
 
     /* **** Converter for List of CoffeeSort **** */

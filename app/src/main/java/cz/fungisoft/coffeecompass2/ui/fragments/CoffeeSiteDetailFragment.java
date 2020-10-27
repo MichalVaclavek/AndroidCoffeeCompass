@@ -81,7 +81,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
         // Show the CoffeeSite info in a TextViews.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.nameTextView)).setText(mItem.getName());
             ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(mItem.getStatusZarizeni().toString());
             ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(mItem.getTypPodniku().toString());
             ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(mItem.getTypLokality().toString());
@@ -157,7 +156,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
 
                 distanceTextView.setCoffeeSite((CoffeeSiteMovable) mItem);
-                //((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
             } else {
                 distanceTableRow.setVisibility(View.GONE);
             }

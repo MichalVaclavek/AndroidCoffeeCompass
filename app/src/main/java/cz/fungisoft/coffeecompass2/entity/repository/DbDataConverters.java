@@ -16,6 +16,9 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 
+/**
+ * Converters used for saving CoffeeSite fields as JSON formatted strings into DB
+ */
 public class DbDataConverters implements Serializable {
 
     @TypeConverter

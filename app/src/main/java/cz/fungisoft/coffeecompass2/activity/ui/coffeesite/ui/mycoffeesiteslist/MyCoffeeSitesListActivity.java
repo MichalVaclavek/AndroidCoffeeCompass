@@ -291,16 +291,17 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
-        boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-        if (offLineModeOn) {
-            myCoffeeSitesViewModel.getUsersCoffeeSites(currentUser).observe(this, new Observer<List<CoffeeSite>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSite> myCoffeeSites) {
-                    // Update the cached copy of the CoffeeSites in the adapter.
+
+        myCoffeeSitesViewModel.getUsersCoffeeSites(currentUser).observe(this, new Observer<List<CoffeeSite>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSite> myCoffeeSites) {
+                // Update the cached copy of the CoffeeSites in the adapter.
+                if (Utils.isOfflineModeOn(getApplicationContext())) {
                     recyclerViewAdapter.setCoffeeSites(myCoffeeSites);
+                    hideProgressbarAndEnableMenuItems();
                 }
-            });
-        }
+            }
+        });
     }
 
     /** UnBind UserAccountService ****/
@@ -378,7 +379,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (coffeeSiteLoadOperationsService != null && !isLoadingPage()) {
                 showProgressbarAndDisableMenuItems();
                 setLoadingPage(true);
-                //coffeeSiteLoadOperationsService.findAllCoffeeSitesFromCurrentUser();
                 coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(1, PAGE_SIZE);
             }
         } else {
@@ -447,11 +447,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * 1) CoffeeSiteStatusChangeService - start loading in onCreate()
      * 2) CoffeeSiteCUDOperationsService
      * 3) CoffeeSiteLoadOperationsService
-     *
      */
     @Override
     public void onCoffeeSiteServiceConnected() {
-
         if (coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService() != null) {
             if (coffeeSiteStatusChangeService == null) {
                 coffeeSiteStatusChangeService = coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService();
@@ -764,11 +762,18 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     protected void onStart() {
+        // If OFFLINE mode is active, the list will be loaded from DB at start of Activity.
+        // Can take some time, show progressBar
+        if (Utils.isOfflineModeOn(getApplicationContext())) {
+            showProgressbarAndDisableMenuItems();
+        }
         super.onStart();
     }
 
     @Override
     protected void onStop() {
+        // To be sure, that progressBar is hiden
+        hideProgressbarAndEnableMenuItems();
         super.onStop();
     }
 

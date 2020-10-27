@@ -39,12 +39,15 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
-    private boolean offlinemode = false;
-
     /**
      * CoffeeSites repository to be used in case of OFFLINE mode
      */
     private static CoffeeSiteRepository coffeeSiteRepository;
+
+    /**
+     * To detect, that search request to server is running
+     */
+    private boolean isSearching = false;
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -214,10 +217,13 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
                 listener.onStartSearchingSitesInRange();
             }
             searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            if (!offlinemode) {
-                startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-            } else {
-                setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            if (!isSearching) {
+                if (!Utils.isOfflineModeOn(getApplicationContext())) {
+                    startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                }
+                else {
+                    setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                }
             }
         }
     }
@@ -229,23 +235,24 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      *
      * @return
      */
-    public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort, boolean offline) {
+    public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
         this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
         if (locationService != null && this.searchLocationOfCurrentSites == null) {
             this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
         }
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
-        this.offlinemode = offline;
 
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onStartSearchingSitesInRange();
         }
 
-        if (!offlinemode) {
-            startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-        } else {
-            setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+        if (!isSearching) {
+            if (!Utils.isOfflineModeOn(getApplicationContext())) {
+                startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            } else {
+                setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            }
         }
     }
 
@@ -257,6 +264,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
 
         if (Utils.isOnline() ) {
+            isSearching = true;
             new GetCoffeeSitesInRangeAsyncTask(this,
                     latitude,
                     longitude,
@@ -273,10 +281,9 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
-        if (coffeeSites.size() > 0) {
-            for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
-                listener.onSitesInRangeFound(coffeeSites);
-            }
+        isSearching = false;
+        for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
+            listener.onSitesInRangeFound(coffeeSites);
         }
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeFinished();
@@ -285,6 +292,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
+        isSearching = false;
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeError(error);
             listener.onSearchingSitesInRangeFinished();

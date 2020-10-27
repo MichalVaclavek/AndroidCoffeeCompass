@@ -81,9 +81,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
-
         // Read coffee site data from calling activity
         Intent intent = this.getIntent();
         Bundle bundle = intent.getExtras();
@@ -96,9 +93,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             }
         }
 
-        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.detail_toolbar_layout);
-        if (appBarLayout != null && coffeeSite != null) {
-            appBarLayout.setTitle(coffeeSite.getName());
+        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null && coffeeSite != null) {
+//            toolbar.setTitle(coffeeSite.getName());
+            toolbar.setSubtitle(coffeeSite.getName());
         }
 
         if (coffeeSite != null) {
