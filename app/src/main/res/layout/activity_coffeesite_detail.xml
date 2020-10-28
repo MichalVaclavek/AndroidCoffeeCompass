@@ -29,10 +29,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textAlignment="center"
-                app:contentInsetStart="8dp"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:titleMargin="2dp"
                 app:titleTextAppearance="@style/Toolbar.TitleText" />
 
         </com.google.android.material.appbar.AppBarLayout>

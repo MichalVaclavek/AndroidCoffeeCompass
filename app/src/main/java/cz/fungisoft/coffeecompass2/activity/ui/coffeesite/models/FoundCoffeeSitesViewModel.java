@@ -87,7 +87,6 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
          * Service to return coffee sites in range
          */
         WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService1 = new WeakReference<>(sitesInRangeUpdateService);
-        sitesInRangeUpdateService1.get().addSitesInRangeFoundListener(this);
         foundCoffeeSitesInDB = sitesInRangeUpdateService1.get().getFoundSites();
     }
 

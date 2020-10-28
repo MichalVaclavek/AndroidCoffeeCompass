@@ -150,7 +150,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         setContentView(R.layout.activity_my_coffee_sites_list);
 
         contextView = findViewById(R.id.my_coffeesite_frameLayout);
-
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
 
         myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
@@ -724,7 +723,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-
         // Save CoffeeSites list state
         mListState = layoutManager.onSaveInstanceState();
         state.putParcelable(LIST_STATE_KEY, mListState);
@@ -733,7 +731,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     @Override
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
-
         // Retrieve CoffeeSites list state and item positions
         if(state != null) {
             mListState = state.getParcelable(LIST_STATE_KEY);
@@ -764,7 +761,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     protected void onStart() {
         // If OFFLINE mode is active, the list will be loaded from DB at start of Activity.
         // Can take some time, show progressBar
-        if (Utils.isOfflineModeOn(getApplicationContext())) {
+        if (Utils.isOfflineModeOn(getApplicationContext()) && recyclerViewAdapter.getItemCount() == 0) {
             showProgressbarAndDisableMenuItems();
         }
         super.onStart();

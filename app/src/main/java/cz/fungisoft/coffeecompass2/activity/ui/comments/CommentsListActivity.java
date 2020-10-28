@@ -101,9 +101,6 @@ public class CommentsListActivity extends AppCompatActivity
             cs = bundle.getParcelable("site");
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.comments_toolbar);
-        setSupportActionBar(toolbar);
-
         commentActionsProgressBar = (ProgressBar) findViewById(R.id.comments_progressBar);
 
         // Show the Up button in the action bar.
@@ -112,10 +109,13 @@ public class CommentsListActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        CollapsingToolbarLayout appBarLayout = findViewById(R.id.comments_toolbar_layout);
-
-        if (appBarLayout != null) {
-            appBarLayout.setTitle(cs.getName());
+        Toolbar toolbar = (Toolbar) findViewById(R.id.comments_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null) {
+            getSupportActionBar().setTitle("Komentáře");
+            toolbar.setSubtitle(cs.getName());
         }
 
         RecyclerView recyclerView = findViewById(R.id.commentsList);

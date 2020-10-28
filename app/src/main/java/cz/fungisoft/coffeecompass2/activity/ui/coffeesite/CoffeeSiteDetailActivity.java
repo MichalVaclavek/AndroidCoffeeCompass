@@ -98,7 +98,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (toolbar != null && coffeeSite != null) {
-//            toolbar.setTitle(coffeeSite.getName());
+            getSupportActionBar().setTitle("Detaily");
             toolbar.setSubtitle(coffeeSite.getName());
         }
 

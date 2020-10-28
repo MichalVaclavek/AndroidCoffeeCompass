@@ -35,16 +35,11 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coffee_site_image_activity);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.image_toolbar);
-        setSupportActionBar(toolbar);
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        CollapsingToolbarLayout appBarLayout = findViewById(R.id.image_toolbar_layout);
 
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
@@ -54,8 +49,14 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
                 cs = bundle.getParcelable("coffeeSite");
             }
         }
-        if (appBarLayout != null && cs != null) {
-            appBarLayout.setTitle(cs.getName());
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.image_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null && cs != null) {
+            getSupportActionBar().setTitle("Fotky");
+            toolbar.setSubtitle(cs.getName());
         }
 
         distLabel = (DistanceChangeTextView) findViewById(R.id.distTextView);
