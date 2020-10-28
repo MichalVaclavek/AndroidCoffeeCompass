@@ -503,18 +503,21 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         this.notifyItemChanged(selectedPosition);
     }
 
-    /** ========== Buttons onClick methods =============== **/
+    /** ========== Buttons onClick handler methods =============== **/
 
     /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
 
     private void onEditButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
-        activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
-        activityIntent.putExtra("coffeeSitePosition", selectedPosition);
-
-        mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
+        if (Utils.isOnline()) {
+            selectedCoffeeSite = (CoffeeSite) v.getTag();
+            selectedPosition = mValues.indexOf(selectedCoffeeSite);
+            Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
+            activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
+            activityIntent.putExtra("coffeeSitePosition", selectedPosition);
+            mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
 
@@ -545,15 +548,23 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     private void onCancelButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        showConfirmDeleteAccountDialog();
+        if (Utils.isOnline()) {
+            selectedCoffeeSite = (CoffeeSite) v.getTag();
+            selectedPosition = mValues.indexOf(selectedCoffeeSite);
+            showConfirmDeleteAccountDialog();
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
     private void onInsertCommentButtonClick(View v) {
-        selectedCoffeeSite = (CoffeeSite) v.getTag();
-        selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        showInsertAuthorsCommentDialog();
+        if (Utils.isOnline()) {
+            selectedCoffeeSite = (CoffeeSite) v.getTag();
+            selectedPosition = mValues.indexOf(selectedCoffeeSite);
+            showInsertAuthorsCommentDialog();
+        } else {
+            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+        }
     }
 
     /* ****************************************************************** */

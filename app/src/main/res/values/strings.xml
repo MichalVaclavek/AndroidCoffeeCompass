@@ -22,7 +22,7 @@
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
     <string name="about_version">v. 1.3.0</string>
-    <string name="about_datum">7. 11. 2020</string>
+    <string name="about_datum">1. 11. 2020</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
@@ -190,7 +190,7 @@
     <string name="offline_seetings_download_button"> Stáhnout</string>
     <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
     <string name="data_download_success">Data stažena úspěšně.</string>
-    <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později ...</string>
+    <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
 
 
 </resources>

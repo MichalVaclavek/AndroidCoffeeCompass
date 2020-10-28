@@ -37,7 +37,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about result later, as all the operations are Async
-    private List<CoffeeSiteLoadServiceOperationsListener> loadOperationsListeners = new ArrayList<>();
+    private final List<CoffeeSiteLoadServiceOperationsListener> loadOperationsListeners = new ArrayList<>();
 
     public void addLoadOperationsListener(CoffeeSiteLoadServiceOperationsListener listener) {
         if (!loadOperationsListeners.contains(listener)) {
@@ -246,7 +246,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
         }
     }
-
 
     /**
      * Expects that operationResult and operationError are set by

@@ -77,7 +77,7 @@ import static android.view.View.VISIBLE;
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
-public class MainActivity extends ActivityWithLocationService
+public class MainActivity<syncronized> extends ActivityWithLocationService
                           implements PropertyChangeListener,
                                      UserAccountServiceConnectionListener,
                                      CoffeeSiteEntitiesServiceConnectionListener,
@@ -93,7 +93,7 @@ public class MainActivity extends ActivityWithLocationService
     private static final float LAST_PRESNOST = 500.0f;
 
     private boolean bPrvni = true;
-    private int barvaBlack = Color.BLACK;
+    private final int barvaBlack = Color.BLACK;
     private int barvaRed = Color.RED;
 
     private TextView accuracy;
@@ -373,7 +373,7 @@ public class MainActivity extends ActivityWithLocationService
 
 
     public void startNumberOfCoffeeSitesFromUserCall() {
-        if (coffeeSiteLoadOperationsService != null) {
+        if (coffeeSiteLoadOperationsService != null && !numberOfCoffeeSitesCreatedByLoggedInUserChecked) {
             coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
         }
     }
@@ -547,7 +547,7 @@ public class MainActivity extends ActivityWithLocationService
     /**
      * Starts AsyncTask to read app. statistics to be shown in MainActivity
      */
-    public void startReadStatistics() {
+    public synchronized void startReadStatistics() {
         new ReadStatsAsyncTask(this).execute();
     }
 
@@ -653,10 +653,6 @@ public class MainActivity extends ActivityWithLocationService
     protected void onResume() {
         super.onResume();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        registerReceiver(networkChangeStateReceiver, filter);
-
         // Read stats if internet is available
         // Can be read later after internet becomes available, see NetworkStateReceiver
         if (!Utils.isOfflineModeOn(getApplicationContext())) {
@@ -688,8 +684,6 @@ public class MainActivity extends ActivityWithLocationService
             searchKafeButton.setEnabled(location != null);
         }
 
-        // Suppose we do not know actual status of loading CoffeeSites number from user
-        numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         doBindCoffeeSiteLoadOperationsService();
     }
 
@@ -703,10 +697,17 @@ public class MainActivity extends ActivityWithLocationService
 
         // UserAccountService service connection first. CoffeeSiteLoadOperationsService next in the onResume()
         doBindUserAccountService();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkChangeStateReceiver, filter);
     }
 
     @Override
     protected void onStop() {
+        numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
+        unregisterReceiver(networkChangeStateReceiver);
+
         doUnbindUserAccountService();
         doUnbindCoffeeSiteEntitiesService();
         super.onStop();
@@ -715,8 +716,6 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onPause() {
         super.onPause();
-
-        unregisterReceiver(networkChangeStateReceiver);
 
         searchKafeButton.setEnabled(false);
         // Kontrola opravneni

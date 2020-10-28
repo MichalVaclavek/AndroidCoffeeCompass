@@ -544,52 +544,52 @@ public class CommentsListActivity extends AppCompatActivity
             }
 
             /**
-                * Inner ViewHolder class for CommentItemRecyclerViewAdapter
-                */
-                class ViewHolder extends RecyclerView.ViewHolder {
+            * Inner ViewHolder class for CommentItemRecyclerViewAdapter
+            */
+            class ViewHolder extends RecyclerView.ViewHolder {
 
-                    final TextView userAndDateText;
-                    final TextView commentTextView;
-                    final LinearLayout commentAndRatingLayout;
+                final TextView userAndDateText;
+                final TextView commentTextView;
+                final LinearLayout commentAndRatingLayout;
 
-                    final LinearLayout editAndDeleteIconLayout;
-                    final ImageView deleteButtonIcon;
-                    final ImageView editButtonIcon;
+                final LinearLayout editAndDeleteIconLayout;
+                final ImageView deleteButtonIcon;
+                final ImageView editButtonIcon;
 
-                    final ImageView starRating1;
-                    final ImageView starRating2;
-                    final ImageView starRating3;
-                    final ImageView starRating4;
-                    final ImageView starRating5;
+                final ImageView starRating1;
+                final ImageView starRating2;
+                final ImageView starRating3;
+                final ImageView starRating4;
+                final ImageView starRating5;
 
-                    final List<ImageView> starsImageView;
+                final List<ImageView> starsImageView;
 
 
-                    ViewHolder(View view) {
-                        super(view);
+                ViewHolder(View view) {
+                    super(view);
 
-                        starsImageView = new ArrayList<>();
+                    starsImageView = new ArrayList<>();
 
-                        userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
-                        commentTextView = (TextView) view.findViewById(R.id.commentText);
-                        commentAndRatingLayout = (LinearLayout)  view.findViewById(R.id.user_comment_and_rating_linearlayout);
+                    userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
+                    commentTextView = (TextView) view.findViewById(R.id.commentText);
+                    commentAndRatingLayout = (LinearLayout)  view.findViewById(R.id.user_comment_and_rating_linearlayout);
 
-                        editAndDeleteIconLayout = (LinearLayout)  view.findViewById(R.id.edit_delete_comment_images_linearlayout);
-                        deleteButtonIcon = (ImageView) view.findViewById(R.id.deleteIconImageView);
-                        editButtonIcon = (ImageView) view.findViewById(R.id.edit_comment_icon_imageview);
+                    editAndDeleteIconLayout = (LinearLayout)  view.findViewById(R.id.edit_delete_comment_images_linearlayout);
+                    deleteButtonIcon = (ImageView) view.findViewById(R.id.deleteIconImageView);
+                    editButtonIcon = (ImageView) view.findViewById(R.id.edit_comment_icon_imageview);
 
-                        starRating5 = (ImageView) view.findViewById(R.id.rating_imageView_5);
-                        starsImageView.add(starRating5);
-                        starRating4 = (ImageView) view.findViewById(R.id.rating_imageView_4);
-                        starsImageView.add(starRating4);
-                        starRating3 = (ImageView) view.findViewById(R.id.rating_imageView_3);
-                        starsImageView.add(starRating3);
-                        starRating2 = (ImageView) view.findViewById(R.id.rating_imageView_2);
-                        starsImageView.add(starRating2);
-                        starRating1 = (ImageView) view.findViewById(R.id.rating_imageView_1);
-                        starsImageView.add(starRating1);
-                    }
+                    starRating5 = (ImageView) view.findViewById(R.id.rating_imageView_5);
+                    starsImageView.add(starRating5);
+                    starRating4 = (ImageView) view.findViewById(R.id.rating_imageView_4);
+                    starsImageView.add(starRating4);
+                    starRating3 = (ImageView) view.findViewById(R.id.rating_imageView_3);
+                    starsImageView.add(starRating3);
+                    starRating2 = (ImageView) view.findViewById(R.id.rating_imageView_2);
+                    starsImageView.add(starRating2);
+                    starRating1 = (ImageView) view.findViewById(R.id.rating_imageView_1);
+                    starsImageView.add(starRating1);
                 }
+            }
         }
 
 }

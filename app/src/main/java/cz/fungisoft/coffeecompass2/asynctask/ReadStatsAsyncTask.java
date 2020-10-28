@@ -105,6 +105,6 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
         if (parentActivity.get() != null) {
             parentActivity.get().showAndSaveStatistics(stats);
         }
-
     }
+
 }

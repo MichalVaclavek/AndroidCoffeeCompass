@@ -108,7 +108,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
      * @param api
      * @param <T>
      */
-    private <T extends List<? extends CoffeeSiteEntity>> void readAndSaveEntitiesFromServer(Class<? extends CoffeeSiteEntity> entityClass,
+    private synchronized <T extends List<? extends CoffeeSiteEntity>> void readAndSaveEntitiesFromServer(Class<? extends CoffeeSiteEntity> entityClass,
                                                                                             CoffeeSiteEntitiesRESTInterface api) {
         operationError = "";
 
