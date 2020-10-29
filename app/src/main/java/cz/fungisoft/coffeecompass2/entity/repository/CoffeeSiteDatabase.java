@@ -129,7 +129,8 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
 
     /**
-     * Deletes the database in the background.
+     * Deletes the database in the background. Used when DB needs to be cleared, before
+     * new data are read from server.
      */
     private static class DeleteCSEntitiesAsync extends AsyncTask<Void, Void, Void> {
 

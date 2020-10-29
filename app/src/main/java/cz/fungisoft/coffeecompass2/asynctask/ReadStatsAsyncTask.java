@@ -36,7 +36,6 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
     private Statistics stats;
 
     public ReadStatsAsyncTask(MainActivity parentActivity) {
-
         this.parentActivity = new WeakReference<>(parentActivity);
     }
 

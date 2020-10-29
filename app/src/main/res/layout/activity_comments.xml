@@ -27,6 +27,7 @@
                 android:textAlignment="center"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
                 app:titleTextAppearance="@style/Toolbar.TitleText" />
 
         </com.google.android.material.appbar.AppBarLayout>

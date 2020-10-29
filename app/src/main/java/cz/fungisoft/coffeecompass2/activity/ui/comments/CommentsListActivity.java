@@ -25,9 +25,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -375,7 +376,7 @@ public class CommentsListActivity extends AppCompatActivity
             Log.e(TAG, "Error REST call. " + error.getDetail());
             Toast.makeText(getApplicationContext(),
                     error.getDetail(),
-                    Toast.LENGTH_SHORT);
+                    Toast.LENGTH_SHORT).show();
         }
         commentActionsProgressBar.setVisibility(View.GONE);
     }
@@ -420,11 +421,12 @@ public class CommentsListActivity extends AppCompatActivity
                  this.parenActivity = parenActivity;
             }
 
+            @NotNull
             @Override
             public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.comment_list_content, parent, false);
-                return new CommentsListActivity.CommentItemRecyclerViewAdapter.ViewHolder(view);
+                return new ViewHolder(view);
             }
 
             @Override
@@ -546,7 +548,7 @@ public class CommentsListActivity extends AppCompatActivity
             /**
             * Inner ViewHolder class for CommentItemRecyclerViewAdapter
             */
-            class ViewHolder extends RecyclerView.ViewHolder {
+            static class ViewHolder extends RecyclerView.ViewHolder {
 
                 final TextView userAndDateText;
                 final TextView commentTextView;

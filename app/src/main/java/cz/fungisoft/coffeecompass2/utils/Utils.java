@@ -101,6 +101,16 @@ public class Utils {
         toast.show();
     }
 
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showNoInternetNoOfflineDataToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_no_internet_no_offline_data,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
     public static String getDeviceID(AppCompatActivity parentActivity) {
         return Settings.Secure.getString(parentActivity.getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);

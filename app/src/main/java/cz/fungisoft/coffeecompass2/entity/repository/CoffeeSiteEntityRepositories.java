@@ -35,7 +35,7 @@ public class CoffeeSiteEntityRepositories {
     }
 
     public void setDataReadedFromServer(boolean dataReadedFromServer) {
-        this.dataReadedFromServer = dataReadedFromServer;
+        CoffeeSiteEntityRepositories.dataReadedFromServer = dataReadedFromServer;
     }
 
     // Indication that data are available in the repository i.e. where readed from server

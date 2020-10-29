@@ -16,8 +16,8 @@ import io.reactivex.Single;
  */
 public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
-    private NextToMachineTypeDao nextToMachineTypeDao;
-    private LiveData<List<NextToMachineType>> mAllNextToMachineTypes;
+    private final NextToMachineTypeDao nextToMachineTypeDao;
+    private final LiveData<List<NextToMachineType>> mAllNextToMachineTypes;
 
     NextToMachineTypeRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -58,7 +58,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
     private static class InsertAllAsyncTask extends AsyncTask<List<NextToMachineType>, Void, Void> {
 
-        private NextToMachineTypeDao mAsyncTaskDao;
+        private final NextToMachineTypeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(NextToMachineTypeDao dao) {
             mAsyncTaskDao = dao;

@@ -160,7 +160,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
         commentsOfCoffeeSiteFromServer.setValue(listOfCommentsForCoffeeSite);
         commentsOfCoffeeSite = commentsOfCoffeeSiteFromServer;
-//        insertAll(comments);
     }
 
     @Override
@@ -192,7 +191,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
     private static class InsertAllCommentsAsyncTask extends AsyncTask<List<Comment>, Void, Void> {
 
-        private CommentDao mAsyncTaskDao;
+        private final CommentDao mAsyncTaskDao;
 
         InsertAllCommentsAsyncTask(CommentDao dao) {
             mAsyncTaskDao = dao;

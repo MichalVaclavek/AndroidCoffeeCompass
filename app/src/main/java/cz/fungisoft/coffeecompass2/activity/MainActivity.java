@@ -164,8 +164,6 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
 
         mainActivityProgressBar = findViewById(R.id.progress_main_activity);
 
-        //offlineModeOn = offlineModePreferenceHelper.getOfflineMode();
-
         statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
         userPreferencesHelper = new UserPreferencesHelper(this);
 
@@ -173,7 +171,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         // lets show progress bar as it can take some time, when the
         // MainActivity runs for the first time
         // Progress bar is hidden in onLocationServiceConnected()
-        //showProgressbar();
+        //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
 
         // Get current serachDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
@@ -183,7 +181,6 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
 
         searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
 
-        //searchDistanceSeekBar.setThumbPlaceholderDrawable(getDrawable(R.drawable.cup_basic));
         String[] vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
         // Seek bar for selecting searching distance
         searchDistanceSeekBar.setMaxValue(vzdalenosti.length - 1);
@@ -374,6 +371,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
 
     public void startNumberOfCoffeeSitesFromUserCall() {
         if (coffeeSiteLoadOperationsService != null && !numberOfCoffeeSitesCreatedByLoggedInUserChecked) {
+            //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
             coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
         }
     }
@@ -478,15 +476,6 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         }
     }
 
-    /**
-     * Returned from read and save operation of All CoffeeSites from server, when OFFLINE mode is switched-on
-     *
-     * @param result
-     */
-//    @Override
-//    public void onAllCoffeeSitesLoaded(boolean result) {
-//        hideProgressbar();
-//    }
 
     /**
      * Starts MyCoffeeSitesListActivity
@@ -548,6 +537,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
      * Starts AsyncTask to read app. statistics to be shown in MainActivity
      */
     public synchronized void startReadStatistics() {
+        //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
         new ReadStatsAsyncTask(this).execute();
     }
 
@@ -557,13 +547,12 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
      * @param stats
      */
     public void showAndSaveStatistics(Statistics stats) {
-
+        hideProgressbar();
         if (!Utils.isOfflineModeOn(getApplicationContext())) {
             statisticsPrefencesHelper.saveStatistics(stats);
         }
 
         if (stats != null) {
-
             TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);
             TextView sites7View = (TextView) findViewById(R.id.AllSites7TextView);
             TextView sitesToday = (TextView) findViewById(R.id.TodaySitesTextView);
@@ -597,14 +586,13 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         if (Utils.isOnline() || Utils.isOfflineModeOn(getApplicationContext())) {
 
                 Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
-
                 csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
                 csListIntent.putExtra("searchRange", searchRange);
                 csListIntent.putExtra("coffeeSort", "");
 
                 startActivity(csListIntent);
         } else {
-            Utils.showNoInternetToast(getApplicationContext());
+            Utils.showNoInternetNoOfflineDataToast(getApplicationContext());
         }
     }
 
@@ -625,7 +613,6 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
                         || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Vyžaduje se přístup k poloze.", Toast.LENGTH_LONG).show();
                 }
-                return;
             }
         }
     }
@@ -822,7 +809,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
     }
 
     /**
-     * Helper method ...
+     * Helper method. Not used currently, but ready for the future, if thre would be a long running job
      */
     public void showProgressbar() {
         mainActivityProgressBar.setVisibility(VISIBLE);

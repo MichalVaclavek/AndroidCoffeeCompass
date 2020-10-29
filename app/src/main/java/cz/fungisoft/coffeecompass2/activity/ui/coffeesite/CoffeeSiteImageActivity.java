@@ -7,8 +7,6 @@ import android.view.View;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
@@ -72,7 +70,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
         fragment.setCoffeeSite(cs);
-        fragment.setOffLineModeOn(Utils.isOfflineModeOn(getApplicationContext()));
 
         if (savedInstanceState == null) { // is this enough?
             if (cs != null) {

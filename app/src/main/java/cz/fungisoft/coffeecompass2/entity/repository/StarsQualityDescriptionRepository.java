@@ -16,8 +16,8 @@ import io.reactivex.Flowable;
  */
 public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase {
 
-    private StarsQualityDescriptionDao starsQualityDescriptionDao;
-    private LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
+    private final StarsQualityDescriptionDao starsQualityDescriptionDao;
+    private final LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
 
     StarsQualityDescriptionRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -58,7 +58,7 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
 
     private static class InsertAllAsyncTask extends AsyncTask<List<StarsQualityDescription>, Void, Void> {
 
-        private StarsQualityDescriptionDao mAsyncTaskDao;
+        private final StarsQualityDescriptionDao mAsyncTaskDao;
 
         InsertAllAsyncTask(StarsQualityDescriptionDao dao) {
             mAsyncTaskDao = dao;

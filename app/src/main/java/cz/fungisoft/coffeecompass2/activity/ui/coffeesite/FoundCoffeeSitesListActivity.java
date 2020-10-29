@@ -210,14 +210,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
 
         switch (item.getItemId()) {
             case R.id.action_map:
-                if (Utils.isOnline()) {
-                    openMap();
-                } else {
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            R.string.map_available_online_only,
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
+                openMap();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

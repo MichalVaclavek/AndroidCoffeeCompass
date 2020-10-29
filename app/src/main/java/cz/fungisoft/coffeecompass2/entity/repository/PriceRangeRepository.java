@@ -16,8 +16,8 @@ import io.reactivex.Single;
  */
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
-    private PriceRangeDao priceRangeDao;
-    private LiveData<List<PriceRange>> mAllPriceRanges;
+    private final PriceRangeDao priceRangeDao;
+    private final LiveData<List<PriceRange>> mAllPriceRanges;
 
     PriceRangeRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -58,7 +58,7 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     private static class InsertAllAsyncTask extends AsyncTask<List<PriceRange>, Void, Void> {
 
-        private PriceRangeDao mAsyncTaskDao;
+        private final PriceRangeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(PriceRangeDao dao) {
             mAsyncTaskDao = dao;

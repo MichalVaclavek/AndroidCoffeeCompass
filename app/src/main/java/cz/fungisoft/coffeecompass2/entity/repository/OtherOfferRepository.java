@@ -16,8 +16,8 @@ import io.reactivex.Single;
  */
 public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
 
-    private OtherOfferDao otherOfferDao;
-    private LiveData<List<OtherOffer>> mAllOtherOffers;
+    private final OtherOfferDao otherOfferDao;
+    private final LiveData<List<OtherOffer>> mAllOtherOffers;
 
     OtherOfferRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -58,7 +58,7 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
 
     private static class InsertAllAsyncTask extends AsyncTask<List<OtherOffer>, Void, Void> {
 
-        private OtherOfferDao mAsyncTaskDao;
+        private final OtherOfferDao mAsyncTaskDao;
 
         InsertAllAsyncTask(OtherOfferDao dao) {
             mAsyncTaskDao = dao;

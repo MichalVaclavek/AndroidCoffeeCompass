@@ -16,8 +16,8 @@ import io.reactivex.Single;
  */
 public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
-    private SiteLocationTypeDao siteLocationTypeDao;
-    private LiveData<List<SiteLocationType>> mAllSiteLocationTypes;
+    private final SiteLocationTypeDao siteLocationTypeDao;
+    private final LiveData<List<SiteLocationType>> mAllSiteLocationTypes;
 
     SiteLocationTypeRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -58,7 +58,7 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
     private static class InsertAllAsyncTask extends AsyncTask<List<SiteLocationType>, Void, Void> {
 
-        private SiteLocationTypeDao mAsyncTaskDao;
+        private final SiteLocationTypeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(SiteLocationTypeDao dao) {
             mAsyncTaskDao = dao;

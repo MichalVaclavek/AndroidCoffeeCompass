@@ -68,4 +68,9 @@
         <item name="android:textSize">24sp</item>
     </style>
 
+    <style name="Toolbar.SubTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/activityBackround</item>
+    </style>
+
 </resources>

@@ -14,7 +14,6 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.snackbar.Snackbar;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -77,7 +76,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         commentsButton = (Button) findViewById(R.id.commentsButton);
 
         mapButton = (Button) findViewById(R.id.mapButton);
-        mapButton.setVisibility(Utils.isOfflineModeOn(getApplicationContext()) ? GONE : VISIBLE);
+        //mapButton.setVisibility(Utils.isOfflineModeOn(getApplicationContext()) ? GONE : VISIBLE);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
@@ -250,11 +249,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             Log.e(TAG, "REST call error: " + error.getDetail());
             Toast.makeText(getApplicationContext(),
                     error.getDetail(),
-                    Toast.LENGTH_SHORT);
+                    Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(),
                     "Server connection error.",
-                    Toast.LENGTH_SHORT);
+                    Toast.LENGTH_SHORT).show();
         }
     }
 

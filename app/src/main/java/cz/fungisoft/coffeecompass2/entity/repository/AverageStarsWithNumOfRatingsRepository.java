@@ -15,8 +15,8 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.AverageStarsWithNumOfRa
  */
 public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepositoryBase {
 
-    private AverageStarsWithNumOfRatingsDao averageStarsWithNumOfHodnoceniDao;
-    private LiveData<List<AverageStarsWithNumOfRatings>> mAllCoffeeSiteTypes;
+    private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfHodnoceniDao;
+    private final LiveData<List<AverageStarsWithNumOfRatings>> mAllCoffeeSiteTypes;
 
     AverageStarsWithNumOfRatingsRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -53,7 +53,7 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
 
     private static class InsertAllAsyncTask extends AsyncTask<List<AverageStarsWithNumOfRatings>, Void, Void> {
 
-        private AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
+        private final AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
 
         InsertAllAsyncTask(AverageStarsWithNumOfRatingsDao dao) {
             mAsyncTaskDao = dao;
