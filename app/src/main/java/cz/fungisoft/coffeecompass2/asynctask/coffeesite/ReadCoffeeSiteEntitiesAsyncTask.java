@@ -40,15 +40,13 @@ import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepo
  */
 public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    static final String REQ_ENTITIES_TAG = "GetCoffeeSiteEntities";
+    static final String REQ_ENTITIES_TAG = "ReadCoffeeSiteEntities";
 
-    private CoffeeSiteEntityRepositories entitiesRepository;
+    private final CoffeeSiteEntityRepositories entitiesRepository;
 
     private String operationError = "";
 
     private final CoffeeSiteEntitiesLoadRESTResultListener callingListenerService;
-
-    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
 
     private Result.Error error;
 
@@ -70,7 +68,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                                            CoffeeSiteEntityRepositories entitiesRepository) {
         this.entitiesRepository = entitiesRepository;
         this.callingListenerService = callingListenerService;
-        this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
     /** Starts Retrofit requestedOperation to load all instancies of
@@ -163,10 +160,12 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_ENTITIES_TAG, "onResponse() success");
+                            // Saves data to repository
                             entitiesRepository.setEntities(response.body());
 
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                                entitiesRepository.setDataReadedFromServer(true);
+                                Log.i(REQ_ENTITIES_TAG, "onResponse() success ALL.");
+                                CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
                                 Result.Success<Boolean> result = new Result.Success<>(true);
                                 if (callingListenerService != null) {
                                     callingListenerService.onCoffeeSiteEntitiesLoaded(result);

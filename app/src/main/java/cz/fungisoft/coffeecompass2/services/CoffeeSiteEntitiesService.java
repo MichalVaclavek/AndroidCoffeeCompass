@@ -58,6 +58,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private final ImageUtil imageUtil = ImageUtil.getInstance();
 
+    private CoffeeSiteDatabase db;
+
+    private static CoffeeSiteRepository coffeeSiteRepository;
+
+
     /**
      * To indicate, that downloading of all data needed for OFFLINE mode finished
      */
@@ -119,11 +124,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         return mBinder;
     }
 
-    private static CoffeeSiteEntityRepositories entitiesRepository;
-
-    private static CoffeeSiteRepository coffeeSiteRepository;
-
-    private CoffeeSiteDatabase db;
 
     @Override
     public void onCreate() {
@@ -149,6 +149,20 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         Log.d(TAG, "Service destroyed.");
     }
 
+    // Indication that data are available in the repository i.e. where read from server
+    public boolean isDataReadFromServer() {
+        return CoffeeSiteEntityRepositories.isDataSaved();
+    }
+
+    /**
+     * Usually called, when MainActivity is destroyed.
+     * This leads to new load of CoffeeSite entities, when the app. runs again.
+     *
+     * @param dataRead
+     */
+    public void resetDataReadFromServer() {
+        CoffeeSiteEntityRepositories.setDataSaved(false);
+    }
 
     /**
      * Deletes current CS entities data from DB and loads and saves new ones
@@ -159,6 +173,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     @Override
     public void onCSEntitiesDeletedEnd() {
+        CoffeeSiteEntityRepositories.setDataSaved(false);
         readAndSaveAllEntitiesFromServer();
     }
 
@@ -168,7 +183,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private void readAndSaveAllEntitiesFromServer() {
         if (Utils.isOnline()) {
-            entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
+            CoffeeSiteEntityRepositories entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
         }
     }
@@ -385,9 +400,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             if (includingImages) {
                 downloadImages();
             } else { // all Comments downloaded, we can return to OfflineModeSelectionActivity as download of images were not requested
-//                for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
-//                    listener.onAllDataForOfflineModeDownloaded();
-//                }
                 informClientAboutAllCoffeeSitesLoadResult(true);
             }
         }

@@ -57,8 +57,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
-    private Button mapButton;
-
     /**
      * To show snackbar
      */
@@ -75,7 +73,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         commentsButton = (Button) findViewById(R.id.commentsButton);
 
-        mapButton = (Button) findViewById(R.id.mapButton);
+        Button mapButton = (Button) findViewById(R.id.mapButton);
         //mapButton.setVisibility(Utils.isOfflineModeOn(getApplicationContext()) ? GONE : VISIBLE);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
@@ -135,7 +133,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         super.onLocationServiceConnected();
         if (coffeeSite != null ) {
             if (coffeeSite instanceof CoffeeSiteMovable) {
-                ((CoffeeSiteMovable)coffeeSite).setLocationService(locationService);
+                ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
                 locationService.addPropertyChangeListener(((CoffeeSiteMovable)coffeeSite));
             }
             getSupportFragmentManager().beginTransaction()

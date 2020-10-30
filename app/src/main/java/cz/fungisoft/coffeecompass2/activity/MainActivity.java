@@ -77,7 +77,7 @@ import static android.view.View.VISIBLE;
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
-public class MainActivity<syncronized> extends ActivityWithLocationService
+public class MainActivity extends ActivityWithLocationService
                           implements PropertyChangeListener,
                                      UserAccountServiceConnectionListener,
                                      CoffeeSiteEntitiesServiceConnectionListener,
@@ -264,6 +264,9 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
 
         fab.setVisibility(!Utils.isOfflineModeOn(getApplicationContext()) ? VISIBLE : GONE);
 
+        // Lets bind CoffeeSiteEntitiesService and load all CoffeeSiteEntities
+        // in onCoffeeSiteEntitiesServiceConnected() method
+        doBindCoffeeSiteEntitiesService();
     }
 
 
@@ -298,7 +301,8 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            // read this data only once as they do not change usually
+            if (!Utils.isOfflineModeOn(getApplicationContext()) && !coffeeSiteEntitiesService.isDataReadFromServer()) {
                 coffeeSiteEntitiesService.populateCSEntities();
             }
         }
@@ -308,6 +312,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         if (mShouldUnbindCoffeeSiteEntitiesService) {
             if (coffeeSiteEntitiesService != null) {
                 coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
+                coffeeSiteEntitiesService.resetDataReadFromServer();
             }
             // Release information about the service's state.
             coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
@@ -677,10 +682,6 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
     @Override
     protected void onStart() {
         super.onStart();
-        // Lets bind CoffeeSiteEntitiesService and load all CoffeeSiteEntities
-        // in onCoffeeSiteEntitiesConnected() method
-        // TODO - Verify, if calling this in onResume() would be more convenient
-        doBindCoffeeSiteEntitiesService();
 
         // UserAccountService service connection first. CoffeeSiteLoadOperationsService next in the onResume()
         doBindUserAccountService();
@@ -696,7 +697,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
         unregisterReceiver(networkChangeStateReceiver);
 
         doUnbindUserAccountService();
-        doUnbindCoffeeSiteEntitiesService();
+
         super.onStop();
     }
 
@@ -719,6 +720,7 @@ public class MainActivity<syncronized> extends ActivityWithLocationService
 
     @Override
     protected void onDestroy() {
+        doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
     }
 

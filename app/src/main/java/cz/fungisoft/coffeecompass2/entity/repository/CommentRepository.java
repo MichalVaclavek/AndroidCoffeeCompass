@@ -144,7 +144,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
     /**
      * Processes the list of Comments belonging to CoffeeSite as returned from server.
-     * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>>> field.
+     * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>> field.
      * Comments read during this online REST call, cannot be inserted, because they can be present
      * already in DB because of previously activated OFFLINE mode.
      *
@@ -171,7 +171,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
     private static class InsertCommentAsyncTask extends AsyncTask<Comment, Void, Void> {
 
-        private CommentDao mAsyncTaskDao;
+        private final CommentDao mAsyncTaskDao;
 
         InsertCommentAsyncTask(CommentDao dao) {
             mAsyncTaskDao = dao;

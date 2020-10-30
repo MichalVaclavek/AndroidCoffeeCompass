@@ -130,7 +130,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         if (isOnline) {
             if (context instanceof CoffeeSiteEntitiesService) {
                 CoffeeSiteEntitiesService coffeeSiteEntitiesService = (CoffeeSiteEntitiesService) context;
-                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()
+                if (!coffeeSiteEntitiesService.isDataReadFromServer() // read this data only once as they do not change usually
                       && !Utils.isOfflineModeOn(context)) {
                     coffeeSiteEntitiesService.populateCSEntities();
                 }

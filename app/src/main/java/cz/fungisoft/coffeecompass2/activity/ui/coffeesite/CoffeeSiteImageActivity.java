@@ -67,6 +67,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
             distLabel.setVisibility(View.GONE);
         }
 
+
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
 
         fragment.setCoffeeSite(cs);
@@ -106,6 +107,14 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
             ((CoffeeSiteMovable) cs).addPropertyChangeListener(distLabel);
             distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
         }
+    }
+
+    @Override
+    public void onStop() {
+        if (cs instanceof  CoffeeSiteMovable) {
+            locationService.removePropertyChangeListener((CoffeeSiteMovable) cs);
+        }
+        super.onStop();;
     }
 
     @Override

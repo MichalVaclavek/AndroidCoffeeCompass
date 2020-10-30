@@ -40,20 +40,30 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <FrameLayout
-        android:id="@+id/imageContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        tools:context=".CoffeeSiteImageActivity">
+        android:layout_margin="6dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="4dp">
 
-    </FrameLayout>
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            tools:context=".CoffeeSiteImageActivity">
+
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>
 

@@ -44,13 +44,14 @@ public class LocationService extends Service {
     /**
      * Support for property change, location in this case.
      */
-    private PropertyChangeSupport support;
+    private final PropertyChangeSupport support;
 
     public LocationService() {
         support = new PropertyChangeSupport(this);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
         support.addPropertyChangeListener(pcl);
         Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
@@ -123,8 +124,6 @@ public class LocationService extends Service {
             public void onProviderDisabled(String provider) {
             }
         };
-
-        //startServiceOrStopIfNotPermitted();
 
     }
 

@@ -1525,7 +1525,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     }
               })
               .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT)
-                                .show())
+                                               .show())
               .onSameThread()
               .check();
     }
@@ -1567,10 +1567,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         public boolean isValid(CharSequence text) {
             Log.v("Test", "Checking if valid: " + text);
             Arrays.sort(SITE_TYPES);
-            if (Arrays.binarySearch(SITE_TYPES, text.toString()) > 0) {
-                return true;
-            }
-            return false;
+            return Arrays.binarySearch(SITE_TYPES, text.toString()) > 0;
         }
 
         @Override

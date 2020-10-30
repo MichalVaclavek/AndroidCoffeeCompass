@@ -6,11 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -27,9 +29,7 @@ public class CoffeeSiteImageFragment extends Fragment {
 
     private Context mContext;
 
-    private ImageView pictureImageView;
-
-    private View view;
+    private ProgressBar mProgressBar;
 
     @Override
     public void onAttach(Context context) {
@@ -52,20 +52,42 @@ public class CoffeeSiteImageFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
-        pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
+        View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
+        ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
+        mProgressBar =  view.findViewById(R.id.image_fragment_progressBar);
 
         if (this.coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+            mProgressBar.setVisibility(View.VISIBLE);
             if (!Utils.isOfflineModeOn(mContext)) {
                 Picasso.get().load(coffeeSite.getMainImageURL())
                              .resize(0, pictureImageView.getMaxHeight())
                              .placeholder(R.drawable.kafe_backround_120x160)
-                             .into(pictureImageView);
+                             .into(pictureImageView, new Callback() {
+                                 @Override
+                                 public void onSuccess() {
+                                     mProgressBar.setVisibility(View.GONE);
+                                 }
+
+                                 @Override
+                                 public void onError(Exception e) {
+                                     mProgressBar.setVisibility(View.GONE);
+                                 }
+                             });
             } else {
                 Picasso.get().load(ImageUtil.getImageFile(mContext, ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSite.getMainImageFileName()))
                         .resize(0, pictureImageView.getMaxHeight())
                         .placeholder(R.drawable.kafe_backround_120x160)
-                        .into(pictureImageView);
+                        .into(pictureImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                mProgressBar.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                mProgressBar.setVisibility(View.GONE);
+                            }
+                        });
             }
         }
         return view;

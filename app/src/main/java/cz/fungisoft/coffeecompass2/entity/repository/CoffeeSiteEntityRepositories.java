@@ -30,16 +30,15 @@ public class CoffeeSiteEntityRepositories {
             CoffeeSort.class, CupType.class, NextToMachineType.class, OtherOffer.class, PriceRange.class,
             SiteLocationType.class, StarsQualityDescription.class};
 
-    public static boolean isDataReadFromServer() {
-        return dataReadedFromServer;
-    }
+    // Indication that data are available in the repository i.e. where read from server
+    private static boolean dataSaved = false;
 
-    public void setDataReadedFromServer(boolean dataReadedFromServer) {
-        CoffeeSiteEntityRepositories.dataReadedFromServer = dataReadedFromServer;
+    public static boolean isDataSaved() {
+        return dataSaved;
     }
-
-    // Indication that data are available in the repository i.e. where readed from server
-    private static boolean dataReadedFromServer = false;
+    public static void setDataSaved(boolean dataSaved) {
+        CoffeeSiteEntityRepositories.dataSaved = dataSaved;
+    }
 
     public AverageStarsWithNumOfRatingsRepository getAverageStarsWithNumOfHodnoceniRepository() {
         return averageStarsWithNumOfHodnoceniRepository;
@@ -48,10 +47,6 @@ public class CoffeeSiteEntityRepositories {
     public CoffeeSiteTypeRepository getCoffeeSiteTypesRepository() {
         return coffeeSiteTypesRepository;
     }
-
-//    public CoffeeSiteRepository getCoffeeSiteRepository() {
-//        return coffeeSiteRepository;
-//    }
 
     public CoffeeSiteRecordStatusRepository getCoffeeSiteRecordStatusRepository() {
         return coffeeSiteRecordStatusRepository;
@@ -64,10 +59,6 @@ public class CoffeeSiteEntityRepositories {
     public CoffeeSortRepository getCoffeeSortRepository() {
         return coffeeSortRepository;
     }
-
-//    public CommentRepository getCommentRepository() {
-//        return commentRepository;
-//    }
 
     public CupTypeRepository getCupTypeRepository() {
         return cupTypeRepository;
@@ -96,12 +87,10 @@ public class CoffeeSiteEntityRepositories {
     /* REPOSITORIES */
     private final AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
     private final CoffeeSiteTypeRepository coffeeSiteTypesRepository;
-    //private CoffeeSiteRepository coffeeSiteRepository;
     private final CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
     private final CoffeeSiteStatusRepository coffeeSiteStatusRepository;
 
     private final CoffeeSortRepository coffeeSortRepository;
-    //private final CommentRepository commentRepository;
     private final CupTypeRepository cupTypeRepository;
     private final NextToMachineTypeRepository nextToMachineTypeRepository;
     private final OtherOfferRepository otherOfferRepository;
@@ -115,11 +104,9 @@ public class CoffeeSiteEntityRepositories {
     private CoffeeSiteEntityRepositories(final CoffeeSiteDatabase db) {
         coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(db);
         averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(db);
-        //coffeeSiteRepository = new CoffeeSiteRepository(db);
         coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
         coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
         coffeeSortRepository = new CoffeeSortRepository(db);
-        //commentRepository = CommentRepository.getInstance(db);
         cupTypeRepository = new CupTypeRepository(db);
         nextToMachineTypeRepository = new NextToMachineTypeRepository(db);
         otherOfferRepository = new OtherOfferRepository(db);

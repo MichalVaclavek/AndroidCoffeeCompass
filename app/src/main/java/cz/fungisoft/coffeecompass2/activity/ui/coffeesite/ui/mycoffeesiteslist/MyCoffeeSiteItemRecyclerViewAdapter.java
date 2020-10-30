@@ -329,9 +329,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.deactivateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeDeactivated());
 
         // If OFFLINE mode is on, all buttons are INVISIBLE/GONE
-        if (offlineModeOn) {
-            enableDisableAllButtons(viewHolder, false);
-        }
+//        if (offlineModeOn) {
+//            enableDisableAllButtons(viewHolder, false);
+//        }
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {

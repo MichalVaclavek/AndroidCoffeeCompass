@@ -31,7 +31,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String bURL = BuildConfig.HOME_API_URL;
 
-    private WeakReference<MainActivity> parentActivity;
+    private final WeakReference<MainActivity> parentActivity;
 
     private Statistics stats;
 
