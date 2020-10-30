@@ -134,7 +134,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (coffeeSite != null ) {
             if (coffeeSite instanceof CoffeeSiteMovable) {
                 ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
-                locationService.addPropertyChangeListener(((CoffeeSiteMovable)coffeeSite));
+                locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));
             }
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.coffeesite_detail_container, detailFragment)

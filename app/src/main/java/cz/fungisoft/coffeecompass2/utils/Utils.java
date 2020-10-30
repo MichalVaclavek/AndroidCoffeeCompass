@@ -48,8 +48,9 @@ public class Utils {
             int     exitValue = ipProcess.waitFor();
             return (exitValue == 0);
         }
-        catch (IOException e)          { Log.e(TAG," Problem during internet connection check."); }
-        catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check."); }
+        catch (IOException | InterruptedException e) {
+            Log.e(TAG," Problem during internet connection check.");
+        }
 
         return false;
     }
@@ -135,12 +136,11 @@ public class Utils {
                                         : "",
                                     jsonObject.getString("instance"));
 
-            if (jsonObject.getString("errorParameter") != null) {
-                retVal.setErrorParameter(jsonObject.getString("errorParameter"));
-            }
-            if (jsonObject.getString("errorParameterValue") != null) {
-                retVal.setErrorParameterValue(jsonObject.getString("errorParameterValue"));
-            }
+            jsonObject.getString("errorParameter");
+            retVal.setErrorParameter(jsonObject.getString("errorParameter"));
+
+            jsonObject.getString("errorParameterValue");
+            retVal.setErrorParameterValue(jsonObject.getString("errorParameterValue"));
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -258,7 +258,6 @@ public class Utils {
     public static boolean isOfflineModeOn(Context context) {
         offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
         return !isOnline() && offlineModePreferenceHelper.getDownloaded();
-//        return offlineModePreferenceHelper.getOfflineMode();
     }
 
 }

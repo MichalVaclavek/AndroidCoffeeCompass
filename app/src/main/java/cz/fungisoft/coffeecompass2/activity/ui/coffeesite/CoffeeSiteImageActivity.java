@@ -111,9 +111,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
 
     @Override
     public void onStop() {
-        if (cs instanceof  CoffeeSiteMovable) {
-            locationService.removePropertyChangeListener((CoffeeSiteMovable) cs);
-        }
         super.onStop();;
     }
 
