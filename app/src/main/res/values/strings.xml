@@ -176,22 +176,27 @@
 
     <string name="title_activity_select_location_map">Vybrat polohu</string>
     <string name="move_map_marker">Přidrž a přesuň na místo kávové lokace</string>
-    <string name="initial_searching">VYHLEDÁVÁM ...</string>
+    <string name="initial_searching">VYHLEDÁVÁM …</string>
     <string name="title_found_sites">Nalezené lokace</string>
-    <string name="searching_will_start_after_move_message">Čekám na změnu polohy ...</string>
+    <string name="searching_will_start_after_move_message">Čekám na změnu polohy …</string>
     <string name="permissions_location_title">Přístup k poloze</string>
     <string name="permissions_location_request">Pro správné fungování aplikace je nutný přístup k poloze zařízení.</string>
     <string name="permissions_location_settings">NASTAVENÍ</string>
     <string name="permissions_location_cancel">Zrušit</string>
 
-    <string name="action_offline">Offline ...</string>
+    <string name="action_offline">Offline …</string>
     <string name="offline_seetings_description">Stažení dat o lokacích vám umožní vyhledávat kávové lokace i bez připojení k internetu. V Offline režimu zatím není možné vytvářet nové lokace, ani zadávat komentáře.</string>
     <string name="offline_seetings_main_label"> OFFLINE režim</string>
-    <string name="offline_seetings_includes_photos"> včetně obrázků</string>
+    <string name="offline_seetings_includes_photos"> včetně obrázků?</string>
     <string name="offline_seetings_download_button"> Stáhnout</string>
     <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
     <string name="data_download_success">Data stažena úspěšně.</string>
     <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
+    <string name="last_offline_data_download_status">Staženo: (naposledy %1$s)</string>
+    <string name="last_offline_data_not_yet_downloaded">data zatím nestažena</string>
+    <string name="offline_data_downloaded_sites">Kávové lokace: %1$s</string>
+    <string name="offline_data_downloaded_comments">Komentáře: %1$s</string>
+    <string name="offline_data_downloaded_images">Obrázky: %1$s</string>
 
 
 </resources>

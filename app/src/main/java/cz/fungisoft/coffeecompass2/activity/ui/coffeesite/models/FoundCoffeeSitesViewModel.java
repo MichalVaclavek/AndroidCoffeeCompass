@@ -103,7 +103,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         newSitesInRange.addAll(coffeeSites);
         newSitesInRange.removeAll(currentSitesInRange);
 
-        // 1. Find oldSites, i.e. sites not included in the coffeeSites
+        // Find oldSites, i.e. sites not included in the coffeeSites
         goneSitesOutOfRange.clear();
         goneSitesOutOfRange.addAll(currentSitesInRange);
         goneSitesOutOfRange.removeAll(coffeeSites);

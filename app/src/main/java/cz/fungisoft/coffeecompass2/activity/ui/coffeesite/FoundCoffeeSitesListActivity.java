@@ -298,10 +298,12 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
             }
         });
 
+
         coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
                 // Update the cached copy of the newCoffeeSitesInRange in the adapter.
+                assert newCoffeeSitesInRange != null;
                 for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
                     // Add new CoffeeSites as locationService listeners
                     csm.setLocationService(locationService);
@@ -312,10 +314,12 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
             }
         });
 
+
         coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
                 // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
+                assert goneCoffeeSitesInRange != null;
                 for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
                     locationService.removePropertyChangeListener(csm);
                 }

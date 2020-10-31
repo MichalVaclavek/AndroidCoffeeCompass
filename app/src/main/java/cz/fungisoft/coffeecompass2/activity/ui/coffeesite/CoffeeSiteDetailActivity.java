@@ -199,10 +199,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             // navigateUpTo(new Intent(this, FoundCoffeeSitesListActivity.class));
 
             /*
-            * The standard way, navigateUpTo(new Intent(this, FoundCoffeeSitesListActivity.class));
-            * did not work for me. I have implemented this hint based on
-            * internet advice. It transforms the Back button click from Navigation bar
-            * to "main" Back button of Android click
+             * The standard way, navigateUpTo(new Intent(this, FoundCoffeeSitesListActivity.class));
+             * did not work for me. I have implemented this hint based on
+             * internet advice. It transforms the Back button click from Navigation bar
+             * to "main" Back button of Android click
              */
             this.onBackPressed();
             return true;

@@ -28,6 +28,8 @@ import cz.fungisoft.coffeecompass2.entity.repository.DbDataListsConverters;
 @Entity(tableName = "coffee_site_table")
 public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable {
 
+    public static final String PHOTO_FILE_NAME_PREFIX = "photo_site_";
+
     @Expose
     @SerializedName("siteName")
     @ColumnInfo(name = "siteName")
@@ -223,9 +225,10 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     }
 
     public CoffeeSite(int id, String name, long dist) {
-        this.id = id;
-        this.name = name;
-        this.distance = dist;
+        this();
+        setId(id);
+        setName(name);
+        setDistance(dist);
     }
 
     /* Parcelable implementation -- START -- */
@@ -387,6 +390,8 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     }
 
     public String getMainImageFileName() {
+        // Default name for the image file
+        mainImageFileName = PHOTO_FILE_NAME_PREFIX + this.id;
         return mainImageFileName;
     }
 

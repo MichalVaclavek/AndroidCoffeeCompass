@@ -77,8 +77,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.imageContainer, fragment)
                         .commitNow();
-            } else {
-                imageNotAvailable();
             }
         }
     }
@@ -122,9 +120,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void imageNotAvailable() {
     }
 
 }

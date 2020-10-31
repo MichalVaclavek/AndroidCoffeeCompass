@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -12,17 +13,18 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
+import cz.fungisoft.coffeecompass2.entity.DownloadDataOverview;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
@@ -39,7 +41,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
     // Saves OFFLINE mode status
     private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
-    private boolean offlineModeOn = false;
 
     @BindView(R.id.mainOfflineLayout)
     ConstraintLayout mainOfflineLayout;
@@ -61,18 +62,42 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @BindView(R.id.checkBoxOfflinePicturesIncluded)
     CheckBox withImagesCheckBox;
 
+    @BindView(R.id.last_loaded_offline_status_TextView)
+    TextView lastLoadedStatusTextView;
+
+    @BindView(R.id.downloaded_sites)
+    TextView downloadedSitesOverview;
+
+    @BindView(R.id.downloaded_offline_comments)
+    TextView downloadedCommentsOverview;
+
+    @BindView(R.id.downloaded_offline_images)
+    TextView downloadedImagesOverview;
+
+    private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
+
+    private boolean downloadInProgress = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_offline_mode_selection);
 
-        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
-
         ButterKnife.bind(this);
+
+        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+        hideDownloadOverview();
+
+        if (dataDownloadPreferenceHelper.getDownloaded()) {
+            lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_download_status, dateFormater.format(dataDownloadPreferenceHelper.getDownloadDate())));
+            showDownloadOverview(dataDownloadPreferenceHelper.getDownloadOverview());
+        } else {
+            lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_not_yet_downloaded));
+        }
 
         origStatusColor =  downloadingStatusTextView.getTextColors(); //saves original color
 
-        downloadButton.setEnabled(true);
+        downloadingStatusTextView.setText("");
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,11 +108,41 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
                     downloadingStatusTextView.setTextColor(origStatusColor);
                     coffeeSiteEntitiesService.addDataDownloadFinishedListener(OfflineModeSelectionActivity.this);
                     coffeeSiteEntitiesService.populateCoffeeSites(withImagesCheckBox.isChecked(), downloadProgressBar, downloadingStatusTextView);
+                    //clearDownloadOverview();
+                    downloadInProgress = true;
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }
             }
         });
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+//        activityState.p("downloadInProgress", downloadInProgress);
+//        activityState.putBoolean("includingImages", withImagesCheckBox.isChecked());
+//        onSaveInstanceState(activityState);
+    }
+
+    /**
+     * Back button available only if downloading is not in progress.
+     * //TODO should be implemented that blocking is not needed
+     */
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        if (!downloadInProgress) {
+            goToMainActivity();
+            //super.onBackPressed(); // Comment this super call to avoid calling finish() or fragmentmanager's backstack pop operation.
+        }
     }
 
     // ** CoffeeSiteEntitiesService connection/disconnection ** //
@@ -119,6 +174,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public void onCoffeeSiteEntitiesServiceConnected() {
         coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
+        downloadButton.setEnabled(!coffeeSiteEntitiesService.isDownloadInProgress());
     }
 
     private void doUnbindCoffeeSiteEntitiesService() {
@@ -131,21 +187,38 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     }
 
     @Override
-    public void onAllDataForOfflineModeDownloaded() {
-        // Info () and return to MainActivity, i.e. go back
-        Toast toast = Toast.makeText(getApplicationContext(),
-                R.string.data_download_success,
-                Toast.LENGTH_LONG);
-        toast.show();
+    public void onAllDataForOfflineModeDownloaded(DownloadDataOverview dataOverview) {
+        downloadInProgress = false;
 
-        dataDownloadPreferenceHelper.putDownloaded(true);
-        dataDownloadPreferenceHelper.putDownloadDate(new Date());
+        downloadingStatusTextView.setText( R.string.data_download_success);
 
-        this.onBackPressed();
+        hideDownloadOverview();
+        showDownloadOverview(dataOverview);
+        lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_download_status, dateFormater.format(new Date())));
+
+        downloadButton.setEnabled(true);
+    }
+
+    private void showDownloadOverview(DownloadDataOverview dataOverview) {
+        lastLoadedStatusTextView.setVisibility(View.VISIBLE);
+
+        if (dataOverview.numOfSitesDownloaded > 0) {
+            downloadedSitesOverview.setVisibility(View.VISIBLE);
+            downloadedSitesOverview.setText(getString(R.string.offline_data_downloaded_sites, String.valueOf(dataOverview.numOfSitesDownloaded)));
+        }
+        if (dataOverview.numOfCommentsDownloaded > 0) {
+            downloadedCommentsOverview.setVisibility(View.VISIBLE);
+            downloadedCommentsOverview.setText(getString(R.string.offline_data_downloaded_comments, String.valueOf(dataOverview.numOfCommentsDownloaded)));
+        }
+        if (dataOverview.numOfImagesDownloaded > 0) {
+            downloadedImagesOverview.setVisibility(View.VISIBLE);
+            downloadedImagesOverview.setText(getString(R.string.offline_data_downloaded_images, String.valueOf(dataOverview.numOfImagesDownloaded)));
+        }
     }
 
     @Override
     public void onDataForOfflineModeDownloadFailed() {
+        downloadInProgress = false;
         //Info in RED with note that download can be repeated later - stay on this Activity
         downloadingStatusTextView.setTextColor(Color.RED);
         downloadingStatusTextView.setText(R.string.data_download_failure);
@@ -153,12 +226,26 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadButton.setEnabled(true);
     }
 
+    private void hideDownloadOverview() {
+        lastLoadedStatusTextView.setVisibility(View.GONE);
+        downloadedSitesOverview.setVisibility(View.GONE);
+        downloadedCommentsOverview.setVisibility(View.GONE);
+        downloadedImagesOverview.setVisibility(View.GONE);
+    }
+
+    private void clearDownloadOverview() {
+        lastLoadedStatusTextView.setText("");
+        downloadedSitesOverview.setText("");
+        downloadedCommentsOverview.setText("");
+        downloadedImagesOverview.setText("");
+    }
+
     private void goToMainActivity() {
         // go to MainActivity
         Intent i = new Intent(OfflineModeSelectionActivity.this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
-        finish();
+        //finish();
     }
 
     @Override

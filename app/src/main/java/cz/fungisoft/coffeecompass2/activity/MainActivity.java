@@ -146,11 +146,6 @@ public class MainActivity extends ActivityWithLocationService
      */
     private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
 
-    /**
-     * To idetify if Offline mode is selected
-     */
-    //private boolean isOfflineChecked = false;
-
     FloatingActionButton fab;
 
 
@@ -523,7 +518,8 @@ public class MainActivity extends ActivityWithLocationService
     private void openOfflineSettingsActivity() {
         Intent activityIntent = new Intent(this, OfflineModeSelectionActivity.class);
         //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // should run only one instance of the Activity
         activityIntent.putExtra("currentUserProfile", userAccountService.getLoggedInUser());
         this.startActivity(activityIntent);
     }

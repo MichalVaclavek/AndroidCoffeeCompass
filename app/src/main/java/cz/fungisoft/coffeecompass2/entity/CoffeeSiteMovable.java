@@ -23,6 +23,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable
 {
     private static final String TAG = "CoffeeSiteMovable";
+
     /**
      * Support for property change, 'distance' in this case.
      */
@@ -120,7 +121,6 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
      * @param coffeeSite
      */
     public CoffeeSiteMovable(CoffeeSite coffeeSite, LatLng searchLocationFrom) {
-
         this(coffeeSite);
         this.setDistance(Utils.countDistanceMetersFromSearchPoint(coffeeSite.getLatitude(), coffeeSite.getLongitude(), searchLocationFrom.latitude, searchLocationFrom.longitude));
     }

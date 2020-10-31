@@ -13,8 +13,10 @@ import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
@@ -24,6 +26,7 @@ import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTa
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ReadCoffeeSiteEntitiesAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.DownloadDataOverview;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
@@ -62,12 +65,21 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private static CoffeeSiteRepository coffeeSiteRepository;
 
+    // Saves OFFLINE mode status
+    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
+
+    private boolean downloadInProgress = false;
+
+    public boolean isDownloadInProgress() {
+        return downloadInProgress;
+    }
+
 
     /**
      * To indicate, that downloading of all data needed for OFFLINE mode finished
      */
     public interface DataDownloadIndicatorListener {
-        void onAllDataForOfflineModeDownloaded();
+        void onAllDataForOfflineModeDownloaded(DownloadDataOverview dataOverview);
 
         void onDataForOfflineModeDownloadFailed();
     }
@@ -138,6 +150,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         coffeeSiteRepository = new CoffeeSiteRepository(db);
         db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
 
+        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+
         Log.d(TAG, "Service started.");
     }
 
@@ -168,6 +182,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      * Deletes current CS entities data from DB and loads and saves new ones
      */
     public void populateCSEntities() {
+        downloadInProgress = true;
         db.deleteCSEntitiesAsync();
     }
 
@@ -183,6 +198,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private void readAndSaveAllEntitiesFromServer() {
         if (Utils.isOnline()) {
+            downloadInProgress = true;
             CoffeeSiteEntityRepositories entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
         }
@@ -191,6 +207,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     @Override
     public void onCoffeeSiteEntitiesLoaded(Result<Boolean> result) {
         if (result instanceof Result.Success) {
+            downloadInProgress = false;
             informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
         }
     }
@@ -234,6 +251,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private void readAndSaveAllCoffeeSitesFromServer() {
         if (Utils.isOnline()) {
+            downloadInProgress = true;
             new GetAllCoffeeSitesAsyncTask(COFFEE_SITE_LOAD_ALL, this).execute();
         }
     }
@@ -241,7 +259,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private int requestedPage;
     private boolean isLastPage = false;;
     public static final int PAGE_SIZE = 20;
-    private int alreadyDownloaded = 0;
+    private int sitesAlreadyDownloaded = 0;
 
     private int numOfSitesWithImages = 0;
 
@@ -249,9 +267,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void readAndSaveAllCoffeeSitesPaginatedFromServer() {
         if (Utils.isOnline()) {
             requestedPage = 1;
-            alreadyDownloaded = 0;
+            sitesAlreadyDownloaded = 0;
             numOfSitesWithImages = 0;
             downloadProgressBar.setProgress(0);
+            downloadInProgress = true;
             new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_FIRST_PAGE, requestedPage, PAGE_SIZE, this).execute();
         }
     }
@@ -264,6 +283,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     @Override
     public void onCoffeeSitesReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
+        downloadInProgress = false;
         if (result instanceof Result.Success) {
 
             List<CoffeeSite> allCoffeeSites = ((Result.Success<List<CoffeeSite>>) result).getData();
@@ -275,8 +295,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 for (CoffeeSite cs : allCoffeeSites) {
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImages++;
-                        String imageFileName = "photo_site_" + cs.getId();
-                        cs.setMainImageFileName(imageFileName);
                         imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
                     }
                 }
@@ -296,6 +314,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     @Override
     public void onCoffeeSitesPageReturned(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper oper, Result<List<CoffeeSite>> result) {
+        downloadInProgress = false;
 
         if (result instanceof Result.Success) {
             if (((Result.Success<List<CoffeeSite>>) result).getData() instanceof CoffeeSitePageEnvelope) {
@@ -308,8 +327,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     for (CoffeeSite cs : coffeeSitesList) {
                         if (!cs.getMainImageURL().isEmpty() ) {
                             numOfSitesWithImages++;
-                            String imageFileName = "photo_site_" + cs.getId();
-                            cs.setMainImageFileName(imageFileName);
                         }
                     }
 
@@ -321,8 +338,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     if (coffeeSitesPage.getFirst()) {
                         downloadProgressBar.setMax(coffeeSitesPage.getTotalElements());
                     }
-                    alreadyDownloaded += coffeeSitesPage.getNumberOfElements();
-                    downloadProgressBar.setProgress(alreadyDownloaded);
+                    sitesAlreadyDownloaded += coffeeSitesPage.getNumberOfElements();
+                    downloadProgressBar.setProgress(sitesAlreadyDownloaded);
 
                     // We do not need to wait until insertAll() finishes as it is faster then downloading the first image
                     if (!isLastPage) {
@@ -357,6 +374,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             public void onChanged(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
                 // Download images
                 if (includingImages) {
+                    downloadInProgress = true;
                     for (CoffeeSite cs : coffeeSitesWithImage) {
                         if (cs != null && !cs.getMainImageFileName().isEmpty()) {
                             imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
@@ -379,6 +397,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         downloadProgressBar.setProgress(0);
         alreadyDownloadedComments = 0;
 
+        downloadInProgress = true;
         commentRepository = CommentRepository.getInstance(db);
         commentRepository.populateCommentsByPages(this, COMMENTS_PAGE_SIZE);
         Log.i(TAG, "Start of Comments download.");
@@ -391,6 +410,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     @Override
     public void onCommentsPageLoaded(CommentsPageEnvelope comments) {
+        downloadInProgress = false;
         downloadProgressBar.setMax(comments.getTotalElements());
         alreadyDownloadedComments += comments.getNumberOfElements();
         downloadProgressBar.setProgress(alreadyDownloadedComments);
@@ -413,6 +433,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 //        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
 //            listener.onAllDataForOfflineModeDownloaded();
 //        }
+        downloadInProgress = false;
         informClientAboutAllCoffeeSitesLoadResult(true);
     }
 
@@ -422,7 +443,12 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         }
         for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
             if (result) {
-                listener.onAllDataForOfflineModeDownloaded();
+                DownloadDataOverview overview = new DownloadDataOverview(sitesAlreadyDownloaded, alreadyDownloadedComments, includingImages ? numOfSitesWithImages : 0);
+                listener.onAllDataForOfflineModeDownloaded(overview);
+                // Saves status of data download
+                dataDownloadPreferenceHelper.putDownloadOverview(overview);
+                dataDownloadPreferenceHelper.putDownloaded(true);
+                dataDownloadPreferenceHelper.putDownloadDate(new Date());
             } else {
                 listener.onDataForOfflineModeDownloadFailed();
             }
