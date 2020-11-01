@@ -37,6 +37,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
@@ -146,8 +147,7 @@ public class MainActivity extends ActivityWithLocationService
      */
     private final NetworkStateReceiver networkChangeStateReceiver = new NetworkStateReceiver();
 
-    FloatingActionButton fab;
-
+    private FloatingActionButton fab;
 
     /* ************* METHODS START ********************* */
 
@@ -593,7 +593,9 @@ public class MainActivity extends ActivityWithLocationService
 
                 startActivity(csListIntent);
         } else {
-            Utils.showNoInternetNoOfflineDataToast(getApplicationContext());
+            Snackbar mySnackbar = Snackbar.make(view, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
+            mySnackbar.show();
+            //Utils.showNoInternetNoOfflineDataToast(getApplicationContext());
         }
     }
 
@@ -612,7 +614,7 @@ public class MainActivity extends ActivityWithLocationService
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length == 0
                         || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Vyžaduje se přístup k poloze.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Je vyžadován přístup k poloze.", Toast.LENGTH_LONG).show();
                 }
             }
         }

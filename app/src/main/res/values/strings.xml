@@ -192,7 +192,7 @@
     <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
     <string name="data_download_success">Data stažena úspěšně.</string>
     <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
-    <string name="last_offline_data_download_status">Staženo: (naposledy %1$s)</string>
+    <string name="last_offline_data_download_status">Staženo: (%1$s)</string>
     <string name="last_offline_data_not_yet_downloaded">data zatím nestažena</string>
     <string name="offline_data_downloaded_sites">Kávové lokace: %1$s</string>
     <string name="offline_data_downloaded_comments">Komentáře: %1$s</string>

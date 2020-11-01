@@ -7,6 +7,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -15,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.text.SimpleDateFormat;
@@ -42,8 +44,8 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     // Saves OFFLINE mode status
     private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
 
-    @BindView(R.id.mainOfflineLayout)
-    ConstraintLayout mainOfflineLayout;
+    //@BindView(R.id.mainOfflineLayout)
+    //ConstraintLayout mainOfflineLayout;
 
     @BindView(R.id.offlineActivityMainLinearLayout)
     LinearLayout mainLinearLayout;
@@ -85,6 +87,12 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
         ButterKnife.bind(this);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.offline_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Offline");
+
         dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
         hideDownloadOverview();
 
@@ -119,17 +127,45 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        doBindCoffeeSiteEntitiesService();
+    }
+
+    @Override
+    protected void onStop() {
+        doUnbindCoffeeSiteEntitiesService();
+        coffeeSiteEntitiesService.removeDataDownloadFinishedListener(this);
+        super.onStop();
+    }
+
+    /**
+     * //TODO should resume status of Offline data download, which is running in Service, independently
+     * on Activity presence. We need to show current status of Download, probably provided
+     * by the CoffeeSiteEntitiesService
+     */
+    @Override
     public void onResume() {
         super.onResume();
     }
 
+    /**
+     * //TODO should process onPause() during ongoing download ... !!! Download should run independently,
+     *
+     */
     @Override
     public void onPause() {
         super.onPause();
+    }
 
-//        activityState.p("downloadInProgress", downloadInProgress);
-//        activityState.putBoolean("includingImages", withImagesCheckBox.isChecked());
-//        onSaveInstanceState(activityState);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        }
+
+        return true;
     }
 
     /**
@@ -140,8 +176,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public void onBackPressed() {
         if (!downloadInProgress) {
-            goToMainActivity();
-            //super.onBackPressed(); // Comment this super call to avoid calling finish() or fragmentmanager's backstack pop operation.
+            super.onBackPressed(); // Comment this super call to avoid calling finish() or fragmentmanager's backstack pop operation.
         }
     }
 
@@ -190,6 +225,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     public void onAllDataForOfflineModeDownloaded(DownloadDataOverview dataOverview) {
         downloadInProgress = false;
 
+        downloadingStatusTextView.setTextColor(getResources().getColor(R.color.colorPrimary));
         downloadingStatusTextView.setText( R.string.data_download_success);
 
         hideDownloadOverview();
@@ -238,28 +274,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadedSitesOverview.setText("");
         downloadedCommentsOverview.setText("");
         downloadedImagesOverview.setText("");
-    }
-
-    private void goToMainActivity() {
-        // go to MainActivity
-        Intent i = new Intent(OfflineModeSelectionActivity.this, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(i);
-        //finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        doBindCoffeeSiteEntitiesService();
-    }
-
-
-    @Override
-    protected void onStop() {
-        doUnbindCoffeeSiteEntitiesService();
-        coffeeSiteEntitiesService.removeDataDownloadFinishedListener(this);
-        super.onStop();
     }
 
 }
