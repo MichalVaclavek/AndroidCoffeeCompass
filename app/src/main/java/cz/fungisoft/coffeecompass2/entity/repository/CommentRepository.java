@@ -55,7 +55,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
      */
     private final MutableLiveData<CoffeeSite> commentsInput = new MutableLiveData<>();
 
-    private LiveData<List<Comment>> mAllComments;
+    private final LiveData<List<Comment>> mAllComments;
 
     private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
             Transformations.switchMap(commentsInput, (cs) -> commentDao.getCoffeeSiteWithComments(cs.getId()));

@@ -96,6 +96,8 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
         hideDownloadOverview();
 
+        lastLoadedStatusTextView.setVisibility(View.VISIBLE);
+
         if (dataDownloadPreferenceHelper.getDownloaded()) {
             lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_download_status, dateFormater.format(dataDownloadPreferenceHelper.getDownloadDate())));
             showDownloadOverview(dataDownloadPreferenceHelper.getDownloadOverview());

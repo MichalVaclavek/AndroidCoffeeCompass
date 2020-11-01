@@ -82,7 +82,8 @@
     <string name="user_profile_createdon_label">Vytvořen:</string>
     <string name="user_profile_delete_button">Smazat</string>
     <string name="user_register_failure">Registrace neúspěšná.</string>
-    <string name="toast_no_internet">Připojení k internetu není k dispozici.</string>
+    <string name="toast_no_internet">Připojení k internetu není k dispozici</string>
+    <string name="toast_no_internet_map_not_available">Mapa je k dispozici pouze online</string>
     <string name="toast_no_internet_no_offline_data">Internet ani offline data nejsou k dispozici.</string>
     <string name="rest_public_user_url">https://coffeecompass.cz/rest/public/user/</string>
     <string name="rest_secured_user_url">https://coffeecompass.cz/rest/secured/user/</string>
@@ -193,7 +194,7 @@
     <string name="data_download_success">Data stažena úspěšně.</string>
     <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
     <string name="last_offline_data_download_status">Staženo: (%1$s)</string>
-    <string name="last_offline_data_not_yet_downloaded">data zatím nestažena</string>
+    <string name="last_offline_data_not_yet_downloaded">Data zatím nebyla stažena.</string>
     <string name="offline_data_downloaded_sites">Kávové lokace: %1$s</string>
     <string name="offline_data_downloaded_comments">Komentáře: %1$s</string>
     <string name="offline_data_downloaded_images">Obrázky: %1$s</string>

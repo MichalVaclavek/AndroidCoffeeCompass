@@ -105,6 +105,16 @@ public class Utils {
     /**
      * Show info Toast message, that internet connection is not available
      */
+    public static void showMapNotAvailableIfNoInternetToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_no_internet_map_not_available,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
     public static void showNoInternetNoOfflineDataToast(Context appContext) {
         Toast toast = Toast.makeText(appContext,
                 R.string.toast_no_internet_no_offline_data,

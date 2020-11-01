@@ -210,15 +210,18 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
 
         switch (item.getItemId()) {
             case R.id.action_map:
-                openMap();
-                return true;
+                if (Utils.isOnline()) {
+                    openMap();
+                } else {
+                    Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     /**
-     * Starts MapsActivity to show found CoffeeSites
+     * Starts MapsActivity to show found CoffeeSites. Available only Online.
      */
     private void openMap() {
         Intent mapIntent = new Intent(this, MapsActivity.class);

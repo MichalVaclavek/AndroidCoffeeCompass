@@ -19,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
@@ -57,6 +58,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
+    // Provides OFFLINE mode status
+    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
+
+
     /**
      * To show snackbar
      */
@@ -69,12 +74,15 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_detail);
 
+        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
 
         commentsButton = (Button) findViewById(R.id.commentsButton);
 
+        // TODO - do we need Map if in offline mode
         Button mapButton = (Button) findViewById(R.id.mapButton);
-        //mapButton.setVisibility(Utils.isOfflineModeOn(getApplicationContext()) ? GONE : VISIBLE);
+        //mapButton.setVisibility(Utils.isOnline() ? VISIBLE : GONE);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
@@ -101,13 +109,16 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         if (coffeeSite != null) {
             Button imageButton = (Button) findViewById(R.id.imageButton);
+            imageButton.setVisibility(GONE);
             if (!coffeeSite.getMainImageURL().isEmpty()) {
-                imageButton.setVisibility(View.VISIBLE);
-                imageButton.setEnabled(true);
-            } else {
-                imageButton.setVisibility(GONE);
+                boolean offlineModeOn = Utils.isOfflineModeOn(getApplicationContext());
+                if (!offlineModeOn || (offlineModeOn && dataDownloadPreferenceHelper.getDownloadOverview().numOfImagesDownloaded > 0)) {
+                    imageButton.setVisibility(View.VISIBLE);
+                    imageButton.setEnabled(true);
+                }
             }
         }
+
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
         // (e.g. when rotating the screen from portrait to landscape).
@@ -223,11 +234,15 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     public void onMapButtonClick(View v) {
-        if (locationService != null) {
-            Intent mapIntent = new Intent(this, MapsActivity.class);
-            mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
-            mapIntent.putExtra("site", (Parcelable) coffeeSite);
-            startActivity(mapIntent);
+        if (Utils.isOnline()) {
+            if (locationService != null) {
+                Intent mapIntent = new Intent(this, MapsActivity.class);
+                mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
+                mapIntent.putExtra("site", (Parcelable) coffeeSite);
+                startActivity(mapIntent);
+            }
+        } else {
+            Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
         }
     }
 

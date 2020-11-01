@@ -70,7 +70,7 @@ public class CommentsListActivity extends AppCompatActivity
     private CoffeeSite cs;
 
     // Comments of the CoffeeSite
-    private List<Comment> shownComments;
+    private List<Comment> siteComments;
     // The text of Comment user wants to modify
     private Comment selectedComment;
     private int starsFromCurrentUser = 0;
@@ -133,9 +133,10 @@ public class CommentsListActivity extends AppCompatActivity
 
         setupRecyclerView(recyclerView);
 
-        // Adds Floating Action Button if a user is loged-in
+        // Adds Floating Action Button if a user is logged-in and we are Online
         FloatingActionButton fab = findViewById(R.id.fab_new_comment);
         fab.setVisibility(!offLineModeOn ? View.VISIBLE : GONE);
+
         fab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,8 +156,8 @@ public class CommentsListActivity extends AppCompatActivity
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteWithComments> commentsLive) {
                 // Update the cached copy of the Comments in the adapter.
-                shownComments = commentsLive.get(0).comments;
-                showComments(shownComments);
+                siteComments = commentsLive.get(0).comments;
+                showComments(siteComments);
             }
         });
     }
@@ -332,10 +333,10 @@ public class CommentsListActivity extends AppCompatActivity
      * @param comments
      */
     public void processComments(List<Comment> comments) {
-        this.shownComments = comments;
-        cs.setComments(this.shownComments);
+        this.siteComments = comments;
+        cs.setComments(this.siteComments);
         commentActionsProgressBar.setVisibility(View.GONE);
-        showComments(this.shownComments);
+        showComments(this.siteComments);
     }
 
     /**
@@ -345,14 +346,14 @@ public class CommentsListActivity extends AppCompatActivity
      * @param comments
      */
     public void processUpdatedComment(Comment updatedComment) {
-        if (this.shownComments != null) {
-            for (Comment comment : this.shownComments) {
+        if (this.siteComments != null) {
+            for (Comment comment : this.siteComments) {
                 if (comment != null && comment.getId() == updatedComment.getId()) {
-                    this.shownComments.set(this.shownComments.indexOf(comment), updatedComment);
+                    this.siteComments.set(this.siteComments.indexOf(comment), updatedComment);
                     break;
                 }
             }
-            showComments(this.shownComments);
+            showComments(this.siteComments);
         }
         commentActionsProgressBar.setVisibility(View.GONE);
     }

@@ -468,7 +468,7 @@ public class MainActivity extends ActivityWithLocationService
                 if (Utils.isOnline()) {
                     openMap();
                 } else {
-                    Utils.showNoInternetToast(getApplicationContext());
+                    Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
                 }
                 return true;
             default:
