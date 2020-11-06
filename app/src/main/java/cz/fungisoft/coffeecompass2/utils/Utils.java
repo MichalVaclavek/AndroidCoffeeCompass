@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
@@ -39,13 +41,20 @@ public class Utils {
      * Checks if the connection to internet is available.
      * Basic method, can be used in UI thread.
      *
-     * @return
+     * @return true if internet connection is available
      */
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
+            int     exitValue = -1;
             Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
-            int     exitValue = ipProcess.waitFor();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (ipProcess.waitFor(2, TimeUnit.SECONDS)) {
+                    exitValue = ipProcess.exitValue();
+                }
+            } else {
+                exitValue = ipProcess.waitFor();
+            }
             return (exitValue == 0);
         }
         catch (IOException | InterruptedException e) {
@@ -257,16 +266,13 @@ public class Utils {
         return distance;
     }
 
-    // Reading OFFLINE mode status
-    private static DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper;
-
     /**
      * Finds from Preferences if the OFFLINE mode is switched ON or OFF
      *
      * @return
      */
     public static boolean isOfflineModeOn(Context context) {
-        offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
+        DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
         return !isOnline() && offlineModePreferenceHelper.getDownloaded();
     }
 

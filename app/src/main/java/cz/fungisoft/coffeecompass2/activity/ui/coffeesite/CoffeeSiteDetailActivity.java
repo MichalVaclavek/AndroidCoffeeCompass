@@ -58,9 +58,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
 
-    // Provides OFFLINE mode status
-    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
-
 
     /**
      * To show snackbar
@@ -74,7 +71,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_detail);
 
-        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+        // Provides OFFLINE mode status
+        DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
 
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
 
@@ -82,7 +80,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         // TODO - do we need Map if in offline mode
         Button mapButton = (Button) findViewById(R.id.mapButton);
-        //mapButton.setVisibility(Utils.isOnline() ? VISIBLE : GONE);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
@@ -145,7 +142,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (coffeeSite != null ) {
             if (coffeeSite instanceof CoffeeSiteMovable) {
                 ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
-                locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));
+                locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
             }
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.coffeesite_detail_container, detailFragment)
@@ -326,7 +323,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     @Override
     public void onCoffeeSiteLoaded(CoffeeSite loadedCoffeeSite, String error) {
         hideProgressbar();
-        Log.i(TAG, "Save success?: " + error.isEmpty());
+        Log.i(TAG, "CoffeeSite load success?: " + error.isEmpty());
         if (error.isEmpty()) {
             // Loaded actual instance of CoffeeSite - transform it to CoffeeSiteMovable
             if (loadedCoffeeSite != null) {
@@ -335,6 +332,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                     loadedCoffeeSite.setDistance(coffeeSite.getDistance());
                 }
                 coffeeSite = new CoffeeSiteMovable(loadedCoffeeSite);
+                // add new coffeeSite as a listener of the locationService
                 if (locationService != null) {
                     ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
                     locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));

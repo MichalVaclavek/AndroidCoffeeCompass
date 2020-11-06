@@ -269,13 +269,13 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         retVal = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CoffeeSiteMovable item = (CoffeeSiteMovable) view.getTag();
+                CoffeeSiteMovable siteMovable = (CoffeeSiteMovable) view.getTag();
                 if (mTwoPane) {
-                    // Open CoffeeSiteDetailFragment, if the item is clicked and there is
+                    // Open CoffeeSiteDetailFragment, if the siteMovable is clicked and there is
                     // landscape orientation
-                    // to show details of the CoffeeSiteMovable holding this item
+                    // to show details of the CoffeeSiteMovable holding this siteMovable
                     Bundle arguments = new Bundle();
-                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(item.getId()));
+                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(siteMovable.getId()));
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -283,11 +283,11 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                             .replace(R.id.coffeesite_detail_container, fragment)
                             .commit();
                 } else {
-                    // Open CoffeeSiteDetailActivity if the item is clicked
-                    // to show details of the CoffeeSiteMovable holding this item
+                    // Open CoffeeSiteDetailActivity if the siteMovable is clicked
+                    // to show details of the CoffeeSiteMovable holding this siteMovable
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) item);
+                    intent.putExtra("coffeeSite", (Parcelable) siteMovable);
                     context.startActivity(intent);
                 }
             }

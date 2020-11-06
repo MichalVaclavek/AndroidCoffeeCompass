@@ -18,8 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -62,7 +60,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     @BindView(R.id.btn_deleteUser) Button deleteUserButton;
 
     @BindView(R.id.user_profile_toolbar) Toolbar toolbar;
-    @BindView(R.id.user_profile_toolbarLayout) CollapsingToolbarLayout appBarLayout;
 
     protected UserAccountService userAccountService;
     private UserAccountServiceConnector userAccountServiceConnector;
@@ -81,6 +78,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setTitle(R.string.user_profile_label);
         }
 
         logoutButton.setEnabled(true);
@@ -89,10 +87,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         userProfileToShow = (LoggedInUser) this.getIntent().getExtras().get("currentUserProfile");
 
         if (userProfileToShow != null) {
-
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(getString(R.string.user_profile_label));
-            }
 
             usernameTextView.setText(userProfileToShow.getUserName());
             userEmailTextView.setText(userProfileToShow.getEmail());

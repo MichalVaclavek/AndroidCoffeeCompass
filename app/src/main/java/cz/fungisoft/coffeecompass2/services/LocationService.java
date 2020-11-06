@@ -51,7 +51,6 @@ public class LocationService extends Service {
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
-        support.removePropertyChangeListener(pcl);
         support.addPropertyChangeListener(pcl);
         Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }

@@ -85,7 +85,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
         if (cs != null && cs instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable)cs).setLocationService(locationService);
+            ((CoffeeSiteMovable) cs).setLocationService(locationService);
             locationService.addPropertyChangeListener((CoffeeSiteMovable) cs);
         }
     }
