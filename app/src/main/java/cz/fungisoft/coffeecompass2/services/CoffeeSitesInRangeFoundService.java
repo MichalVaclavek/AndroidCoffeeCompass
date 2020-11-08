@@ -136,6 +136,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     public void onCreate() {
         super.onCreate();
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
+
         // Transform CoffeeSites returned from DB (sites within Rectangel) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
         foundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), coffeeSites -> {
             List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();

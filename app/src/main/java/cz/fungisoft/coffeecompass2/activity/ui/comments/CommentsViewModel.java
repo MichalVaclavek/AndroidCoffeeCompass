@@ -24,27 +24,7 @@ public class CommentsViewModel extends AndroidViewModel {
 
     private static final String TAG = "CommentsViewModel";
 
-    /**
-     * Inner class to hold search parameters for comments
-     */
-    static class CommentsLiveDataInput {
 
-        public boolean isOfflineModeOn() {
-            return offlineModeOn;
-        }
-
-        public CoffeeSite getCoffeeSite() {
-            return coffeeSite;
-        }
-
-        private boolean offlineModeOn;
-        private CoffeeSite coffeeSite;
-
-        public CommentsLiveDataInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
-            this.offlineModeOn = offlineModeOn;
-            this.coffeeSite = coffeeSite;
-        }
-    }
 
 
     private CommentRepository commentRepository;
@@ -52,7 +32,7 @@ public class CommentsViewModel extends AndroidViewModel {
     /**
      * Actual list of all Comments
      */
-    private LiveData<List<Comment>> allComments;
+    private final LiveData<List<Comment>> allComments;
 
     public CommentsViewModel(@NonNull Application application) {
         super(application);
@@ -61,17 +41,17 @@ public class CommentsViewModel extends AndroidViewModel {
         allComments  = commentRepository.getAllComments();
     }
 
-    private final MutableLiveData<CommentsLiveDataInput> commentsInput = new MutableLiveData<>();
+    private final MutableLiveData<CommentRepository.CommentsLiveDataInput> commentsInput = new MutableLiveData<>();
 
     private void setInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
-        commentsInput.setValue(new CommentsLiveDataInput(offlineModeOn, coffeeSite));
+        commentsInput.setValue(new CommentRepository.CommentsLiveDataInput(offlineModeOn, coffeeSite));
     }
 
     /**
      * Actual list of all Comments belonging to one CoffeeSite
      */
-    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
-            Transformations.switchMap(commentsInput, (ci) -> commentRepository.getCommentsForCoffeeSite(ci.coffeeSite, ci.offlineModeOn));
+    private final LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
+            Transformations.switchMap(commentsInput, (ci) -> commentRepository.getCommentsForCoffeeSite(ci.getCoffeeSite(), ci.isOfflineModeOn()));
 
 
     public LiveData<List<Comment>> getAllComments(boolean offlineModeOn) {

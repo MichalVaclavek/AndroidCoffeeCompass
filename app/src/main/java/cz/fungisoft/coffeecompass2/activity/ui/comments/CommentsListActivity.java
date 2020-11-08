@@ -156,8 +156,11 @@ public class CommentsListActivity extends AppCompatActivity
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteWithComments> commentsLive) {
                 // Update the cached copy of the Comments in the adapter.
-                siteComments = commentsLive.get(0).comments;
-                showComments(siteComments);
+                assert commentsLive != null;
+                if (commentsLive.size() > 0) {
+                    siteComments = commentsLive.get(0).comments;
+                    showComments(siteComments);
+                }
             }
         });
     }

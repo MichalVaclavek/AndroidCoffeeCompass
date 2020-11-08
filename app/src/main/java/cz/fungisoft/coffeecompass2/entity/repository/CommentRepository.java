@@ -30,11 +30,37 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
                                                                            CoffeeSiteDatabase.DbDeleteEndListener {
 
     /**
+     * Inner help class to hold search parameters for comments
+     */
+    public static class CommentsLiveDataInput {
+
+        public boolean isOfflineModeOn() {
+            return offlineModeOn;
+        }
+
+        public CoffeeSite getCoffeeSite() {
+            return coffeeSite;
+        }
+
+        private final boolean offlineModeOn;
+        private final CoffeeSite coffeeSite;
+
+        public CommentsLiveDataInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
+            this.offlineModeOn = offlineModeOn;
+            this.coffeeSite = coffeeSite;
+        }
+    }
+
+    /* ======== Start of fields and Constructors of CommentRepository ============ */
+
+    /**
      * DAO object of the Room DB for the {@link Comment} class
      */
     private CommentDao commentDao;
 
     private static CommentRepository repository;
+
+    private final LiveData<List<Comment>> mAllComments;
 
     private CommentRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -50,19 +76,10 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         return repository;
     }
 
-    /**
-     * LiveData input holder for coffeeSite for whom the Comments are to be returned
-     */
-    private final MutableLiveData<CoffeeSite> commentsInput = new MutableLiveData<>();
-
-    private final LiveData<List<Comment>> mAllComments;
-
-    private LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
-            Transformations.switchMap(commentsInput, (cs) -> commentDao.getCoffeeSiteWithComments(cs.getId()));
-
-    private void setInput(CoffeeSite coffeeSite) {
-        commentsInput.setValue(coffeeSite);
+    public LiveData<List<Comment>> getAllComments() {
+        return mAllComments;
     }
+
 
     /**
      * Deletes current Comments data from DB and loads and saves new ones
@@ -103,22 +120,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         }
     }
 
-    public LiveData<List<Comment>> getAllComments() {
-        return mAllComments;
-    }
-
-    public LiveData<List<CoffeeSiteWithComments>> getCommentsForCoffeeSite(CoffeeSite coffeeSite, boolean offlineModeOn) {
-        if (!offlineModeOn) {
-            new GetCommentsOfCoffeeSiteAsyncTask(this, coffeeSite).execute();
-        }
-        setInput(coffeeSite);
-        return commentsOfCoffeeSite;
-    }
-
-    public void insert (Comment comment) {
-        new InsertCommentAsyncTask(commentDao).execute(comment);
-    }
-
     @Override
     public void onCommentsLoaded(List<Comment> comments) {
         insertAll(comments);
@@ -140,11 +141,54 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         }
     }
 
+    /**
+     * MutableLiveData input to select either DB LiveData or LiveData created from server response.
+     */
+    private final MutableLiveData<CommentRepository.CommentsLiveDataInput> commentsInput = new MutableLiveData<>();
+
+    private void setInput(boolean offlineModeOn, CoffeeSite coffeeSite) {
+        commentsInput.setValue(new CommentRepository.CommentsLiveDataInput(offlineModeOn, coffeeSite));
+    }
+
+    /**
+     * Comments for one CoffeeSite returned from server as MutableLiveData<>. Can be returned
+     * as LiveData<> if app. is Online.
+     *
+     */
     private final MutableLiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSiteFromServer = new MutableLiveData<>();
 
     /**
-     * Processes the list of Comments belonging to CoffeeSite as returned from server.
-     * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>> field.
+     * Comments for one CoffeeSite as LiveData<>. Can be data from DB or data returned from server {@code commentsOfCoffeeSiteFromServer}
+     */
+    private final LiveData<List<CoffeeSiteWithComments>> commentsOfCoffeeSite =
+            Transformations.switchMap(commentsInput, (cs) -> (cs.offlineModeOn) ? commentDao.getCoffeeSiteWithComments(cs.coffeeSite.getId())
+                                                                                : commentsOfCoffeeSiteFromServer);
+
+    /**
+     * Starts loading Comments for CoffeeSite from server or gets data from DB
+     *
+     * @param coffeeSite - CoffeeSite for which the Comments are required
+     * @param offlineModeOn - flag to indicate if Offline mode is Off or On. Leads to either AsyncTask requesting Comments from server or to invoke
+     *                      LiveData setInput(true, coffeeSite), which leads to LiveData from DB change/request
+     * @return
+     */
+    public LiveData<List<CoffeeSiteWithComments>> getCommentsForCoffeeSite(CoffeeSite coffeeSite, boolean offlineModeOn) {
+        if (!offlineModeOn) {
+            new GetCommentsOfCoffeeSiteAsyncTask(this, coffeeSite).execute();
+        } else {
+            setInput(true, coffeeSite);
+        }
+        return commentsOfCoffeeSite;
+    }
+
+
+    /**
+     * Processes the list of Comments belonging to CoffeeSite as returned from server.<br>
+     * Comments are not saved into DB here, but returned as LiveData<List<CoffeeSiteWithComments>> <br>
+     * field {@code commentsOfCoffeeSiteFromServer}, followed by setInput(false, coffeeSite),<br>
+     * which then leads to switch LiveData to a new source i.e {@code commentsOfCoffeeSiteFromServer}.
+     * <p>
+     * Note:
      * Comments read during this online REST call, cannot be inserted, because they can be present
      * already in DB because of previously activated OFFLINE mode.
      *
@@ -153,18 +197,25 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
      */
     @Override
     public void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {
-        //Collections.sort(comments, Collections.reverseOrder());
         List<CoffeeSiteWithComments> listOfCommentsForCoffeeSite = new ArrayList<>();
         CoffeeSiteWithComments coffeeSiteWithComments = new CoffeeSiteWithComments(coffeeSite, comments);
         listOfCommentsForCoffeeSite.add(coffeeSiteWithComments);
 
         commentsOfCoffeeSiteFromServer.setValue(listOfCommentsForCoffeeSite);
-        commentsOfCoffeeSite = commentsOfCoffeeSiteFromServer;
+        setInput(false, coffeeSite);
     }
 
     @Override
     public void onRESTCallError(Result.Error error) {
+    }
 
+    /**
+     * Creates and calls AsyncTask execute() inserting Comments to DB.
+     *
+     * @param comment
+     */
+    public void insert (Comment comment) {
+        new InsertCommentAsyncTask(commentDao).execute(comment);
     }
 
     /** Helper inner classes to create AsyncTasks for inserting Comments */
