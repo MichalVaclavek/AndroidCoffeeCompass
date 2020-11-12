@@ -229,8 +229,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            this.onBackPressed();
-            goToMainActivity();
+            //this.onBackPressed();
+            goToMainActivity(); // TODO does it make sense? to call this
             return true;
         }
         boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
@@ -374,14 +374,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
 
     private void startMyCoffeeSitesLoadOperation() {
-        if (Utils.isOnline()) {
-            if (coffeeSiteLoadOperationsService != null && !isLoadingPage()) {
-                showProgressbarAndDisableMenuItems();
-                setLoadingPage(true);
-                coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(1, PAGE_SIZE);
-            }
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
+        if (coffeeSiteLoadOperationsService != null && !isLoadingPage()) {
+            showProgressbarAndDisableMenuItems();
+            setLoadingPage(true);
+            coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(1, PAGE_SIZE);
         }
     }
 
@@ -732,7 +728,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
         // Retrieve CoffeeSites list state and item positions
-        if(state != null) {
+        if (state != null) {
             mListState = state.getParcelable(LIST_STATE_KEY);
         }
     }

@@ -23,7 +23,6 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
-import cz.fungisoft.coffeecompass2.activity.support.FoundCoffeeSitesRecyclerViewAdapter;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
@@ -65,7 +64,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
-    private CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent();
+    private final CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent();
 
     private FoundCoffeeSitesRecyclerViewAdapter recyclerViewAdapter;
     private Parcelable mListState;

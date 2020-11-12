@@ -84,7 +84,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        if (cs != null && cs instanceof  CoffeeSiteMovable) {
+        if (cs != null && (cs instanceof  CoffeeSiteMovable)) {
             ((CoffeeSiteMovable) cs).setLocationService(locationService);
             locationService.addPropertyChangeListener((CoffeeSiteMovable) cs);
         }
@@ -105,11 +105,6 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
             ((CoffeeSiteMovable) cs).addPropertyChangeListener(distLabel);
             distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
         }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();;
     }
 
     @Override

@@ -58,7 +58,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
     @Override
     public void onStop() {
         if (mItem instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable)mItem).removePropertyChangeListener(distanceTextView);
+            ((CoffeeSiteMovable) mItem).removePropertyChangeListener(distanceTextView);
         }
         super.onStop();
     }
@@ -68,7 +68,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
     public void onStart() {
         if (distanceTextView != null && mItem != null
         && mItem instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable)mItem).addPropertyChangeListener(distanceTextView);
+            ((CoffeeSiteMovable) mItem).addPropertyChangeListener(distanceTextView);
             distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
         }
         super.onStart();

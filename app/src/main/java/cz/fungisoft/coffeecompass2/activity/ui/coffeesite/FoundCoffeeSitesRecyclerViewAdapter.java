@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.support;
+package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,8 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;

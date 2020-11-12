@@ -263,15 +263,12 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      * @param coffeeSort
      */
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
-
-        if (Utils.isOnline() ) {
-            isSearching = true;
-            new GetCoffeeSitesInRangeAsyncTask(this,
-                    latitude,
-                    longitude,
-                    range,
-                    coffeeSort).execute();
-        }
+        isSearching = true;
+        new GetCoffeeSitesInRangeAsyncTask(this,
+                latitude,
+                longitude,
+                range,
+                coffeeSort).execute();
     }
 
     /**

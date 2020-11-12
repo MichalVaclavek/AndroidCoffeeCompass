@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -21,18 +22,21 @@ import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
@@ -43,6 +47,7 @@ import static android.view.View.VISIBLE;
  */
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                                       implements CoffeeSiteServicesConnectionListener,
+                                                 UserAccountServiceConnectionListener,
                                                  CoffeeSiteLoadServiceOperationsListener {
 
     private static final String TAG = "CoffeeSiteDetailAct";
@@ -57,12 +62,29 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
 
     private ProgressBar loadCoffeeSiteProgressBar;
+    private LoggedInUser currentUser;
 
+    /**
+     * UserAccount Service is probably not needed here
+     */
+    protected UserAccountService userAccountService;
+    private UserAccountServiceConnector userAccountServiceConnector;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindUserLoginService;
+
+    /**
+     * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
+     */
+    static final int EDIT_COFFEESITE_REQUEST = 1;
 
     /**
      * To show snackbar
      */
     private View contextView;
+
+    private Toolbar mainToolbar;
 
 
     @Override
@@ -78,30 +100,16 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         commentsButton = (Button) findViewById(R.id.commentsButton);
 
-        // TODO - do we need Map if in offline mode
-        Button mapButton = (Button) findViewById(R.id.mapButton);
-
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
         // Read coffee site data from calling activity
         Intent intent = this.getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
-            if (coffeeSite instanceof CoffeeSiteMovable) {
-                coffeeSite = (CoffeeSiteMovable) bundle.getParcelable("coffeeSite");
-            } else {
-                // Activity is opened from another Activity which uses only CoffeeSite instances
-                coffeeSite = (CoffeeSite) bundle.getParcelable("coffeeSite");
+            coffeeSite = bundle.getParcelable("coffeeSite");
+            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+                coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
-        }
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (toolbar != null && coffeeSite != null) {
-            getSupportActionBar().setTitle("Detaily");
-            toolbar.setSubtitle(coffeeSite.getName());
         }
 
         if (coffeeSite != null) {
@@ -115,6 +123,17 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 }
             }
         }
+
+        // Setup main toolbar
+        mainToolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        setSupportActionBar(mainToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (mainToolbar != null && coffeeSite != null) {
+            getSupportActionBar().setTitle("Detaily");
+            mainToolbar.setSubtitle(coffeeSite.getName());
+        }
+
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -130,6 +149,55 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             detailFragment = new CoffeeSiteDetailFragment();
             detailFragment.setCoffeeSite(coffeeSite);
         }
+
+        /*
+         Must be called here, in onCreate(), as after successful connection to UserAccountService
+         loading of users CoffeeSites starts. We need this loading only if this Activity
+         is created, not in case we returned to it from another Activity
+         */
+        doBindUserAccountService();
+    }
+
+    /** **************** UserAccountService ******************* START ****/
+
+    private void doBindUserAccountService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other
+        // applications).
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
+
+        if (bindService(new Intent(this, UserAccountService.class),
+                userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserLoginService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    @Override
+    public void onUserAccountServiceConnected() {
+        userAccountService = userAccountServiceConnector.getUserLoginService();
+        currentUser = userAccountService.getLoggedInUser();
+        MenuItem editCoffeeSiteMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().findItem(R.id.action_go_to_edit_coffeesite) : null;
+
+        if (editCoffeeSiteMenuItem != null
+                && currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+            editCoffeeSiteMenuItem.setVisible(true);
+        }
+    }
+
+    /** UnBind UserAccountService ****/
+    private void doUnbindUserAccountService() {
+        if (mShouldUnbindUserLoginService) {
+            // Release information about the service's state.
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
+            unbindService(userAccountServiceConnector);
+            mShouldUnbindUserLoginService = false;
+        }
     }
 
     /**
@@ -137,7 +205,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      */
     @Override
     public void onLocationServiceConnected() {
-
         super.onLocationServiceConnected();
         if (coffeeSite != null ) {
             if (coffeeSite instanceof CoffeeSiteMovable) {
@@ -163,15 +230,15 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         doBindCoffeeSiteLoadOperationsService();
     }
 
+    @Override
+    protected void onDestroy() {
+        doUnbindUserAccountService();
+        super.onDestroy();
+    }
+
     public void startCoffeeSiteLoad() {
-        if (!Utils.isOfflineModeOn(getApplicationContext())) {
-            if (Utils.isOnline()) {
-                showProgressbar();
-                coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
-            } else{
-                Utils.showNoInternetToast(getApplicationContext());
-            }
-        }
+        showProgressbar();
+        coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
     }
 
     /**
@@ -188,10 +255,16 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         loadCoffeeSiteProgressBar.setVisibility(GONE);
     }
 
-
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present
+        getMenuInflater().inflate(R.menu.menu_coffeesite_detail, menu);
+        MenuItem editCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_edit_coffeesite);
+        if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+            editCoffeeSiteMenuItem.setVisible(true);
+        }
+
+        return true;
     }
 
     @Override
@@ -215,8 +288,61 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             this.onBackPressed();
             return true;
         }
+
+        if (id == R.id.action_go_to_edit_coffeesite) {
+             if (currentUser != null
+                 && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+                if (Utils.isOnline()) {
+                    goToEditCoffeeSiteActivity();
+                } else {
+                    Utils.showNoInternetToast(getApplicationContext());
+                }
+            }
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
+
+    private void goToEditCoffeeSiteActivity() {
+        Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
+        activityIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+        startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
+    }
+
+    /**
+     * Receives result from CreateCoffeeSiteActivity, which was requested by this activity,
+     * when user clicked on Edit menu item.
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.i(TAG, "onActivityResult() from CreateCoffeeSiteActivity. Request code: " + requestCode + ". Result code: " + resultCode);
+
+        // Check which request we're responding to
+        if (requestCode == EDIT_COFFEESITE_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                if (Utils.isOnline()) {
+                    // Reloads CoffeeSite to show current saved data after edit
+                    startCoffeeSiteLoad();
+                } else { // or gets as return value from Edit activity
+                    coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
+                    // Refresh detailFragment to update View with the new CoffeeSiteMovable
+                    refreshDetailFragment(coffeeSite);
+                }
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    /* ====== HANDLERS of BUTTONS clicks ======== */
 
     public void onImageButtonClick(View v) {
         Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
@@ -297,13 +423,19 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
     }
 
+    /**
+     * When the CoffeeSiteLoadOperationsService is connected, loads the current CoffeeSite's data
+     * from server.
+     */
     @Override
     public void onCoffeeSiteServiceConnected() {
-
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            startCoffeeSiteLoad();
+            // refresh CoffeeSite after start
+            if (Utils.isOnline()) {
+               startCoffeeSiteLoad();
+            }
         }
     }
 
@@ -319,7 +451,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
     }
 
-
+    /**
+     * CoffeeSites's data reloaded from server, show the data.
+     *
+     * @param loadedCoffeeSite - CoffeeSite's data reloaded from server
+     * @param error - indication, if there was error during loading
+     */
     @Override
     public void onCoffeeSiteLoaded(CoffeeSite loadedCoffeeSite, String error) {
         hideProgressbar();
@@ -335,15 +472,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 // add new coffeeSite as a listener of the locationService
                 if (locationService != null) {
                     ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
-                    locationService.addPropertyChangeListener(((CoffeeSiteMovable) coffeeSite));
+                    locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
                 }
             }
             // Refresh detailFragment to update View with the new CoffeeSiteMovable
-            detailFragment.setCoffeeSite(coffeeSite);
-            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.detach(detailFragment);
-            ft.attach(detailFragment);
-            ft.commit();
+            refreshDetailFragment(coffeeSite);
         } else {
             // Not needed to change current coffeeSite, only show some message?
             showCoffeeSiteLoadFailure(error);
@@ -354,6 +487,18 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         error = !error.isEmpty() ? error : getString(R.string.coffee_site_load_failure);
         Snackbar mySnackbar = Snackbar.make(contextView, error, Snackbar.LENGTH_LONG);
         mySnackbar.show();
+    }
+
+    /**
+     * Helper method to update detail fragment data
+     * @param coffeeSite current CoffeeSite data to be shown in {@code }detailFragment}
+     */
+    private void refreshDetailFragment(CoffeeSite coffeeSite) {
+        detailFragment.setCoffeeSite(coffeeSite);
+        final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.detach(detailFragment);
+        ft.attach(detailFragment);
+        ft.commit();
     }
 
 }

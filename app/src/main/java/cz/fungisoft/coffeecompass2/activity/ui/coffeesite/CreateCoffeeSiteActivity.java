@@ -254,7 +254,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_coffee_site);
 
-        coffeeSiteEntitiesViewModel = ViewModelProviders.of(this).get(CoffeeSiteEntitiesViewModel.class);
+//        coffeeSiteEntitiesViewModel = ViewModelProviders.of(this).get(CoffeeSiteEntitiesViewModel.class);
+        coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
 
         ButterKnife.bind(this);
 

@@ -499,7 +499,6 @@ public class MainActivity extends ActivityWithLocationService
     private void openLoginActivity() {
         if (Utils.isOnline()) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
-            //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(activityIntent);
         } else {
@@ -509,7 +508,6 @@ public class MainActivity extends ActivityWithLocationService
 
     private void openUserProfileActivity() {
         Intent activityIntent = new Intent(this, UserDataViewActivity.class);
-        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.putExtra("currentUserProfile", userAccountService.getLoggedInUser());
         this.startActivity(activityIntent);
@@ -517,8 +515,6 @@ public class MainActivity extends ActivityWithLocationService
 
     private void openOfflineSettingsActivity() {
         Intent activityIntent = new Intent(this, OfflineModeSelectionActivity.class);
-        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // should run only one instance of the Activity
         activityIntent.putExtra("currentUserProfile", userAccountService.getLoggedInUser());
         this.startActivity(activityIntent);
@@ -549,9 +545,9 @@ public class MainActivity extends ActivityWithLocationService
      */
     public void showAndSaveStatistics(Statistics stats) {
         hideProgressbar();
-        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+     //   if (!Utils.isOfflineModeOn(getApplicationContext())) {
             statisticsPrefencesHelper.saveStatistics(stats);
-        }
+//        }
 
         if (stats != null) {
             TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);
@@ -586,16 +582,15 @@ public class MainActivity extends ActivityWithLocationService
         }
         if (Utils.isOnline() || Utils.isOfflineModeOn(getApplicationContext())) {
 
-                Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
-                csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
-                csListIntent.putExtra("searchRange", searchRange);
-                csListIntent.putExtra("coffeeSort", "");
+            Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+            csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
+            csListIntent.putExtra("searchRange", searchRange);
+            csListIntent.putExtra("coffeeSort", "");
 
-                startActivity(csListIntent);
+            startActivity(csListIntent);
         } else {
             Snackbar mySnackbar = Snackbar.make(view, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
             mySnackbar.show();
-            //Utils.showNoInternetNoOfflineDataToast(getApplicationContext());
         }
     }
 
@@ -645,17 +640,15 @@ public class MainActivity extends ActivityWithLocationService
 
         // Read stats if internet is available
         // Can be read later after internet becomes available, see NetworkStateReceiver
-        if (!Utils.isOfflineModeOn(getApplicationContext())) {
-            if (Utils.isOnline()) {
-                    startReadStatistics();
-                    startNumberOfCoffeeSitesFromUserCall();
-                } else {
-                    Utils.showNoInternetToast(getApplicationContext());
-                }
-        } else {
+        if (Utils.isOnline()) {
+            startReadStatistics();
+            startNumberOfCoffeeSitesFromUserCall();
+        } else if (Utils.isOfflineModeOn(getApplicationContext())) {
             showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
             onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
-        }
+            } else {
+                Utils.showNoInternetToast(getApplicationContext());
+            }
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

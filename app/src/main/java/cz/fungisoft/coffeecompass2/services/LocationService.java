@@ -19,10 +19,12 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeListenerProxy;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
  * Location service to provide location to all other Activities.<br>

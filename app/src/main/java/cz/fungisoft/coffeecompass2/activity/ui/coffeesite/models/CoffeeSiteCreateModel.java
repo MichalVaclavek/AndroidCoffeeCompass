@@ -12,6 +12,8 @@ import cz.fungisoft.coffeecompass2.R;
  */
 public class CoffeeSiteCreateModel extends ViewModel {
 
+    private final int SITE_NAME_LENGTH = 35;
+
     private MutableLiveData<CoffeeSiteCreateFormState> coffeeSiteFormState = new MutableLiveData<>();
 
     public LiveData<CoffeeSiteCreateFormState> getCoffeeSiteFormState() {
@@ -33,7 +35,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
 
     // A placeholder CoffeeSite name validation check
     private boolean isCoffeeSiteNameValid(String coffeeSiteName) {
-        return coffeeSiteName != null && coffeeSiteName.trim().length() >= 4 && coffeeSiteName.trim().length() <= 30;
+        return coffeeSiteName != null && coffeeSiteName.trim().length() >= 4 && coffeeSiteName.trim().length() <= SITE_NAME_LENGTH;
     }
 
     // A placeholder longitude validation check

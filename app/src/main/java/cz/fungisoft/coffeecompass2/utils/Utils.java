@@ -46,15 +46,8 @@ public class Utils {
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
-            int     exitValue = -1;
             Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (ipProcess.waitFor(2, TimeUnit.SECONDS)) {
-                    exitValue = ipProcess.exitValue();
-                }
-            } else {
-                exitValue = ipProcess.waitFor();
-            }
+            int     exitValue = ipProcess.waitFor();
             return (exitValue == 0);
         }
         catch (IOException | InterruptedException e) {
