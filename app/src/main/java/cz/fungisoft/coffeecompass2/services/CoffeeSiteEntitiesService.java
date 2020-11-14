@@ -430,9 +430,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     @Override
     public void onRequestedNumberOfImagesToDownloadReached() {
-//        for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
-//            listener.onAllDataForOfflineModeDownloaded();
-//        }
         downloadInProgress = false;
         informClientAboutAllCoffeeSitesLoadResult(true);
     }

@@ -192,14 +192,12 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @Override
     public void onUserLogoutFailure(String errorMessage) {
-        //allowButtonAndGoneProgressBar();
         logoutDeleteProgressBar.setVisibility(View.GONE);
         Toast.makeText(getBaseContext(), errorMessage, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onUserDeleteSuccess() {
-        //allowButtonAndGoneProgressBar();
         logoutDeleteProgressBar.setVisibility(View.GONE);
         Toast.makeText(getBaseContext(), getString(R.string.delete_user_success), Toast.LENGTH_LONG).show();
         setResult(Activity.RESULT_OK);

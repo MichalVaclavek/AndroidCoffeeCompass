@@ -445,8 +445,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
 
             @Override
-            public void onAnimationRepeat(Animation arg0) {
-            }
+            public void onAnimationRepeat(Animation arg0) {}
 
             @Override
             public void onAnimationStart(Animation arg0) {
@@ -470,12 +469,11 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
 
             @Override
-            public void onAnimationRepeat(Animation arg0) {
-            }
+            public void onAnimationRepeat(Animation arg0) {}
 
             @Override
-            public void onAnimationStart(Animation arg0) {
-            }
+            public void onAnimationStart(Animation arg0) {}
+
         });
         animationRunning = false; // init value
     }
@@ -511,12 +509,11 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
 
             @Override
-            public void onAnimationRepeat(Animation arg0) {
-            }
+            public void onAnimationRepeat(Animation arg0) {}
 
             @Override
-            public void onAnimationStart(Animation arg0) {
-            }
+            public void onAnimationStart(Animation arg0) {}
+
         });
 
         animation2.setAnimationListener(new Animation.AnimationListener() {
@@ -528,12 +525,11 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
 
             @Override
-            public void onAnimationRepeat(Animation arg0) {
-            }
+            public void onAnimationRepeat(Animation arg0) {}
 
             @Override
-            public void onAnimationStart(Animation arg0) {
-            }
+            public void onAnimationStart(Animation arg0) {}
+
         });
 
         viewHolder.searchingInfoLabel.startAnimation(animation1);
@@ -553,9 +549,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         viewHolder1.distanceView.setText(Utils.getDistanceInBetterReadableForm(this.mValues.get(position).getDistance()));
         viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));
-        viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
-
         this.mValues.get(position).addPropertyChangeListener(viewHolder1.distanceView);
+        viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
         Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
 

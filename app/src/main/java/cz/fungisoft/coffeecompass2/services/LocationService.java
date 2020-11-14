@@ -19,12 +19,10 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeListenerProxy;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
  * Location service to provide location to all other Activities.<br>
@@ -54,12 +52,14 @@ public class LocationService extends Service {
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         support.addPropertyChangeListener(pcl);
-        Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
+        Log.d(TAG,  "Pridan posluchac zmeny polohy: " + pcl);
+        Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         support.removePropertyChangeListener(pcl);
-        Log.d(TAG,  ". Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
+        Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
+        Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
     // Unique Identification Number for the Notification.

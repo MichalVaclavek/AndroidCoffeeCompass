@@ -327,11 +327,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         viewHolder.activateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeActivated());
         viewHolder.deactivateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeDeactivated());
-
-        // If OFFLINE mode is on, all buttons are INVISIBLE/GONE
-//        if (offlineModeOn) {
-//            enableDisableAllButtons(viewHolder, false);
-//        }
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
@@ -403,8 +398,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-    void onInsertAuthorCommentDialogNegativeClick(InsertAuthorCommentDialogFragment dialog) {
-    }
+    void onInsertAuthorCommentDialogNegativeClick(InsertAuthorCommentDialogFragment dialog) {}
 
     /* *************************************************** */
 

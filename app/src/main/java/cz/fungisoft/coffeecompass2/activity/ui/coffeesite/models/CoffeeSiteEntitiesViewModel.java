@@ -167,28 +167,6 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
         return retVal;
     }
 
-    /**
-     * Helper method to find instance of the CoffeeSiteEntity from this
-     * repository internal lists of CoffeeSiteEntities of selected CoffeeSiteEntity type.
-     * If not found returns null.
-     * Expects that values in input entityInstances List<T> sre unique
-     *
-     * @param value
-     * @param entityInstances
-     * @param <T>
-     * @return
-     */
-//    private static <T extends CoffeeSiteEntity> T getEntityInstance(String value, List<T> entityInstances) {
-//        if (entityInstances != null) {
-//            for (T entity : entityInstances) {
-//                if (entity.toString().equalsIgnoreCase(value)) {
-//                    return entity;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
 
     /** ------------- GETTERS ------------------------------ */
 

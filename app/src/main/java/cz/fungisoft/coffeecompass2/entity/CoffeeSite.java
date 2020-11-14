@@ -378,7 +378,9 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
     }
 
     public void clearComments() {
-        this.comments.clear();
+        if (this.comments != null) {
+            this.comments.clear();
+        }
     }
 
     public String getMainImageURL() {

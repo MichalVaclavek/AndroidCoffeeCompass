@@ -20,8 +20,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Another Class can also to register listeners for 'distance'
  * change event of this CoffeeSiteMovable class
  */
-public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable
-{
+public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable {
+
     private static final String TAG = "CoffeeSiteMovable";
 
     /**
@@ -63,13 +63,14 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
-        changeSupport.removePropertyChangeListener(pcl);
         changeSupport.addPropertyChangeListener(pcl);
+        Log.d(TAG, "Posluchac zmeny vzdalenosti pridan: " + pcl);
         Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         changeSupport.removePropertyChangeListener(pcl);
+        Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
         Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 

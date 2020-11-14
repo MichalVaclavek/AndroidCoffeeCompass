@@ -30,7 +30,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -254,15 +254,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_coffee_site);
 
-//        coffeeSiteEntitiesViewModel = ViewModelProviders.of(this).get(CoffeeSiteEntitiesViewModel.class);
         coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
 
         ButterKnife.bind(this);
 
         contextView = findViewById(R.id.coffeesite_create_main_scrollview);
 
-        createCoffeeSiteViewModel = ViewModelProviders.of(this, new CoffeeSiteViewModelFactory())
-                .get(CoffeeSiteCreateModel.class);
+        createCoffeeSiteViewModel = new ViewModelProvider(this, new CoffeeSiteViewModelFactory()).get(CoffeeSiteCreateModel.class);
 
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) { // When called from MyCoffeeSitesListActivity ...

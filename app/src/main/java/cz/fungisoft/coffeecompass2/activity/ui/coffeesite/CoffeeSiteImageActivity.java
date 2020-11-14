@@ -67,9 +67,7 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
             distLabel.setVisibility(View.GONE);
         }
 
-
         CoffeeSiteImageFragment fragment = new CoffeeSiteImageFragment();
-
         fragment.setCoffeeSite(cs);
 
         if (savedInstanceState == null) { // is this enough?
@@ -91,20 +89,27 @@ public class CoffeeSiteImageActivity extends ActivityWithLocationService
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (cs instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable) cs).removePropertyChangeListener(distLabel);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         if (cs instanceof  CoffeeSiteMovable) {
             ((CoffeeSiteMovable) cs).addPropertyChangeListener(distLabel);
             distLabel.setText(Utils.getDistanceInBetterReadableForm(cs.getDistance()));
         }
+    }
+
+    /**
+     * locationService.removePropertyChangeListener((CoffeeSiteMovable) cs); should
+     * be performed here (or in onDestroy()), but if done, then FoundCoffeeSiteListActivity,
+     * the respective item in FoundCoffeeSitesRecyclerViewAdapter, does not updates
+     * CoffeeSite distance in the given label ...
+     * TODO found the error ...
+     */
+    @Override
+    public void onStop() {
+        if (cs instanceof  CoffeeSiteMovable) {
+            ((CoffeeSiteMovable) cs).removePropertyChangeListener(distLabel);
+        }
+        super.onStop();
     }
 
     @Override

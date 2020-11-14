@@ -37,7 +37,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
@@ -581,8 +580,8 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (Utils.isOnline() || Utils.isOfflineModeOn(getApplicationContext())) {
-
             Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+            csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
             csListIntent.putExtra("searchRange", searchRange);
             csListIntent.putExtra("coffeeSort", "");
@@ -711,6 +710,9 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     protected void onDestroy() {
+        if (locationService != null) {
+            locationService.removePropertyChangeListener(this);
+        }
         doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
     }

@@ -57,21 +57,16 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     @Override
     public void onStop() {
-        if (mItem instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable) mItem).removePropertyChangeListener(distanceTextView);
-        }
         super.onStop();
     }
 
-
     @Override
     public void onStart() {
+        super.onStart();
         if (distanceTextView != null && mItem != null
-        && mItem instanceof  CoffeeSiteMovable) {
-            ((CoffeeSiteMovable) mItem).addPropertyChangeListener(distanceTextView);
+            && mItem instanceof  CoffeeSiteMovable) {
             distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
         }
-        super.onStart();
     }
 
     @Override
@@ -150,12 +145,14 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
             if (mItem instanceof  CoffeeSiteMovable) {
                 distanceTableRow.setVisibility(View.VISIBLE);
-
                 distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
+
                 distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
                 distanceTextView.setTag(TAG + ". DistanceTextView for " + mItem.getName());
 
                 distanceTextView.setCoffeeSite((CoffeeSiteMovable) mItem);
+                ((CoffeeSiteMovable) mItem).addPropertyChangeListener(distanceTextView);
+                distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
             } else {
                 distanceTableRow.setVisibility(View.GONE);
             }

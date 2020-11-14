@@ -230,6 +230,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         doBindCoffeeSiteLoadOperationsService();
     }
 
+    /**
+     * locationService.removePropertyChangeListener((CoffeeSiteMovable) coffeeSite); should
+     * be performed here, but if done, then FoundCoffeeSiteListActivity, the respective item
+     * in FoundCoffeeSitesRecyclerViewAdapter, does not updates CoffeeSite distance in the
+     * given label ...
+     * TODO found the error ...
+     */
     @Override
     protected void onDestroy() {
         doUnbindUserAccountService();

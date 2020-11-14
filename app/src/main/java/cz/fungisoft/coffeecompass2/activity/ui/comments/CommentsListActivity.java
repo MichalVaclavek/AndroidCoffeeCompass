@@ -395,7 +395,7 @@ public class CommentsListActivity extends AppCompatActivity
             if (Utils.isOnline()) {
                 new GetCommentsForCoffeeSiteAsyncTask(this, cs.getId()).execute();
             }
-        } else {
+        } else { // number of comments for this CoffeeSite is 0
             cs.clearComments();
             showComments(null);
         }
