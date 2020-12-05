@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="ThemeOverlay.CoffeeCompass.AppWidgetContainer" parent="">
+        <item name="appWidgetBackgroundColor">@color/activityBackround</item>
+        <item name="appWidgetTextColor">@color/colorPrimaryDark</item>
+    </style>
+</resources>

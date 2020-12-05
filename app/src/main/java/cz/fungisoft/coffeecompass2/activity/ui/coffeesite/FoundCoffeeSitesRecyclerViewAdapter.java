@@ -55,7 +55,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private final View.OnClickListener mOnClickListener;
 
-    private int currentSearchRange;
+    private final int currentSearchRange;
 
     private static final CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
     private static final CoffeeSiteMovable initialDummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "InitialDummy", 0);

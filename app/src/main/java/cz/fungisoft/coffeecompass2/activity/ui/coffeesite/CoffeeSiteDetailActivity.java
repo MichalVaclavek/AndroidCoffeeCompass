@@ -98,7 +98,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
 
-        commentsButton = (Button) findViewById(R.id.commentsButton);
+        commentsButton = findViewById(R.id.commentsButton);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
@@ -113,11 +113,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
 
         if (coffeeSite != null) {
-            Button imageButton = (Button) findViewById(R.id.imageButton);
+            Button imageButton = findViewById(R.id.imageButton);
             imageButton.setVisibility(GONE);
             if (!coffeeSite.getMainImageURL().isEmpty()) {
                 boolean offlineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-                if (!offlineModeOn || (offlineModeOn && dataDownloadPreferenceHelper.getDownloadOverview().numOfImagesDownloaded > 0)) {
+                if (!coffeeSite.getMainImageFileName().isEmpty() && (Utils.isOnline() || offlineModeOn)) {
                     imageButton.setVisibility(View.VISIBLE);
                     imageButton.setEnabled(true);
                 }
@@ -133,7 +133,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             getSupportActionBar().setTitle("Detaily");
             mainToolbar.setSubtitle(coffeeSite.getName());
         }
-
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -184,8 +183,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         currentUser = userAccountService.getLoggedInUser();
         MenuItem editCoffeeSiteMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().findItem(R.id.action_go_to_edit_coffeesite) : null;
 
-        if (editCoffeeSiteMenuItem != null
-                && currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+        if (editCoffeeSiteMenuItem != null && currentUser != null
+                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
             editCoffeeSiteMenuItem.setVisible(true);
         }
     }
@@ -270,7 +269,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
             editCoffeeSiteMenuItem.setVisible(true);
         }
-
         return true;
     }
 

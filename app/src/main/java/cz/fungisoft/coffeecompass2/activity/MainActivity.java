@@ -94,7 +94,7 @@ public class MainActivity extends ActivityWithLocationService
 
     private boolean bPrvni = true;
     private final int barvaBlack = Color.BLACK;
-    private int barvaRed = Color.RED;
+    private final int barvaRed = Color.RED;
 
     private TextView accuracy;
 
@@ -347,10 +347,10 @@ public class MainActivity extends ActivityWithLocationService
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            if (!Utils.isOfflineModeOn(getApplicationContext())) {
-                startNumberOfCoffeeSitesFromUserCall();
-            } else {
+            if (Utils.isOfflineModeOn(getApplicationContext())) {
                 onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
+            } else {
+                startNumberOfCoffeeSitesFromUserCall();
             }
         }
     }
@@ -491,7 +491,6 @@ public class MainActivity extends ActivityWithLocationService
         Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
         //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //activityIntent.putExtra("currentUserName", userAccountService.getLoggedInUser().getUserName());
         this.startActivity(activityIntent);
     }
 
@@ -544,9 +543,7 @@ public class MainActivity extends ActivityWithLocationService
      */
     public void showAndSaveStatistics(Statistics stats) {
         hideProgressbar();
-     //   if (!Utils.isOfflineModeOn(getApplicationContext())) {
-            statisticsPrefencesHelper.saveStatistics(stats);
-//        }
+        statisticsPrefencesHelper.saveStatistics(stats);
 
         if (stats != null) {
             TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);

@@ -538,7 +538,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     static final int REQUEST_TAKE_PHOTO = 100;
     static final int REQUEST_GALLERY_PHOTO = 101;
 
-    private Uri photoURI;
     private File imagePhotoFile;
     private FileCompressor fileCompressor;
 
@@ -631,7 +630,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                photoURI = FileProvider.getUriForFile(this,
+                Uri photoURI = FileProvider.getUriForFile(this,
                         getString(R.string.file_provider),
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -1098,8 +1097,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         Log.i(TAG, "Activate success?: " + error.isEmpty());
         if (!error.isEmpty()) {
             showCoffeeSiteActivateFailure(error);
-        }
-        else {
+        } else {
             showCoffeeSiteStatusChangeSuccess(COFFEE_SITE_ACTIVATE, "OK");
         }
         goToMyCoffeeSitesActivity();
@@ -1328,7 +1326,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (locationService != null) {
             currentLocation = locationService.getCurrentLocation();
         }
-        //showCurrentLocationInView();
         if (!locationEnterManualMode) {
             showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
         }

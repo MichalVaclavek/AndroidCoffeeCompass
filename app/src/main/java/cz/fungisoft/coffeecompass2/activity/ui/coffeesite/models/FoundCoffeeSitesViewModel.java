@@ -1,6 +1,9 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -14,6 +17,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
 
 /**
@@ -24,14 +28,22 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
 
     private static final String TAG = "FoundCoffeeSitesModel";
 
+    WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService1;
+
+    private static FoundCoffeeSitesViewModel instance;
+
+    public static FoundCoffeeSitesViewModel getInstance() {
+        return instance;
+    }
+
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment as
      * found in DB.
      */
-    private final LiveData<List<CoffeeSiteMovable>> foundCoffeeSitesInDB;
+    private final LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
 
-    public LiveData<List<CoffeeSiteMovable>> getFoundCoffeeSitesInDb() {
-        return foundCoffeeSitesInDB;
+    public LiveData<List<CoffeeSiteMovable>> getFoundCoffeeSites() {
+        return foundCoffeeSites;
     }
 
     /**
@@ -86,8 +98,14 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         /**
          * Service to return coffee sites in range
          */
-        WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService1 = new WeakReference<>(sitesInRangeUpdateService);
-        foundCoffeeSitesInDB = sitesInRangeUpdateService1.get().getFoundSites();
+        sitesInRangeUpdateService1 = new WeakReference<>(sitesInRangeUpdateService);
+        foundCoffeeSites = sitesInRangeUpdateService1.get().getFoundSites();
+        instance = this;
+    }
+
+
+    public List<CoffeeSiteMovable> getCurrentSitesInRange() {
+        return sitesInRangeUpdateService1.get().getCurrentCoffeeSites();
     }
 
 

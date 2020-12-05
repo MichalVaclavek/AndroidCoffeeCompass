@@ -7,7 +7,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -272,6 +275,15 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     }
 
     /**
+     * Main field provided by this service
+     */
+    private List<CoffeeSiteMovable> lastFoundSitesFromServer;
+
+    public List<CoffeeSiteMovable> getCurrentCoffeeSites() {
+        return lastFoundSitesFromServer;
+    }
+
+    /**
      * A callback method to be called, when there are CoffeeSites in range returned by
      * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
      * Compares returned coffeeSites with currentSitesInRange and finds new and old
@@ -286,6 +298,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeFinished();
         }
+        lastFoundSitesFromServer = coffeeSites;
     }
 
     @Override

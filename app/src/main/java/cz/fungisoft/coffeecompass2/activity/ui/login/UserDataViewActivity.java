@@ -217,6 +217,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         userAccountService = userAccountServiceConnector.getUserLoginService();
         userAccountService.addLogoutAndDeleteServiceListener(this);
         Log.i(TAG, "This is UserAccountServie instance: " + userAccountService.toString());
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,6 +231,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
                 }
             }
         });
+
         deleteUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

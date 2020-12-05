@@ -47,8 +47,9 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * <p>
  * Another activity is used to show CoffeeSites created by user.
  */
-public class FoundCoffeeSitesListActivity extends ActivityWithLocationService implements CoffeeSitesInRangeSearchOperationListener,
-                                                                                         CoffeeSitesInRangeServiceConnectionListener {
+public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
+                                          implements CoffeeSitesInRangeSearchOperationListener,
+                                                     CoffeeSitesInRangeServiceConnectionListener {
     private static final String TAG = "FoundCoffeeSitesAct";
 
     /**
@@ -292,7 +293,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         coffeeSitesViewModel = new FoundCoffeeSitesViewModel(getApplication(), sitesInRangeUpdateService);
         sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
 
-        coffeeSitesViewModel.getFoundCoffeeSitesInDb().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+        coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
                 // Process found CoffeeSites - leads to update list of new and gone CoffeeSites, see below
