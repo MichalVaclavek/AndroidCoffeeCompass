@@ -1,75 +1,103 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_shape"
+    android:orientation="horizontal"
     android:padding="@dimen/widget_margin"
     android:theme="@style/ThemeOverlay.CoffeeCompass.AppWidgetContainer">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="8dp"
+        android:weightSum="100">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="5dp">
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="65"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/nearest_site_layout"
+            <TextView
+                android:id="@+id/widget_nearest_site_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_locAndTypeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/widget_coffee_sort_and_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:text="TextView" />
 
-                <TextView
-                    android:id="@+id/widget_nearest_site_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_weight="8"
-                    android:contentDescription="@string/appwidget_text"
-                    android:text="@string/appwidget_text"
-                    android:textColor="?attr/appWidgetTextColor"
-                    android:textSize="30sp"
-                    android:textStyle="bold|italic" />
-
-                <TextView
-                    android:id="@+id/widget_nearest_site_distance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="TextView" />
-
-                <ImageButton
-                    android:id="@+id/widget_refresh_Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="5dp"
-                    android:layout_weight="1"
-                    android:background="@color/colorPrimary2"
-                    android:src="@android:drawable/ic_popup_sync" />
-            </LinearLayout>
-
-            <ListView
-                android:id="@+id/widget_other_sites_list"
+            <TextView
+                android:id="@+id/widget_nearest_site_distance"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="9" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
 
         </LinearLayout>
 
         <ImageView
             android:id="@+id/widget_nearest_site_image"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="25"
+            android:rotation="0"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/zrnka_480x480" />
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:padding="5dp" />
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_weight="10"
+            android:orientation="vertical"
+            android:weightSum="10">
+
+            <ImageButton
+                android:id="@+id/widget_refresh_Button"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="top"
+                android:layout_weight="3"
+                android:background="@null"
+                android:src="@android:drawable/ic_popup_sync" />
+
+            <TextView
+                android:id="@+id/widget_number_of_other_sites"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="bottom"
+                android:layout_weight="7"
+                android:text="TextView"
+                android:textAlignment="viewEnd" />
+
+            <TextView
+                android:id="@+id/widget_update_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+        </LinearLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.services;
 
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -8,7 +9,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.core.app.JobIntentService;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -19,16 +20,23 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Service to check, if there is a change of CoffeeSites in the search range while equipment is
@@ -37,8 +45,10 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * detection.<br>
  * Can use repository in case of OFFLiNE mode.
  */
-public class CoffeeSitesInRangeFoundService extends Service implements PropertyChangeListener,
+public class CoffeeSitesInRangeFoundService extends JobIntentService implements PropertyChangeListener,
                                                                        CoffeeSitesInRangeFromServerResultListener {
+
+    public static final int JOB_ID = 1010;
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -69,6 +79,60 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+
+    private static AppWidgetManager appWidgetManager;
+    private static  int[] allWidgetIds;
+
+    /**
+     * Used when called from MainAppWidgetProvider by context.startService(intent);
+     *
+     * @param intent
+     * @param flags
+     * @param startId
+     * @return
+     */
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onStartCommand()");
+        starWorkOnWidgetRequest(intent);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    /**
+     *
+     * @param context
+     * @param work
+     */
+    public static void enqueueWork(Context context, Intent work) {
+        Log.i(TAG, "Service invoked from MainAppWidgetProvider: enqueueWork()");
+        enqueueWork(context, CoffeeSitesInRangeFoundService.class, JOB_ID, work);
+    }
+
+
+    /**
+     * Called from MainAppWidgetProvider using CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
+     *
+     * @param intent
+     */
+    @Override
+    protected void onHandleWork(@NonNull Intent intent) {
+        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onHandleWork()");
+        starWorkOnWidgetRequest(intent);
+    }
+
+    /**
+     * All work, which should be done, if service is invoked from MainAppWidgetProvider
+     */
+    private void starWorkOnWidgetRequest(Intent intent) {
+        allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+        appWidgetManager = AppWidgetManager.getInstance(this);
+        if (locationService == null && !mShouldUnbind) {
+            doBindLocationService();
+        } else {
+            updateCurrentSitesForWidget();
+        }
     }
 
 
@@ -131,7 +195,16 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
-        locationService.addPropertyChangeListener(this);
+        if (locationService != null) {
+            locationService.addPropertyChangeListener(this);
+            if (searchLocationOfCurrentSites == null) {
+                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            }
+        }
+
+        if (allWidgetIds != null) {
+            updateCurrentSitesForWidget();
+        }
     }
 
 
@@ -144,14 +217,18 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         foundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), coffeeSites -> {
             List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
             for (CoffeeSite cs : coffeeSites) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
-                if (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange) {
-                    coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocationOfCurrentSites));
+                if (searchLocationOfCurrentSites != null) {
+                    if (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange) {
+                        coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocationOfCurrentSites));
+                    }
                 }
             }
             return coffeeSiteMovables;
         });
 
-        doBindLocationService();
+        if (locationService == null && !mShouldUnbind) {
+            doBindLocationService();
+        }
     }
 
     private void doBindLocationService() {
@@ -214,20 +291,19 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        long movedDistance = locationService.getDistanceFromCurrentLocation(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude);
+        long movedDistance = 0;
+        if (this.searchLocationOfCurrentSites != null) {
+            movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
+        }
 
         if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange) {
             for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
                 listener.onStartSearchingSitesInRange();
             }
-            searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            if (!isSearching) {
-                if (!Utils.isOfflineModeOn(getApplicationContext())) {
-                    startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                }
-                else {
-                    setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                }
+            this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+
+            if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
+                startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             }
         }
     }
@@ -241,21 +317,27 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
         this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
-        if (locationService != null && this.searchLocationOfCurrentSites == null) {
+        if (locationService != null) {
             this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
         }
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
 
-        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onStartSearchingSitesInRange();
+        if (this.searchLocationOfCurrentSites != null) {
+            startSearchingSites(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                listener.onStartSearchingSitesInRange();
+            }
         }
+    }
 
+    private void startSearchingSites(String coffeeSort, double latitude, double longitude, int range) {
         if (!isSearching) {
             if (!Utils.isOfflineModeOn(getApplicationContext())) {
-                startSearchSitesInRangeFromServer(coffeeSort, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-            } else {
-                setInput(searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
+            }
+            else { // updates LiveData returned from DB
+                setInput(latitude, latitude, range);
             }
         }
     }
@@ -274,13 +356,51 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
                 coffeeSort).execute();
     }
 
-    /**
-     * Main field provided by this service
-     */
-    private List<CoffeeSiteMovable> lastFoundSitesFromServer;
 
-    public List<CoffeeSiteMovable> getCurrentCoffeeSites() {
-        return lastFoundSitesFromServer;
+    private void updateCurrentSitesForWidget() {
+        // Get search info, longitude, latitude, range
+        // Range taken from Widget settings, or from Widget Intent ?
+        int searchRange = 2000;
+        if (locationService != null) {
+            LatLng searchLocation = locationService.getCurrentLatLng();
+            if (searchLocation != null) {
+                if (Utils.isOfflineModeOn(getApplicationContext())) {
+                    //TODO - get Single
+                    Disposable d = coffeeSiteRepository.getCoffeeSitesInRangeSingle(searchLocation.latitude, searchLocation.longitude, searchRange)
+                            .delay(10, TimeUnit.SECONDS, Schedulers.io())
+                            .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
+                                @Override
+                                public void onStart() {
+                                    Log.i(TAG, "Start Single request for Widget");
+                                }
+
+                                @Override
+                                public void onSuccess(@NonNull List<CoffeeSite> coffeeSites) {
+                                    //foundSitesForWidget = coffeeSites;
+                                    //TODO updateWidget
+                                    updateWidget(coffeeSites);
+                                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                                        listener.onSearchingSitesInRangeFinished();
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable error) {
+                                    Log.e(TAG, "Single request for Widget failed.");
+                                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                                        listener.onSearchingSitesInRangeFinished();
+                                    }
+                                }
+                            });
+
+                    d.dispose();
+                } else {
+                    //TODO Start search from server - Asynchronously After result is here, updateWidget
+                    String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
+                    startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, searchRange);
+                }
+            }
+        }
     }
 
     /**
@@ -291,6 +411,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
+        //TODO - detection, taht service was invoked from Widget. If yes, updateWidget via WidgetManager
         isSearching = false;
         for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
             listener.onSitesInRangeFound(coffeeSites);
@@ -298,7 +419,8 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeFinished();
         }
-        lastFoundSitesFromServer = coffeeSites;
+        //TODO updateWidget
+        updateWidget(coffeeSites);
     }
 
     @Override
@@ -307,6 +429,15 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeError(error);
             listener.onSearchingSitesInRangeFinished();
+        }
+    }
+
+    private void updateWidget(List<? extends CoffeeSite> coffeeSites) {
+        if (allWidgetIds != null && appWidgetManager != null) {
+            for (int appWidgetId : allWidgetIds) {
+//                MainAppWidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId);
+                MainAppWidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId, allWidgetIds, coffeeSites);
+            }
         }
     }
 

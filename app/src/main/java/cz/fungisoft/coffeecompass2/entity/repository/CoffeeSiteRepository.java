@@ -11,6 +11,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 /**
  * Repository to work with CoffeeSite's DAO.<br>
@@ -35,7 +36,6 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
     // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
-
 
 
     public CoffeeSiteRepository(CoffeeSiteDatabase db) {
@@ -96,7 +96,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     }
 
     private final LiveData<List<CoffeeSite>> coffeeSitesInRange =
-            Transformations.switchMap(searchParamsInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangle(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
+            Transformations.switchMap(searchParamsInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
 
 
     public void setNewSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
@@ -140,6 +140,11 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesFromUser;
     }
 
+    /* Data for MainAppWidget */
+
+    public Single<List<CoffeeSite>> getCoffeeSitesInRangeSingle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePar) {
+        return coffeeSiteDao.getCoffeeSitesInRectangleSingle(latitudeFrom, longitudeFrom, searchRangeAsDegreePar);
+    }
 
     /* ***** Insert CoffeeSite procedures and AsyncTask ***** */
 

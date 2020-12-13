@@ -209,7 +209,11 @@ public class LocationService extends Service {
     }
 
     public LatLng getCurrentLatLng() {
-        return new LatLng(location.getLatitude(), location.getLongitude());
+        if (location != null) {
+            return new LatLng(location.getLatitude(), location.getLongitude());
+        } else {
+            return null;
+        }
     }
 
     public Location getCurrentLocation() {

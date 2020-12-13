@@ -11,6 +11,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.relations.CoffeeSiteWithComments;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 @Dao
 public interface CoffeeSiteDao {
@@ -33,7 +34,18 @@ public interface CoffeeSiteDao {
             "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart)" +
             "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart)" +
             "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart)")
-    LiveData<List<CoffeeSite>> getCoffeeSitesInRectangle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
+    LiveData<List<CoffeeSite>> getCoffeeSitesInRectangleLiveData(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
+
+    /**
+     *
+     * @param searchRangeAsDegreePart to be calculated as searchRange in meters * {@link ONE_METER_IN_DEGREE}
+     * @return
+     */
+    @Query("SELECT * FROM coffee_site_table WHERE zemSirka > (:latitudeFrom - :searchRangeAsDegreePart)" +
+            "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart)" +
+            "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart)" +
+            "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart)")
+    Single<List<CoffeeSite>> getCoffeeSitesInRectangleSingle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
     /**
      *

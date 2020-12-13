@@ -122,7 +122,6 @@ public class MainActivity extends ActivityWithLocationService
     // Saves number of Not canceled sites created by user
     private UserPreferencesHelper userPreferencesHelper;
 
-
     private ProgressBar mainActivityProgressBar;
 
     /**
@@ -601,6 +600,7 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length == 0
@@ -700,7 +700,9 @@ public class MainActivity extends ActivityWithLocationService
 
             return;
         }
-        locationService.removePropertyChangeListener(this);
+        if (locationService != null) {
+            locationService.removePropertyChangeListener(this);
+        }
         doUnbindCoffeeSiteLoadOperationsService();
     }
 

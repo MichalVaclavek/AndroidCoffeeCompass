@@ -1,9 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -17,7 +14,6 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
 
 /**
@@ -28,9 +24,20 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
 
     private static final String TAG = "FoundCoffeeSitesModel";
 
-    WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService1;
+    private final WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService;
 
+    /**
+     * Class is singleton
+     */
     private static FoundCoffeeSitesViewModel instance;
+
+    public static FoundCoffeeSitesViewModel getInstance(@NonNull Application application,
+                                                        @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+        if (instance == null) {
+            instance = new FoundCoffeeSitesViewModel(application, sitesInRangeUpdateService);
+        }
+        return instance;
+    }
 
     public static FoundCoffeeSitesViewModel getInstance() {
         return instance;
@@ -75,6 +82,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * and old sites in Range)
      */
     private final MutableLiveData<List<CoffeeSiteMovable>> newSitesInRangeMutable = new MutableLiveData<>();
+
     public MutableLiveData<List<CoffeeSiteMovable>> getNewSitesInRange() {
         return newSitesInRangeMutable;
     }
@@ -87,26 +95,30 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * and old sites in Range)
      */
     private final MutableLiveData<List<CoffeeSiteMovable>> goneSitesOutOfRangeMutable = new MutableLiveData<>();
+
     public MutableLiveData<List<CoffeeSiteMovable>> getGoneSitesOutOfRange() {
         return goneSitesOutOfRangeMutable;
     }
 
 
-    public FoundCoffeeSitesViewModel(@NonNull Application application,
-                                     @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+    private FoundCoffeeSitesViewModel(@NonNull Application application,
+                                      @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
         super(application);
         /**
          * Service to return coffee sites in range
          */
-        sitesInRangeUpdateService1 = new WeakReference<>(sitesInRangeUpdateService);
-        foundCoffeeSites = sitesInRangeUpdateService1.get().getFoundSites();
+        this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
+        foundCoffeeSites = this.sitesInRangeUpdateService.get().getFoundSites();
         instance = this;
     }
 
-
-    public List<CoffeeSiteMovable> getCurrentSitesInRange() {
-        return sitesInRangeUpdateService1.get().getCurrentCoffeeSites();
-    }
+    /**
+     * Used to provide data to b shown in {@link MainAppWidgetProvider}
+     * @return
+     */
+//    public List<CoffeeSiteMovable> getCurrentSitesInRange() {
+//        return sitesInRangeUpdateService.get().getFoundSites();
+//    }
 
 
     /**

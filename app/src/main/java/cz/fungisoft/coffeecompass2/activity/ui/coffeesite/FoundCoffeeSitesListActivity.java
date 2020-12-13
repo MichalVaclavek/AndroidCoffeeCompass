@@ -290,7 +290,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
         sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
 
-        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(getApplication(), sitesInRangeUpdateService);
+        coffeeSitesViewModel = FoundCoffeeSitesViewModel.getInstance(getApplication(), sitesInRangeUpdateService);
         sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
 
         coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {

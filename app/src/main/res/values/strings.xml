@@ -202,4 +202,29 @@
     <string name="appwidget_text">Káva s sebou</string>
     <string name="add_widget">Add widget</string>
 
+    <string name="empty_view_text">Žádná lokace ...</string>
+    <string name="toast_format_string">%1$s!</string>
+    <string name="item_format_string">%1$d\u00B0 on %2$s</string>
+    <string name="header_format_string">%1$d\u00B0 in %2$s</string>
+
+    <string name="refresh">Refresh</string>
+    <string name="city_name">Káva s sebou</string>
+    <string name="widget_confirm_toast">Káva s sebou - obnoveno.</string>
+    <string name="title_activity_widget_configuration">WidgetConfigurationActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
 </resources>
