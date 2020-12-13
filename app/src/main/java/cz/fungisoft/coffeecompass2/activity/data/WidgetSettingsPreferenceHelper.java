@@ -3,6 +3,8 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import cz.fungisoft.coffeecompass2.R;
+
 /**
  * Saves current selected search distance into Preference repository
  */
@@ -40,7 +42,7 @@ public class WidgetSettingsPreferenceHelper {
     }
 
     public int getTextColor() {
-        return app_prefs.getInt(TEXT_COLOR, 500);
+        return app_prefs.getInt(TEXT_COLOR, R.color.colorPrimaryDark);
     }
 
     public void putBackround(int backround) {
@@ -50,7 +52,7 @@ public class WidgetSettingsPreferenceHelper {
     }
 
     public int getBackround() {
-        return app_prefs.getInt(BACKROUND, 1);
+        return app_prefs.getInt(BACKROUND, 0);
     }
 
     public void putSelectedRadio(int radio) {

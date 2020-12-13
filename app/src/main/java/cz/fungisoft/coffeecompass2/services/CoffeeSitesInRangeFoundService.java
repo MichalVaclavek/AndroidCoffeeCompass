@@ -81,8 +81,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
         return mBinder;
     }
 
-
-    private static AppWidgetManager appWidgetManager;
+    //private static AppWidgetManager appWidgetManager;
     private static  int[] allWidgetIds;
 
     /**
@@ -127,7 +126,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
      */
     private void starWorkOnWidgetRequest(Intent intent) {
         allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-        appWidgetManager = AppWidgetManager.getInstance(this);
+        //appWidgetManager = AppWidgetManager.getInstance(this);
         if (locationService == null && !mShouldUnbind) {
             doBindLocationService();
         } else {
@@ -433,10 +432,11 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     }
 
     private void updateWidget(List<? extends CoffeeSite> coffeeSites) {
-        if (allWidgetIds != null && appWidgetManager != null) {
+//        if (allWidgetIds != null && appWidgetManager != null) {
+        if (allWidgetIds != null) {
             for (int appWidgetId : allWidgetIds) {
-//                MainAppWidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId);
-                MainAppWidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId, allWidgetIds, coffeeSites);
+               // MainAppWidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId, allWidgetIds, coffeeSites);
+                MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites, appWidgetId);
             }
         }
     }

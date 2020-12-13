@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.widgets;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -7,9 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceFragmentCompat;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -23,6 +26,8 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
     private LinearLayout container;
     private SeekBar seekBar;
     private RadioGroup rg;
+
+    private TextView siteName = findViewById(R.id.widget_nearest_site_name);
 
     // Saves selected search distance range
     private WidgetSettingsPreferenceHelper sharedPref;
@@ -55,8 +60,10 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         searchRange = sharedPref.getSearchDistance();
 
         //populate setting-UI elements with the selected values or default values
-        seekBar.setProgress(sharedPref.getBackround(), 0));
-        rg.check(sharedPref.getTextColor(), R.id.black));
+        seekBar.setMax(100);
+        seekBar.setProgress(sharedPref.getBackround());
+
+        rg.check(sharedPref.getSelectedRadio());
 
         //apply settings to the widget
         //helps in viewing how widget looks with current settings.
@@ -84,7 +91,7 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         });
 
         //google places api requires location access peremission
-        checkPermission(ACCESS_FINE_LOCATION);
+        //checkPermission(ACCESS_FINE_LOCATION);
 
     }
 
@@ -137,21 +144,22 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
     //looks with the selected settings.
     private void applySettings() {
 
-        int widgetBackground = sharedPref.getInt(getString(R.string.widget_background), 0);
+        int widgetBackground = sharedPref.getBackround();
         //0 means transparent , 255 opaque
         //convert value to percentage
         int transparentBackground = widgetBackground * 100 / 255;
 
-        int textcolor = sharedPref.getInt(getString(R.string.widget_color), android.R.color.black);
+        int textcolor = sharedPref.getTextColor();
 
         container.getBackground().setAlpha(transparentBackground);
-        loactionName.setTextColor(ContextCompat.getColor(getApplicationContext(), textcolor));
+        siteName.setTextColor(ContextCompat.getColor(getApplicationContext(), textcolor));
     }
 
     //close settings screen
     public void closeSettings(View v) {
         //update all widgets to apply the slected settings.
-        LocationAppWidgetProvider.updateLocationWidget(getApplicationContext(), null);
+        //TODO
+        //MainAppWidgetProvider.updateAppWidget(getApplicationContext(), );
 
         Intent widgetIntent = new Intent();
         setResult(RESULT_OK, widgetIntent);

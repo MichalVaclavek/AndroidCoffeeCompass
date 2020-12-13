@@ -223,7 +223,7 @@ public class MainActivity extends ActivityWithLocationService
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
 
-        //Location info
+        // Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
         accuracy = (TextView) findViewById(R.id.accuracy);

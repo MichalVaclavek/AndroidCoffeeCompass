@@ -67,52 +67,52 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
     private static boolean imagesLoaded = false;
 
-    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.main_app_widget);
-
-        // Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action
-        Intent intentUpdate = new Intent(context, MainAppWidgetProvider.class);
-        intentUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-
-        // Update the current widget instance only, by creating an array that contains the widget’s unique ID//
-        int[] idArray = new int[] {appWidgetId};
-        intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray);
-
-        // Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
-        PendingIntent pendingUpdate = PendingIntent.getBroadcast(context, appWidgetId, intentUpdate,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Send the pending intent in response to the user tapping the ‘Update’ button
-        remoteViews.setOnClickPendingIntent(R.id.widget_refresh_Button, pendingUpdate);
-
-        if (coffeeSites != null && coffeeSites.size() > 0) {
-            remoteViews.setTextViewText(R.id.widget_nearest_site_name, coffeeSites.get(0).getName());
-            remoteViews.setTextViewText(R.id.widget_nearest_site_distance, coffeeSites.get(0).getDistance() + " m");
-            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
-            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
-            remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
-
-            if (!imagesLoaded) {
-                if (!Utils.isOfflineModeOn(context)) {
-                    Picasso.get().load(coffeeSites.get(0).getMainImageURL())
-                            //.resize(100, 150)
-                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
-                } else {
-                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSites.get(0).getMainImageFileName()))
-                            //.resize(100, 75)
-                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
-                }
-                imagesLoaded = true;
-            }
-        }
-
-        String time = new Date();
-        remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-        Log.i("Widget", "updateAppWidget() performed.");
-    }
+//    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
+//        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.main_app_widget);
+//
+//        // Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action
+//        Intent intentUpdate = new Intent(context, MainAppWidgetProvider.class);
+//        intentUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+//
+//        // Update the current widget instance only, by creating an array that contains the widget’s unique ID//
+//        int[] idArray = new int[] {appWidgetId};
+//        intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray);
+//
+//        // Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
+//        PendingIntent pendingUpdate = PendingIntent.getBroadcast(context, appWidgetId, intentUpdate,
+//                PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        // Send the pending intent in response to the user tapping the ‘Update’ button
+//        remoteViews.setOnClickPendingIntent(R.id.widget_refresh_Button, pendingUpdate);
+//
+//        if (coffeeSites != null && coffeeSites.size() > 0) {
+//            remoteViews.setTextViewText(R.id.widget_nearest_site_name, coffeeSites.get(0).getName());
+//            remoteViews.setTextViewText(R.id.widget_nearest_site_distance, coffeeSites.get(0).getDistance() + " m");
+//            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
+//            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
+//            remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
+//
+//            if (!imagesLoaded) {
+//                if (!Utils.isOfflineModeOn(context)) {
+//                    Picasso.get().load(coffeeSites.get(0).getMainImageURL())
+//                            //.resize(100, 150)
+//                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+//                } else {
+//                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSites.get(0).getMainImageFileName()))
+//                            //.resize(100, 75)
+//                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+//                }
+//                imagesLoaded = true;
+//            }
+//        }
+//
+//        //String time = new Date();
+//        remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
+//
+//        // Instruct the widget manager to update the widget
+//        appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+//        Log.i("Widget", "updateAppWidget() performed.");
+//    }
 
     private int[] appWidgetIds;
 
@@ -120,12 +120,13 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // Update each of the widgets with the remote adapter
         imagesLoaded = false;
-        for (int i = 0; i < appWidgetIds.length; ++i) {
-           //RemoteViews layout = buildLayout(context, appWidgetIds[i], mIsLargeLayout);
-            //appWidgetManager.updateAppWidget(appWidgetIds[i], layout);
-            updateAppWidget(context, appWidgetManager, i, appWidgetIds, null);
-            //Toast.makeText(context, context.getResources().getText(R.string.widget_confirm_toast), Toast.LENGTH_SHORT).show();
-        }
+//        for (int i = 0; i < appWidgetIds.length; ++i) {
+//           //RemoteViews layout = buildLayout(context, appWidgetIds[i], mIsLargeLayout);
+//            //appWidgetManager.updateAppWidget(appWidgetIds[i], layout);
+//            updateAppWidget(context, appWidgetManager, i, appWidgetIds, null);
+//            //Toast.makeText(context, context.getResources().getText(R.string.widget_confirm_toast), Toast.LENGTH_SHORT).show();
+//            setRefreshPendingIntent(context, i);
+//        }
 
         this.appWidgetIds = appWidgetIds;
         //this logic prevents infinite loop which is caused due to
@@ -139,7 +140,19 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         //schedule site fetcher job
         //LocationScheduler.scheduleGetPlacesWork(appWidgetIds);
 
-        //super.onUpdate(context, appWidgetManager, appWidgetIds);
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
+    }
+
+    // update location widgets
+    public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites, int refreshedWidgetId) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager
+                .getAppWidgetIds(new ComponentName(context, MainAppWidgetProvider.class));
+
+        RemoteViews rviews = getRemoteViewsOfWidget(context, appWidgetIds, coffeeSites);
+        setRefreshPendingIntent(context, refreshedWidgetId, rviews);
+
+        appWidgetManager.updateAppWidget(appWidgetIds, rviews);
     }
 
     private void updateViaService(Context context, int[] appWidgetIds) {
@@ -159,7 +172,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         LocalBroadcastManager.getInstance(context)
-                .registerReceiver(this, new IntentFilter(DISPLAY_SITE));
+                .registerReceiver(this, new IntentFilter(SETTINGS_CLICK));
         LocalBroadcastManager.getInstance(context)
                 .registerReceiver(this, new IntentFilter(WIDGET_CLICK));
 
@@ -194,14 +207,14 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             });
         }
 
-        if (intent.getAction().equals(SETTINGS_CLICK)){
+        if (intent.getAction().equals(SETTINGS_CLICK)) {
             //start settings activity
             Intent settings = new Intent(context, WidgetConfigurationActivity.class);
-            settings.setAction(WIDGET_CLICK);
+            settings.setAction(SETTINGS_CLICK);
             context.startActivity(settings);
         }
 
-        if (intent.getAction().equals(WIDGET_CLICK)){
+        if (intent.getAction().equals(WIDGET_CLICK)) {
             //start settings activity
             Intent settings = new Intent(context, FoundCoffeeSitesListActivity.class);
             settings.setAction(WIDGET_CLICK);
@@ -212,35 +225,62 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
     }
 
-    private static RemoteViews getRemoteViewsOfWidget(Context context,
-                                                      int appWidgetId[], String placeName){
-        RemoteViews rviews = new RemoteViews(context.getPackageName(),
-                R.layout.location_widget_layout);
-        //add pending intent to handle widget click events
-        setWidgetClickPendingIntent(context, appWidgetId, rviews);
+    private static RemoteViews getRemoteViewsOfWidget(Context context, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.main_app_widget);
+
+        // add pending intents to handle widget click events
+        setWidgetClickPendingIntent(context, appWidgetIds, remoteViews);
+        setSettingsPendingIntent(context, appWidgetIds, remoteViews);
 
         //apply current settings
-        applySettings(context, appWidgetId, rviews);
+        applySettings(context, appWidgetIds, remoteViews);
 
-        //display current place
-        populateData(context, rviews, placeName);
+        //display current coffeeSite
+        populateData(context, remoteViews, appWidgetIds, coffeeSites);
 
-        return rviews;
+        return remoteViews;
     }
 
     //sets pending intent which gets fired on clicking widget
-    private static void setWidgetClickPendingIntent(Context context, int appWidgetId[],
-                                                    RemoteViews rviews){
-        Intent intent = new Intent(context, LocationAppWidgetProvider.class);
+    private static void setWidgetClickPendingIntent(Context context, int[] appWidgetIds, RemoteViews rviews){
+        Intent intent = new Intent(context, MainAppWidgetProvider.class);
         intent.setAction(WIDGET_CLICK);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         rviews.setOnClickPendingIntent(R.id.container, pendingIntent);
     }
 
+    // sets pending intent which gets fired on settings button
+    private static void setSettingsPendingIntent(Context context, int[] appWidgetIds, RemoteViews rviews){
+        Intent intent = new Intent(context, MainAppWidgetProvider.class);
+        intent.setAction(WIDGET_CLICK);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+        rviews.setOnClickPendingIntent(R.id.widget_settings_button, pendingIntent);
+    }
+
+    // sets pending intent which gets fired on refresh button
+    private static void setRefreshPendingIntent(Context context, int appWidgetId, RemoteViews rviews) {
+        // Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action
+        Intent intentUpdate = new Intent(context, MainAppWidgetProvider.class);
+        intentUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+
+        // Update the current widget instance only, by creating an array that contains the widget’s unique ID//
+        int[] idArray = new int[] {appWidgetId};
+        intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray);
+
+        // Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
+        PendingIntent pendingUpdate = PendingIntent.getBroadcast(context, appWidgetId, intentUpdate,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Send the pending intent in response to the user tapping the ‘Update’ button
+        rviews.setOnClickPendingIntent(R.id.widget_refresh_Button, pendingUpdate);
+    }
+
     //applies settings to widgets
-    private static void applySettings(Context context, int appWidgetId[], RemoteViews rviews) {
+    private static void applySettings(Context context, int[] appWidgetIds, RemoteViews rviews) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.location_pref), Context.MODE_PRIVATE);
 
@@ -256,7 +296,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     //populates widgets with current place name
-    private static void populateData(Context context, RemoteViews rviews, String placeName) {
+    private static void populateData(Context context, RemoteViews remoteViews, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.location_pref), Context.MODE_PRIVATE);
         if(placeName == null){
@@ -270,7 +310,31 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         if(placeName == null || placeName.isEmpty()){
             placeName = DEFAULT_LOCATION;
         }
-        rviews.setTextViewText(R.id.location_name, placeName);
+
+        if (coffeeSites != null && coffeeSites.size() > 0) {
+            remoteViews.setTextViewText(R.id.widget_nearest_site_name, coffeeSites.get(0).getName());
+            remoteViews.setTextViewText(R.id.widget_nearest_site_distance, coffeeSites.get(0).getDistance() + " m");
+            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
+            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
+            remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
+
+            if (!imagesLoaded) {
+                if (!Utils.isOfflineModeOn(context)) {
+                    Picasso.get().load(coffeeSites.get(0).getMainImageURL())
+                            //.resize(100, 150)
+                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+                } else {
+                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSites.get(0).getMainImageFileName()))
+                            //.resize(100, 75)
+                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+                }
+                imagesLoaded = true;
+            }
+        }
+
+        String time = "10:00";
+
+        remoteViews.setTextViewText(R.id.widget_update_time, time);
     }
 
     //this is used to prevent loop

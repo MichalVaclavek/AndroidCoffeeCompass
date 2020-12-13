@@ -74,7 +74,7 @@
             android:weightSum="10">
 
             <ImageButton
-                android:id="@+id/widget_refresh_Button"
+                android:id="@+id/widget_refresh_button"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_gravity="top"
@@ -96,6 +96,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="TextView" />
+
+            <ImageButton
+                android:id="@+id/widget_settings_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:srcCompat="@android:drawable/ic_menu_manage" />
         </LinearLayout>
 
     </LinearLayout>
