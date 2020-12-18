@@ -11,29 +11,35 @@ import cz.fungisoft.coffeecompass2.R;
 public class WidgetSettingsPreferenceHelper {
 
     private final String SEARCH_DISTANCE = "searchDistanceWidget";
+    private final String SELECTED_DISTANCE_RADIO = "selectedDistanceRadioWidget";
+
     private final String TEXT_COLOR = "textColorWidget";
-    private final String SELECTED_RADIO = "selectedRadioWidget";
+    private final String SELECTED_TEXT_COLOR_RADIO = "selectedTextColorRadioWidget";
 
-    private final String BACKROUND = "backroundWidget";
+    private final String BACKROUND_COLOR = "backroundColorWidget";
+    private final String SELECTED_BACKROUND_COLOR_RADIO = "selectedBackroundColorRadioWidget";
 
-    private SharedPreferences app_prefs;
+    /**
+     * Barva ramecku widgetu
+     */
+    private final String FRAME_COLOR = "frameColorWidget";
+    private final String SELECTED_FRAME_COLOR_RADIO = "selectedFrameColorRadioWidget";
+
+    private final String BACKROUND_OPACITY = "backroundOpacityWidget";
+
+    private final String LAST_SERVICE_CALL = "lastServiceCallWidget";
+
+    private final SharedPreferences app_prefs;
     private Context context;
 
+
     public WidgetSettingsPreferenceHelper(Context context) {
-        app_prefs = context.getSharedPreferences("sharedDistance",
+        app_prefs = context.getSharedPreferences("sharedWidgetPrefs",
                 Context.MODE_PRIVATE);
         this.context = context;
     }
 
-    public void putSearchDistance(int searchDistance) {
-        SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putInt(SEARCH_DISTANCE, searchDistance);
-        edit.apply();
-    }
-
-    public int getSearchDistance() {
-        return app_prefs.getInt(SEARCH_DISTANCE, 500);
-    }
+    /* **** TEXT **** */
 
     public void putTextColor(int textColor) {
         SharedPreferences.Editor edit = app_prefs.edit();
@@ -45,24 +51,101 @@ public class WidgetSettingsPreferenceHelper {
         return app_prefs.getInt(TEXT_COLOR, R.color.colorPrimaryDark);
     }
 
-    public void putBackround(int backround) {
+    public void putSelectedTextRadio(int radio) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putInt(BACKROUND, backround);
+        edit.putInt(SELECTED_TEXT_COLOR_RADIO, radio);
         edit.apply();
     }
 
-    public int getBackround() {
-        return app_prefs.getInt(BACKROUND, 0);
+    public int getSelectedTextRadio() {
+        return app_prefs.getInt(SELECTED_TEXT_COLOR_RADIO, 1);
     }
 
-    public void putSelectedRadio(int radio) {
+   /* **** FRAME **** */
+
+    public void putSelectedFrameColor(int backroundColor) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putInt(SELECTED_RADIO, radio);
+        edit.putInt(FRAME_COLOR, backroundColor);
         edit.apply();
     }
 
-    public int getSelectedRadio() {
-        return app_prefs.getInt(SELECTED_RADIO, 1);
+    public int getSelectedFrameColor() {
+        return app_prefs.getInt(FRAME_COLOR, R.color.colorPrimary2);
     }
 
+
+    public void putSelectedFrameColorRadio(int radio) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(SELECTED_FRAME_COLOR_RADIO, radio);
+        edit.apply();
+    }
+
+    public int getSelectedFrameColorRadio() {
+        return app_prefs.getInt(SELECTED_FRAME_COLOR_RADIO, 1);
+    }
+
+    /* *** BACKROUND **** */
+
+    public void putSelectedBackroundColor(int backroundColor) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(BACKROUND_COLOR, backroundColor);
+        edit.apply();
+    }
+
+    public int getSelectedBackroundColor() {
+        return app_prefs.getInt(BACKROUND_COLOR, R.color.colorPrimary2);
+    }
+
+
+    public void putSelectedBackroundColorRadio(int radio) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(SELECTED_BACKROUND_COLOR_RADIO, radio);
+        edit.apply();
+    }
+
+    public int getSelectedBackroundColorRadio() {
+        return app_prefs.getInt(SELECTED_BACKROUND_COLOR_RADIO, 1);
+    }
+
+    public void putBackroundOpacity(int backround) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(BACKROUND_OPACITY, backround);
+        edit.apply();
+    }
+
+    public int getBackroundOpacity() {
+        return app_prefs.getInt(BACKROUND_OPACITY, 255);
+    }
+
+    /* *** DISTANCE **** */
+
+    public void putSelectedDistanceRadio(int radio) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(SELECTED_DISTANCE_RADIO, radio);
+        edit.apply();
+    }
+
+    public int getSelectedDistanceRadio() {
+        return app_prefs.getInt(SELECTED_DISTANCE_RADIO, 1);
+    }
+
+    public void putSearchDistance(int searchDistance) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putInt(SEARCH_DISTANCE, searchDistance);
+        edit.apply();
+    }
+
+    public int getSearchDistance() {
+        return app_prefs.getInt(SEARCH_DISTANCE, 1000);
+    }
+
+    public void putLastServiceCall(long lastServiceCall) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putLong(LAST_SERVICE_CALL, lastServiceCall);
+        edit.apply();
+    }
+
+    public long getLastServiceCall() {
+        return app_prefs.getLong(LAST_SERVICE_CALL, 0);
+    }
 }

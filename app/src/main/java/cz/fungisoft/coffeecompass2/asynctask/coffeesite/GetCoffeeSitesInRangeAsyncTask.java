@@ -34,7 +34,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
     /**
      * A Service, which invokes this async. task
      */
-    private CoffeeSitesInRangeFromServerResultListener callingService;
+    private final CoffeeSitesInRangeFromServerResultListener callingService;
 
     private String error;
 
@@ -96,8 +96,8 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
                 if (response.isSuccessful()) {
+                    Log.i(TAG, "onSuccess()");
                     if (response.body() != null) {
-                        Log.i(TAG, "onSuccess()");
                         List<CoffeeSite> coffeeSites = response.body();
                         // Convert to CoffeeSiteMovable
                         for (CoffeeSite cs : coffeeSites) {
@@ -113,6 +113,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
                     }
                 } else {
                     try {
+                        Log.i(TAG, "No CoffeeSite found.");
                         if (response.code() == 404) { // No CoffeeSite found
                             if (callingService != null) {
                                 callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
@@ -131,7 +132,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
 
             @Override
             public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
-                error = "Error loading CoffeeSites  in range REST request." + t.getMessage();
+                error = "Error loading CoffeeSites in range REST request." + t.getMessage();
                 Log.e(TAG, error);
                 callingService.onSitesInRangeReturnedFromServerError(error);
             }

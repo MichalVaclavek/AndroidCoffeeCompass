@@ -49,7 +49,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
     private List<CoffeeSiteMovable> mValues = new ArrayList<>();
-    private CoffeeSiteMovableListContent content;
 
     private final boolean mTwoPane;
 
@@ -244,10 +243,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param twoPane
      */
     public FoundCoffeeSitesRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
-                                               CoffeeSiteMovableListContent content,
                                                int currentSearchRange,
                                                boolean twoPane) {
-        this.content = content;
         this.currentSearchRange = currentSearchRange;
         mParentActivity = parent;
         mTwoPane = twoPane;
@@ -255,11 +252,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         searchingDistanceLabel = mParentActivity.getResources().getString(R.string.current_range_label);
         mOnClickListener = createOnClickListener();
 
-        if (this.content != null) {
-            mValues = this.content.getItems();
-            mValues.add(0, initialDummyEmptyListCoffeeSite);
-            this.notifyItemInserted(0);
-        }
+        mValues.add(0, initialDummyEmptyListCoffeeSite);
+        this.notifyItemInserted(0);
     }
 
     private View.OnClickListener createOnClickListener() {

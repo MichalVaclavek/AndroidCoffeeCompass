@@ -1,7 +1,7 @@
 package cz.fungisoft.coffeecompass2.widgets;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -16,24 +16,22 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceFragmentCompat;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
-
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class WidgetConfigurationActivity extends AppCompatActivity {
 
     private LinearLayout container;
-    private SeekBar seekBar;
-    private RadioGroup rg;
 
-    private TextView siteName = findViewById(R.id.widget_nearest_site_name);
+    private SeekBar opacitySeekBar;
+    //private RadioGroup rgTextColor;
+    private RadioGroup rgBackroundColor;
+    private RadioGroup rgFrameColor;
+    private RadioGroup rgDistance;
+
+    private TextView siteName;
 
     // Saves selected search distance range
     private WidgetSettingsPreferenceHelper sharedPref;
-
-    private static int searchRange = 500; // range in meters for searching from current position - 500 m default value
-    private static  String searchRangeString;
 
 
     @Override
@@ -43,7 +41,7 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings, new SettingsFragment())
+                    //.replace(R.id.settings, new SettingsFragment())
                     .commit();
         }
         ActionBar actionBar = getSupportActionBar();
@@ -51,33 +49,38 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        container = findViewById(R.id.widget_container);
-        seekBar = findViewById(R.id.widgetBackground);
-        rg = findViewById(R.id.widgetColor);
+        siteName = findViewById(R.id.widget_nearest_site_name);
+
+        container = findViewById(R.id.widget_settings_container);
+
+        opacitySeekBar = findViewById(R.id.widget_background_opacity);
+//        rgTextColor = findViewById(R.id.widget_text_color);
+        rgBackroundColor = findViewById(R.id.widget_backround_color);
+        rgFrameColor = findViewById(R.id.widget_frame_color);
+        rgDistance = findViewById(R.id.widget_search_distance);
 
         // Get current serachDistance from Preferences
         sharedPref = new WidgetSettingsPreferenceHelper(this);
-        searchRange = sharedPref.getSearchDistance();
 
         //populate setting-UI elements with the selected values or default values
-        seekBar.setMax(100);
-        seekBar.setProgress(sharedPref.getBackround());
+        opacitySeekBar.setMax(100);
+        opacitySeekBar.setProgress(sharedPref.getBackroundOpacity());
 
-        rg.check(sharedPref.getSelectedRadio());
+        //rgTextColor.check(sharedPref.getSelectedTextRadio());
+        rgBackroundColor.check(sharedPref.getSelectedBackroundColorRadio());
+        rgFrameColor.check(sharedPref.getSelectedFrameColorRadio());
+        rgDistance.check(sharedPref.getSelectedDistanceRadio());
 
         //apply settings to the widget
         //helps in viewing how widget looks with current settings.
         applySettings();
 
         //handle widget background settings and store in shared preferences
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        opacitySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 //save the selected background
-//                SharedPreferences.Editor editor = sharedPref.edit();
-//                editor.putInt(getString(R.string.widget_background), i);
-//                editor.commit();
-                sharedPref.putBackround(i);
+                sharedPref.putBackroundOpacity(i);
                 applySettings();
             }
 
@@ -95,76 +98,181 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
 
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey);
-        }
-    }
+//    public static class SettingsFragment extends PreferenceFragmentCompat {
+//        @Override
+//        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+//            setPreferencesFromResource(R.xml.root_preferences, rootKey);
+//        }
+//    }
 
-    //handle text color setting and store in shared preferences
-    public void onChooseColor(View view) {
+    // handle text color setting and store in shared preferences
+//    public void onChooseTextColor(View view) {
+//        if (!((RadioButton) view).isChecked()) {
+//            return;
+//        }
+//
+//        int color = android.R.color.black;
+//        int selectedRadio = R.id.black_text;
+//
+//        switch (view.getId()) {
+//            case R.id.red_text:
+//                color = android.R.color.holo_red_dark;
+//                selectedRadio = R.id.red_text;
+//                break;
+//            case R.id.blue_text:
+//                color = android.R.color.holo_blue_dark;
+//                selectedRadio = R.id.blue_text;
+//                break;
+//            case R.id.green_text:
+//                color = android.R.color.holo_green_dark;
+//                selectedRadio = R.id.green_text;
+//                break;
+//            case R.id.black_text:
+//                color = android.R.color.black;
+//                selectedRadio = R.id.black_text;
+//                break;
+//        }
+//
+//        sharedPref.putTextColor(color);
+//        sharedPref.putSelectedTextRadio(selectedRadio);
+//
+//        applySettings();
+//    }
+
+    // handle widget frame color setting and store in shared preferences
+    public void onChooseFrameColor(View view) {
         if (!((RadioButton) view).isChecked()) {
             return;
         }
 
         int color = android.R.color.black;
-        int selectedRadio = R.id.black;
+        int selectedRadio = R.id.black_frame;
 
         switch (view.getId()) {
-            case R.id.red:
+            case R.id.red_frame:
                 color = android.R.color.holo_red_dark;
-                selectedRadio = R.id.red;
+                selectedRadio = R.id.red_frame;
                 break;
-            case R.id.blue:
+            case R.id.blue_frame:
                 color = android.R.color.holo_blue_dark;
-                selectedRadio = R.id.blue;
+                selectedRadio = R.id.blue_frame;
                 break;
-            case R.id.green:
+            case R.id.green_frame:
                 color = android.R.color.holo_green_dark;
-                selectedRadio = R.id.green;
+                selectedRadio = R.id.green_frame;
                 break;
-            case R.id.black:
+            case R.id.black_frame:
                 color = android.R.color.black;
-                selectedRadio = R.id.black;
+                selectedRadio = R.id.black_frame;
                 break;
         }
 
-//        SharedPreferences.Editor editor = sharedPref.edit();
-//        editor.putInt(getString(R.string.widget_color), color);
-//        editor.putInt(getString(R.string.widget_color_button), selectedRadio);
-//        editor.commit();
-        sharedPref.putTextColor(color);
-        sharedPref.putSelectedRadio(selectedRadio);
+        sharedPref.putSelectedFrameColor(color);
+        sharedPref.putSelectedFrameColorRadio(selectedRadio);
 
         applySettings();
     }
 
-    //apply selected settings to the widget to see how widget
-    //looks with the selected settings.
+    // handle backround color setting and store in shared preferences
+    public void onChooseBackroundColor(View view) {
+        if (!((RadioButton) view).isChecked()) {
+            return;
+        }
+
+        int color = android.R.color.black;
+        int selectedRadio = R.id.black_backround;
+
+        switch (view.getId()) {
+            case R.id.red_backround:
+                color = android.R.color.holo_red_dark;
+                selectedRadio = R.id.red_backround;
+                break;
+            case R.id.blue_backround:
+                color = android.R.color.holo_blue_dark;
+                selectedRadio = R.id.blue_backround;
+                break;
+            case R.id.green_backround:
+                color = android.R.color.holo_green_dark;
+                selectedRadio = R.id.green_backround;
+                break;
+            case R.id.black_backround:
+                color = android.R.color.black;
+                selectedRadio = R.id.black_backround;
+                break;
+        }
+
+        sharedPref.putSelectedBackroundColor(color);
+        sharedPref.putSelectedBackroundColorRadio(selectedRadio);
+
+        applySettings();
+    }
+
+    // handle search distance setting and store in shared preferences
+    public void onChooseSearchDistance(View view) {
+        if (!((RadioButton) view).isChecked()) {
+            return;
+        }
+
+        int distance = 500;
+        int selectedRadio = R.id.widget_dist_2000;
+
+        switch (view.getId()) {
+            case R.id.widget_dist_100:
+                distance = 100;
+                selectedRadio = R.id.widget_dist_100;
+                break;
+            case R.id.widget_dist_200:
+                distance = 200;
+                selectedRadio = R.id.widget_dist_200;
+                break;
+            case R.id.widget_dist_500:
+                distance = 500;
+                selectedRadio = R.id.widget_dist_500;
+                break;
+            case R.id.widget_dist_1000:
+                distance = 1000;
+                selectedRadio = R.id.widget_dist_1000;
+                break;
+            case R.id.widget_dist_2000:
+                distance = 2000;
+                selectedRadio = R.id.widget_dist_2000;
+                break;
+        }
+
+        sharedPref.putSearchDistance(distance);
+        sharedPref.putSelectedDistanceRadio(selectedRadio);
+
+        applySettings();
+    }
+
+    // apply selected settings to the widget to see how widget
+    // looks with the selected settings.
+    //TODO - set all other selected colors i.e. Frame, Backround
     private void applySettings() {
 
-        int widgetBackground = sharedPref.getBackround();
+        int widgetBackground = sharedPref.getBackroundOpacity();
         //0 means transparent , 255 opaque
         //convert value to percentage
         int transparentBackground = widgetBackground * 100 / 255;
 
-        int textcolor = sharedPref.getTextColor();
+        int textColor = sharedPref.getTextColor();
 
+        siteName.setTextColor(ContextCompat.getColor(getApplicationContext(), textColor));
         container.getBackground().setAlpha(transparentBackground);
-        siteName.setTextColor(ContextCompat.getColor(getApplicationContext(), textcolor));
+
+        //TODO - set backround end color
+
+        //TODO - set frame color
+
     }
 
-    //close settings screen
+    // close settings screen
     public void closeSettings(View v) {
         //update all widgets to apply the slected settings.
-        //TODO
-        //MainAppWidgetProvider.updateAppWidget(getApplicationContext(), );
+        MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), null);
 
         Intent widgetIntent = new Intent();
         setResult(RESULT_OK, widgetIntent);
         finish();
-        //System.exit(0);
     }
-
 }
