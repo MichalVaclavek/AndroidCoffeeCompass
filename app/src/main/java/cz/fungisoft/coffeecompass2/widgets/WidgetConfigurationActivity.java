@@ -2,7 +2,9 @@ package cz.fungisoft.coffeecompass2.widgets;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -24,11 +26,11 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
 
     private SeekBar opacitySeekBar;
     //private RadioGroup rgTextColor;
-    private RadioGroup rgBackroundColor;
-    private RadioGroup rgFrameColor;
+    //private RadioGroup rgBackroundColor;
+    //private RadioGroup rgFrameColor;
     private RadioGroup rgDistance;
 
-    private TextView siteName;
+    //private TextView siteName;
 
     // Saves selected search distance range
     private WidgetSettingsPreferenceHelper sharedPref;
@@ -41,7 +43,6 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    //.replace(R.id.settings, new SettingsFragment())
                     .commit();
         }
         ActionBar actionBar = getSupportActionBar();
@@ -49,33 +50,32 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        siteName = findViewById(R.id.widget_nearest_site_name);
+        //siteName = findViewById(R.id.widget_nearest_site_name);
 
-        container = findViewById(R.id.widget_settings_container);
+        //container = findViewById(R.id.widget_settings_container);
 
-        opacitySeekBar = findViewById(R.id.widget_background_opacity);
-//        rgTextColor = findViewById(R.id.widget_text_color);
-        rgBackroundColor = findViewById(R.id.widget_backround_color);
-        rgFrameColor = findViewById(R.id.widget_frame_color);
+        //opacitySeekBar = findViewById(R.id.widget_background_opacity);
+        //rgBackroundColor = findViewById(R.id.widget_backround_color);
+        //rgFrameColor = findViewById(R.id.widget_frame_color);
         rgDistance = findViewById(R.id.widget_search_distance);
 
-        // Get current serachDistance from Preferences
+        // Get current searchDistance from Preferences
         sharedPref = new WidgetSettingsPreferenceHelper(this);
 
-        //populate setting-UI elements with the selected values or default values
-        opacitySeekBar.setMax(100);
-        opacitySeekBar.setProgress(sharedPref.getBackroundOpacity());
+        // populate setting-UI elements with the selected values or default values
+        //opacitySeekBar.setMax(100); // opacity as a percentage of the max. value 255
+        //opacitySeekBar.setProgress(sharedPref.getBackroundOpacity());
 
-        //rgTextColor.check(sharedPref.getSelectedTextRadio());
-        rgBackroundColor.check(sharedPref.getSelectedBackroundColorRadio());
-        rgFrameColor.check(sharedPref.getSelectedFrameColorRadio());
+        //rgBackroundColor.check(sharedPref.getSelectedBackroundColorRadio());
+        //rgFrameColor.check(sharedPref.getSelectedFrameColorRadio());
         rgDistance.check(sharedPref.getSelectedDistanceRadio());
 
         //apply settings to the widget
         //helps in viewing how widget looks with current settings.
-        applySettings();
+        //applySettings();
 
         //handle widget background settings and store in shared preferences
+        /*
         opacitySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -92,119 +92,10 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-
+*/
         //google places api requires location access peremission
         //checkPermission(ACCESS_FINE_LOCATION);
 
-    }
-
-//    public static class SettingsFragment extends PreferenceFragmentCompat {
-//        @Override
-//        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-//            setPreferencesFromResource(R.xml.root_preferences, rootKey);
-//        }
-//    }
-
-    // handle text color setting and store in shared preferences
-//    public void onChooseTextColor(View view) {
-//        if (!((RadioButton) view).isChecked()) {
-//            return;
-//        }
-//
-//        int color = android.R.color.black;
-//        int selectedRadio = R.id.black_text;
-//
-//        switch (view.getId()) {
-//            case R.id.red_text:
-//                color = android.R.color.holo_red_dark;
-//                selectedRadio = R.id.red_text;
-//                break;
-//            case R.id.blue_text:
-//                color = android.R.color.holo_blue_dark;
-//                selectedRadio = R.id.blue_text;
-//                break;
-//            case R.id.green_text:
-//                color = android.R.color.holo_green_dark;
-//                selectedRadio = R.id.green_text;
-//                break;
-//            case R.id.black_text:
-//                color = android.R.color.black;
-//                selectedRadio = R.id.black_text;
-//                break;
-//        }
-//
-//        sharedPref.putTextColor(color);
-//        sharedPref.putSelectedTextRadio(selectedRadio);
-//
-//        applySettings();
-//    }
-
-    // handle widget frame color setting and store in shared preferences
-    public void onChooseFrameColor(View view) {
-        if (!((RadioButton) view).isChecked()) {
-            return;
-        }
-
-        int color = android.R.color.black;
-        int selectedRadio = R.id.black_frame;
-
-        switch (view.getId()) {
-            case R.id.red_frame:
-                color = android.R.color.holo_red_dark;
-                selectedRadio = R.id.red_frame;
-                break;
-            case R.id.blue_frame:
-                color = android.R.color.holo_blue_dark;
-                selectedRadio = R.id.blue_frame;
-                break;
-            case R.id.green_frame:
-                color = android.R.color.holo_green_dark;
-                selectedRadio = R.id.green_frame;
-                break;
-            case R.id.black_frame:
-                color = android.R.color.black;
-                selectedRadio = R.id.black_frame;
-                break;
-        }
-
-        sharedPref.putSelectedFrameColor(color);
-        sharedPref.putSelectedFrameColorRadio(selectedRadio);
-
-        applySettings();
-    }
-
-    // handle backround color setting and store in shared preferences
-    public void onChooseBackroundColor(View view) {
-        if (!((RadioButton) view).isChecked()) {
-            return;
-        }
-
-        int color = android.R.color.black;
-        int selectedRadio = R.id.black_backround;
-
-        switch (view.getId()) {
-            case R.id.red_backround:
-                color = android.R.color.holo_red_dark;
-                selectedRadio = R.id.red_backround;
-                break;
-            case R.id.blue_backround:
-                color = android.R.color.holo_blue_dark;
-                selectedRadio = R.id.blue_backround;
-                break;
-            case R.id.green_backround:
-                color = android.R.color.holo_green_dark;
-                selectedRadio = R.id.green_backround;
-                break;
-            case R.id.black_backround:
-                color = android.R.color.black;
-                selectedRadio = R.id.black_backround;
-                break;
-        }
-
-        sharedPref.putSelectedBackroundColor(color);
-        sharedPref.putSelectedBackroundColorRadio(selectedRadio);
-
-        applySettings();
     }
 
     // handle search distance setting and store in shared preferences
@@ -242,28 +133,72 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         sharedPref.putSearchDistance(distance);
         sharedPref.putSelectedDistanceRadio(selectedRadio);
 
-        applySettings();
+        //applySettings();
     }
+
+
+    // handle widget frame color setting and store in shared preferences
+
+    // handle backround color setting and store in shared preferences
+//    public void onChooseBackroundColor(View view) {
+//        if (!((RadioButton) view).isChecked()) {
+//            return;
+//        }
+//
+//        int color = android.R.color.black;
+//        int selectedRadio = R.id.black_backround;
+//
+//        switch (view.getId()) {
+//            case R.id.red_backround:
+//                color = android.R.color.holo_red_dark;
+//                selectedRadio = R.id.red_backround;
+//                break;
+//            case R.id.blue_backround:
+//                color = android.R.color.holo_blue_dark;
+//                selectedRadio = R.id.blue_backround;
+//                break;
+//            case R.id.green_backround:
+//                color = android.R.color.holo_green_dark;
+//                selectedRadio = R.id.green_backround;
+//                break;
+//            case R.id.black_backround:
+//                color = R.color.colorPrimary2;
+//                selectedRadio = R.id.black_backround;
+//                break;
+//        }
+//
+//        sharedPref.putSelectedBackroundColor(ContextCompat.getColor(this, color));
+//        sharedPref.putSelectedBackroundColorRadio(selectedRadio);
+//
+//        applySettings();
+//    }
 
     // apply selected settings to the widget to see how widget
     // looks with the selected settings.
-    //TODO - set all other selected colors i.e. Frame, Backround
     private void applySettings() {
+        int backgroundAlphaPerc = sharedPref.getBackroundOpacity();
+        // 0 means transparent , 255 opaque
+        // convert percentage to value
+        int transparentBackground = (int) Math.round(2.55 * backgroundAlphaPerc);
 
-        int widgetBackground = sharedPref.getBackroundOpacity();
-        //0 means transparent , 255 opaque
-        //convert value to percentage
-        int transparentBackground = widgetBackground * 100 / 255;
+        int backroundEndColor = sharedPref.getSelectedBackroundColor();
+        int frameColor = sharedPref.getSelectedFrameColor();
+        configureWidgetShape(container, backroundEndColor, frameColor, transparentBackground);
+    }
 
-        int textColor = sharedPref.getTextColor();
+    private void configureWidgetShape(View v, int backgroundColor, int frameColor, int alpha) {
+        GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.TR_BL, new int[] { backgroundColor, ContextCompat.getColor(this, R.color.activityBackround) } );
+        shape.setShape(GradientDrawable.RECTANGLE);
+        //shape.setColors(new int[] {R.color.activityBackround, backgroundColor});
+        //shape.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+        shape.setCornerRadius(20);
+        shape.setStroke(10, frameColor);
+        shape.setAlpha(alpha);
+        v.setBackground(shape);
+    }
 
-        siteName.setTextColor(ContextCompat.getColor(getApplicationContext(), textColor));
-        container.getBackground().setAlpha(transparentBackground);
-
-        //TODO - set backround end color
-
-        //TODO - set frame color
-
+    private int convertDpToPixels(int dp) {
+        return getResources().getDimensionPixelSize(dp);
     }
 
     // close settings screen

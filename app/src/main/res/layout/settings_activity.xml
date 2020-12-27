@@ -34,11 +34,13 @@
                     android:text="Káva s sebou - nastavení"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
+                <!--
                 <FrameLayout
                     android:id="@+id/settings"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp">
+
 
                     <include
                         android:id="@+id/widget_settings_container"
@@ -47,22 +49,22 @@
                         android:layout_height="90dp" />
 
                 </FrameLayout>
+-->
+                <TextView
+                    android:id="@+id/title_search_distance_widget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="14dp"
+                    android:text="Vzdálenost vyhledávání v nástroji"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textSize="18sp" />
 
                 <RadioGroup
                     android:id="@+id/widget_search_distance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="6dp"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/title_search_distance_widget"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:text="Vzdálenost vyhledávání v nástroji"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                        android:textSize="18sp" />
 
                     <RadioButton
                         android:id="@+id/widget_dist_100"
@@ -90,16 +92,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:onClick="onChooseSearchDistance"
-                        android:text="1000 m" />
+                        android:text="1 km" />
 
                     <RadioButton
                         android:id="@+id/widget_dist_2000"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:onClick="onChooseSearchDistance"
-                        android:text="2000 m" />
+                        android:text="2 km" />
                 </RadioGroup>
 
+                <!--
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -128,28 +131,28 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseBackroundColor"
-                            android:text="Red" />
+                            android:text="Červená" />
 
                         <RadioButton
                             android:id="@+id/blue_backround"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseBackroundColor"
-                            android:text="Blue" />
+                            android:text="Modrá" />
 
                         <RadioButton
                             android:id="@+id/green_backround"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseBackroundColor"
-                            android:text="Green" />
+                            android:text="Zelená" />
 
                         <RadioButton
                             android:id="@+id/black_backround"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseBackroundColor"
-                            android:text="Black" />
+                            android:text="Hnědá" />
                     </RadioGroup>
 
                     <RadioGroup
@@ -174,31 +177,33 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseFrameColor"
-                            android:text="Red" />
+                            android:text="Červená" />
 
                         <RadioButton
                             android:id="@+id/blue_frame"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseFrameColor"
-                            android:text="Blue" />
+                            android:text="Modrá" />
 
                         <RadioButton
                             android:id="@+id/green_frame"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseFrameColor"
-                            android:text="Green" />
+                            android:text="Zelená" />
 
                         <RadioButton
                             android:id="@+id/black_frame"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:onClick="onChooseFrameColor"
-                            android:text="Black" />
+                            android:text="Černá" />
                     </RadioGroup>
                 </LinearLayout>
+                -->
 
+                <!--
                 <TextView
                     android:id="@+id/widget_backround_opacity_title"
                     android:layout_width="wrap_content"
@@ -215,7 +220,7 @@
                     android:layout_marginTop="8dp"
                     android:max="255"
                     android:min="0" />
-
+-->
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -230,7 +235,9 @@
                         android:text="Zavřít" />
                 </FrameLayout>
 
+
             </LinearLayout>
+
         </ScrollView>
     </LinearLayout>
 

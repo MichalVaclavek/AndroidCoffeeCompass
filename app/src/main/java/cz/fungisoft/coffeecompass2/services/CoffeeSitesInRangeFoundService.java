@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import android.app.Notification;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -118,6 +119,10 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
         enqueueWork(context, CoffeeSitesInRangeFoundService.class, JOB_ID, work);
     }
 
+    /**
+     * To detect, if the enque job has been already called
+     */
+    private Intent theOnlyJobIhave = null;
 
     /**
      * Called from MainAppWidgetProvider using CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
@@ -127,7 +132,20 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         Log.i(TAG, "Service invoked from MainAppWidgetProvider: onHandleWork()");
-        starWorkOnWidgetRequest(intent);
+        if (theOnlyJobIhave == null) {
+            theOnlyJobIhave = intent;
+            //final int extraValue = theOnlyJobIhave.getIntExtra(intent.KEY, -500);
+            //Log.d(TAG, "onHandleWork: " + extraValue);
+            try {
+                starWorkOnWidgetRequest(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.d(TAG, "onHandleWork I'm already busy, refuse to work >:(");
+        }
+        Log.d(TAG, "onHandleWork end");
+        //starWorkOnWidgetRequest(intent);
     }
 
     /**
@@ -211,6 +229,9 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (allWidgetIds != null) { // started from Widget using context.startForegroundService(intent);
+            startForeground(1, new Notification());
+        }
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
 
         // Transform CoffeeSites returned from DB (sites within Rectangel) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
@@ -431,9 +452,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     }
 
     private void updateWidget(List<? extends CoffeeSite> coffeeSites) {
-        if (allWidgetIds != null) {
-            MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
-        }
+        MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
     }
 
 }

@@ -1,3 +1,4 @@
+
 package cz.fungisoft.coffeecompass2.widgets;
 
 import android.app.PendingIntent;
@@ -8,7 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +41,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.squareup.picasso.Picasso;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE;
+import static android.graphics.drawable.GradientDrawable.RECTANGLE;
 
 /**
  * Implementation of App Widget functionality.
@@ -42,29 +51,28 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
     private static final SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm");
 
+    public static final String REFRESH_CLICK = "cz.fungisoft.coffeecompass2.widgets.REFRESH";
     public static final String WIDGET_CLICK = "cz.fungisoft.coffeecompass2.widgets.CLICK";
     public static final String SETTINGS_CLICK = "cz.fungisoft.coffeecompass2.widgets.SETTINGS";
 
+    public static String picturePath = "";
+    public static boolean pictureLoaded = false;
+    public static int coffeeSiteId = 0;
 
     public MainAppWidgetProvider() {
     }
-
-
-    private static boolean imagesLoaded = false;
 
     private int[] appWidgetIds;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // Update each of the widgets with the remote adapter
-        imagesLoaded = false;
         this.appWidgetIds = appWidgetIds;
 
         // First setup default values
         RemoteViews rViews = getRemoteViewsOfWidget(context, appWidgetIds, null);
         // Set update time
         rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
-        appWidgetManager.updateAppWidget(appWidgetIds, rViews);
 
         // Then Update via service
         updateViaService(context, appWidgetIds);
@@ -87,28 +95,34 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         intent.putExtra("coffeeSort", "");
 
         try {
-            //context.startService(intent);
-            CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent);
+                } else {
+                    //context.startService(intent);
+                    CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
+                }
             Log.i("Widget", "CoffeeSitesInRangeFoundService started.");
         }
         catch (Exception ex) {
             Log.e("Widget", ex.getMessage());
-            //CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
         }
     }
 
-    // Called by service after finishing its job
+    // Called by CoffeeSitesInRangeFoundService after finishing its job
+    // or by WidgetConfigurationActivity after closing (with coffeeSites param. set to null)
     public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager
                 .getAppWidgetIds(new ComponentName(context, MainAppWidgetProvider.class));
 
-        RemoteViews rviews = getRemoteViewsOfWidget(context, appWidgetIds, coffeeSites);
+        RemoteViews rViews = getRemoteViewsOfWidget(context, appWidgetIds, coffeeSites);
         for (int refreshedWidgetId : appWidgetIds) {
-            setRefreshPendingIntent(context, refreshedWidgetId, rviews);
+            setRefreshPendingIntent(context, refreshedWidgetId, rViews);
         }
+        // Set update time
+        rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
 
-        appWidgetManager.updateAppWidget(appWidgetIds, rviews);
+        appWidgetManager.updateAppWidget(appWidgetIds, rViews);
     }
 
     @Override
@@ -127,7 +141,8 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Handles requests based on user action. I.e. Refresh, Settings and FoundCoffeeSitesListActivity
+     * Handles requests based on user action. I.e. Refresh, Settings and open FoundCoffeeSitesListActivity.
+     *
      * @param ctx
      * @param intent
      */
@@ -139,6 +154,16 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         final int[] widgetIds = this.appWidgetIds;
         final Context context = ctx;
         final String action = intent.getAction();
+
+        if (action.equals(REFRESH_CLICK)) {
+            // start refresh using CoffeeSitesInRangeFoundService
+            try {
+                updateViaService(context, widgetIds);
+            }
+            catch (Exception ex) {
+                Log.e("Widget", ex.getMessage());
+            }
+        }
 
         if (action.equals(SETTINGS_CLICK)) {
             // start settings activity
@@ -154,7 +179,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             if (Utils.isOnline() || Utils.isOfflineModeOn(ctx)) {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
-                searching.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                searching.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 searching.putExtra("searchRange", sharedPref.getSearchDistance());
                 searching.putExtra("coffeeSort", "");
                 context.startActivity(searching);
@@ -167,6 +192,15 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         super.onReceive(ctx, intent);
     }
 
+    /**
+     * Prepares RemoteViews object of the Widget, applies current widget VIew settings and
+     * inserts current data to be displayed by the Widget
+     *
+     * @param context
+     * @param appWidgetIds
+     * @param coffeeSites
+     * @return
+     */
     private static RemoteViews getRemoteViewsOfWidget(Context context, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.main_app_widget);
 
@@ -175,7 +209,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         setSettingsPendingIntent(context, appWidgetIds, remoteViews);
 
         // apply current settings
-        applySettings(context, remoteViews);
+        //applySettings(context, remoteViews);
 
         // display current coffeeSite
         populateData(context, remoteViews, appWidgetIds, coffeeSites);
@@ -183,7 +217,9 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         return remoteViews;
     }
 
-    //sets pending intent which gets fired on clicking widget
+    /**
+     * Sets pending intent which gets fired on clicking widget. Processed by onReceive() then.
+     */
     private static void setWidgetClickPendingIntent(Context context, int[] appWidgetIds, RemoteViews rViews){
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
         intent.setAction(WIDGET_CLICK);
@@ -193,7 +229,9 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         rViews.setOnClickPendingIntent(R.id.widget_container, pendingIntent);
     }
 
-    // sets pending intent which gets fired on settings button
+    /**
+     * Sets pending intent which gets fired on settings button. Processed by onReceive() then.
+     */
     private static void setSettingsPendingIntent(Context context, int[] appWidgetIds, RemoteViews rViews){
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
         intent.setAction(SETTINGS_CLICK);
@@ -203,11 +241,13 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         rViews.setOnClickPendingIntent(R.id.widget_settings_button, pendingIntent);
     }
 
-    // sets pending intent which gets fired on refresh button
+    /**
+     * Sets pending intent which gets fired on refresh button. Processed by onReceive() then.
+     */
     private static void setRefreshPendingIntent(Context context, int appWidgetId, RemoteViews rViews) {
         // Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action
         Intent intentUpdate = new Intent(context, MainAppWidgetProvider.class);
-        intentUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intentUpdate.setAction(REFRESH_CLICK);
 
         // Update the current widget instance only, by creating an array that contains the widget’s unique ID//
         int[] idArray = new int[] { appWidgetId};
@@ -221,26 +261,72 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         rViews.setOnClickPendingIntent(R.id.widget_refresh_button, pendingUpdate);
     }
 
-    // applies settings to widgets
+    /**
+     * Applies settings to widgets
+     */
     private static void applySettings(Context context, RemoteViews rViews) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
 
-        int widgetBackground = 255 - sharedPref.getBackroundOpacity();
-        //TODO - nastaveni barev, backround opacity, search distance
+        int backroundOpacity = sharedPref.getBackroundOpacity();
+        //TODO - nastaveni barev a backround opacity z sharedPref
 //        Color bg = Color.valueOf(context.getResources().g
 //        int bg = context.getResources().getColor(R.color.colorPrimaryDark, null);
-//        widgetBackground = Color.argb( widgetBackground, bg.toArgb(), bg.toArgb(), bg.toArgb());
+//        backroundOpacity = Color.argb( backroundOpacity, bg.toArgb(), bg.toArgb(), bg.toArgb());
 
-        rViews.setInt(R.id.widget_container, "setBackgroundColor", widgetBackground);
+        int color = sharedPref.getSelectedBackroundColor();
 
+        int backroundColor = 255 - sharedPref.getBackroundOpacity();
+        //Color bg = Color.valueOf(context.getResources().getColor(color, null));
+        //backroundColor = Color.argb((float)backroundColor, bg.red(), bg.green(), bg.blue() );
+
+        //rViews.setInt(R.id.widget_container, "setBackgroundColor", backroundColor);
+        int frameColor = sharedPref.getSelectedFrameColor();
+        rViews.setImageViewBitmap(R.id.widget_container, getBackground(color, backroundOpacity, frameColor, 180, 120, context));
+
+        // Not settable in WidgetConfigurationActivity, yet
         int textColor = sharedPref.getTextColor();
         rViews.setTextColor(R.id.widget_nearest_site_name, ContextCompat.getColor(context, textColor));
-
-
     }
 
-    //populates widgets with current place name
-    private static void populateData(Context context, RemoteViews remoteViews, int[] appWidgetIds, List<? extends CoffeeSite> coffeeSites) {
+    public static Bitmap getBackground(int bgColor, int alpha, int frameColor, int width, int height, Context context) {
+        try {
+            // convert to HSV to lighten and darken
+            float[] hsv = new float[3];
+            Color.colorToHSV(bgColor, hsv);
+            hsv[2] -= .1;
+            int darker = Color.HSVToColor(alpha, hsv);
+            hsv[2] += .3;
+            int lighter = Color.HSVToColor(alpha, hsv);
+
+            // create gradient useng lighter and darker colors
+            GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.TR_BL, new int[] { darker, lighter} );
+            shape.setShape(GradientDrawable.RECTANGLE);
+            // set corner size
+            shape.setCornerRadii(new float[] {4,4,4,4,4,4,4,4});
+
+            shape.setStroke(10, frameColor);
+
+            // get density to scale bitmap for device
+            float dp = context.getResources().getDisplayMetrics().density;
+
+            // create bitmap based on width and height of widget
+            Bitmap bitmap = Bitmap.createBitmap(Math.round(width * dp), Math.round(height * dp),
+                    Bitmap.Config.ARGB_8888);
+            Canvas canvas =  new Canvas(bitmap);
+            shape.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            shape.draw(canvas);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Populates widgets with current CoffeeSite data.
+     */
+    private static void populateData(Context context, RemoteViews remoteViews, int[] appWidgetIds,
+                                     List<? extends CoffeeSite> coffeeSites) {
 
         // Default data, if no CoffeeSites found
         remoteViews.setTextViewText(R.id.widget_nearest_site_name, context.getString(R.string.no_site_found));
@@ -248,25 +334,35 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, "");
         remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, "");
         remoteViews.setTextViewText(R.id.widget_number_of_other_sites, "");
+        // default image
+        Picasso.get().load(R.drawable.kafe_backround_120x160)
+                     .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
 
         if (coffeeSites != null && coffeeSites.size() > 0) {
+
+            picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFileName()
+                                                         : coffeeSites.get(0).getMainImageURL();
+           // pictureLoaded = coffeeSites.get(0).getId() == coffeeSiteId;
+
             remoteViews.setTextViewText(R.id.widget_nearest_site_name, coffeeSites.get(0).getName());
             remoteViews.setTextViewText(R.id.widget_nearest_site_distance, coffeeSites.get(0).getDistance() + " m");
-            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
-            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
+            //remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
+            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, (CharSequence) coffeeSites.get(0).getTypLokality());
+            //remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
+            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, (CharSequence) coffeeSites.get(0).getCena());
             remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
 
-            if (!imagesLoaded) {
+            if (!picturePath.isEmpty()) {
                 if (!Utils.isOfflineModeOn(context)) {
-                    Picasso.get().load(coffeeSites.get(0).getMainImageURL())
-                            //.resize(100, 150)
+                    Picasso.get().load(picturePath)
+                            .resize(270, 360)
                             .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
                 } else {
-                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSites.get(0).getMainImageFileName()))
-                            //.resize(100, 75)
+                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, picturePath))
+                            .resize(270, 360)
                             .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
                 }
-                imagesLoaded = true;
+                //coffeeSiteId = coffeeSites.get(0).getId(); // avoids loading twice, if Service.enqueue is somehow invoked twice
             }
         }
     }
