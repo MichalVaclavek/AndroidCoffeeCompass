@@ -13,9 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import java.text.SimpleDateFormat;
@@ -28,11 +26,10 @@ import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeWidgetService;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -41,8 +38,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.squareup.picasso.Picasso;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE;
-import static android.graphics.drawable.GradientDrawable.RECTANGLE;
 
 /**
  * Implementation of App Widget functionality.
@@ -95,12 +90,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         intent.putExtra("coffeeSort", "");
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(intent);
-                } else {
-                    //context.startService(intent);
-                    CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
-                }
+            CoffeeSitesInRangeWidgetService.enqueueWork(context, intent);
             Log.i("Widget", "CoffeeSitesInRangeFoundService started.");
         }
         catch (Exception ex) {
@@ -155,8 +145,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         final Context context = ctx;
         final String action = intent.getAction();
 
-        if (action.equals(REFRESH_CLICK)) {
-            // start refresh using CoffeeSitesInRangeFoundService
+        if (action.equals(REFRESH_CLICK)) {  // start refresh using CoffeeSitesInRangeFoundService
             try {
                 updateViaService(context, widgetIds);
             }
@@ -165,8 +154,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             }
         }
 
-        if (action.equals(SETTINGS_CLICK)) {
-            // start settings activity
+        if (action.equals(SETTINGS_CLICK)) { // start settings activity
             Intent settings = new Intent(context, WidgetConfigurationActivity.class);
             settings.setAction(SETTINGS_CLICK);
             settings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -174,12 +162,11 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             context.startActivity(settings);
         }
 
-        if (action.equals(WIDGET_CLICK)) {
-            // start FoundCoffeeSitesListActivity
+        if (action.equals(WIDGET_CLICK)) { // start FoundCoffeeSitesListActivity
             if (Utils.isOnline() || Utils.isOfflineModeOn(ctx)) {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
-//                searching.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                searching.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 searching.putExtra("searchRange", sharedPref.getSearchDistance());
                 searching.putExtra("coffeeSort", "");
                 context.startActivity(searching);
@@ -339,19 +326,18 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                      .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
 
         if (coffeeSites != null && coffeeSites.size() > 0) {
-
-            picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFileName()
-                                                         : coffeeSites.get(0).getMainImageURL();
-           // pictureLoaded = coffeeSites.get(0).getId() == coffeeSiteId;
-
             remoteViews.setTextViewText(R.id.widget_nearest_site_name, coffeeSites.get(0).getName());
             remoteViews.setTextViewText(R.id.widget_nearest_site_distance, coffeeSites.get(0).getDistance() + " m");
-            //remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
-            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, (CharSequence) coffeeSites.get(0).getTypLokality());
+            remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, coffeeSites.get(0).getTypPodniku() + ", " +  coffeeSites.get(0).getTypLokality());
+            //remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, String.valueOf(coffeeSites.get(0).getTypLokality()));
             //remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, coffeeSites.get(0).getCoffeeSortsOneString() + ", " +  coffeeSites.get(0).getCena());
-            remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, (CharSequence) coffeeSites.get(0).getCena());
+            if (coffeeSites.get(0).getCena() != null) { // not obligatory, can be null
+                remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, String.valueOf(coffeeSites.get(0).getCena()));
+            }
             remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
 
+            picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFileName()
+                    : coffeeSites.get(0).getMainImageURL();
             if (!picturePath.isEmpty()) {
                 if (!Utils.isOfflineModeOn(context)) {
                     Picasso.get().load(picturePath)

@@ -1,0 +1,307 @@
+package cz.fungisoft.coffeecompass2.services;
+
+import android.appwidget.AppWidgetManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import androidx.core.app.JobIntentService;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * Service to check, if there is a change of CoffeeSites in the search range while equipment is
+ * moving.<br>
+ * Implements PropertyChangeListener of the LocationService, which is needed for equipment move
+ * detection.<br>
+ * Can use repository in case of OFFLiNE mode.
+ */
+public class CoffeeSitesInRangeWidgetService extends JobIntentService
+                                             implements CoffeeSitesInRangeFromServerResultListener {
+
+    public static final int JOB_ID = 1010;
+
+    private static final String TAG = "SitesInRangeWidgetSrv";
+
+
+    /**
+     * Location when the currentSitesInRange where observed
+     */
+    private LatLng searchLocationOfCurrentSites;
+
+    private int currentSearchRange;
+    private String coffeeSort;
+
+
+    /**
+     * CoffeeSites repository to be used in case of OFFLINE mode
+     */
+    private static CoffeeSiteRepository coffeeSiteRepository;
+
+    /**
+     * To detect, that search request to server is running
+     */
+    private boolean isSearching = false;
+
+    private int[] allWidgetIds;
+
+
+    /**
+     *
+     * @param context
+     * @param work
+     */
+    public static void enqueueWork(Context context, Intent work) {
+        Log.i(TAG, "Service invoked from MainAppWidgetProvider: enqueueWork()");
+        enqueueWork(context, CoffeeSitesInRangeWidgetService.class, JOB_ID, work);
+    }
+
+    /**
+     * To detect, if the enqueue job has been already called
+     */
+    private Intent theOnlyJobIhave = null;
+
+    /**
+     * Called from MainAppWidgetProvider using CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
+     *
+     * @param intent
+     */
+    @Override
+    protected void onHandleWork(@NonNull Intent intent) {
+        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onHandleWork()");
+        if (theOnlyJobIhave == null) {
+            theOnlyJobIhave = intent;
+            try {
+                starWorkOnWidgetRequest(intent);
+            } catch (Exception ex) {
+                Log.e(TAG, "onHandleWork() exception during starWorkOnWidgetRequest(). Ex.: " + ex.getMessage());
+            }
+        } else {
+            Log.d(TAG, "onHandleWork I'm already busy, refuse to work >:(");
+        }
+        Log.d(TAG, "onHandleWork end");
+    }
+
+    /**
+     * All work, which should be done, if service is invoked from MainAppWidgetProvider
+     */
+    private void starWorkOnWidgetRequest(Intent intent) {
+        coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
+        this.currentSearchRange = (int) intent.getExtras().get("searchRange");
+        this.coffeeSort = (String) intent.getExtras().get("coffeeSort");
+        this.allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+        if (locationService == null && !mShouldUnbind) {
+            doBindLocationService();
+        } else {
+            updateCurrentSitesForWidget();
+        }
+    }
+
+
+    /**
+     * Cislo vetsi nez 0 a menzi nez 1, vyjadrujici, kdy se ma provest
+     * novy dotaz na server pro aktualni CoffeeSites.
+     * Pri zmene lokace se vypocita o jakou vzdalenost se telefon posunul
+     * a pokud je tato zmenu vetsi jako moveToRangeNewSearchRatio * currentSearchRange
+     * pak se posle novy dotaz na server nebo do DB.
+     */
+    private final double DISTANCE_TO_RANGE_NEW_SEARCH_RATIO = 0.15;
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbind;
+
+    // Location service
+    protected static LocationService locationService;
+    private static LocationServiceConnector locationServiceConnector;
+
+
+    private void doBindLocationService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other applications).
+        Log.i(TAG, "Binding location service ...");
+        locationServiceConnector = new LocationServiceConnector(this);
+        if (bindService(new Intent(this, LocationService.class),
+                locationServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbind = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'LocationService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    public void onLocationServiceConnected() {
+        locationService = locationServiceConnector.getLocationService();
+        if (locationService != null) {
+            Log.d(TAG, "Location service binded.");
+            if (searchLocationOfCurrentSites == null) {
+                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            }
+            updateCurrentSitesForWidget();
+        }
+    }
+
+
+    private void doUnbindLocationService() {
+        if (mShouldUnbind) {
+            // Release information about the service's state.
+            unbindService(locationServiceConnector);
+            Log.i(TAG, "Location service unbinded.");
+            mShouldUnbind = false;
+        }
+    }
+
+    /**
+     * Calls REST async. task. or requests DB if in OFFLINE mode
+     *
+     * @param coffeeSort
+     */
+    private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
+        isSearching = true;
+        Log.i(TAG, "Start Async task for searching on server.");
+        new GetCoffeeSitesInRangeAsyncTask(this,
+                latitude,
+                longitude,
+                range,
+                coffeeSort).execute();
+    }
+
+
+    private void updateCurrentSitesForWidget() {
+        // Get search info, longitude, latitude, range
+        // Range taken from Widget Intent ?
+        Log.i(TAG, "Updating CoffeeSites for Widget.");
+        if (locationService != null && this.currentSearchRange > 0) {
+            Log.i(TAG, "Updating CoffeeSites for Widget.");
+            LatLng searchLocation = locationService.getCurrentLatLng();
+            if (searchLocation != null) {
+                Log.i(TAG, "Search location lat.: " + searchLocation.latitude + ", lon.: " + searchLocation.longitude);
+                if (Utils.isOfflineModeOn(getApplicationContext())) {
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    isSearching = true;
+                    Log.i(TAG, "Start Async task for searching in DB.");
+                    new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, this.currentSearchRange)
+                            .execute();
+                    try {
+                        latch.await(); // wait to finish async task assignment to coffeeSitesFromDB
+                        if (coffeeSitesFromDB != null) {
+                            updateWidget(coffeeSitesFromDB, d);
+                        }
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "Error waiting for CountDownLatch of DB search.");
+                    }
+                } else {
+                    String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
+                    startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, this.currentSearchRange);
+                }
+            }
+            doUnbindLocationService();
+        }
+    }
+
+    /**
+     * A callback method to be called, when there are CoffeeSites in range returned by
+     * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
+     * Compares returned coffeeSites with currentSitesInRange and finds new and old
+     * CoffeeSites.
+     */
+    @Override
+    public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
+        isSearching = false;
+        Log.i(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
+        updateWidget(coffeeSites, null);
+    }
+
+    @Override
+    public void onSitesInRangeReturnedFromServerError(String error) {
+        isSearching = false;
+    }
+
+    private void updateWidget(List<? extends CoffeeSite> coffeeSites, Disposable d) {
+        if (d != null) {
+            d.dispose();
+        }
+        Log.i(TAG, "Updating widget with found coffeeSites.");
+        MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
+    }
+
+
+    private static List<? extends CoffeeSite> coffeeSitesFromDB;
+    private static Disposable d;
+
+    /**
+     * Async Task to start Single request to DB.
+     */
+    private static class GetSingleCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Disposable> {
+
+        private int range;
+
+        private LatLng searchLocation;
+
+        private CountDownLatch latch;
+
+        public GetSingleCoffeeSitesAsyncTask(CountDownLatch latch, LatLng searchLocation, int currentSearchRange) {
+            this.latch = latch;
+            this.searchLocation = searchLocation;
+            this.range = currentSearchRange;
+        }
+
+        @Override
+        protected Disposable doInBackground(Void... params) {
+            d = coffeeSiteRepository.getCoffeeSitesInRangeSingle(searchLocation.latitude, searchLocation.longitude, range)
+                    .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
+                    .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
+
+                        @Override
+                        public void onStart() {
+                            Log.i(TAG, "Start Single request for Widget");
+                        }
+
+                        @Override
+                        public void onSuccess(@NonNull List<CoffeeSite> coffeeSites) {
+                            Log.i(TAG, "Single onSuccess()");
+                            List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
+                            for (CoffeeSite cs : coffeeSites) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
+                                if (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocation.latitude, searchLocation.longitude) <= range) {
+                                    coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocation));
+                                }
+                            }
+                            coffeeSitesFromDB = coffeeSiteMovables;
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            Log.e(TAG, "Single request for Widget failed. Error: " + error.getMessage());
+                            latch.countDown();
+                        }
+                    });
+
+            return d;
+        }
+    }
+
+
+}

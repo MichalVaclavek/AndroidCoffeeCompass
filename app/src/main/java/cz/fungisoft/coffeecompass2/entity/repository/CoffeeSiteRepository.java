@@ -142,8 +142,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
 
     /* Data for MainAppWidget */
 
-    public Single<List<CoffeeSite>> getCoffeeSitesInRangeSingle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePar) {
-        return coffeeSiteDao.getCoffeeSitesInRectangleSingle(latitudeFrom, longitudeFrom, searchRangeAsDegreePar);
+    public Single<List<CoffeeSite>> getCoffeeSitesInRangeSingle(double latitudeFrom, double longitudeFrom, double searchRange) {
+        double searchRangeAsDegreePart = searchRange * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
+        return coffeeSiteDao.getCoffeeSitesInRectangleSingle(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
     }
 
     /* ***** Insert CoffeeSite procedures and AsyncTask ***** */

@@ -62,13 +62,14 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         // Get current searchDistance from Preferences
         sharedPref = new WidgetSettingsPreferenceHelper(this);
 
+        rgDistance.check(sharedPref.getSelectedDistanceRadio());
+
         // populate setting-UI elements with the selected values or default values
         //opacitySeekBar.setMax(100); // opacity as a percentage of the max. value 255
         //opacitySeekBar.setProgress(sharedPref.getBackroundOpacity());
 
         //rgBackroundColor.check(sharedPref.getSelectedBackroundColorRadio());
         //rgFrameColor.check(sharedPref.getSelectedFrameColorRadio());
-        rgDistance.check(sharedPref.getSelectedDistanceRadio());
 
         //apply settings to the widget
         //helps in viewing how widget looks with current settings.
@@ -204,7 +205,7 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
     // close settings screen
     public void closeSettings(View v) {
         //update all widgets to apply the slected settings.
-        MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), null);
+        //MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), null);
 
         Intent widgetIntent = new Intent();
         setResult(RESULT_OK, widgetIntent);

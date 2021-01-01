@@ -24,6 +24,12 @@ public class LocationServiceConnector implements ServiceConnection {
         this.callingService = callingService;
     }
 
+    private CoffeeSitesInRangeWidgetService callingService2;
+
+    public LocationServiceConnector(CoffeeSitesInRangeWidgetService callingService) {
+        this.callingService2 = callingService;
+    }
+
     // To invoke the bound service, first make sure that this value
     // is not null.
     private LocationService mBoundService;
@@ -55,6 +61,10 @@ public class LocationServiceConnector implements ServiceConnection {
 
         if (this.callingService != null) {
             this.callingService.onLocationServiceConnected();
+        }
+
+        if (this.callingService2 != null) {
+            this.callingService2.onLocationServiceConnected();
         }
     }
 

@@ -1,16 +1,20 @@
 package cz.fungisoft.coffeecompass2.services;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -46,10 +50,8 @@ import io.reactivex.schedulers.Schedulers;
  * detection.<br>
  * Can use repository in case of OFFLiNE mode.
  */
-public class CoffeeSitesInRangeFoundService extends JobIntentService implements PropertyChangeListener,
+public class CoffeeSitesInRangeFoundService extends Service implements PropertyChangeListener,
                                                                        CoffeeSitesInRangeFromServerResultListener {
-
-    public static final int JOB_ID = 1010;
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -90,76 +92,6 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    private static int[] allWidgetIds;
-
-    /**
-     * Used when called from MainAppWidgetProvider by context.startService(intent);
-     *
-     * @param intent
-     * @param flags
-     * @param startId
-     * @return
-     */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onStartCommand()");
-        starWorkOnWidgetRequest(intent);
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    /**
-     *
-     * @param context
-     * @param work
-     */
-    public static void enqueueWork(Context context, Intent work) {
-        Log.i(TAG, "Service invoked from MainAppWidgetProvider: enqueueWork()");
-        enqueueWork(context, CoffeeSitesInRangeFoundService.class, JOB_ID, work);
-    }
-
-    /**
-     * To detect, if the enque job has been already called
-     */
-    private Intent theOnlyJobIhave = null;
-
-    /**
-     * Called from MainAppWidgetProvider using CoffeeSitesInRangeFoundService.enqueueWork(context, intent);
-     *
-     * @param intent
-     */
-    @Override
-    protected void onHandleWork(@NonNull Intent intent) {
-        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onHandleWork()");
-        if (theOnlyJobIhave == null) {
-            theOnlyJobIhave = intent;
-            //final int extraValue = theOnlyJobIhave.getIntExtra(intent.KEY, -500);
-            //Log.d(TAG, "onHandleWork: " + extraValue);
-            try {
-                starWorkOnWidgetRequest(intent);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            Log.d(TAG, "onHandleWork I'm already busy, refuse to work >:(");
-        }
-        Log.d(TAG, "onHandleWork end");
-        //starWorkOnWidgetRequest(intent);
-    }
-
-    /**
-     * All work, which should be done, if service is invoked from MainAppWidgetProvider
-     */
-    private void starWorkOnWidgetRequest(Intent intent) {
-        allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-        this.currentSearchRange = (int) intent.getExtras().get("searchRange");
-        this.coffeeSort = (String) intent.getExtras().get("coffeeSort");
-        if (locationService == null && !mShouldUnbind) {
-            doBindLocationService();
-        } else {
-            updateCurrentSitesForWidget();
-        }
     }
 
 
@@ -215,12 +147,10 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
         if (locationService != null) {
+            Log.i(TAG, "Location service binded.");
             locationService.addPropertyChangeListener(this);
             if (searchLocationOfCurrentSites == null) {
                 this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            }
-            if (allWidgetIds != null) {
-                updateCurrentSitesForWidget();
             }
         }
     }
@@ -229,9 +159,6 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (allWidgetIds != null) { // started from Widget using context.startForegroundService(intent);
-            startForeground(1, new Notification());
-        }
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
 
         // Transform CoffeeSites returned from DB (sites within Rectangel) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
@@ -247,7 +174,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
             return coffeeSiteMovables;
         });
 
-        if (locationService == null && !mShouldUnbind) {
+        if (locationService == null) {
             doBindLocationService();
         }
     }
@@ -257,6 +184,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other applications).
+        Log.i(TAG, "Binding location service ...");
         locationServiceConnector = new LocationServiceConnector(this);
         if (bindService(new Intent(this, LocationService.class),
                 locationServiceConnector, Context.BIND_AUTO_CREATE)) {
@@ -312,18 +240,20 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         long movedDistance = 0;
-        if (this.searchLocationOfCurrentSites != null) {
-            movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
-        }
-
-        if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange) {
-            for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                listener.onStartSearchingSitesInRange();
+        if (locationService != null) {
+            if (this.searchLocationOfCurrentSites != null) {
+                movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
             }
-            this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
 
-            if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
-                startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange) {
+                // get current location for searching
+                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+                if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
+                    startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                        listener.onStartSearchingSitesInRange();
+                    }
+                }
             }
         }
     }
@@ -357,7 +287,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
                 startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
             }
             else { // updates LiveData returned from DB
-                setInput(latitude, latitude, range);
+                setInput(latitude, longitude, range);
             }
         }
     }
@@ -369,57 +299,12 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
      */
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
         isSearching = true;
+        Log.i(TAG, "Start Async task for searching on server.");
         new GetCoffeeSitesInRangeAsyncTask(this,
                 latitude,
                 longitude,
                 range,
                 coffeeSort).execute();
-    }
-
-
-    private void updateCurrentSitesForWidget() {
-        // Get search info, longitude, latitude, range
-        // Range taken from Widget settings, or from Widget Intent ?
-        if (locationService != null && this.currentSearchRange > 0) {
-            LatLng searchLocation = locationService.getCurrentLatLng();
-            if (searchLocation != null) {
-                if (Utils.isOfflineModeOn(getApplicationContext())) {
-                    //TODO - get Single
-                    Disposable d = coffeeSiteRepository.getCoffeeSitesInRangeSingle(searchLocation.latitude, searchLocation.longitude, this.currentSearchRange)
-                            .delay(10, TimeUnit.SECONDS, Schedulers.io())
-                            .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
-                                @Override
-                                public void onStart() {
-                                    Log.i(TAG, "Start Single request for Widget");
-                                }
-
-                                @Override
-                                public void onSuccess(@NonNull List<CoffeeSite> coffeeSites) {
-                                    //foundSitesForWidget = coffeeSites;
-                                    //TODO updateWidget
-                                    updateWidget(coffeeSites);
-                                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                                        listener.onSearchingSitesInRangeFinished();
-                                    }
-                                }
-
-                                @Override
-                                public void onError(Throwable error) {
-                                    Log.e(TAG, "Single request for Widget failed.");
-                                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                                        listener.onSearchingSitesInRangeFinished();
-                                    }
-                                }
-                            });
-
-                    d.dispose();
-                } else {
-                    //TODO Start search from server - Asynchronously After result is here, updateWidget
-                    String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
-                    startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, this.currentSearchRange);
-                }
-            }
-        }
     }
 
     /**
@@ -430,7 +315,6 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
-        //TODO - detection, taht service was invoked from Widget. If yes, updateWidget via WidgetManager
         isSearching = false;
         for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
             listener.onSitesInRangeFound(coffeeSites);
@@ -438,8 +322,7 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesInRangeFinished();
         }
-
-        updateWidget(coffeeSites);
+        Log.i(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
     }
 
     @Override
@@ -450,9 +333,4 @@ public class CoffeeSitesInRangeFoundService extends JobIntentService implements 
             listener.onSearchingSitesInRangeFinished();
         }
     }
-
-    private void updateWidget(List<? extends CoffeeSite> coffeeSites) {
-        MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
-    }
-
 }
