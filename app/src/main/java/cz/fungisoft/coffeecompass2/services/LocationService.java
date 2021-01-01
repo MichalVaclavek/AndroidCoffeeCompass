@@ -30,7 +30,7 @@ import cz.fungisoft.coffeecompass2.R;
  */
 public class LocationService extends Service {
 
-    private String TAG = "Location service";
+    private final String TAG = "Location service";
 
     private static final long GPS_REFRESH_TIME_MS = 2_000; // milisecond of GPS refresh ?
     private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
@@ -95,18 +95,15 @@ public class LocationService extends Service {
 
             @Override
             public void onLocationChanged(Location loc) {
-
-                if (location == null // Current location has better then Min. accuracy
-                                     // and time period for observing location elapsed
+                // Current location has better then Min. accuracy
+                // and time period for observing location elapsed
+                if (location == null
                         ||
                         (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS) && (loc.hasAccuracy()) )
-                        && (
-                            (loc.getProvider().equals("gps") && (loc.getAccuracy() < MIN_PRESNOST))
+                        && ((loc.getProvider().equals("gps") && (loc.getAccuracy() < MIN_PRESNOST))
                             || // only available provider is network
-                            ((locManager.getProviders(true).size() == 1) && loc.getProvider().equals("network") && loc.getAccuracy() < MIN_PRESNOST * 5)
-                        )
-                )
-                {
+                            ((locManager.getProviders(true).size() == 1) && loc.getProvider().equals("network") && loc.getAccuracy() < MIN_PRESNOST * 5))
+                ) {
                     Location oldLocation = location;
                     location = loc;
                     support.firePropertyChange("location", oldLocation, location);
@@ -175,7 +172,7 @@ public class LocationService extends Service {
 
         startServiceOrStopIfNotPermitted();
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     private void startServiceOrStopIfNotPermitted() {

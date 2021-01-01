@@ -118,15 +118,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     }
 
 
-    /**
-     * Cislo vetsi nez 0 a menzi nez 1, vyjadrujici, kdy se ma provest
-     * novy dotaz na server pro aktualni CoffeeSites.
-     * Pri zmene lokace se vypocita o jakou vzdalenost se telefon posunul
-     * a pokud je tato zmenu vetsi jako moveToRangeNewSearchRatio * currentSearchRange
-     * pak se posle novy dotaz na server nebo do DB.
-     */
-    private final double DISTANCE_TO_RANGE_NEW_SEARCH_RATIO = 0.15;
-
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
     private boolean mShouldUnbind;
@@ -182,42 +173,58 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         isSearching = true;
         Log.i(TAG, "Start Async task for searching on server.");
         new GetCoffeeSitesInRangeAsyncTask(this,
-                latitude,
-                longitude,
+                latitude, longitude,
                 range,
-                coffeeSort).execute();
+                coffeeSort)
+                .execute();
     }
 
-
+    /**
+     * Calls either AsyncTasks for retrieving CoffeeSites from DB or from server.
+     */
     private void updateCurrentSitesForWidget() {
-        // Get search info, longitude, latitude, range
-        // Range taken from Widget Intent ?
         Log.i(TAG, "Updating CoffeeSites for Widget.");
         if (locationService != null && this.currentSearchRange > 0) {
             Log.i(TAG, "Updating CoffeeSites for Widget.");
             LatLng searchLocation = locationService.getCurrentLatLng();
-            if (searchLocation != null) {
+            if (searchLocation != null && !isSearching) {
                 Log.i(TAG, "Search location lat.: " + searchLocation.latitude + ", lon.: " + searchLocation.longitude);
                 if (Utils.isOfflineModeOn(getApplicationContext())) {
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    isSearching = true;
-                    Log.i(TAG, "Start Async task for searching in DB.");
-                    new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, this.currentSearchRange)
-                            .execute();
-                    try {
-                        latch.await(); // wait to finish async task assignment to coffeeSitesFromDB
-                        if (coffeeSitesFromDB != null) {
-                            updateWidget(coffeeSitesFromDB, d);
-                        }
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "Error waiting for CountDownLatch of DB search.");
-                    }
+                    startSearchCoffeeSitesInDB(searchLocation);
                 } else {
                     String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
                     startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, this.currentSearchRange);
                 }
             }
-            doUnbindLocationService();
+            doUnbindLocationService(); // location service not needed now, can be unbinded now to release resources
+        }
+    }
+
+    /**
+     * Starts GetSingleCoffeeSitesAsyncTask to find CoffeeSites in range from DB.
+     *
+     * @param searchLocation current search location
+     */
+    private void startSearchCoffeeSitesInDB(LatLng searchLocation) {
+       /*
+        Needed to process results of DB search returned as Single in the Main thread
+        DB request must run in separate thread, therefore AsyncTask is created,
+        byt Picasso library works in Main thread, therefore update of Widget cannot
+        be called from AsyncTask from onSuccess() of the DisposableSingleObserver
+        */
+        final CountDownLatch latch = new CountDownLatch(1);
+        isSearching = true;
+        Log.i(TAG, "Start Async task for searching in DB.");
+        new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, this.currentSearchRange)
+                .execute();
+        try {
+            latch.await(); // wait to finish async task assignment to coffeeSitesFromDB
+            isSearching = false;
+            if (coffeeSitesFromDB != null) {
+                updateWidget(coffeeSitesFromDB, d);
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Error waiting for CountDownLatch of DB search.");
         }
     }
 
@@ -230,7 +237,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
         isSearching = false;
-        Log.i(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
+        Log.d(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
         updateWidget(coffeeSites, null);
     }
 
@@ -239,20 +246,31 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         isSearching = false;
     }
 
+    /**
+     * Updates Widget with CoffeeSites found by this service.
+     *
+     * @param coffeeSites
+     * @param d
+     */
     private void updateWidget(List<? extends CoffeeSite> coffeeSites, Disposable d) {
         if (d != null) {
             d.dispose();
         }
-        Log.i(TAG, "Updating widget with found coffeeSites.");
+        Log.d(TAG, "Updating widget with found coffeeSites.");
         MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
     }
 
-
+    /**
+     * Result of the DB request
+     */
     private static List<? extends CoffeeSite> coffeeSitesFromDB;
+    /**
+     * Disposable of the Single DB request
+     */
     private static Disposable d;
 
     /**
-     * Async Task to start Single request to DB.
+     * Async Task to start and get Single request result from DB.
      */
     private static class GetSingleCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Disposable> {
 
@@ -302,6 +320,5 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             return d;
         }
     }
-
 
 }

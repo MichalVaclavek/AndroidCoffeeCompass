@@ -57,7 +57,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
      * Actual list of CoffeeSites in the search range from current position of the equipment
      * as returned from server (or from DB after conversion from List<CoffeeSite> to List<CoffeeSiteMovable>)
      */
-    private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
+    private static List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
 
     /**
      * CoffeeSites, which have come into current Range.
@@ -112,13 +112,9 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         instance = this;
     }
 
-    /**
-     * Used to provide data to b shown in {@link MainAppWidgetProvider}
-     * @return
-     */
-//    public List<CoffeeSiteMovable> getCurrentSitesInRange() {
-//        return sitesInRangeUpdateService.get().getFoundSites();
-//    }
+    public void clear() {
+        currentSitesInRange.clear();
+    }
 
 
     /**
@@ -155,5 +151,4 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
     public void onSitesInRangeFound(List<CoffeeSiteMovable> coffeeSites) {
         processFoundCoffeeSites(coffeeSites);
     }
-
 }

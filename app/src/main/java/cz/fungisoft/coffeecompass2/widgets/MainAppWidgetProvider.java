@@ -44,6 +44,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class MainAppWidgetProvider extends AppWidgetProvider {
 
+    private static String TAG = "Widget";
+
     private static final SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm");
 
     public static final String REFRESH_CLICK = "cz.fungisoft.coffeecompass2.widgets.REFRESH";
@@ -91,10 +93,10 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
         try {
             CoffeeSitesInRangeWidgetService.enqueueWork(context, intent);
-            Log.i("Widget", "CoffeeSitesInRangeFoundService started.");
+            Log.i(TAG, "CoffeeSitesInRangeFoundService started.");
         }
         catch (Exception ex) {
-            Log.e("Widget", ex.getMessage());
+            Log.e(TAG, ex.getMessage());
         }
     }
 
@@ -140,7 +142,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     public void onReceive(Context ctx, Intent intent) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(ctx);
 
-        Log.i("Widget", "onReceive() started.");
+        Log.i(TAG, "onReceive() started.");
         final int[] widgetIds = this.appWidgetIds;
         final Context context = ctx;
         final String action = intent.getAction();
@@ -150,7 +152,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 updateViaService(context, widgetIds);
             }
             catch (Exception ex) {
-                Log.e("Widget", ex.getMessage());
+                Log.e(TAG, ex.getMessage());
             }
         }
 
@@ -170,12 +172,13 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 searching.putExtra("searchRange", sharedPref.getSearchDistance());
                 searching.putExtra("coffeeSort", "");
                 context.startActivity(searching);
+                Log.i(TAG, "Started FoundCoffeeSitesListActivity");
             } else {
                 Toast.makeText(context, context.getResources().getText(R.string.toast_no_internet_no_offline_data), Toast.LENGTH_SHORT).show();
             }
         }
 
-        Log.i("Widget", "onReceive() finished.");
+        Log.i(TAG, "onReceive() finished.");
         super.onReceive(ctx, intent);
     }
 

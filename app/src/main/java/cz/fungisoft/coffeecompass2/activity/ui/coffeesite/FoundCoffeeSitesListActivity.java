@@ -264,6 +264,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other applications).
+        //sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
         if (bindService(new Intent(this, CoffeeSitesInRangeFoundService.class),
                 sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUpdateSitesInRangeUnbind = true;
@@ -303,6 +304,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
             sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
         }
         if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.clear();
+
             coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {
                 @Override
                 public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
