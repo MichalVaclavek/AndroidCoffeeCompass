@@ -1,22 +1,13 @@
 package cz.fungisoft.coffeecompass2.services;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-import androidx.core.app.JobIntentService;
-import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -25,30 +16,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
 
 /**
- * Service to check, if there is a change of CoffeeSites in the search range while equipment is
- * moving.<br>
+ * Service to find CoffeeSites in current search range. Uses other objects to get such data<br>
+ * either from server or from DB (for OFFLINE mode).<br>
  * Implements PropertyChangeListener of the LocationService, which is needed for equipment move
  * detection.<br>
- * Can use repository in case of OFFLiNE mode.
  */
 public class CoffeeSitesInRangeFoundService extends Service implements PropertyChangeListener,
                                                                        CoffeeSitesInRangeFromServerResultListener {
@@ -137,7 +120,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     // Don't attempt to unbind from the service unless the client has received some
     // information about the service's state.
-    private boolean mShouldUnbind;
+    private static boolean mShouldUnbind;
 
     // Location service
     protected static LocationService locationService;
@@ -259,11 +242,8 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     }
 
     /**
-     * Calls the REST API function to get current CoffeeSites in Range.
-     * and updates the sites in range using locationService. If anything
-     * updated, then inform listeners about the change.
-     *
-     * @return
+     * Validates prerequisites for CoffeeSites search and starts searching fro CoffeeSites in range.<br>
+     * Also calls onStartSearchingSitesInRange of the listeners to perform action required at search begin.
      */
     public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
         this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
@@ -281,6 +261,15 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         }
     }
 
+    /**
+     * Starts request for CoffeeSites in range either from server (REST API) or sets the input to LiveData
+     * to be returned from DB.
+     *
+     * @param coffeeSort
+     * @param latitude
+     * @param longitude
+     * @param range
+     */
     private void startSearchingSites(String coffeeSort, double latitude, double longitude, int range) {
         if (!isSearching) {
             if (!Utils.isOfflineModeOn(getApplicationContext())) {

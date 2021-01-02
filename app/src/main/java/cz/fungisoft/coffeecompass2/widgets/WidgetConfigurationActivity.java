@@ -20,6 +20,12 @@ import androidx.preference.PreferenceFragmentCompat;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
 
+/**
+ * Activity to configure parameters of the Widget by user.
+ * <p><p/>
+ * Currently only search distance for Widget is implemented, but also
+ * some colors of the Widget should be implemented too.
+ */
 public class WidgetConfigurationActivity extends AppCompatActivity {
 
     private LinearLayout container;

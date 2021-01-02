@@ -41,11 +41,17 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 /**
  * Implementation of App Widget functionality.
+ * Shows the current nearest CoffeeSite found.
+ * Uses mainly CoffeeSitesInRangeWidgetService to get current CoffeeSites in the search range
+ * and location.
  */
 public class MainAppWidgetProvider extends AppWidgetProvider {
 
     private static String TAG = "Widget";
 
+    /**
+     * Format of the last widget update time.
+     */
     private static final SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm");
 
     public static final String REFRESH_CLICK = "cz.fungisoft.coffeecompass2.widgets.REFRESH";
@@ -53,7 +59,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     public static final String SETTINGS_CLICK = "cz.fungisoft.coffeecompass2.widgets.SETTINGS";
 
     public static String picturePath = "";
-    public static boolean pictureLoaded = false;
     public static int coffeeSiteId = 0;
 
     public MainAppWidgetProvider() {
@@ -86,7 +91,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     private void updateViaService(Context context, int[] appWidgetIds) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
 
-        Intent intent = new Intent(context, CoffeeSitesInRangeFoundService.class);
+        Intent intent = new Intent(context, CoffeeSitesInRangeWidgetService.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         intent.putExtra("searchRange", sharedPref.getSearchDistance());
         intent.putExtra("coffeeSort", "");
@@ -100,8 +105,10 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         }
     }
 
-    // Called by CoffeeSitesInRangeFoundService after finishing its job
-    // or by WidgetConfigurationActivity after closing (with coffeeSites param. set to null)
+    /**
+    *  Called by CoffeeSitesInRangeWidgetService, after finishing its job
+    *  or by WidgetConfigurationActivity after closing (with coffeeSites param. set to null)
+    */
     public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager
@@ -169,6 +176,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
                 searching.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                //searching.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 searching.putExtra("searchRange", sharedPref.getSearchDistance());
                 searching.putExtra("coffeeSort", "");
                 context.startActivity(searching);
@@ -208,7 +216,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Sets pending intent which gets fired on clicking widget. Processed by onReceive() then.
+     * Sets pending intent which gets fired on clicking widget body. Processed by onReceive() then.
      */
     private static void setWidgetClickPendingIntent(Context context, int[] appWidgetIds, RemoteViews rViews){
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
@@ -220,7 +228,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Sets pending intent which gets fired on settings button. Processed by onReceive() then.
+     * Sets pending intent which gets fired on settings button of the Widget. Processed by onReceive() then.
      */
     private static void setSettingsPendingIntent(Context context, int[] appWidgetIds, RemoteViews rViews){
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
@@ -232,7 +240,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Sets pending intent which gets fired on refresh button. Processed by onReceive() then.
+     * Sets pending intent which gets fired on refresh button of the Widget. Processed by onReceive() then.
      */
     private static void setRefreshPendingIntent(Context context, int appWidgetId, RemoteViews rViews) {
         // Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action
@@ -340,7 +348,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
 
             picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFileName()
-                    : coffeeSites.get(0).getMainImageURL();
+                                                         : coffeeSites.get(0).getMainImageURL();
             if (!picturePath.isEmpty()) {
                 if (!Utils.isOfflineModeOn(context)) {
                     Picasso.get().load(picturePath)
@@ -351,7 +359,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                             .resize(270, 360)
                             .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
                 }
-                //coffeeSiteId = coffeeSites.get(0).getId(); // avoids loading twice, if Service.enqueue is somehow invoked twice
             }
         }
     }

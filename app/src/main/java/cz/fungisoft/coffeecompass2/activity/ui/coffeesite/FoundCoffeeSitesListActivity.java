@@ -34,7 +34,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 
 /**
- * An activity representing a list of CoffeeSites.
+ * An activity representing a list of CoffeeSites currently in the search range.
+ * <p>
  * This activity has different presentations for handset and tablet-size devices.
  * On handsets, the activity presents a list of items, which when touched,
  * lead to a {@link CoffeeSiteDetailActivity} representing
@@ -42,10 +43,11 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p><p/>
- * Used to start AsyncTask for searching CoffeeSites in range and to show
- * list of found CoffeeSites based on location.
+ * Uses FoundCoffeeSitesViewModel, which holds information about CoffeeSites
+ * newly entered into search range and CoffeeSites, which left the current range.
+ * This is used to be inserted to FoundCoffeeSitesRecyclerViewAdapter, which shows
+ * changes of CoffeeSites in the current search range (and location).
  * <p>
- * Another activity is used to show CoffeeSites created by user.
  */
 public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                                           implements CoffeeSitesInRangeSearchOperationListener,
@@ -67,6 +69,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
      */
     private final CoffeeSiteMovableListContent currentContent = new CoffeeSiteMovableListContent();
 
+    /**
+     * Adapter to show current CoffeeSites in range.
+     */
     private FoundCoffeeSitesRecyclerViewAdapter recyclerViewAdapter;
     private Parcelable mListState;
 
@@ -80,17 +85,18 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     private String originalToolbarTitle;
 
     /**
-     * Model providing found coffeeSites to Activity and it's recycler view adapter
+     * Model providing "new" and "old" CoffeeSites to the Activity and it's recycler view adapter
      */
-    private static FoundCoffeeSitesViewModel coffeeSitesViewModel;
+    private FoundCoffeeSitesViewModel coffeeSitesViewModel;
 
     /**
      * Service which provides updates of CoffeeSites list in the current
-     * search Range
+     * search Range to FoundCoffeeSitesViewModel to further evaluation of the "new"/"old"
+     * CoffeeSites.
      */
     private static CoffeeSitesInRangeFoundService sitesInRangeUpdateService;
     private static CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
-    private boolean mShouldUpdateSitesInRangeUnbind;
+    private static boolean mShouldUpdateSitesInRangeUnbind;
 
 
     @Override
@@ -115,16 +121,13 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         setSupportActionBar(toolbar);
 
         originalToolbarTitle = String.valueOf(getTitle());
-
         layoutManager = new LinearLayoutManager(this);
 
+        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
+
         sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
-        if (sitesInRangeUpdateService == null && !mShouldUpdateSitesInRangeUnbind) {
-            doBindSitesInRangeService();
-        }
-        else {
-            startSearchingSites();
-        }
+
+        doBindSitesInRangeService();
 
         prepareAndActivateRecyclerView();
     }
@@ -177,6 +180,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         super.onResume();
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
+        }
+        if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.clear();
         }
     }
 
@@ -264,7 +270,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other applications).
-        //sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
         if (bindService(new Intent(this, CoffeeSitesInRangeFoundService.class),
                 sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUpdateSitesInRangeUnbind = true;
@@ -290,7 +295,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
         sitesInRangeUpdateService.addSitesInRangeSearchOperationListener(this);
 
-        coffeeSitesViewModel = FoundCoffeeSitesViewModel.getInstance(getApplication(), sitesInRangeUpdateService);
+        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(sitesInRangeUpdateService);
         sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
 
         startSearchingSites();
@@ -304,15 +309,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
             sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
         }
         if (coffeeSitesViewModel != null) {
-            coffeeSitesViewModel.clear();
-
-            coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
-                    // Process found CoffeeSites - leads to update list of new and gone CoffeeSites, see below
-                    coffeeSitesViewModel = coffeeSitesViewModel.processFoundCoffeeSites(coffeeSitesInRange);
-                }
-            });
 
             coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
                 @Override
@@ -348,5 +344,4 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
             });
         }
     }
-
 }

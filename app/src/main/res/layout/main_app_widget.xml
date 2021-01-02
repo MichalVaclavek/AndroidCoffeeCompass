@@ -20,7 +20,7 @@
             android:id="@+id/widget_nearest_site_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No coffee nearby"
+            android:text="@string/no_site_found"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="14sp"
             android:textStyle="bold" />

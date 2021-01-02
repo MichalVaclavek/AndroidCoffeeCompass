@@ -226,14 +226,14 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * Returns current CoffeeSitesMovable shown by the Adapter
      * @return current CoffeeSitesMovable shown by the Adapter
      */
-    public List<CoffeeSiteMovable> getShownItems() {
-        if (mValues != null && mValues.size() >= 1
-                && (!mValues.get(0).getName().equals("Dummy") || !mValues.get(0).getName().equals("InitialDummy"))) {
-            return mValues;
-        } else {
-            return new ArrayList<>();
-        }
-    }
+//    public List<CoffeeSiteMovable> getShownItems() {
+//        if (mValues != null && mValues.size() >= 1
+//                && (!mValues.get(0).getName().equals("Dummy") || !mValues.get(0).getName().equals("InitialDummy"))) {
+//            return mValues;
+//        } else {
+//            return new ArrayList<>();
+//        }
+//    }
 
     /**
      * Standard constructor of the class MyCoffeeSiteItemRecyclerViewAdapter
@@ -572,7 +572,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
 
-    /**
+        /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
          */
         class ViewHolder1 extends RecyclerView.ViewHolder {

@@ -1,11 +1,12 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -17,41 +18,63 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
 
 /**
- * Data Model to be hold by {@link FoundCoffeeSitesListActivity}.
- * Represents all found coffee sites to be displayed by the activity's RecyclerViewAdapter
+ * Data Model to be hold by {@link FoundCoffeeSitesListActivity}.<br>
+ * <p>
+ * Collects following information:
+ *
+ * - all currently found Coffee sites
+ * - new CoffeeSites
+ * - old CoffeeSites to be displayed by the activity's RecyclerViewAdapter
+ * <p>
+ * Class is a singleton.
  */
-public class FoundCoffeeSitesViewModel extends AndroidViewModel implements CoffeeSitesInRangeFoundListener {
+public class FoundCoffeeSitesViewModel extends AndroidViewModel
+                                       implements CoffeeSitesInRangeFoundListener {
 
     private static final String TAG = "FoundCoffeeSitesModel";
 
-    private final WeakReference<CoffeeSitesInRangeFoundService> sitesInRangeUpdateService;
-
-    /**
-     * Class is singleton
-     */
-    private static FoundCoffeeSitesViewModel instance;
-
-    public static FoundCoffeeSitesViewModel getInstance(@NonNull Application application,
-                                                        @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
-        if (instance == null) {
-            instance = new FoundCoffeeSitesViewModel(application, sitesInRangeUpdateService);
-        }
-        return instance;
-    }
-
-    public static FoundCoffeeSitesViewModel getInstance() {
-        return instance;
-    }
+    private WeakReference<AppCompatActivity> ownerActivity;
 
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment as
      * found in DB.
      */
-    private final LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
+    private LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
 
-    public LiveData<List<CoffeeSiteMovable>> getFoundCoffeeSites() {
-        return foundCoffeeSites;
+    /**
+     * Private constructor, class is singleton. Only instance is returned by getInstance() method.
+     *
+     * @param ownerActivity owner Activity
+     * @param sitesInRangeUpdateService service to return coffee sites in range
+     */
+    public FoundCoffeeSitesViewModel(@NonNull AppCompatActivity ownerActivity,
+                                     @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+        this(ownerActivity);
+        foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
     }
+
+    /**
+     * Private constructor, class is singleton. Only instance is returned by getInstance() method.
+     *
+     * @param application
+     * @param sitesInRangeUpdateService
+     */
+    public FoundCoffeeSitesViewModel(@NonNull AppCompatActivity ownerActivity) {
+        super(ownerActivity.getApplication());
+        this.ownerActivity = new WeakReference<>(ownerActivity);
+    }
+
+    public void setCoffeeSitesInRangeFoundService(CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+        foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
+        foundCoffeeSites.observe(ownerActivity.get(), new Observer<List<CoffeeSiteMovable>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
+                // Process found CoffeeSites - leads to update list of new and gone CoffeeSites, see below
+                processFoundCoffeeSites(coffeeSitesInRange);
+            }
+        });
+    }
+
 
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment
@@ -100,18 +123,11 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel implements Coffe
         return goneSitesOutOfRangeMutable;
     }
 
-
-    private FoundCoffeeSitesViewModel(@NonNull Application application,
-                                      @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
-        super(application);
-        /**
-         * Service to return coffee sites in range
-         */
-        this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
-        foundCoffeeSites = this.sitesInRangeUpdateService.get().getFoundSites();
-        instance = this;
-    }
-
+    /**
+     * Method to initiate new processing of the "new" and "old" CoffeeSites.<br>
+     * Usually called, when a new instance of the calling activity is created and the new searching of the
+     * CoffeeSites is requested.
+     */
     public void clear() {
         currentSitesInRange.clear();
     }

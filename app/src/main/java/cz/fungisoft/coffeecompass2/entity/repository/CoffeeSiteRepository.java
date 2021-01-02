@@ -26,7 +26,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
      * A multiply factor, found by experiment, which has to be used,
      * when searching from current location within circle range, when
      * the searching itself in DB can be only performed like searching
-     * within square
+     * within square.
      */
     final double MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE = 1.4;
 
