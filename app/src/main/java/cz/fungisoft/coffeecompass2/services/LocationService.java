@@ -52,13 +52,13 @@ public class LocationService extends Service {
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         support.addPropertyChangeListener(pcl);
-        Log.d(TAG,  "Pridan posluchac zmeny polohy: " + pcl);
+        //Log.d(TAG,  "Pridan posluchac zmeny polohy: " + pcl);
         Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         support.removePropertyChangeListener(pcl);
-        Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
+        //Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
         Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
@@ -98,12 +98,10 @@ public class LocationService extends Service {
                 // Current location has better then Min. accuracy
                 // and time period for observing location elapsed
                 if (location == null
-                        ||
-                        (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS) && (loc.hasAccuracy()) )
+                        || (location.getTime() < (System.currentTimeMillis() - GPS_REFRESH_TIME_MS) && (loc.hasAccuracy()) )
                         && ((loc.getProvider().equals("gps") && (loc.getAccuracy() < MIN_PRESNOST))
                             || // only available provider is network
-                            ((locManager.getProviders(true).size() == 1) && loc.getProvider().equals("network") && loc.getAccuracy() < MIN_PRESNOST * 5))
-                ) {
+                            ((locManager.getProviders(true).size() == 1) && loc.getProvider().equals("network") && loc.getAccuracy() < MIN_PRESNOST * 5))) {
                     Location oldLocation = location;
                     location = loc;
                     support.firePropertyChange("location", oldLocation, location);
@@ -206,11 +204,8 @@ public class LocationService extends Service {
     }
 
     public LatLng getCurrentLatLng() {
-        if (location != null) {
-            return new LatLng(location.getLatitude(), location.getLongitude());
-        } else {
-            return null;
-        }
+        return (location != null) ? new LatLng(location.getLatitude(), location.getLongitude())
+                                  : null;
     }
 
     public Location getCurrentLocation() {

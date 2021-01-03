@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.services;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -10,6 +11,8 @@ import androidx.core.app.JobIntentService;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -40,7 +43,8 @@ import io.reactivex.schedulers.Schedulers;
  * only network location.
  */
 public class CoffeeSitesInRangeWidgetService extends JobIntentService
-                                             implements CoffeeSitesInRangeFromServerResultListener {
+                                             implements CoffeeSitesInRangeFromServerResultListener,
+                                                        PropertyChangeListener {
 
     public static final int JOB_ID = 1010;
 
@@ -115,11 +119,12 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         this.currentSearchRange = (int) intent.getExtras().get("searchRange");
         this.coffeeSort = (String) intent.getExtras().get("coffeeSort");
         this.allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-        if (locationService == null && !mShouldUnbind) {
-            doBindLocationService();
-        } else {
-            updateCurrentSitesForWidget();
-        }
+        //if (locationService == null && !mShouldUnbind) {
+        doBindLocationService();
+        //}
+//        else {
+//            updateCurrentSitesForWidget();
+//        }
     }
 
 
@@ -151,8 +156,11 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
         if (locationService != null) {
+            locationService.addPropertyChangeListener(this);
             Log.d(TAG, "Location service binded.");
             if (searchLocationOfCurrentSites == null) {
+                //Location lastLoc = locationService.posledniPozice(this.currentSearchRange, 1000);
+                //this.searchLocationOfCurrentSites = new LatLng(lastLoc.getLatitude(), lastLoc.getLongitude());
                 this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
             }
             updateCurrentSitesForWidget();
@@ -162,12 +170,14 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     private void doUnbindLocationService() {
         if (mShouldUnbind) {
+            locationService.removePropertyChangeListener(this);
             // Release information about the service's state.
             unbindService(locationServiceConnector);
             Log.i(TAG, "Location service unbinded.");
             mShouldUnbind = false;
         }
     }
+
 
     /**
      * Calls either AsyncTasks for retrieving CoffeeSites from DB or from server.
@@ -186,7 +196,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                     startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, this.currentSearchRange);
                 }
             }
-            doUnbindLocationService(); // location service not needed now, can be unbinded now to release resources
         }
     }
 
@@ -237,6 +246,24 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
     }
 
+    /**
+     * Wait for change of location before perfomring service's job ... to get actual location.
+     * @param evt
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        Log.d(TAG, "Location property changed.");
+        updateCurrentSitesForWidget();
+    }
+
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "Unbinding Location service.");
+        doUnbindLocationService();
+        super.onDestroy();
+    }
+
     /* ================ DB request for Offline mode ========================== */
 
     /**
@@ -275,6 +302,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             Log.e(TAG, "Error waiting for CountDownLatch of DB search.");
         }
     }
+
 
     /**
      * Async Task to start and get Single request result from DB.

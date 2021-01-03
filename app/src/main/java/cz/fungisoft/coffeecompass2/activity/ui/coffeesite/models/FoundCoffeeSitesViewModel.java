@@ -33,7 +33,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
 
     private static final String TAG = "FoundCoffeeSitesModel";
 
-    private WeakReference<AppCompatActivity> ownerActivity;
+    private final WeakReference<AppCompatActivity> ownerActivity;
 
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment as
@@ -54,7 +54,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
     }
 
     /**
-     * Private constructor, class is singleton. Only instance is returned by getInstance() method.
+     * Constructor ....
      *
      * @param application
      * @param sitesInRangeUpdateService

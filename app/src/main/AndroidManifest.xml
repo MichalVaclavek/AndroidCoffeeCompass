@@ -13,8 +13,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" /> <!-- needed for Widget handling for Pre-Oreo devices -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- needed for Widget handling for Pre-Oreo devices -->
     <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> -->
 
     <uses-feature
@@ -158,11 +158,17 @@
             android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".activity.ui.coffeesite.FoundCoffeeSitesListActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter> <!-- To start the activity from Widget -->
+                <action android:name="cz.fungisoft.coffeecompass2.widgets.CLICK" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".activity.ui.login.UserDataViewActivity"
             android:parentActivityName=".activity.MainActivity"
@@ -186,7 +192,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

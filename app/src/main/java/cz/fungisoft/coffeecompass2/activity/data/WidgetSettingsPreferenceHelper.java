@@ -126,7 +126,7 @@ public class WidgetSettingsPreferenceHelper {
     }
 
     public int getSelectedDistanceRadio() {
-        return app_prefs.getInt(SELECTED_DISTANCE_RADIO, 1);
+        return app_prefs.getInt(SELECTED_DISTANCE_RADIO, 4);
     }
 
     public void putSearchDistance(int searchDistance) {

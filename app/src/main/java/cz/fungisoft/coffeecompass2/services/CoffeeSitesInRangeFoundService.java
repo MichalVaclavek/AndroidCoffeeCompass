@@ -127,18 +127,6 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     private static LocationServiceConnector locationServiceConnector;
 
 
-    public void onLocationServiceConnected() {
-        locationService = locationServiceConnector.getLocationService();
-        if (locationService != null) {
-            Log.i(TAG, "Location service binded.");
-            locationService.addPropertyChangeListener(this);
-            if (searchLocationOfCurrentSites == null) {
-                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-            }
-        }
-    }
-
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -157,9 +145,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
             return coffeeSiteMovables;
         });
 
-        if (locationService == null) {
-            doBindLocationService();
-        }
+        doBindLocationService();
     }
 
     private void doBindLocationService() {
@@ -178,6 +164,18 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         }
     }
 
+    public void onLocationServiceConnected() {
+        locationService = locationServiceConnector.getLocationService();
+        if (locationService != null) {
+            Log.i(TAG, "Location service binded.");
+            locationService.addPropertyChangeListener(this);
+            if (searchLocationOfCurrentSites == null) {
+                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            }
+        }
+    }
+
+
     private void doUnbindLocationService() {
         if (mShouldUnbind && locationService != null) {
             locationService.removePropertyChangeListener(this);
@@ -185,12 +183,6 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
             unbindService(locationServiceConnector);
             mShouldUnbind = false;
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        doUnbindLocationService();
     }
 
     /**
@@ -322,4 +314,11 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
             listener.onSearchingSitesInRangeFinished();
         }
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        doUnbindLocationService();
+    }
+
 }

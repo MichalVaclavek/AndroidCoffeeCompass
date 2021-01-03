@@ -31,6 +31,9 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConne
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
+
+import static cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider.WIDGET_CLICK;
 
 
 /**
@@ -87,16 +90,16 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     /**
      * Model providing "new" and "old" CoffeeSites to the Activity and it's recycler view adapter
      */
-    private FoundCoffeeSitesViewModel coffeeSitesViewModel;
+    private static FoundCoffeeSitesViewModel coffeeSitesViewModel;
 
     /**
      * Service which provides updates of CoffeeSites list in the current
      * search Range to FoundCoffeeSitesViewModel to further evaluation of the "new"/"old"
      * CoffeeSites.
      */
-    private static CoffeeSitesInRangeFoundService sitesInRangeUpdateService;
-    private static CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
-    private static boolean mShouldUpdateSitesInRangeUnbind;
+    private CoffeeSitesInRangeFoundService sitesInRangeUpdateService;
+    private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
+    private boolean mShouldUpdateSitesInRangeUnbind;
 
 
     @Override
@@ -117,29 +120,21 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
         this.searchRange = (int) getIntent().getExtras().get("searchRange");
 
+        if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.clear();
+        }
+
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
         setSupportActionBar(toolbar);
 
         originalToolbarTitle = String.valueOf(getTitle());
         layoutManager = new LinearLayoutManager(this);
 
-        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
-
-        sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
-
         doBindSitesInRangeService();
 
         prepareAndActivateRecyclerView();
     }
 
-    /**
-     * Setup locationService listeners and RecyclerView which also
-     * requires locationService to be activated/connected.
-     */
-    @Override
-    public void onLocationServiceConnected() {
-        super.onLocationServiceConnected();
-    }
 
     private void prepareAndActivateRecyclerView() {
         Bundle extras = getIntent().getExtras();
@@ -181,27 +176,24 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
         }
-        if (coffeeSitesViewModel != null) {
-            coffeeSitesViewModel.clear();
-        }
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         // save RecyclerView state
         Bundle listState = new Bundle();
         mListState = recyclerView.getLayoutManager().onSaveInstanceState();
         listState.putParcelable(LIST_STATE_KEY, mListState);
+        super.onPause();
     }
 
     @Override
     public void onDestroy() {
         if ((locationService != null) && currentContent.getItems().size() > 0) {
             for (CoffeeSiteMovable csm : currentContent.getItems()) {
-                if (csm.isLocationServiceAssigned()) {
-                    locationService.removePropertyChangeListener(csm);
-                }
+                //if (csm.isLocationServiceAssigned()) {
+                locationService.removePropertyChangeListener(csm);
+                //}
             }
         }
 
@@ -209,6 +201,93 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
         doUnBindSitesInRangeService();
         super.onDestroy();
+    }
+
+
+    private void doBindSitesInRangeService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other applications).
+        sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
+        if (bindService(new Intent(this, CoffeeSitesInRangeFoundService.class),
+                sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUpdateSitesInRangeUnbind = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSitesInRangeUpdateService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    public void doUnBindSitesInRangeService() {
+        // Release information about the service's state.
+        if (mShouldUpdateSitesInRangeUnbind) {
+            if (sitesInRangeUpdateService != null) {
+                sitesInRangeUpdateService.removeSitesInRangeSearchOperationListener(this);
+            }
+            unbindService(sitesInRangeUpdateServiceConnector);
+            mShouldUpdateSitesInRangeUnbind = false;
+        }
+    }
+
+    @Override
+    public void onCoffeeSitesInRangeUpdateServiceConnected() {
+        sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
+        sitesInRangeUpdateService.addSitesInRangeSearchOperationListener(this);
+
+        startSearchingSites();
+    }
+
+    /**
+     * Processes changes of the 'new' and/or 'old' CoffeeSites LiveData in range
+     * as provided by coffeeSitesViewModel
+     */
+    private void startSearchingSites() {
+        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
+        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(sitesInRangeUpdateService);
+        sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
+
+        final int currentSearchRange = this.searchRange;
+        final LatLng currentSearchFromLocation = this.searchLocation;
+
+        if (sitesInRangeUpdateService != null) {
+            sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
+        }
+        if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+                @Override
+                public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
+                    // Update the cached copy of the newCoffeeSitesInRange in the adapter.
+                    assert newCoffeeSitesInRange != null;
+                    for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
+                        // Add new CoffeeSites as locationService listeners
+                        csm.setLocationService(locationService);
+                        if (locationService != null) {
+                            locationService.addPropertyChangeListener(csm);
+                            currentContent.getItems().add(csm);
+                        }
+                    }
+                    recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
+                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange); // update Widget
+                    onSearchingSitesInRangeFinished();
+                }
+            });
+
+            coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+                @Override
+                public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
+                    // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
+                    assert goneCoffeeSitesInRange != null;
+                    for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
+                        if (locationService != null) {
+                            locationService.removePropertyChangeListener(csm);
+                        }
+                    }
+                    recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange);
+                    onSearchingSitesInRangeFinished();
+                }
+            });
+        }
     }
 
     @Override
@@ -264,84 +343,4 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         toast.show();
     }
 
-
-    private void doBindSitesInRangeService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other applications).
-        if (bindService(new Intent(this, CoffeeSitesInRangeFoundService.class),
-                sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUpdateSitesInRangeUnbind = true;
-        } else {
-            Log.e(TAG, "Error: The requested 'CoffeeSitesInRangeUpdateService' service doesn't " +
-                    "exist, or this client isn't allowed access to it.");
-        }
-    }
-
-    public void doUnBindSitesInRangeService() {
-        // Release information about the service's state.
-        if (mShouldUpdateSitesInRangeUnbind) {
-            if (sitesInRangeUpdateService != null) {
-                sitesInRangeUpdateService.removeSitesInRangeSearchOperationListener(this);
-            }
-            unbindService(sitesInRangeUpdateServiceConnector);
-            mShouldUpdateSitesInRangeUnbind = false;
-        }
-    }
-
-    @Override
-    public void onCoffeeSitesInRangeUpdateServiceConnected() {
-        sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
-        sitesInRangeUpdateService.addSitesInRangeSearchOperationListener(this);
-
-        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(sitesInRangeUpdateService);
-        sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
-
-        startSearchingSites();
-    }
-
-    private void startSearchingSites() {
-        final int currentSearchRange = this.searchRange;
-        final LatLng currentSearchFromLocation = this.searchLocation;
-
-        if (sitesInRangeUpdateService != null) {
-            sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
-        }
-        if (coffeeSitesViewModel != null) {
-
-            coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
-                    // Update the cached copy of the newCoffeeSitesInRange in the adapter.
-                    assert newCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
-                        // Add new CoffeeSites as locationService listeners
-                        csm.setLocationService(locationService);
-                        if (locationService != null) {
-                            locationService.addPropertyChangeListener(csm);
-                        }
-                    }
-                    currentContent.setItems(newCoffeeSitesInRange);
-                    recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
-                    onSearchingSitesInRangeFinished();
-                }
-            });
-
-            coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
-                    // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
-                    assert goneCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
-                        if (locationService != null) {
-                            locationService.removePropertyChangeListener(csm);
-                        }
-                    }
-                    recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange);
-                    onSearchingSitesInRangeFinished();
-                }
-            });
-        }
-    }
 }

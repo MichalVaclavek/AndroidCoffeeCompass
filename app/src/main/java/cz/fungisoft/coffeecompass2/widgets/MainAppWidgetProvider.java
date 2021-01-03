@@ -176,7 +176,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
                 searching.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                //searching.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 searching.putExtra("searchRange", sharedPref.getSearchDistance());
                 searching.putExtra("coffeeSort", "");
                 context.startActivity(searching);

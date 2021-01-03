@@ -65,13 +65,13 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         changeSupport.addPropertyChangeListener(pcl);
         Log.d(TAG, "Posluchac zmeny vzdalenosti pridan: " + pcl);
-        Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+        //Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         changeSupport.removePropertyChangeListener(pcl);
         Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
-        Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+        //Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public CoffeeSiteMovable() {
