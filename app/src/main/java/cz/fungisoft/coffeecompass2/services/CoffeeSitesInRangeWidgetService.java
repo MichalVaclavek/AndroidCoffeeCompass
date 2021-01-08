@@ -1,23 +1,35 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.JobIntentService;
 
+//import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
@@ -48,13 +60,26 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     public static final int JOB_ID = 1010;
 
+    public static final int NOTIFICATION_ID = 121234;
+
+    private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove
+    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pocka na lepsi
+
     private static final String TAG = "SitesInRangeWidgetSrv";
+
+    private static final long GET_LOCATION_WAITING_TIME = 40_000L; // wait max. 40 secs to get right location
 
 
     /**
      * Location when the currentSitesInRange where observed
      */
-    private LatLng searchLocationOfCurrentSites;
+    private static LatLng searchLocationOfCurrentSites;
+
+    /**
+     * To indicate, that searching for location is still ongoing after  locationService.getPosledniPozice()
+     * and service waits for locationService's propertyChange for better location accuracy.
+     */
+    private static boolean locationSearchFinished = false;
 
     private int currentSearchRange;
     private String coffeeSort;
@@ -68,9 +93,42 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     /**
      * To detect, that search request to server is running
      */
-    private boolean isSearching = false;
+    private boolean isSearchingSites = false;
 
     private int[] allWidgetIds;
+
+    @Override
+    public int onStartCommand (Intent intent, int flags, int startId) {
+        prepareAndStartForeground();
+        starWorkOnWidgetRequest(intent);
+        return START_STICKY;
+    }
+
+
+    private void prepareAndStartForeground() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            String CHANNEL_ID = "my_channel_01";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    "Start Widget update", NotificationManager.IMPORTANCE_LOW);
+
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+
+            Intent notificationIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+            Notification notification = new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle(getText(R.string.widget_notification_title))
+                .setContentText(getText(R.string.widget_notification_message))
+                .setSmallIcon(R.drawable.cup_48)
+                .setContentIntent(pendingIntent)
+                .setTicker(getText(R.string.widget_ticker_text))
+                .build();
+
+
+            startForeground(NOTIFICATION_ID, notification);
+            //startForeground(notification, FOREGROUND_SERVICE_TYPE_LOCATION);
+        }
+    }
 
 
     /**
@@ -111,6 +169,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         Log.d(TAG, "onHandleWork end");
     }
 
+    //private FusedLocationProviderClient fusedLocationClient;
+
     /**
      * All work, which should be done, if service is invoked from MainAppWidgetProvider
      */
@@ -119,12 +179,9 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         this.currentSearchRange = (int) intent.getExtras().get("searchRange");
         this.coffeeSort = (String) intent.getExtras().get("coffeeSort");
         this.allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-        //if (locationService == null && !mShouldUnbind) {
+
+        isSearchingSites = false; // reset
         doBindLocationService();
-        //}
-//        else {
-//            updateCurrentSitesForWidget();
-//        }
     }
 
 
@@ -156,15 +213,29 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
         if (locationService != null) {
+            startLocationFoundTimerTask();
             locationService.addPropertyChangeListener(this);
             Log.d(TAG, "Location service binded.");
-            if (searchLocationOfCurrentSites == null) {
-                //Location lastLoc = locationService.posledniPozice(this.currentSearchRange, 1000);
-                //this.searchLocationOfCurrentSites = new LatLng(lastLoc.getLatitude(), lastLoc.getLongitude());
-                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            Location lastLocation =  locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            //TODO Toast to inform that searchin started ... please wait nebo Nelze vyhledat, nelze ziskat polohu zarizeni
+            locationSearchFinished = false;
+            if (lastLocation != null) {
+                Toast.makeText(this, "Hledám nejbližší lokaci ...", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Last location found.");
+                searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                Log.d(TAG, "Last location accuracy: " + lastLocation.getAccuracy());
+                if (lastLocation.getAccuracy() < LAST_PRESNOST) {
+                    locationSearchFinished = true;
+                }
+                if (!isSearchingSites) {
+                    startSearchCurrentSitesForWidget();
+                }
+            } else {
+                Toast.makeText(this, "Určování polohy není zapnuto", Toast.LENGTH_LONG).show();
+                //updateWidget(null, null);
             }
-            updateCurrentSitesForWidget();
         }
+
     }
 
 
@@ -182,19 +253,15 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     /**
      * Calls either AsyncTasks for retrieving CoffeeSites from DB or from server.
      */
-    private void updateCurrentSitesForWidget() {
-        Log.i(TAG, "Updating CoffeeSites for Widget.");
-        if (locationService != null && this.currentSearchRange > 0) {
-            Log.i(TAG, "Updating CoffeeSites for Widget.");
-            LatLng searchLocation = locationService.getCurrentLatLng();
-            if (searchLocation != null && !isSearching) {
-                Log.i(TAG, "Search location lat.: " + searchLocation.latitude + ", lon.: " + searchLocation.longitude);
-                if (Utils.isOfflineModeOn(getApplicationContext())) {
-                    startSearchCoffeeSitesInDB(searchLocation);
-                } else {
-                    String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
-                    startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocation.latitude, searchLocation.longitude, this.currentSearchRange);
-                }
+    private void startSearchCurrentSitesForWidget() {
+        Log.i(TAG, "Start calling Async tasks for updating CoffeeSites for Widget.");
+        if (searchLocationOfCurrentSites != null) {
+            Log.i(TAG, "Search location lat.: " + searchLocationOfCurrentSites.latitude + ", lon.: " + searchLocationOfCurrentSites.longitude);
+            if (Utils.isOfflineModeOn(getApplicationContext())) {
+                startSearchCoffeeSitesInDB(searchLocationOfCurrentSites, currentSearchRange);
+            } else {
+                String coffeeSortLoc = this.coffeeSort != null ? this.coffeeSort : "";
+                startSearchSitesInRangeFromServer(coffeeSortLoc, searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             }
         }
     }
@@ -205,13 +272,12 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      * @param coffeeSort
      */
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
-        isSearching = true;
+        isSearchingSites = true;
         Log.i(TAG, "Start Async task for searching on server.");
         new GetCoffeeSitesInRangeAsyncTask(this,
                 latitude, longitude,
                 range,
-                coffeeSort)
-                .execute();
+                coffeeSort).execute();
     }
 
     /**
@@ -222,14 +288,14 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
-        isSearching = false;
+        isSearchingSites = false;
         Log.d(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
         updateWidget(coffeeSites, null);
     }
 
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
-        isSearching = false;
+        isSearchingSites = false;
     }
 
     /**
@@ -242,8 +308,18 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         if (d != null) {
             d.dispose();
         }
+
+        if ((timer != null) && locationSearchFinished) {
+            timer.cancel();
+            Log.d(TAG, "Timer cancelled.");
+        }
+
         Log.d(TAG, "Updating widget with found coffeeSites.");
-        MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites);
+        MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites, locationSearchFinished);
+
+        if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.O) && locationSearchFinished) { // was started using enqueue()
+            stopSelf();
+        }
     }
 
     /**
@@ -253,13 +329,43 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         Log.d(TAG, "Location property changed.");
-        updateCurrentSitesForWidget();
+        if (locationService != null) {
+            searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            if (searchLocationOfCurrentSites != null ) {
+                locationSearchFinished = true;
+                if (!isSearchingSites) {
+                    startSearchCurrentSitesForWidget();
+                }
+            }
+        }
+    }
+
+    private Timer timer;
+
+    /**
+     * Starts TimerTask to check, if searchingFinished is done. If not,
+     * service is finished
+     */
+    private void startLocationFoundTimerTask() {
+        TimerTask task = new TimerTask() {
+            public void run() {
+                Log.d(TAG, "Timer task performed on: " + new Date() + ". Thread's name: " + Thread.currentThread().getName());
+                locationSearchFinished = true;
+                updateWidget(null, null);
+            }
+        };
+
+        timer = new Timer("Location_search_finished_timer");
+        long delay = GET_LOCATION_WAITING_TIME;
+        Log.d(TAG, "Timer task scheduled.");
+        timer.schedule(task, delay);
     }
 
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "Unbinding Location service.");
+        locationService.removePropertyChangeListener(this);
         doUnbindLocationService();
         super.onDestroy();
     }
@@ -270,6 +376,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      * Result of the DB request
      */
     private static List<? extends CoffeeSite> coffeeSitesFromDB;
+
     /**
      * Disposable of the Single DB request
      */
@@ -280,7 +387,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      *
      * @param searchLocation current search location
      */
-    private void startSearchCoffeeSitesInDB(LatLng searchLocation) {
+    private void startSearchCoffeeSitesInDB(LatLng searchLocation, int range) {
        /*
         Needed to process results of DB search returned as Single in the Main thread
         DB request must run in separate thread, therefore AsyncTask is created,
@@ -288,13 +395,13 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         be called from AsyncTask from onSuccess() of the DisposableSingleObserver
         */
         final CountDownLatch latch = new CountDownLatch(1);
-        isSearching = true;
+        isSearchingSites = true;
         Log.i(TAG, "Start Async task for searching in DB.");
-        new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, this.currentSearchRange)
+        new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, range)
                 .execute();
         try {
             latch.await(); // wait to finish Async task assignment to coffeeSitesFromDB
-            isSearching = false;
+            isSearchingSites = false;
             if (coffeeSitesFromDB != null) {
                 updateWidget(coffeeSitesFromDB, d);
             }

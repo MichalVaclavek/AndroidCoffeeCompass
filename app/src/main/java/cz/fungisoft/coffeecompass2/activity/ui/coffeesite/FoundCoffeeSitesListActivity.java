@@ -101,7 +101,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
     private boolean mShouldUpdateSitesInRangeUnbind;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -120,9 +119,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
         this.searchRange = (int) getIntent().getExtras().get("searchRange");
 
-        if (coffeeSitesViewModel != null) {
-            coffeeSitesViewModel.clear();
-        }
+//        if (coffeeSitesViewModel != null) {
+//            coffeeSitesViewModel.clear();
+//        }
 
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
         setSupportActionBar(toolbar);
@@ -155,7 +154,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-
         // Save CoffeeSites list state
         mListState = layoutManager.onSaveInstanceState();
         state.putParcelable(LIST_STATE_KEY, mListState);
@@ -191,9 +189,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     public void onDestroy() {
         if ((locationService != null) && currentContent.getItems().size() > 0) {
             for (CoffeeSiteMovable csm : currentContent.getItems()) {
-                //if (csm.isLocationServiceAssigned()) {
                 locationService.removePropertyChangeListener(csm);
-                //}
             }
         }
 
@@ -235,6 +231,10 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
         sitesInRangeUpdateService.addSitesInRangeSearchOperationListener(this);
 
+        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
+        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(sitesInRangeUpdateService);
+        sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
+
         startSearchingSites();
     }
 
@@ -243,50 +243,49 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
      * as provided by coffeeSitesViewModel
      */
     private void startSearchingSites() {
-        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
-        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(sitesInRangeUpdateService);
-        sitesInRangeUpdateService.addSitesInRangeFoundListener(coffeeSitesViewModel);
-
         final int currentSearchRange = this.searchRange;
         final LatLng currentSearchFromLocation = this.searchLocation;
 
         if (sitesInRangeUpdateService != null) {
             sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
-        }
-        if (coffeeSitesViewModel != null) {
-            coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
-                    // Update the cached copy of the newCoffeeSitesInRange in the adapter.
-                    assert newCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
-                        // Add new CoffeeSites as locationService listeners
-                        csm.setLocationService(locationService);
-                        if (locationService != null) {
-                            locationService.addPropertyChangeListener(csm);
-                            currentContent.getItems().add(csm);
-                        }
-                    }
-                    recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
-                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange); // update Widget
-                    onSearchingSitesInRangeFinished();
-                }
-            });
 
-            coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
-                    // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
-                    assert goneCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
-                        if (locationService != null) {
-                            locationService.removePropertyChangeListener(csm);
+            if (coffeeSitesViewModel != null) {
+                coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+                    @Override
+                    public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
+                        // Update the cached copy of the newCoffeeSitesInRange in the adapter.
+                        assert newCoffeeSitesInRange != null;
+                        for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
+                            // Add new CoffeeSites as locationService listeners
+                            csm.setLocationService(locationService);
+                            if (locationService != null) {
+                                locationService.addPropertyChangeListener(csm);
+                                currentContent.getItems().add(csm);
+                            }
                         }
+                        recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
+                        MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true); // update Widget
+                        onSearchingSitesInRangeFinished();
                     }
-                    recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange);
-                    onSearchingSitesInRangeFinished();
-                }
-            });
+                });
+
+                coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+                    @Override
+                    public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
+                        // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
+                        assert goneCoffeeSitesInRange != null;
+                        for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
+                            if (locationService != null) {
+                                locationService.removePropertyChangeListener(csm);
+                                currentContent.getItems().remove(csm);
+                            }
+                        }
+                        recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange);
+                        MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true); // update Widget
+                        onSearchingSitesInRangeFinished();
+                    }
+                });
+            }
         }
     }
 

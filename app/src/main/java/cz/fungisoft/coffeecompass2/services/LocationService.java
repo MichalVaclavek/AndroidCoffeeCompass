@@ -130,7 +130,7 @@ public class LocationService extends Service {
      * @param cas
      * @return
      */
-    public Location posledniPozice(float minAccuracy, long cas) {
+    public Location getPosledniPozice(float minAccuracy, long cas) {
 
         Location vysledek = null;
         float topPresnost = Float.MAX_VALUE;
@@ -199,7 +199,7 @@ public class LocationService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         startServiceOrStopIfNotPermitted();
-        location = posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        location = getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         return mBinder;
     }
 

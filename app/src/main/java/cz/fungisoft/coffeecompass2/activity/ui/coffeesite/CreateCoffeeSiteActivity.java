@@ -1143,7 +1143,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         super.onLocationServiceConnected();
         if (mode == MODE_CREATE) {
-            currentLocation = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationService.addPropertyChangeListener(this);
             // Initiate coffeeSite location selected by user
             if (currentLocation != null) {

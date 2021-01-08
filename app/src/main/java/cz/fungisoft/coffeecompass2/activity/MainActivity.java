@@ -620,7 +620,7 @@ public class MainActivity extends ActivityWithLocationService
         super.onLocationServiceConnected();
         hideProgressbar();
 
-        location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         locationService.addPropertyChangeListener(this);
 
         showLocationAccuracy(location);
@@ -655,7 +655,7 @@ public class MainActivity extends ActivityWithLocationService
 
         if (locationService != null) {
             locationService.addPropertyChangeListener(this);
-            location = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
             showLocationAccuracy(location);
             updateAccuracyIndicator(location);

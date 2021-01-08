@@ -15,7 +15,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- needed for Widget handling for Pre-Oreo devices -->
-    <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -100,6 +101,7 @@
             android:name=".services.CoffeeSitesInRangeWidgetService"
             android:enabled="true"
             android:exported="true"
+            android:foregroundServiceType="location"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.UserAccountService"
@@ -164,9 +166,9 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter> <!-- To start the activity from Widget -->
-                <action android:name="cz.fungisoft.coffeecompass2.widgets.CLICK" />
-            </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
         </activity>
 
         <activity

@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -25,7 +26,6 @@ import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeWidgetService;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -82,6 +82,9 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
+    private static Intent sitesInRangeServiceIntent;
+    private static boolean serviceStarted = false;
+
     /**
      * Widget is always updated calling service CoffeeSitesInRangeFoundService
      *
@@ -91,14 +94,24 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     private void updateViaService(Context context, int[] appWidgetIds) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
 
-        Intent intent = new Intent(context, CoffeeSitesInRangeWidgetService.class);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-        intent.putExtra("searchRange", sharedPref.getSearchDistance());
-        intent.putExtra("coffeeSort", "");
+        sitesInRangeServiceIntent = new Intent(context, CoffeeSitesInRangeWidgetService.class);
+        sitesInRangeServiceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+        sitesInRangeServiceIntent.putExtra("searchRange", sharedPref.getSearchDistance());
+        sitesInRangeServiceIntent.putExtra("coffeeSort", "");
 
         try {
-            CoffeeSitesInRangeWidgetService.enqueueWork(context, intent);
-            Log.i(TAG, "CoffeeSitesInRangeFoundService started.");
+            //CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+                if (!serviceStarted) {
+                    context.startForegroundService(sitesInRangeServiceIntent);
+                    serviceStarted = true;
+                    Log.i(TAG, "CoffeeSitesInRangeWidgetService started.");
+                }
+            } else {
+                CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent);
+                Log.i(TAG, "CoffeeSitesInRangeWidgetService started - enqueueWork()");
+            }
+
         }
         catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
@@ -108,20 +121,31 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     /**
     *  Called by CoffeeSitesInRangeWidgetService, after finishing its job
     *  or by WidgetConfigurationActivity after closing (with coffeeSites param. set to null)
+     * @param coffeeSites
+     * @param searchingFinished to indicate if the service, calling this method, already finished searching - then the service can be stopped as it was called by this MainAppWidgetprovider
     */
-    public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int[] appWidgetIds = appWidgetManager
-                .getAppWidgetIds(new ComponentName(context, MainAppWidgetProvider.class));
+    public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites, boolean searchingFinished) {
+        if (coffeeSites != null) {
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int[] appWidgetIds = appWidgetManager
+                    .getAppWidgetIds(new ComponentName(context, MainAppWidgetProvider.class));
 
-        RemoteViews rViews = getRemoteViewsOfWidget(context, appWidgetIds, coffeeSites);
-        for (int refreshedWidgetId : appWidgetIds) {
-            setRefreshPendingIntent(context, refreshedWidgetId, rViews);
+            RemoteViews rViews = getRemoteViewsOfWidget(context, appWidgetIds, coffeeSites);
+            for (int refreshedWidgetId : appWidgetIds) {
+                setRefreshPendingIntent(context, refreshedWidgetId, rViews);
+            }
+            // Set update time
+            rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
+
+            appWidgetManager.updateAppWidget(appWidgetIds, rViews);
         }
-        // Set update time
-        rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
 
-        appWidgetManager.updateAppWidget(appWidgetIds, rViews);
+        if (searchingFinished && serviceStarted) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+                context.stopService(sitesInRangeServiceIntent);
+                serviceStarted = false;
+            }
+        }
     }
 
     @Override

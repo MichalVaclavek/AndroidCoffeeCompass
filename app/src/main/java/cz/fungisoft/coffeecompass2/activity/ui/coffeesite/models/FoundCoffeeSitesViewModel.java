@@ -80,7 +80,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
      * Actual list of CoffeeSites in the search range from current position of the equipment
      * as returned from server (or from DB after conversion from List<CoffeeSite> to List<CoffeeSiteMovable>)
      */
-    private static List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
+    private List<CoffeeSiteMovable> currentSitesInRange = new ArrayList<>();
 
     /**
      * CoffeeSites, which have come into current Range.
