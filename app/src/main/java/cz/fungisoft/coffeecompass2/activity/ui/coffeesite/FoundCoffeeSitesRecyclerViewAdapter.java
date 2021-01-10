@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
@@ -53,6 +55,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private final boolean mTwoPane;
 
     private final View.OnClickListener mOnClickListener;
+    private final View.OnClickListener mOnImageClickListener;
 
     private final int currentSearchRange;
 
@@ -251,11 +254,18 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         searchingDistanceLabel = mParentActivity.getResources().getString(R.string.current_range_label);
         mOnClickListener = createOnClickListener();
+        mOnImageClickListener = createOnClickListenerForShowImageActivityStart();
 
         mValues.add(0, initialDummyEmptyListCoffeeSite);
         this.notifyItemInserted(0);
     }
 
+    /**
+     * OnClick listener to open CoffeeSiteDetailActivity to show details
+     * of the CoffeeSite as it is shown when searching and looking into the detailes.
+     *
+     * @return
+     */
     private View.OnClickListener createOnClickListener() {
         View.OnClickListener retVal;
 
@@ -281,6 +291,30 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) siteMovable);
+                    context.startActivity(intent);
+                }
+            }
+        };
+        return retVal;
+    }
+
+    /**
+     * OnClick listener to open CoffeeSiteImageActivity to show picture
+     * of the CoffeeSite as it is shown when searching and looking into the details.
+     *
+     * @return
+     */
+    private View.OnClickListener createOnClickListenerForShowImageActivityStart() {
+        View.OnClickListener retVal;
+
+        retVal = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
+                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
                     context.startActivity(intent);
                 }
             }
@@ -322,8 +356,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         switch (viewHolder.getItemViewType()) {
             // Case 0 for standard View with any CoffeeSiteMovable in the list available
             case 0:
-                ViewHolder1 viewHolder1 = (ViewHolder1) viewHolder;
-                setupBasicViewHolder(position, viewHolder1);
+                ViewHolder1 basicViewHolder = (ViewHolder1) viewHolder;
+                setupBasicViewHolder(position, basicViewHolder);
                 break;
             // Case -1 for 'Empty card'
             case -1:
@@ -533,37 +567,40 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * Setup of ViewHolder holding info about found CoffeeSite
      *
      * @param position
-     * @param viewHolder1
+     * @param viewHolder
      */
-    private void setupBasicViewHolder(int position, ViewHolder1 viewHolder1) {
+    private void setupBasicViewHolder(int position, ViewHolder1 viewHolder) {
 
-        viewHolder1.csNameView.setText(this.mValues.get(position).getName());
-        viewHolder1.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
-        viewHolder1.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
+        viewHolder.csNameView.setText(this.mValues.get(position).getName());
+        viewHolder.locAndTypeView.setText(this.mValues.get(position).getTypPodniku() + ", " +  this.mValues.get(position).getTypLokality());
+        viewHolder.coffeeSortView.setText(this.mValues.get(position).getCoffeeSortsOneString());
 
-        viewHolder1.distanceView.setText(Utils.getDistanceInBetterReadableForm(this.mValues.get(position).getDistance()));
-        viewHolder1.distanceView.setCoffeeSite(this.mValues.get(position));
-        this.mValues.get(position).addPropertyChangeListener(viewHolder1.distanceView);
-        viewHolder1.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
-        Log.d(TAG, ". Distance Text View " + viewHolder1.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
+        viewHolder.distanceView.setText(Utils.getDistanceInBetterReadableForm(this.mValues.get(position).getDistance()));
+        viewHolder.distanceView.setCoffeeSite(this.mValues.get(position));
+        this.mValues.get(position).addPropertyChangeListener(viewHolder.distanceView);
+        viewHolder.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
+        Log.d(TAG, ". Distance Text View " + viewHolder.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
             if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {
                 Picasso.get().load(this.mValues.get(position).getMainImageURL())
                              .fit().placeholder(R.drawable.kafe_backround_120x160)
-                             .into(viewHolder1.siteFoto);
+                             .into(viewHolder.siteFoto);
             } else {
                 Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
                              .fit().placeholder(R.drawable.kafe_backround_120x160)
-                             .into(viewHolder1.siteFoto);
+                             .into(viewHolder.siteFoto);
             }
         } else {
-            viewHolder1.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
         }
 
-        viewHolder1.itemView.setTag(this.mValues.get(position));
-        viewHolder1.itemView.setOnClickListener(this.mOnClickListener);
+        viewHolder.itemView.setTag(this.mValues.get(position));
+        viewHolder.itemView.setOnClickListener(this.mOnClickListener);
+        // SiteFoto has its own listener
+        viewHolder.siteFoto.setOnClickListener(this.mOnImageClickListener);
+        viewHolder.siteFoto.setTag(this.mValues.get(position));
 
         // Needs to be reseted, when this holder creation interupts animation of the EmptyCardViewHolder,
         // so it cannot be reseted by animation itself
@@ -577,6 +614,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
          */
         class ViewHolder1 extends RecyclerView.ViewHolder {
 
+            final LinearLayout csDataView; // to assign listener different from listener assigned to siteFoto
             final TextView csNameView; // to show name of CoffeeSite
             final TextView locAndTypeView; // to show type of the CoffeeSite and location type
             final TextView coffeeSortView; // to show available sorts of coffee on this CoffeeSite
@@ -596,6 +634,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 coffeeSortView = (TextView) view.findViewById(R.id.coffeeSortsTextView);
                 distanceView = (DistanceChangeTextView) view.findViewById(R.id.csDistanceTextView);
                 siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+                csDataView = (LinearLayout) view.findViewById(R.id.found_cs_data_linearview);
             }
         }
 

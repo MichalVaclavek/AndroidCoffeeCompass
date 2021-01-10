@@ -119,10 +119,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
         this.searchRange = (int) getIntent().getExtras().get("searchRange");
 
-//        if (coffeeSitesViewModel != null) {
-//            coffeeSitesViewModel.clear();
-//        }
-
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
         setSupportActionBar(toolbar);
 

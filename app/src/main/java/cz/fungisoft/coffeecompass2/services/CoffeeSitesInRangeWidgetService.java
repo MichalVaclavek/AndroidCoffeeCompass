@@ -29,7 +29,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
@@ -51,8 +50,7 @@ import io.reactivex.schedulers.Schedulers;
  * Uses either REST API requests from server or DB repository in case of OFFLiNE mode to get
  * requested data about CoffeeSites.<br>
  * <p>
- * Requires using Location service, but as it cannot wait for a long GPS fix, it uses
- * only network location.
+ * Requires using Location service.
  */
 public class CoffeeSitesInRangeWidgetService extends JobIntentService
                                              implements CoffeeSitesInRangeFromServerResultListener,
@@ -62,8 +60,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     public static final int NOTIFICATION_ID = 121234;
 
-    private static final long MAX_STARI_DAT = 1000 * 120; // pokud jsou posledni zname udaje o poloze starsi jako 2 minuty, zjistit nove
-    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pocka na lepsi
+    private static final long MAX_STARI_DAT = 1000 * 480; // pokud jsou posledni zname udaje o poloze starsi jako 4 minuty, zjistit nove
+    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pockat na lepsi
 
     private static final String TAG = "SitesInRangeWidgetSrv";
 
@@ -91,12 +89,21 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     private static CoffeeSiteRepository coffeeSiteRepository;
 
     /**
-     * To detect, that search request to server is running
+     * To detect that search request to server is running
      */
     private boolean isSearchingSites = false;
 
-    private int[] allWidgetIds;
+    private int[] allWidgetIds; // currently not used
 
+    /**
+     * Called for Android API >= 26 using context.startForegroundService(sitesInRangeServiceIntent);
+     * from MainAppWidgetProvider
+     *
+     * @param intent
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
         prepareAndStartForeground();
@@ -104,7 +111,10 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         return START_STICKY;
     }
 
-
+    /**
+     * Method to prepare this servie to as a Foreground service. Needed for Android API >= 26
+     * For lower API the enqueue() method is used to invoke this service.
+     */
     private void prepareAndStartForeground() {
         if (Build.VERSION.SDK_INT >= 26) {
             String CHANNEL_ID = "my_channel_01";
@@ -113,7 +123,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
-            Intent notificationIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
+            //Intent notificationIntent = new Intent(this, FoundCoffeeSitesListActivity.class); 
+            Intent notificationIntent = new Intent(this, CoffeeSitesInRangeWidgetService.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
             Notification notification = new Notification.Builder(this, CHANNEL_ID)
@@ -124,7 +135,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                 .setTicker(getText(R.string.widget_ticker_text))
                 .build();
 
-
             startForeground(NOTIFICATION_ID, notification);
             //startForeground(notification, FOREGROUND_SERVICE_TYPE_LOCATION);
         }
@@ -132,7 +142,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
 
     /**
-     * Start method of this service to be called from Widget.
+     * Start method of this service to be called from Widget
+     * ( CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent); )
      *
      * @param context
      * @param work
@@ -217,7 +228,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             locationService.addPropertyChangeListener(this);
             Log.d(TAG, "Location service binded.");
             Location lastLocation =  locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-            //TODO Toast to inform that searchin started ... please wait nebo Nelze vyhledat, nelze ziskat polohu zarizeni
             locationSearchFinished = false;
             if (lastLocation != null) {
                 Toast.makeText(this, "Hledám nejbližší lokaci ...", Toast.LENGTH_SHORT).show();
@@ -231,8 +241,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                     startSearchCurrentSitesForWidget();
                 }
             } else {
-                Toast.makeText(this, "Určování polohy není zapnuto", Toast.LENGTH_LONG).show();
-                //updateWidget(null, null);
+                Toast.makeText(this, "Hledání polohy zařízení ...", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -251,7 +260,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
 
     /**
-     * Calls either AsyncTasks for retrieving CoffeeSites from DB or from server.
+     * Calls either AsyncTask retrieving CoffeeSites from DB or AsyncTask retrieving CoffeeSites from server.
      */
     private void startSearchCurrentSitesForWidget() {
         Log.i(TAG, "Start calling Async tasks for updating CoffeeSites for Widget.");
@@ -282,9 +291,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     /**
      * A callback method to be called, when there are CoffeeSites in range returned by
-     * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
-     * Compares returned coffeeSites with currentSitesInRange and finds new and old
-     * CoffeeSites.
+     * GetSitesInRangeAsyncTask (called in GetSitesInRangeAsyncTask.doInBackground().)
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
@@ -300,6 +307,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     /**
      * Updates Widget with CoffeeSites found by this service.
+     * Also releases resources if used (Disposable and/or timer) and finishes the service (for API < 26)
      *
      * @param coffeeSites
      * @param d
@@ -309,8 +317,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             d.dispose();
         }
 
-        if ((timer != null) && locationSearchFinished) {
-            timer.cancel();
+        if ((locationFoundTimer != null) && locationSearchFinished) {
+            locationFoundTimer.cancel();
             Log.d(TAG, "Timer cancelled.");
         }
 
@@ -324,6 +332,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     /**
      * Wait for change of location before perfomring service's job ... to get actual location.
+     *
      * @param evt
      */
     @Override
@@ -340,7 +349,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         }
     }
 
-    private Timer timer;
+    private Timer locationFoundTimer;
 
     /**
      * Starts TimerTask to check, if searchingFinished is done. If not,
@@ -355,10 +364,10 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             }
         };
 
-        timer = new Timer("Location_search_finished_timer");
+        locationFoundTimer = new Timer("Location_search_finished_timer");
         long delay = GET_LOCATION_WAITING_TIME;
         Log.d(TAG, "Timer task scheduled.");
-        timer.schedule(task, delay);
+        locationFoundTimer.schedule(task, delay);
     }
 
 

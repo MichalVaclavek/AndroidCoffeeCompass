@@ -69,13 +69,6 @@
                     android:orientation="vertical">
 
                     <RadioButton
-                        android:id="@+id/widget_dist_100"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:onClick="onChooseSearchDistance"
-                        android:text="100 m" />
-
-                    <RadioButton
                         android:id="@+id/widget_dist_200"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

@@ -22,6 +22,7 @@
         android:weightSum="10">
 
         <LinearLayout
+            android:id="@+id/found_cs_data_linearview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="10"

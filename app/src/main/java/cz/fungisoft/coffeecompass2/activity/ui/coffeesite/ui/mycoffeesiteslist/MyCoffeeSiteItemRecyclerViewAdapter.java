@@ -178,8 +178,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     /**
-     * OnClick listener to open CoffeeSiteDetailActivity to show details
-     * of the CoffeeSite as it is shown when searching and looking into the detailes.
+     * OnClick listener to open CoffeeSiteImageActivity to show picture
+     * of the CoffeeSite as it is shown when searching and looking into the details.
      *
      * @return
      */
@@ -202,6 +202,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
 
+    @NotNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 

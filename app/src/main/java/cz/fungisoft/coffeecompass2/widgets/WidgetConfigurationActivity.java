@@ -115,10 +115,6 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         int selectedRadio = R.id.widget_dist_2000;
 
         switch (view.getId()) {
-            case R.id.widget_dist_100:
-                distance = 100;
-                selectedRadio = R.id.widget_dist_100;
-                break;
             case R.id.widget_dist_200:
                 distance = 200;
                 selectedRadio = R.id.widget_dist_200;
@@ -210,8 +206,8 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
 
     // close settings screen
     public void closeSettings(View v) {
-        //update all widgets to apply the slected settings.
-        //MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), null);
+        //update all widgets to apply the selected settings.
+        MainAppWidgetProvider.updateCoffeeSiteWidget(this, null, true);
 
         Intent widgetIntent = new Intent();
         setResult(RESULT_OK, widgetIntent);
