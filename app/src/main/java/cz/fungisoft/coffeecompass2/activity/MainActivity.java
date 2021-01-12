@@ -92,7 +92,7 @@ public class MainActivity extends ActivityWithLocationService
     private static final float GOOD_PRESNOST = 10.0f;
     private static final float LAST_PRESNOST = 500.0f;
 
-    private boolean bPrvni = true;
+    private boolean firstLocationDetection = true;
     private final int barvaBlack = Color.BLACK;
     private final int barvaRed = Color.RED;
 
@@ -726,8 +726,8 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
-        if (bPrvni) { // prvni platna detekce polohy
-            bPrvni = false;
+        if (firstLocationDetection) { // prvni platna detekce polohy
+            firstLocationDetection = false;
             setAccuracyTextColor(barvaBlack);
         }
 

@@ -20,9 +20,8 @@
             android:id="@+id/widget_nearest_site_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_site_found"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -42,6 +41,7 @@
                     android:id="@+id/widget_locAndTypeTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="@string/widget_no_coffee"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="16sp" />
 
@@ -66,7 +66,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginBottom="2dp"
+                    android:layout_marginRight="4dp"
                     android:layout_weight="5"
                     android:textAlignment="textEnd"
                     android:textColor="@color/colorNiceYellow"
@@ -77,6 +77,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
+                    android:layout_marginRight="4dp"
                     android:layout_weight="5"
                     android:textAlignment="textEnd"
                     android:textColor="@color/colorPrimary"
@@ -94,11 +95,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="25"
-        android:paddingLeft="5dp"
-        android:paddingRight="2dp"
+        android:paddingStart="1dp"
+        android:paddingEnd="1dp"
         android:rotation="0"
-        android:scaleType="fitStart"
-        app:srcCompat="@drawable/zrnka_480x480" />
+        android:scaleType="fitStart" />
 
     <LinearLayout
         android:layout_width="0dp"

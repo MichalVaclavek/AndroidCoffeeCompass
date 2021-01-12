@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -46,6 +47,11 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     private int currentSearchRange;
     private String coffeeSort;
+
+    /**
+     * To detect a first successful detection of the location
+     */
+    private boolean firstLocationDetection = true;
 
 
     /**
@@ -214,19 +220,25 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        long movedDistance = 0;
+        long movedDistance;
         if (locationService != null) {
-            if (this.searchLocationOfCurrentSites != null) {
-                movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
+            if (this.searchLocationOfCurrentSites == null) {
+                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
             }
 
-            if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange) {
-                // get current location for searching
-                this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-                if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
-                    startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                        listener.onStartSearchingSitesInRange();
+            if (this.searchLocationOfCurrentSites != null) {
+                movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
+
+                if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange
+                    || firstLocationDetection) {
+                    firstLocationDetection = false;
+                    // get current location for searching
+                    this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+                    if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
+                        startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                            listener.onStartSearchingSitesInRange();
+                        }
                     }
                 }
             }
@@ -239,8 +251,14 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
         this.searchLocationOfCurrentSites = searchLocationOfCurrentSites;
-        if (locationService != null) {
+        if (this.searchLocationOfCurrentSites == null && locationService != null) {
             this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
+            if (this.searchLocationOfCurrentSites == null) {
+                Location lastLocation = locationService.getPosledniPozice(100, 300_000L); // 5 minutes old data are OK
+                if (lastLocation != null) {
+                    this.searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                }
+            }
         }
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;

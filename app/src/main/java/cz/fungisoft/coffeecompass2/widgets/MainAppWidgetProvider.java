@@ -350,12 +350,13 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                                      List<? extends CoffeeSite> coffeeSites) {
 
         // Default data, if no CoffeeSites found
-        remoteViews.setTextViewText(R.id.widget_nearest_site_name, context.getString(R.string.no_site_found));
+        remoteViews.setTextViewText(R.id.widget_nearest_site_name, "");
         remoteViews.setTextViewText(R.id.widget_nearest_site_distance, "");
-        remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, "");
+        remoteViews.setTextViewText(R.id.widget_locAndTypeTextView, context.getString(R.string.widget_no_coffee));
         remoteViews.setTextViewText(R.id.widget_coffee_sort_and_price, "");
         remoteViews.setTextViewText(R.id.widget_number_of_other_sites, "");
-        // default image
+        // default image - used when there was CoffeeSite with image nad there is no CoffeeSite
+        // or CoffeeSite without image, now
         Picasso.get().load(R.drawable.kafe_backround_120x160)
                      .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
 

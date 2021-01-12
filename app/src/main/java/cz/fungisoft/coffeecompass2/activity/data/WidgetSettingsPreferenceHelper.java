@@ -34,8 +34,7 @@ public class WidgetSettingsPreferenceHelper {
 
 
     public WidgetSettingsPreferenceHelper(Context context) {
-        app_prefs = context.getSharedPreferences("sharedWidgetPrefs",
-                Context.MODE_PRIVATE);
+        app_prefs = context.getSharedPreferences("sharedWidgetPrefs", Context.MODE_PRIVATE);
         this.context = context;
     }
 

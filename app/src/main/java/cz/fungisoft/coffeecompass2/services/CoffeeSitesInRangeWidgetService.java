@@ -331,7 +331,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     }
 
     /**
-     * Wait for change of location before perfomring service's job ... to get actual location.
+     * Wait for change of location before performing service's job ... to get actual location.
      *
      * @param evt
      */
