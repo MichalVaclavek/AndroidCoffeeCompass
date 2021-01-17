@@ -202,10 +202,12 @@
     <string name="appwidget_text">Káva s sebou</string>
     <string name="add_widget">Add widget</string>
 
-    <string name="empty_view_text">Žádná lokace ...</string>
+    <string name="empty_view_text">Žádná lokace …</string>
     <string name="toast_format_string">%1$s!</string>
     <string name="item_format_string">%1$d\u00B0 on %2$s</string>
     <string name="header_format_string">%1$d\u00B0 in %2$s</string>
+
+    <string name="detail_rating_label">Hodnocení (%1$d):</string>
 
     <string name="refresh">Refresh</string>
     <string name="city_name">Káva s sebou</string>
@@ -221,10 +223,9 @@
     <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
-    <string name="widget_notification_title">Hledání nejbližší lokace</string>
-    <string name="widget_notification_message">zjišťování polohy ...</string>
+    <string name="widget_notification_title">Hledání nejbližší kávy s sebou</string>
+    <string name="widget_notification_message">zjišťování polohy …</string>
     <string name="widget_ticker_text">ticker_coffee_compass</string>
-    <string name="widget_no_coffee">Žádná káva poblíž.</string>
+    <string name="widget_no_coffee">Žádná káva poblíž</string>
 
 </resources>

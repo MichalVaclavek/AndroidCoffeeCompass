@@ -269,4 +269,44 @@ public class Utils {
         return !isOnline() && offlineModePreferenceHelper.getDownloaded();
     }
 
+    /**
+     * Class to define fractions of 1 full cup rating.
+     * Currently available: QUARTER, HALF, THREE_QUARTERS, FULL
+     */
+    public enum RatingFractions {
+        QUARTER, HALF, THREE_QUARTERS, FULL, EMPTY
+    }
+
+
+    /**
+     * Method to calculate, what is the fraction of whole cup rating.
+     * This is the definition:
+     * FULL: >= 0.88 and <= 0.12
+     * QUARTER: > 0.12 and <= 0.37
+     * HALF: > 0.37 and < 0.63
+     * THREE_QUARTERS: >= 0.63 < .88
+     */
+    public static RatingFractions getRatingFraction(float rating) {
+        int intPart = (int) rating;
+        float fraction = rating - intPart;
+
+        if (fraction > 0.12 && fraction <= 0.37) {
+            return RatingFractions.QUARTER;
+        }
+        if (fraction > 0.37 && fraction < 0.63) {
+            return RatingFractions.HALF;
+        }
+        if (fraction>= 0.6 && fraction < .88) {
+            return RatingFractions.THREE_QUARTERS;
+        }
+
+        if ((fraction >= 0.88 && fraction <= 1)) {
+            return RatingFractions.FULL;
+        }
+        // Nothing applied before, then we are in a 'EMPTY' range
+        // i.e. something between 0 and 0.12 i.e. (fraction >= 0 && fraction <= 0.12)
+        return RatingFractions.EMPTY;
+
+    }
+
 }

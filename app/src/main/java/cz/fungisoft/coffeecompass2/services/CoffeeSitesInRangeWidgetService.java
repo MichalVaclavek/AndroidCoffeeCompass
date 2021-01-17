@@ -60,7 +60,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     public static final int NOTIFICATION_ID = 121234;
 
-    private static final long MAX_STARI_DAT = 1000 * 480; // pokud jsou posledni zname udaje o poloze starsi jako 4 minuty, zjistit nove
+    private static final long MAX_STARI_DAT = 1000 * 300; // pokud jsou posledni zname udaje o poloze starsi jako 5 minuty, zjistit nove
     private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pockat na lepsi
 
     private static final String TAG = "SitesInRangeWidgetSrv";
@@ -130,7 +130,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             Notification notification = new Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle(getText(R.string.widget_notification_title))
                 .setContentText(getText(R.string.widget_notification_message))
-                .setSmallIcon(R.drawable.cup_48)
+                .setSmallIcon(R.drawable.cup_rating_full_3)
                 .setContentIntent(pendingIntent)
                 .setTicker(getText(R.string.widget_ticker_text))
                 .build();
@@ -223,6 +223,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
+
         if (locationService != null) {
             startLocationFoundTimerTask();
             locationService.addPropertyChangeListener(this);

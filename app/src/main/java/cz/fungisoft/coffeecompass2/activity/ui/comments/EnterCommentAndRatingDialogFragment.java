@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.RadioButton;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AlertDialog;
@@ -31,6 +31,10 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
     public CommentAndStars getCommentAndStars() {
         return commentAndStars;
     }
+
+    private final ImageView[] ratingCupsViews = new ImageView[5];
+
+    private int selectedRatingNumber = 0;
 
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
@@ -63,8 +67,7 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
             listener = (CommentAndRatingDialogListener) context;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(listener.toString()
-                    + " must implement CommentAndRatingDialogListener");
+            throw new ClassCastException(listener.toString() + " must implement CommentAndRatingDialogListener");
         }
     }
 
@@ -82,25 +85,27 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
 
         dialogView = inflater.inflate(R.layout.comment_and_rating_dialog, null);
 
-        starsRadioGroup = dialogView.findViewById(R.id.stars_radiogroup);
-        if (numOfStarsForSiteAndUser != 0) {
-            switch (numOfStarsForSiteAndUser)
-            {
-                case 1: starsRadioGroup.check(R.id.radioButton1);
-                    break;
-                case 2: starsRadioGroup.check(R.id.radioButton2);
-                    break;
-                case 3: starsRadioGroup.check(R.id.radioButton3);
-                    break;
-                case 4: starsRadioGroup.check(R.id.radioButton4);
-                    break;
-                case 5: starsRadioGroup.check(R.id.radioButton5);
-                    break;
-                default: break;
-            }
-        } else {
-            starsRadioGroup.check(R.id.radioButton3);
-        }
+        /*
+        Setup rating cups ImageView. Tags equals number of stars
+         */
+        ratingCupsViews[0] = ((ImageView) dialogView.findViewById(R.id.dialog_rating_image_cup1));
+        ratingCupsViews[0].setOnClickListener(createOnClickListenerForRatingCupsImageView());
+        ratingCupsViews[0].setTag(1);
+        ratingCupsViews[1] = ((ImageView) dialogView.findViewById(R.id.dialog_rating_image_cup2));
+        ratingCupsViews[1].setOnClickListener(createOnClickListenerForRatingCupsImageView());
+        ratingCupsViews[1].setTag(2);
+        ratingCupsViews[2] = ((ImageView) dialogView.findViewById(R.id.dialog_rating_image_cup3));
+        ratingCupsViews[2].setOnClickListener(createOnClickListenerForRatingCupsImageView());
+        ratingCupsViews[2].setTag(3);
+        ratingCupsViews[3] = ((ImageView) dialogView.findViewById(R.id.dialog_rating_image_cup4));
+        ratingCupsViews[3].setOnClickListener(createOnClickListenerForRatingCupsImageView());
+        ratingCupsViews[3].setTag(4);
+        ratingCupsViews[4] = ((ImageView) dialogView.findViewById(R.id.dialog_rating_image_cup5));
+        ratingCupsViews[4].setOnClickListener(createOnClickListenerForRatingCupsImageView());
+        ratingCupsViews[4].setTag(5);
+
+        setCurrentRatingCupsImageViews(ratingCupsViews, numOfStarsForSiteAndUser);
+
         commentInput = dialogView.findViewById(R.id.commentTextInput);
 
         // If current Comment is to be modified
@@ -114,12 +119,8 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
                .setTitle(R.string.comment_dialog_title)
                .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        int selectedId = starsRadioGroup.getCheckedRadioButtonId();
-
-                        // find the radiobutton by returned id
-                        RadioButton starsButton = (RadioButton) dialogView.findViewById(selectedId);
-                        int stars = Integer.parseInt(starsButton.getText().toString());
-                        commentAndStars.setStars(new CommentAndStars.Stars(stars));
+                        // Create new Comment and star object and call listener to pass it further as return value of this dia;log
+                        commentAndStars.setStars(new CommentAndStars.Stars(selectedRatingNumber));
                         commentAndStars.setComment(commentInput.getText().toString());
                         listener.onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment.this);
                     }
@@ -132,6 +133,39 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
                 });
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+
+    /**
+     * OnClick listener to handle click on ratinf cups ImageViews
+     *
+     * @return
+     */
+    private View.OnClickListener createOnClickListenerForRatingCupsImageView() {
+        View.OnClickListener retVal;
+
+        retVal = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Get selected cup image
+                if (view instanceof ImageView) {
+                    selectedRatingNumber = (Integer) view.getTag();
+                    setCurrentRatingCupsImageViews(ratingCupsViews, selectedRatingNumber);
+                }
+            }
+        };
+        return retVal;
+    }
+
+    private void setCurrentRatingCupsImageViews(ImageView[] ratingCupsViews, int currentRating) {
+        // Set all cups empty first
+        for (ImageView cupImageView : ratingCupsViews) {
+            cupImageView.setImageResource(R.drawable.cup_rating_empty_4);
+        }
+        // All cups till selected make full
+        for (int i = 0; i < currentRating; i++) {
+            ratingCupsViews[i].setImageResource(R.drawable.cup_rating_grey_full_5);
+        }
     }
 
 }

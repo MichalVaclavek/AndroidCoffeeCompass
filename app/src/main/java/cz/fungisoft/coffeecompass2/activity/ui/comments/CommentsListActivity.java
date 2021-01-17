@@ -454,7 +454,12 @@ public class CommentsListActivity extends AppCompatActivity
                         showRatingSigns(holder);
                         showNameAndDate(holder);
 
-                        // Inserts dots/icons of user's rating
+                        // First clear all ratings signs - show 'empty'
+                        // Set all cups empty first
+                        for (ImageView ratingImageView : holder.starsImageView) {
+                            ratingImageView.setImageDrawable(this.parenActivity.getDrawable(R.drawable.rating_star_empty));
+                        }
+                        // Inserts dots/icons of current user's rating
                         for (int i = item.getStarsFromUser() - 1; i >= 0; i--) {
                             holder.starsImageView.get(i).setImageDrawable(this.parenActivity.getDrawable(R.drawable.rating_star_full));
                         }

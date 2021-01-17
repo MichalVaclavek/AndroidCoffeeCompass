@@ -496,7 +496,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     /**
      * Helper method to update detail fragment data
-     * @param coffeeSite current CoffeeSite data to be shown in {@code }detailFragment}
+     * @param coffeeSite current CoffeeSite data to be shown in {@code detailFragment}
      */
     private void refreshDetailFragment(CoffeeSite coffeeSite) {
         detailFragment.setCoffeeSite(coffeeSite);

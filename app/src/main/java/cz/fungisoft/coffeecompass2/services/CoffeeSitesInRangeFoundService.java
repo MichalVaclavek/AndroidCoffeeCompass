@@ -39,6 +39,9 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
+    private static final long MAX_STARI_DAT = 1000 * 300; // pokud jsou posledni zname udaje o poloze starsi jako 5 minuty, zjistit nove
+    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pockat na lepsi
+
 
     /**
      * Location when the currentSitesInRange where observed
@@ -254,7 +257,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         if (this.searchLocationOfCurrentSites == null && locationService != null) {
             this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
             if (this.searchLocationOfCurrentSites == null) {
-                Location lastLocation = locationService.getPosledniPozice(100, 300_000L); // 5 minutes old data are OK
+                Location lastLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT); // 5 minutes old data are OK
                 if (lastLocation != null) {
                     this.searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 }
