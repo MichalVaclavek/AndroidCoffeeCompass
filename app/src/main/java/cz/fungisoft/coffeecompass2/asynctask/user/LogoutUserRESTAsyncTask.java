@@ -9,7 +9,7 @@ import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
  */
 public class LogoutUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private UserAccountRepository registerRepository;
+    private final UserAccountRepository registerRepository;
 
     public LogoutUserRESTAsyncTask(UserAccountRepository registerRepository) {
         super();

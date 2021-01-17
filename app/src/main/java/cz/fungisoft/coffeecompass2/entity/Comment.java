@@ -57,7 +57,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
     private boolean canBeDeleted;
 
     @Ignore
-    private SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
+    private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
 
     protected Comment(Parcel in) {
         id = in.readInt();

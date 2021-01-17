@@ -23,7 +23,7 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "GetNumberOfCommentsAsyn";
 
-    private int coffeeSiteId;
+    private final int coffeeSiteId;
 
     private final WeakReference<CoffeeSiteDetailActivity> coffeeSiteDetailActivity;
 

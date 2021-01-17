@@ -82,7 +82,7 @@ public class CommentsListActivity extends AppCompatActivity
     protected UserAccountService userAccountService;
     private UserAccountServiceConnector userAccountServiceConnector;
 
-    private enum CommentOperation {SAVE, UPDATE};
+    private enum CommentOperation {SAVE, UPDATE}
 
     private CommentOperation currentCommentOperation = CommentOperation.SAVE;
 
@@ -409,7 +409,7 @@ public class CommentsListActivity extends AppCompatActivity
 
             private final boolean offLineModeOn;
             private List<Comment> mValues;
-            private CommentsListActivity parenActivity;
+            private final CommentsListActivity parenActivity;
 
             public void setLoggedInUser(LoggedInUser loggedInUser) {
                 this.loggedInUser = loggedInUser;

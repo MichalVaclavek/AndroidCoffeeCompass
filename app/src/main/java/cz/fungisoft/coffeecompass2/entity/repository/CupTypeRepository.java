@@ -39,7 +39,7 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
 
     private static class insertAsyncTask extends AsyncTask<CupType, Void, Void> {
 
-        private CupTypeDao mAsyncTaskDao;
+        private final CupTypeDao mAsyncTaskDao;
 
         insertAsyncTask(CupTypeDao dao) {
             mAsyncTaskDao = dao;

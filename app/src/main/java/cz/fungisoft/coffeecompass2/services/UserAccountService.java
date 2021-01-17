@@ -37,17 +37,17 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListen
  */
 public class UserAccountService extends Service implements UserAccountActionsEvaluator {
 
-    private String TAG = "UserAccountService";
+    private final String TAG = "UserAccountService";
 
     // Repository to check if a user is logen in
     private static UserAccountRepository userLoginAndRegisterRepository;
 
     private static UserPreferencesHelper userPreferenceHelper;
 
-    private static MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
-    private static MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
-    private static MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<>();
-    private static MutableLiveData<LogoutOrDeleteResult> deleteResult = new MutableLiveData<>();
+    private static final MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
+    private static final MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
+    private static final MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<>();
+    private static final MutableLiveData<LogoutOrDeleteResult> deleteResult = new MutableLiveData<>();
 
     public LiveData<LoginOrRegisterResult> getLoginResult() {
         return loginResult;
@@ -65,7 +65,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     /**
      * List of listeneres for user login events.
      */
-    private static List<UserLoginServiceListener> userLoginServiceListeners = new ArrayList<>();
+    private static final List<UserLoginServiceListener> userLoginServiceListeners = new ArrayList<>();
 
     public void addUserLoginServiceListener(UserLoginServiceListener userLogindServiceListener) {
         if (!userLoginServiceListeners.contains(userLogindServiceListener)) {
@@ -84,7 +84,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     /**
      * List of listeneres for new user register events.
      */
-    private static List<UserRegisterServiceListener> userRegisterServiceListeners = new ArrayList<>();
+    private static final List<UserRegisterServiceListener> userRegisterServiceListeners = new ArrayList<>();
 
     /**
      * Adds new listener, if it is not already in a list
@@ -107,7 +107,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     /**
      * List of listeneres for logout and delete user account events.
      */
-    private static List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
+    private static final List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
 
     public void addLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
         if (!userLogoutAndDeleteServiceListeners.contains(logoutAndDeleteServiceListener)) {

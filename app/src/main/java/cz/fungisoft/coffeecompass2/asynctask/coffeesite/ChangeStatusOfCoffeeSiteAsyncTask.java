@@ -69,7 +69,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
         //operationResult = "";
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(tag, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null && coffeeSiteToModify != null) {
 
             // Inserts user authorization token to Authorization header

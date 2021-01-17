@@ -42,7 +42,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
 
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about resutl later, as all the operations are Async
-    private List<CoffeeSiteServiceCUDOperationsListener> coffeeSiteCUDOperationsListeners = new ArrayList<>();
+    private final List<CoffeeSiteServiceCUDOperationsListener> coffeeSiteCUDOperationsListeners = new ArrayList<>();
 
     public void addCUDOperationsListener(CoffeeSiteServiceCUDOperationsListener listener) {
         if (!coffeeSiteCUDOperationsListeners.contains(listener)) {

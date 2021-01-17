@@ -35,14 +35,14 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "SaveCommentAsyncREST";
 
-    private int coffeeSiteId;
+    private final int coffeeSiteId;
 
     private final LoggedInUser user;
 
 
     private final WeakReference<CommentsListActivity> commentsActivity;
 
-    private CommentAndStars commentAndStarsToSave;
+    private final CommentAndStars commentAndStarsToSave;
 
     public SaveCommentAndStarsAsyncTask(int coffeeSiteId, LoggedInUser user, CommentsListActivity commentsActivity, CommentAndStars commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;

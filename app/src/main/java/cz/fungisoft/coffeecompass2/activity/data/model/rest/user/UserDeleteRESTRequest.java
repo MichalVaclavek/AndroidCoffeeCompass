@@ -25,7 +25,7 @@ public class UserDeleteRESTRequest {
 
     static final String REQ_TAG = "UserDeleteREST";
 
-    private UserAccountActionsEvaluator userAccountService;
+    private final UserAccountActionsEvaluator userAccountService;
 
     /**
      * User account to be deleted

@@ -45,7 +45,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
 
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about resutl later, as all the operations are Async
-    private List<CoffeeSiteServiceStatusOperationsListener> coffeeSiteStatusOperationsListeners = new ArrayList<>();
+    private final List<CoffeeSiteServiceStatusOperationsListener> coffeeSiteStatusOperationsListeners = new ArrayList<>();
 
     public void addCoffeeSiteStatusOperationsListener(CoffeeSiteServiceStatusOperationsListener listener) {
         if (!coffeeSiteStatusOperationsListeners.contains(listener)) {

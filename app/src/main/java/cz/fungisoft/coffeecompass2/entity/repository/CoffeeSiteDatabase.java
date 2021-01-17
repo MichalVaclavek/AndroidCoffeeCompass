@@ -91,7 +91,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         return DB_INSTANCE;
     }
 
-    private static CoffeeSiteDatabase.Callback sCoffeeSiteDatabaseCallback =
+    private static final CoffeeSiteDatabase.Callback sCoffeeSiteDatabaseCallback =
             new CoffeeSiteDatabase.Callback() {
 
                 @Override
@@ -134,7 +134,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
      */
     private static class DeleteCSEntitiesAsync extends AsyncTask<Void, Void, Void> {
 
-        private CoffeeSiteDatabase mDB;
+        private final CoffeeSiteDatabase mDB;
 
         private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfRatingsDao;
         private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
@@ -194,7 +194,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
      */
     private static class DeleteCoffeeSitesAsync extends AsyncTask<Void, Void, Void> {
 
-        private CoffeeSiteDatabase mDB;
+        private final CoffeeSiteDatabase mDB;
 
         private final CoffeeSiteDao coffeeSiteDao;
 
@@ -221,7 +221,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
      */
     private static class DeleteCommentsAsync extends AsyncTask<Void, Void, Void> {
 
-        private CoffeeSiteDatabase mDB;
+        private final CoffeeSiteDatabase mDB;
 
         private final CommentDao commentDao;
 

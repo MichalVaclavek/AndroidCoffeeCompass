@@ -37,7 +37,7 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
 
     private final WeakReference<CommentsListActivity> commentsActivity;
 
-    private Comment commentAndStarsToUpdate;
+    private final Comment commentAndStarsToUpdate;
 
     public UpdateCommentAndStarsAsyncTask(LoggedInUser user, CommentsListActivity commentsActivity, Comment commentAndStarsToUpdate) {
         this.commentsActivity = new WeakReference<>(commentsActivity);

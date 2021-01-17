@@ -43,9 +43,9 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
 
     private Result.Error error;
 
-    private int requestedPage;
+    private final int requestedPage;
 
-    private int pageSize;
+    private final int pageSize;
 
 
     public GetCfSitesFromLoggedUserPaginatedAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
@@ -67,7 +67,7 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
         //operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null) {
 
             // Inserts currentUser authorization token to Authorization header

@@ -39,7 +39,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
     private static class insertAsyncTask extends AsyncTask<NextToMachineType, Void, Void> {
 
-        private NextToMachineTypeDao mAsyncTaskDao;
+        private final NextToMachineTypeDao mAsyncTaskDao;
 
         insertAsyncTask(NextToMachineTypeDao dao) {
             mAsyncTaskDao = dao;

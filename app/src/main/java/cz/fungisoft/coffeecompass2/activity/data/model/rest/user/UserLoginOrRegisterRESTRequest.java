@@ -33,12 +33,12 @@ public class UserLoginOrRegisterRESTRequest {
     /**
      * User register or login REST input data structure expected by server, sent using JSON
      */
-    private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
+    private final UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
     /**
      * Evaluator of the user register or login REST response
      */
-    private UserAccountActionsEvaluator userLoginAndRegisterService;
+    private final UserAccountActionsEvaluator userLoginAndRegisterService;
 
     /**
      * User data obtained from server as a result of login or register process

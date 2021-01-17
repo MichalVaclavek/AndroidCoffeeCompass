@@ -43,7 +43,7 @@ public class CurrentUserRESTRequest {
      * Service or Class implementing interface for evaluation of user register
      * or login REST request.
      */
-    private UserAccountActionsEvaluator userLoginAndRegisterService;
+    private final UserAccountActionsEvaluator userLoginAndRegisterService;
 
     /**
      *

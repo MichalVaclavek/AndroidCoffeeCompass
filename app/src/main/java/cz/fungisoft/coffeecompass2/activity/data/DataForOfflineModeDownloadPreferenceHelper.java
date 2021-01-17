@@ -19,8 +19,8 @@ public class DataForOfflineModeDownloadPreferenceHelper {
     private final String DOWNLOADED_COMMENTS = "downloaded_comments";
     private final String DOWNLOADED_IMAGES = "downloaded_images";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     public DataForOfflineModeDownloadPreferenceHelper(Context context) {
         app_prefs = context.getSharedPreferences("sharedDataDownload",

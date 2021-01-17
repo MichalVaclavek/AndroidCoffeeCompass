@@ -466,12 +466,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 if (longitudeEditText.getTag() == null || latitudeEditText.getTag() == null) {
                     // Value changed by user, because before setText() programmatically entered, the tag
                     // is set to a special value
-                    locationEnterManualMode = true; // means from now on, ignore values entered programmatically in showCurrentLocationInView()
-                                                    // as user wants to enter values manually
+// means from now on, ignore values entered programmatically in showCurrentLocationInView()
+// as user wants to enter values manually
                     // but if both  textInputs are cleared, allow automatic enter again
-                    if (longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty()) {
-                        locationEnterManualMode = false;
-                    }
+                    locationEnterManualMode = !longitudeEditText.getText().toString().isEmpty() || !latitudeEditText.getText().toString().isEmpty();
                 }
             }
         };
@@ -962,7 +960,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void onImageDeleteSuccess(String imageDeleteResult) {
         hideProgressbar();
-        String text = getString(R.string.image_delete_ok);;
+        String text = getString(R.string.image_delete_ok);
         if (Long.parseLong(imageDeleteResult) == currentCoffeeSite.getId()) {
             text = getString(R.string.image_delete_success);
         }
@@ -1597,10 +1595,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         public boolean isValid(CharSequence text) {
             Log.v(TAG, "Checking if valid: " + text);
             Arrays.sort(LOCATION_TYPES);
-            if (Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0) {
-                return true;
-            }
-            return false;
+            return Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0;
         }
 
         @Override

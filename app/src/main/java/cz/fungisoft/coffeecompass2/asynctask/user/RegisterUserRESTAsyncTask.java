@@ -9,12 +9,12 @@ import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
  */
 public class RegisterUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private String userName;
-    private String deviceID;
-    private String password;
-    private String email;
+    private final String userName;
+    private final String deviceID;
+    private final String password;
+    private final String email;
 
-    private UserAccountRepository registerRepository;
+    private final UserAccountRepository registerRepository;
 
     public RegisterUserRESTAsyncTask(String username, String password, String email, String deviceID, UserAccountRepository registerRepository) {
         super();

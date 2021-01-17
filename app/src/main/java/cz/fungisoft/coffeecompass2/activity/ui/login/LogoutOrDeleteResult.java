@@ -8,9 +8,9 @@ import androidx.annotation.Nullable;
 public class LogoutOrDeleteResult {
 
     @Nullable
-    private String userName;
+    private final String userName;
     @Nullable
-    private String error;
+    private final String error;
 
     public LogoutOrDeleteResult(@Nullable String userName, @Nullable String error) {
         this.error = error;

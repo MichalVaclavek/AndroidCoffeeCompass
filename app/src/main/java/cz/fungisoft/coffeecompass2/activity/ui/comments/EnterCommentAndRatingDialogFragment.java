@@ -42,7 +42,7 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
     public interface CommentAndRatingDialogListener {
 
         void onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog);
-        default void onSaveUpdateCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog) {};
+        default void onSaveUpdateCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment dialog) {}
     }
 
     // Use this instance of the interface to deliver action events

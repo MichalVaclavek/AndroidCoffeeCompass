@@ -17,5 +17,5 @@ public interface CommentsLoadOperationListener {
 
     default void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {}
 
-    default void onRESTCallError(Result.Error error) {};
+    default void onRESTCallError(Result.Error error) {}
 }

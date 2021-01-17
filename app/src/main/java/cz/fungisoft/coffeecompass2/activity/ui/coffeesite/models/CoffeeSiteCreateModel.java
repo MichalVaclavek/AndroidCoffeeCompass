@@ -14,7 +14,7 @@ public class CoffeeSiteCreateModel extends ViewModel {
 
     private final int SITE_NAME_LENGTH = 35;
 
-    private MutableLiveData<CoffeeSiteCreateFormState> coffeeSiteFormState = new MutableLiveData<>();
+    private final MutableLiveData<CoffeeSiteCreateFormState> coffeeSiteFormState = new MutableLiveData<>();
 
     public LiveData<CoffeeSiteCreateFormState> getCoffeeSiteFormState() {
         return coffeeSiteFormState;

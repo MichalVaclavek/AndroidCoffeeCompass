@@ -122,7 +122,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      */
     private boolean isLoadingPage = false;
 
-    private boolean isLastPage = false;;
+    private boolean isLastPage = false;
     private int currentPage = 1;
     public static final int PAGE_SIZE = 20;
 
@@ -554,7 +554,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-    private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
+    private final RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);

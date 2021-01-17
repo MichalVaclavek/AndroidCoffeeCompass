@@ -8,10 +8,10 @@ import androidx.annotation.Nullable;
 class LoginFormValidationState {
 
     @Nullable
-    private Integer usernameError;
+    private final Integer usernameError;
     @Nullable
-    private Integer passwordError;
-    private boolean isDataValid;
+    private final Integer passwordError;
+    private final boolean isDataValid;
 
     LoginFormValidationState(@Nullable Integer usernameError, @Nullable Integer passwordError) {
         this.usernameError = usernameError;

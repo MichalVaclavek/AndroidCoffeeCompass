@@ -15,13 +15,13 @@ import androidx.annotation.Nullable;
 public class CoffeeSiteCreateFormState {
 
     @Nullable
-    private Integer coffeeSiteNameError;
+    private final Integer coffeeSiteNameError;
     @Nullable
-    private Integer longitudeError;
+    private final Integer longitudeError;
     @Nullable
-    private Integer latitudeError;
+    private final Integer latitudeError;
 
-    private boolean isDataValid;
+    private final boolean isDataValid;
 
     CoffeeSiteCreateFormState(@Nullable Integer coffeeSiteNameError, @Nullable Integer longitudeError, @Nullable Integer latitudeError) {
         this.coffeeSiteNameError = coffeeSiteNameError;

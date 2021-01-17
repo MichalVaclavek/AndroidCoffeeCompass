@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,8 +23,10 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
+import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
+import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
@@ -121,6 +124,13 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
         setSupportActionBar(toolbar);
+
+        // Show the Up button in the action bar.
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
         originalToolbarTitle = String.valueOf(getTitle());
         layoutManager = new LinearLayoutManager(this);
@@ -301,9 +311,25 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                 } else {
                     Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
                 }
+                return true;
+            case android.R.id.home:
+                goToMainActivityAndFinish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void goToMainActivityAndFinish() {
+        // go to MainActivity
+        goToMainActivity();
+        finish();
+    }
+
+    private void goToMainActivity() {
+        Intent i = new Intent(FoundCoffeeSitesListActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(i);
     }
 
     /**

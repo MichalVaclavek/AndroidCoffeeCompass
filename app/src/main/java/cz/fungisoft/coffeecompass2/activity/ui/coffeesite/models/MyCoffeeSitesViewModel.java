@@ -29,7 +29,7 @@ public class MyCoffeeSitesViewModel extends AndroidViewModel {
      * Actual list of CoffeeSites in the search range from current position of the equipment as
      * found in DB.
      */
-    private LiveData<List<CoffeeSite>> usersCoffeeSitesInDB = Transformations.switchMap(userInput, (ui) -> coffeeSiteRepository.getCoffeeSitesByAuthorUserName(ui.getUserName()));
+    private final LiveData<List<CoffeeSite>> usersCoffeeSitesInDB = Transformations.switchMap(userInput, (ui) -> coffeeSiteRepository.getCoffeeSitesByAuthorUserName(ui.getUserName()));
 
     public LiveData<List<CoffeeSite>> getUsersCoffeeSites(LoggedInUser loggedInUser) {
         setInput(loggedInUser);

@@ -44,8 +44,8 @@ public class UserPreferencesHelper {
     private final String LOGIN_TOKEN_TYPE = "loginTokenType";
     private final String LOGIN_TOKEN_EXPIRY = "loginTokenExpiry";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     private final String nameOfSharedPreferences = "sharedUser2";
 
@@ -169,7 +169,7 @@ public class UserPreferencesHelper {
         rolesArray = userRoles.toArray(rolesArray);
         SharedPreferences.Editor edit = app_prefs.edit();
         for (int i=0; i < rolesArray.length; i++) {
-            edit.putString(USER_ROLES + String.valueOf(i), rolesArray[i]);
+            edit.putString(USER_ROLES + i, rolesArray[i]);
         }
         edit.apply();
     }
@@ -177,8 +177,8 @@ public class UserPreferencesHelper {
     private List<String> getUserRoles() {
         List<String> retVal = new ArrayList<>();
         int rolesCounter = 0;
-        while (!app_prefs.getString(USER_ROLES + String.valueOf(rolesCounter), "").isEmpty()) {
-            retVal.add(app_prefs.getString(USER_ROLES  + String.valueOf(rolesCounter), "USER"));
+        while (!app_prefs.getString(USER_ROLES + rolesCounter, "").isEmpty()) {
+            retVal.add(app_prefs.getString(USER_ROLES  + rolesCounter, "USER"));
             rolesCounter++;
         }
         return retVal;

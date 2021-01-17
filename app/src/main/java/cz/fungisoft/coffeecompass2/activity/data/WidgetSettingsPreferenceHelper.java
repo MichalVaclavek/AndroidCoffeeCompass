@@ -30,7 +30,7 @@ public class WidgetSettingsPreferenceHelper {
     private final String LAST_SERVICE_CALL = "lastServiceCallWidget";
 
     private final SharedPreferences app_prefs;
-    private Context context;
+    private final Context context;
 
 
     public WidgetSettingsPreferenceHelper(Context context) {

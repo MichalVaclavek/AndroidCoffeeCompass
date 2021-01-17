@@ -29,9 +29,9 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final LoggedInUser user;
 
-    private int commentID;
+    private final int commentID;
 
-    private WeakReference<CommentsListActivity> commentsActivity;
+    private final WeakReference<CommentsListActivity> commentsActivity;
 
     public DeleteCommentAsyncTask(int commentID, LoggedInUser user, CommentsListActivity parentActivity) {
         this.user = user;

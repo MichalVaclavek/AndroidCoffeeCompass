@@ -48,7 +48,7 @@ public class CoffeeSiteMovableListContent implements Parcelable {
     /**
      * A map of CoffeeSite items, by ID. Used by RecyclerView in the FoundCoffeeSitesListActivity
      */
-    private Map<String, CoffeeSiteMovable> items_map = new HashMap<>();
+    private final Map<String, CoffeeSiteMovable> items_map = new HashMap<>();
 
     public Map<String, CoffeeSiteMovable> getItemsMap() {
         return items_map;

@@ -55,7 +55,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
         //operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null) {
 
             // Inserts currentUser authorization token to Authorization header

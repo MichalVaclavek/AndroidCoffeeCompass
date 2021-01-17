@@ -27,7 +27,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     /**
      * Support for property change, 'distance' in this case.
      */
-    private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     private static  LocationService locService;
 
@@ -59,7 +59,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     };
 
     public void setLocationService(LocationService locationService) {
-        this.locService = locationService;
+        locService = locationService;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {

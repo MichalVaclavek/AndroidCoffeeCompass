@@ -39,7 +39,7 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
 
     private static class insertAsyncTask extends AsyncTask<OtherOffer, Void, Void> {
 
-        private OtherOfferDao mAsyncTaskDao;
+        private final OtherOfferDao mAsyncTaskDao;
 
         insertAsyncTask(OtherOfferDao dao) {
             mAsyncTaskDao = dao;

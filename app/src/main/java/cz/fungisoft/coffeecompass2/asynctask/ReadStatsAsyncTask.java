@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
@@ -51,7 +52,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
             conn.setRequestMethod("GET");
 
             inpStream = new BufferedInputStream(conn.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, StandardCharsets.UTF_8));
 
             StringBuilder sb = new StringBuilder();
             String radek = null;

@@ -34,7 +34,7 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
 
     private static class insertAsyncTask extends AsyncTask<AverageStarsWithNumOfRatings, Void, Void> {
 
-        private AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
+        private final AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
 
         insertAsyncTask(AverageStarsWithNumOfRatingsDao dao) {
             mAsyncTaskDao = dao;

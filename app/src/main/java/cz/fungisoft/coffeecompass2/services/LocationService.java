@@ -64,7 +64,7 @@ public class LocationService extends Service {
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION = R.string.local_service_started;
+    private final int NOTIFICATION = R.string.local_service_started;
 
     /**
      * Class for clients to access.  Because we know this service always

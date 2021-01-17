@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +33,13 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
     private static final String TAG = "Read comments async.";
 
     private static final String sURLCore = "https://coffeecompass.cz/rest/public/starsAndComments/comments/";
-    private String sURL;
+    private final String sURL;
 
-    private WeakReference<CommentsListActivity> parentActivity;
+    private final WeakReference<CommentsListActivity> parentActivity;
 
     private List<Comment> comments;
 
-    private int coffeeSiteID;
+    private final int coffeeSiteID;
 
     public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
         this.parentActivity = new WeakReference<>(parentActivity);
@@ -67,7 +68,7 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
                 inpStream = new BufferedInputStream(conn.getInputStream());
 
                 if (inpStream != null) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, "UTF-8"));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, StandardCharsets.UTF_8));
 
                     StringBuilder sb = new StringBuilder();
                     String radek = null;

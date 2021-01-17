@@ -28,7 +28,7 @@ public class UserLogoutRESTRequest {
 
     // Activity or Service implementing interface for evaluation of the
     // user logout REST call attempt response
-    private UserAccountActionsEvaluator userAccountService;
+    private final UserAccountActionsEvaluator userAccountService;
 
     /**
      * User to be logged-out

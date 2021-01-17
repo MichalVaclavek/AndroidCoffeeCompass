@@ -84,7 +84,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         void onDataForOfflineModeDownloadFailed();
     }
 
-    private List<DataDownloadIndicatorListener> dataDownloadFinishedListeners = new ArrayList<>();
+    private final List<DataDownloadIndicatorListener> dataDownloadFinishedListeners = new ArrayList<>();
 
     public void addDataDownloadFinishedListener(DataDownloadIndicatorListener listener) {
         if (!dataDownloadFinishedListeners.contains(listener)) {
@@ -103,7 +103,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about result later, as all the operations are Async
-    private List<CoffeeSiteEntitiesServiceOperationsListener> coffeeSiteEntitiesOperationsListeners = new ArrayList<>();
+    private final List<CoffeeSiteEntitiesServiceOperationsListener> coffeeSiteEntitiesOperationsListeners = new ArrayList<>();
 
     public void addCoffeeSiteEntitiesOperationsListener(CoffeeSiteEntitiesServiceOperationsListener listener) {
         if (!coffeeSiteEntitiesOperationsListeners.contains(listener)) {
@@ -257,7 +257,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     }
 
     private int requestedPage;
-    private boolean isLastPage = false;;
+    private boolean isLastPage = false;
     public static final int PAGE_SIZE = 20;
     private int sitesAlreadyDownloaded = 0;
 

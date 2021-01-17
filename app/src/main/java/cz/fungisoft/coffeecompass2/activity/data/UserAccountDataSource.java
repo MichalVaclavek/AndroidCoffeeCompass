@@ -15,7 +15,7 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
  */
 public class UserAccountDataSource {
 
-    private UserAccountService userLoginAndRegisterService;
+    private final UserAccountService userLoginAndRegisterService;
 
     private final String TAG = "UserAccountDataSource";
 

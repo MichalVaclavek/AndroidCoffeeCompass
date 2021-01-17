@@ -28,9 +28,9 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     /**
      * Id of the CoffeeSite whose image is requested to be deleted
      */
-    private int coffeeSiteId;
+    private final int coffeeSiteId;
 
-    private WeakReference<CoffeeSiteImageService> callingService;
+    private final WeakReference<CoffeeSiteImageService> callingService;
 
     private String operationResult = "";
     private String operationError = "";
@@ -50,7 +50,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
         operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null && coffeeSiteId != 0) {
 
             // Inserts user authorization token to Authorization header

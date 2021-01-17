@@ -9,7 +9,7 @@ import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
  */
 public class DeleteUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private UserAccountRepository registerRepository;
+    private final UserAccountRepository registerRepository;
 
     public DeleteUserRESTAsyncTask(UserAccountRepository registerRepository) {
         super();

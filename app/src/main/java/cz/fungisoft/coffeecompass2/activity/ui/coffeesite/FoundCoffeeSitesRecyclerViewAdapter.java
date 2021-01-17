@@ -50,7 +50,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private final FoundCoffeeSitesListActivity mParentActivity;
 
 
-    private List<CoffeeSiteMovable> mValues = new ArrayList<>();
+    private final List<CoffeeSiteMovable> mValues = new ArrayList<>();
 
     private final boolean mTwoPane;
 

@@ -23,10 +23,10 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
 
     static final String REQ_TAG = "GetNumberOfStarsAsyncT";
 
-    private long userID;
-    private int coffeeSiteId;
+    private final long userID;
+    private final int coffeeSiteId;
 
-    private WeakReference<CommentsListActivity> parentActivity;
+    private final WeakReference<CommentsListActivity> parentActivity;
 
     public GetNumberOfStarsAsyncTask(long userID, int coffeeSiteId, CommentsListActivity parentActivity) {
         this.userID = userID;

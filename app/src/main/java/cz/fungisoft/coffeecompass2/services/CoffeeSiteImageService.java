@@ -34,7 +34,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
      * List of listeners for operations performed by CoffeeSiteImageService
      * i.e. results of Save and Delete of CoffeeSite's image
      */
-    private static List<CoffeeSiteImageServiceCallResultListener> imageOperationsResultListeners = new ArrayList<>();
+    private static final List<CoffeeSiteImageServiceCallResultListener> imageOperationsResultListeners = new ArrayList<>();
 
     public void addImageOperationsResultListener(CoffeeSiteImageServiceCallResultListener imageOperationsResultListener) {
         if (!imageOperationsResultListeners.contains(imageOperationsResultListener)) {

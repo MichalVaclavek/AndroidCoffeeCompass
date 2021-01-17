@@ -17,7 +17,7 @@ public class CoffeeSiteImageServiceConnector implements ServiceConnection {
 
     public CoffeeSiteImageServiceConnector() {}
 
-    private List<CoffeeSiteImageServiceConnectionListener> connectionListenerList = new ArrayList<>();
+    private final List<CoffeeSiteImageServiceConnectionListener> connectionListenerList = new ArrayList<>();
 
     public void addCoffeeSiteImageServiceConnectionListener( CoffeeSiteImageServiceConnectionListener listener) {
         this.connectionListenerList.add(listener);

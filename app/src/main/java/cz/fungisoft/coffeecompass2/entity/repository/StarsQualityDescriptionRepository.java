@@ -39,7 +39,7 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
 
     private static class insertAsyncTask extends AsyncTask<StarsQualityDescription, Void, Void> {
 
-        private StarsQualityDescriptionDao mAsyncTaskDao;
+        private final StarsQualityDescriptionDao mAsyncTaskDao;
 
         insertAsyncTask(StarsQualityDescriptionDao dao) {
             mAsyncTaskDao = dao;

@@ -39,7 +39,7 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     private static class insertAsyncTask extends AsyncTask<PriceRange, Void, Void> {
 
-        private PriceRangeDao mAsyncTaskDao;
+        private final PriceRangeDao mAsyncTaskDao;
 
         insertAsyncTask(PriceRangeDao dao) {
             mAsyncTaskDao = dao;

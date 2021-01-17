@@ -21,8 +21,8 @@ public class StatisticsPrefencesHelper {
 
     private final String DEFAULT_VALUE = "0";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     private final String nameOfSharedPreferences = "statistics";
 

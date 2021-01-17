@@ -10,8 +10,8 @@ public class UserAccountRepository {
 
     private static volatile UserAccountRepository instance;
 
-    private UserAccountDataSource dataSource;
-    private UserPreferencesHelper preferenceHelper;
+    private final UserAccountDataSource dataSource;
+    private final UserPreferencesHelper preferenceHelper;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore

@@ -11,7 +11,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeService
  */
 public class CoffeeSitesInRangeUpdateServiceConnector implements ServiceConnection {
 
-    private CoffeeSitesInRangeServiceConnectionListener callingActivity;
+    private final CoffeeSitesInRangeServiceConnectionListener callingActivity;
 
     public CoffeeSitesInRangeUpdateServiceConnector(CoffeeSitesInRangeServiceConnectionListener callingActivity) {
         this.callingActivity = callingActivity;

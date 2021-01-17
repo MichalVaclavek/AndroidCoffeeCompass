@@ -29,11 +29,11 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final LoggedInUser currentUser;
 
-    private File imageFile;
+    private final File imageFile;
 
-    private long coffeeSiteId;
+    private final long coffeeSiteId;
 
-    private WeakReference<CoffeeSiteImageService> callingService;
+    private final WeakReference<CoffeeSiteImageService> callingService;
 
     private String operationResult = "";
     private String operationError = "";
@@ -55,7 +55,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
         operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
+        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null && imageFile != null) {
 
             // Inserts user authorization token to Authorization header

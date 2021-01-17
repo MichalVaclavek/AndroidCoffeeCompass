@@ -35,29 +35,29 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
     /**
      * Common repository
      */
-    private CoffeeSiteEntityRepositories mRepositories;
+    private final CoffeeSiteEntityRepositories mRepositories;
 
-    private LiveData<List<CoffeeSiteType>> allCoffeeSiteTypes;
+    private final LiveData<List<CoffeeSiteType>> allCoffeeSiteTypes;
 
-    private LiveData<List<CoffeeSiteRecordStatus>> allCoffeeSiteRecordStatuses;
+    private final LiveData<List<CoffeeSiteRecordStatus>> allCoffeeSiteRecordStatuses;
 
-    private LiveData<List<CoffeeSiteStatus>> allCoffeeSiteStatuses;
+    private final LiveData<List<CoffeeSiteStatus>> allCoffeeSiteStatuses;
 
-    private LiveData<List<CoffeeSort>> allCoffeeSorts;
+    private final LiveData<List<CoffeeSort>> allCoffeeSorts;
 
-    private LiveData<List<CupType>> allCupTypes;
+    private final LiveData<List<CupType>> allCupTypes;
 
-    private LiveData<List<NextToMachineType>> allNextToMachineTypes;
+    private final LiveData<List<NextToMachineType>> allNextToMachineTypes;
 
-    private LiveData<List<OtherOffer>> allOtherOffers;
+    private final LiveData<List<OtherOffer>> allOtherOffers;
 
-    private LiveData<List<PriceRange>> allPriceRanges;
+    private final LiveData<List<PriceRange>> allPriceRanges;
 
-    private LiveData<List<SiteLocationType>> allSiteLocationTypes;
+    private final LiveData<List<SiteLocationType>> allSiteLocationTypes;
 
-    private LiveData<List<StarsQualityDescription>> allStarsQualityDescriptions;
+    private final LiveData<List<StarsQualityDescription>> allStarsQualityDescriptions;
 
-    private CoffeeSiteDatabase db;
+    private final CoffeeSiteDatabase db;
 
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 

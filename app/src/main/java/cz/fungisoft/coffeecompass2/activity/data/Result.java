@@ -27,7 +27,7 @@ public class Result<T> {
     // Success sub-class
     public final static class Success<T> extends Result {
 
-        private T data;
+        private final T data;
 
         public Success(T data) {
             this.data = data;
@@ -44,7 +44,7 @@ public class Result<T> {
         private Exception exception;
         private RestError error;
 
-        private String detailToDisplay;
+        private final String detailToDisplay;
 
         public Error(Exception error) {
             this.exception = error;

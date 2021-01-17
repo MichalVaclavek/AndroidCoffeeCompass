@@ -47,7 +47,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class MainAppWidgetProvider extends AppWidgetProvider {
 
-    private static String TAG = "Widget";
+    private static final String TAG = "Widget";
 
     /**
      * Format of the last widget update time.
