@@ -80,7 +80,7 @@
                     android:layout_marginRight="4dp"
                     android:layout_weight="5"
                     android:textAlignment="textEnd"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/chip_gray"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 

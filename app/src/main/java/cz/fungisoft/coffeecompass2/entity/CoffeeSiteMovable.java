@@ -146,4 +146,12 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     public boolean isLocationServiceAssigned() {
         return locService != null;
     }
+
+    @Override
+    public String toString() {
+        return "CoffeeSiteMovable{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

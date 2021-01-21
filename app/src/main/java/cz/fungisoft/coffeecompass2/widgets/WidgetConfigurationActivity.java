@@ -190,10 +190,10 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
     }
 
     private void configureWidgetShape(View v, int backgroundColor, int frameColor, int alpha) {
-        GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.TR_BL, new int[] { backgroundColor, ContextCompat.getColor(this, R.color.activityBackround) } );
+        GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.TR_BL, new int[] { backgroundColor, ContextCompat.getColor(this, R.color.activityBackroundWidget) } );
         shape.setShape(GradientDrawable.RECTANGLE);
-        //shape.setColors(new int[] {R.color.activityBackround, backgroundColor});
-        //shape.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+        shape.setColors(new int[] {R.color.activityBackround, backgroundColor});
+        shape.setGradientType(GradientDrawable.LINEAR_GRADIENT);
         shape.setCornerRadius(20);
         shape.setStroke(10, frameColor);
         shape.setAlpha(alpha);

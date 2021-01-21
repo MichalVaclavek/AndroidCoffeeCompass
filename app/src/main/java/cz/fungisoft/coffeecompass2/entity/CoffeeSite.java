@@ -710,4 +710,11 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Compar
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return "CoffeeSite{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

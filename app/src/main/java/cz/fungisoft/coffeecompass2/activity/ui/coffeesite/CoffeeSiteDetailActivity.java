@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPrefe
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
@@ -52,8 +54,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
-    private Button commentsButton;
-
     private CoffeeSiteDetailFragment detailFragment;
 
     private CoffeeSite coffeeSite;
@@ -63,6 +63,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private ProgressBar loadCoffeeSiteProgressBar;
     private LoggedInUser currentUser;
+
+    /**
+     * Shows current CoffeeSite distance under the details of the CoffeeSite
+     */
+    private DistanceChangeTextView distanceTextView;
 
     /**
      * UserAccount Service is probably not needed here
@@ -93,12 +98,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_detail);
 
-        // Provides OFFLINE mode status
-        DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
-
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
-
-        commentsButton = findViewById(R.id.commentsButton);
 
         loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
@@ -149,6 +149,22 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             detailFragment.setCoffeeSite(coffeeSite);
         }
 
+        // Show distance to the CoffeeSite
+        LinearLayout distanceLinearLayout = findViewById(R.id.distance_detail_linear_layout);
+
+        if (coffeeSite instanceof  CoffeeSiteMovable) {
+            distanceLinearLayout.setVisibility(View.VISIBLE);
+            distanceTextView = (DistanceChangeTextView) findViewById(R.id.distanceTextView);
+
+            distanceTextView.setTag(TAG + ". DistanceTextView for " + coffeeSite.getName());
+
+            distanceTextView.setCoffeeSite((CoffeeSiteMovable) coffeeSite);
+            ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
+            distanceTextView.setText(Utils.getDistanceInBetterReadableForm(coffeeSite.getDistance()));
+        } else {
+            distanceLinearLayout.setVisibility(View.GONE);
+        }
+
         /*
          Must be called here, in onCreate(), as after successful connection to UserAccountService
          loading of users CoffeeSites starts. We need this loading only if this Activity
@@ -181,12 +197,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
-        MenuItem editCoffeeSiteMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().findItem(R.id.action_go_to_edit_coffeesite) : null;
-
-        if (editCoffeeSiteMenuItem != null && currentUser != null
-                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-            editCoffeeSiteMenuItem.setVisible(true);
-        }
+        detailFragment.setCurrentUser(currentUser);
     }
 
     /** UnBind UserAccountService ****/
@@ -261,16 +272,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         loadCoffeeSiteProgressBar.setVisibility(GONE);
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present
-        getMenuInflater().inflate(R.menu.menu_coffeesite_detail, menu);
-        MenuItem editCoffeeSiteMenuItem = menu.findItem(R.id.action_go_to_edit_coffeesite);
-        if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-            editCoffeeSiteMenuItem.setVisible(true);
-        }
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -294,25 +295,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             return true;
         }
 
-        if (id == R.id.action_go_to_edit_coffeesite) {
-             if (currentUser != null
-                 && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-                if (Utils.isOnline()) {
-                    goToEditCoffeeSiteActivity();
-                } else {
-                    Utils.showNoInternetToast(getApplicationContext());
-                }
-            }
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    private void goToEditCoffeeSiteActivity() {
-        Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
-        activityIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-        startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }
 
     /**
@@ -396,15 +379,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                     "Server connection error.",
                     Toast.LENGTH_SHORT).show();
         }
-    }
-
-    /**
-     * To enable the commentsButton in case comments are available for the Coffee site
-     * found in GetCommentsAsyncTask
-     */
-    public void enableCommentsButton() {
-        commentsButton.setVisibility(View.VISIBLE);
-        commentsButton.setEnabled(true);
     }
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -505,5 +479,4 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         ft.attach(detailFragment);
         ft.commit();
     }
-
 }

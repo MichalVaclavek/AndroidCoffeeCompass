@@ -1,6 +1,8 @@
 package cz.fungisoft.coffeecompass2.ui.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +13,11 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
@@ -36,9 +38,19 @@ public class CoffeeSiteDetailFragment extends Fragment {
     /**
      * The object this fragment is presenting.
      */
-    private CoffeeSite mItem;
+    private CoffeeSite coffeeSite;
 
-    private DistanceChangeTextView distanceTextView;
+    private ImageView editCoffeeSiteIcon;
+
+    /**
+     * We need to know current to determine if the edit CoffeeSite image can be shown
+     */
+    private LoggedInUser currentUser;
+
+    /**
+     * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
+     */
+    static final int EDIT_COFFEESITE_REQUEST = 1;
 
     /**
      * This is rating string, which will not be shown
@@ -57,7 +69,17 @@ public class CoffeeSiteDetailFragment extends Fragment {
     }
 
     public void setCoffeeSite(CoffeeSite csm) {
-       mItem = csm;
+       coffeeSite = csm;
+    }
+
+    public void setCurrentUser( LoggedInUser currentUser) {
+       this.currentUser = currentUser;
+        if (currentUser != null
+                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+            editCoffeeSiteIcon.setVisibility(View.VISIBLE);
+        } else {
+            editCoffeeSiteIcon.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -73,13 +95,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if (distanceTextView != null && mItem != null
-            && mItem instanceof  CoffeeSiteMovable) {
-            distanceTextView.setText(Utils.getDistanceInBetterReadableForm(mItem.getDistance()));
+        if (rootView != null && coffeeSite != null) {
+            showAllCoffeeSiteInfo(rootView, coffeeSite);
         }
-        if (rootView != null && mItem != null) {
-            showAllCoffeeSiteInfo(rootView, mItem);
-        }
+        editCoffeeSiteIcon = rootView.findViewById(R.id.edit_coffeesite_detail_imageView);
+        editCoffeeSiteIcon.setOnClickListener(createOnClickListenerForEditCoffeeSiteImageView());
     }
 
     @Override
@@ -167,22 +187,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
             } else {
                 rootView.findViewById(R.id.authorCommentTableRow).setVisibility(View.GONE);
             }
-
-            TableRow distanceTableRow = rootView.findViewById(R.id.cs_detail_distance_row);
-
-            if (coffeeSite instanceof  CoffeeSiteMovable) {
-                distanceTableRow.setVisibility(View.VISIBLE);
-                distanceTextView = (DistanceChangeTextView) rootView.findViewById(R.id.distanceTextView);
-
-                distanceTextView.setText(Utils.getDistanceInBetterReadableForm(coffeeSite.getDistance()));
-                distanceTextView.setTag(TAG + ". DistanceTextView for " + coffeeSite.getName());
-
-                distanceTextView.setCoffeeSite((CoffeeSiteMovable) coffeeSite);
-                ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
-                distanceTextView.setText(Utils.getDistanceInBetterReadableForm(coffeeSite.getDistance()));
-            } else {
-                distanceTableRow.setVisibility(View.GONE);
-            }
         }
     }
 
@@ -215,6 +219,40 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 default:  ratingCupsViews[intPart].setImageResource(R.drawable.cup_rating_empty_4);
             }
         }
+    }
+
+    /**
+     * OnClick listener to handle click on edit CoffeeSite imageView icon
+     *
+     * @return
+     */
+    private View.OnClickListener createOnClickListenerForEditCoffeeSiteImageView() {
+        View.OnClickListener retVal;
+
+        retVal = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Get selected cup image
+                if (view instanceof ImageView) {
+                        if (currentUser != null
+                                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+                            if (Utils.isOnline()) {
+                                goToEditCoffeeSiteActivity();
+                            } else {
+                                Utils.showNoInternetToast(getActivity().getApplicationContext());
+                            }
+                        }
+                    }
+                }
+        };
+        return retVal;
+    }
+
+    private void goToEditCoffeeSiteActivity() {
+        Intent activityIntent = new Intent(getActivity(), CreateCoffeeSiteActivity.class);
+        activityIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+        // Return value handled in owner CoffeeSiteDetailActivity
+        startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }
 
 }

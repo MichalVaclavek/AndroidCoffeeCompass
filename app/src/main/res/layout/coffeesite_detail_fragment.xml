@@ -13,6 +13,14 @@
     card_view:contentPadding="10dp"
     tools:context="ui.fragments.CoffeeSiteDetailFragment">
 
+    <ImageView
+        android:id="@+id/edit_coffeesite_detail_imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:src="@drawable/ic_baseline_edit_36"
+        tools:visibility="gone" />
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -89,28 +97,6 @@
                     android:textStyle="bold" />
             </TableRow>
 
-            <TableRow
-                android:id="@+id/cs_detail_distance_row"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/vzdalenostLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Vzdálenost: "
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView
-                    android:id="@+id/distanceTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
 
             <TableRow
                 android:id="@+id/streetTableRow"

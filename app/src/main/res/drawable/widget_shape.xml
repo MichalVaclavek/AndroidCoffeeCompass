@@ -8,7 +8,7 @@
 
     <gradient
         android:angle="225"
-        android:endColor="@color/activityBackround"
+        android:endColor="@color/activityBackroundWidget"
         android:startColor="@color/colorPrimary2" />
 
     <corners
