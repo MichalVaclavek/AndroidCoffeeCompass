@@ -29,7 +29,6 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
@@ -281,10 +280,10 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                     arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(siteMovable.getId()));
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
                     fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .addToBackStack(null)
-                            .replace(R.id.coffeesite_detail_container, fragment)
-                            .commit();
+//                    mParentActivity.getSupportFragmentManager().beginTransaction()
+//                            .addToBackStack(null)
+//                            .replace(R.id.details_fragments_collection, fragment)
+//                            .commit();
                 } else {
                     // Open CoffeeSiteDetailActivity if the siteMovable is clicked
                     // to show details of the CoffeeSiteMovable holding this siteMovable
@@ -313,8 +312,13 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
                 if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
                     Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+//                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+//                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+//                    context.startActivity(intent);
+
+                    Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+                    intent.putExtra("showImageFirst", true);
                     context.startActivity(intent);
                 }
             }

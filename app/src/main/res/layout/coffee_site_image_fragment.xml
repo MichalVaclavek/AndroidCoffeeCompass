@@ -1,25 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coffeesiteimage"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".ui.fragments.CoffeeSiteImageFragment">
 
-    <ImageView
-        android:id="@+id/coffeesitePictureImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:maxHeight="600dp"
-        android:rotation="0"
-        android:scaleType="centerInside" />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coffeesite_detail_image_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@android:color/transparent"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    tools:context="ui.fragments.CoffeeSiteImageFragment">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/coffeesitePictureImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:maxHeight="500dp"
+            android:rotation="0"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/kafe_backround_120x160" />
+
+        <TextView
+            android:id="@+id/textView24"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="20dp"
+            android:text="Foto není k dispozici"
+            android:textStyle="italic" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/image_fragment_progressBar"
-        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone" />
 
 </FrameLayout>
+
+

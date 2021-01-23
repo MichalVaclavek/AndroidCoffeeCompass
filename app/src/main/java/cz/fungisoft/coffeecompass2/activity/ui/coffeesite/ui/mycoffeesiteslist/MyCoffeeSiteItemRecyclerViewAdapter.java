@@ -29,7 +29,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
+//import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
@@ -192,8 +192,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
                 if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
                     Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+//                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
+//                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+//                    context.startActivity(intent);
+
+                    Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+                    intent.putExtra("showImageFirst", true);
                     context.startActivity(intent);
                 }
             }

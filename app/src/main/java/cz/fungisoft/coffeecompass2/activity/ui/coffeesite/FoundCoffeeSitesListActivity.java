@@ -26,7 +26,6 @@ import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
-import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
@@ -35,8 +34,6 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchO
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
-
-import static cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider.WIDGET_CLICK;
 
 
 /**
@@ -110,13 +107,13 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_list);
 
-        if (findViewById(R.id.coffeesite_detail_container) != null) {
+        //if (findViewById(R.id.details_fragments_collection) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
             // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
+            //mTwoPane = true;
+        //}
 
         this.searchLocation = (LatLng) getIntent().getExtras().get("latLongFrom");
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
@@ -169,9 +166,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
         // Retrieve CoffeeSites list state and item positions
-        if (state != null) {
-            mListState = state.getParcelable(LIST_STATE_KEY);
-        }
+        mListState = state.getParcelable(LIST_STATE_KEY);
     }
 
     @Override

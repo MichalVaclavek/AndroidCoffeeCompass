@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +37,8 @@ import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
+import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailsTabsAdapter;
+import cz.fungisoft.coffeecompass2.ui.fragments.DetailsCollectionFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
@@ -54,7 +57,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
-    private CoffeeSiteDetailFragment detailFragment;
+    private DetailsCollectionFragment detailsCollectionFragment;
 
     private CoffeeSite coffeeSite;
 
@@ -91,6 +94,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private Toolbar mainToolbar;
 
+    // Calling activity can request to show image fragment first
+    private boolean showImageFirstRequest = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,18 +115,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             if (!(coffeeSite instanceof CoffeeSiteMovable)) {
                 coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
-        }
-
-        if (coffeeSite != null) {
-            Button imageButton = findViewById(R.id.imageButton);
-            imageButton.setVisibility(GONE);
-            if (!coffeeSite.getMainImageURL().isEmpty()) {
-                boolean offlineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-                if (!coffeeSite.getMainImageFileName().isEmpty() && (Utils.isOnline() || offlineModeOn)) {
-                    imageButton.setVisibility(View.VISIBLE);
-                    imageButton.setEnabled(true);
-                }
-            }
+            showImageFirstRequest = bundle.getBoolean("showImageFirst");
         }
 
         // Setup main toolbar
@@ -143,10 +137,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         //
         // http://developer.android.com/guide/components/fragments.html
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
+            // Create the detailsCollectionFragment and add it to the activity
             // using a fragment transaction.
-            detailFragment = new CoffeeSiteDetailFragment();
-            detailFragment.setCoffeeSite(coffeeSite);
+            Bundle fragmentArgs = new Bundle();
+            fragmentArgs.putParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT, coffeeSite);
+            fragmentArgs.putBoolean("showImageFirst", showImageFirstRequest);
+            detailsCollectionFragment = new DetailsCollectionFragment();
+            detailsCollectionFragment.setArguments(fragmentArgs);
         }
 
         // Show distance to the CoffeeSite
@@ -197,7 +194,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
-        detailFragment.setCurrentUser(currentUser);
+        //detailsCollectionFragmentAdapter.setCurrentUser(currentUser);
+        detailsCollectionFragment.setCurrentUser(currentUser);
     }
 
     /** UnBind UserAccountService ****/
@@ -222,7 +220,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
             }
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.coffeesite_detail_container, detailFragment)
+                    .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
                     .commit();
         }
     }
@@ -332,11 +330,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     /* ====== HANDLERS of BUTTONS clicks ======== */
 
-    public void onImageButtonClick(View v) {
-        Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
-        imageIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-        startActivity(imageIntent);
-    }
+//    public void onImageButtonClick(View v) {
+//        Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
+//        imageIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+//        startActivity(imageIntent);
+//    }
 
     public void onCommentsButtonClick(View v) {
         Intent commentsIntent = new Intent(this, CommentsListActivity.class);
@@ -473,10 +471,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      * @param coffeeSite current CoffeeSite data to be shown in {@code detailFragment}
      */
     private void refreshDetailFragment(CoffeeSite coffeeSite) {
-        detailFragment.setCoffeeSite(coffeeSite);
+        //detailFragment.setCoffeeSite(coffeeSite);
+        detailsCollectionFragment.setCoffeeSite(coffeeSite);
         final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.detach(detailFragment);
-        ft.attach(detailFragment);
+        ft.detach(detailsCollectionFragment);
+        ft.attach(detailsCollectionFragment);
         ft.commit();
     }
 }

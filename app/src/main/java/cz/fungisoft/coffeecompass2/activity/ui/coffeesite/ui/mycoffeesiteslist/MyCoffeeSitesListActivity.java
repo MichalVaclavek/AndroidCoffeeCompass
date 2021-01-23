@@ -170,6 +170,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_sitesList_Toolbar);
         setSupportActionBar(toolbar);
+        // Setup main toolbar with back button arrow
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         layoutManager = new LinearLayoutManager(this);
 
@@ -229,8 +232,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            //this.onBackPressed();
-            goToMainActivity(); // TODO does it make sense? to call this
+            this.onBackPressed();
+            //goToMainActivity(); // TODO does it make sense? to call this
+            //onBackPressed();
             return true;
         }
         boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());

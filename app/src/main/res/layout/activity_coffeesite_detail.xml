@@ -36,20 +36,29 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <!--
         <androidx.core.widget.NestedScrollView
             android:id="@+id/coffeesite_detail_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         </androidx.core.widget.NestedScrollView>
+
+        -->
+
+        <FrameLayout
+            android:id="@+id/coffeesite_detail_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"></FrameLayout>
 
         <LinearLayout
             android:id="@+id/distance_detail_linear_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -100,22 +109,6 @@
                     android:text="Mapa"
                     android:textColor="@android:color/white"
                     android:visibility="visible" />
-
-                <Button
-                    android:id="@+id/imageButton"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/roundedbutton"
-                    android:enabled="false"
-                    android:onClick="onImageButtonClick"
-                    android:paddingLeft="2dp"
-                    android:paddingRight="2dp"
-                    android:text="Foto"
-                    android:textColor="@android:color/white"
-                    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
-                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/commentsButton"

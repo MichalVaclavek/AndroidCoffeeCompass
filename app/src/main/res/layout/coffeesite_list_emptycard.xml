@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
     android:clickable="false"
-    android:foreground="?attr/selectableItemBackground"
-    card_view:cardBackgroundColor="@color/colorPrimary"
+    card_view:cardBackgroundColor="@color/white_transparent"
     card_view:cardCornerRadius="6dp"
     card_view:cardElevation="4dp"
     card_view:contentPadding="2dp">
@@ -35,7 +34,8 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="2dp"
-                android:text="@string/current_range_label" />
+                android:text="@string/current_range_label"
+                android:textColor="@color/colorPrimary2" />
 
             <TextView
                 android:id="@+id/current_distance_range_empty_card_textView"
@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="2dp"
                 android:layout_marginTop="5dp"
-                android:textColor="@color/colorNiceYellow"
+                android:textColor="@color/colorPrimary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -74,7 +74,7 @@
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="5dp"
             android:text="@string/still_searching"
-            android:textColor="#FFE0B2"
+            android:textStyle="italic"
             android:visibility="visible" />
 
         <ImageView

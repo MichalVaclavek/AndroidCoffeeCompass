@@ -17,11 +17,12 @@ import com.squareup.picasso.Picasso;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * Fragment of the CoffeeSiteImageActivity view to show photo of the CoffeeSite.
+ * Fragment of the CoffeeSiteDetailActivity - view to show photo of the CoffeeSite.
  */
 public class CoffeeSiteImageFragment extends Fragment {
 
@@ -43,15 +44,20 @@ public class CoffeeSiteImageFragment extends Fragment {
         mContext = null;
     }
 
-    public static CoffeeSiteImageFragment newInstance() {
-        return new CoffeeSiteImageFragment();
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            coffeeSite = bundle.getParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT);
+            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+                coffeeSite = new CoffeeSiteMovable(coffeeSite);
+            }
+        }
+
         View view = inflater.inflate(R.layout.coffee_site_image_fragment, container, false);
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
         mProgressBar =  view.findViewById(R.id.image_fragment_progressBar);

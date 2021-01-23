@@ -13,11 +13,14 @@
     <color name="selectedSearchDistanceBackround">#C1F1CC8A</color>
     <color name="listOfDistancesBackround">#FCD8A6</color>
     <color name="chip_gray">#DDDDDD</color>
+    <color name="gray_transparent">#AADDDDDD</color>
+    <color name="white_transparent">#DAFCFCFC</color>
     <color name="site_status_gray">#C5C5C5</color>
     <color name="site_status_dark_gray">#959595</color>
     <color name="light_blue_50">#FFE1F5FE</color>
     <color name="light_blue_200">#FF81D4FA</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
+    <color name="green_emptycard" >#B1C34A</color>
 </resources>
 

@@ -16,13 +16,14 @@
 
     <string name="action_settings">Nastavení</string>
     <string name="action_about">O aplikaci</string>
+    <string name="about_toolbar_title">O aplikaci</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_map">Mapa</string>
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 1.4.0</string>
-    <string name="about_datum">21. 01. 2021</string>
+    <string name="about_version">v. 1.4.1</string>
+    <string name="about_datum">31. 01. 2021</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>

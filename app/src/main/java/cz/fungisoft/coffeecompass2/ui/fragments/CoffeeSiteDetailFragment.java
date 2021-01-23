@@ -18,17 +18,19 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivi
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * A fragment representing a single CoffeeSite detail screen.
  * This fragment is either contained in a {@link FoundCoffeeSitesListActivity}
  * in two-pane mode (on tablets) or a {@link CoffeeSiteDetailActivity}
- * on handsets.
+ * on handsets ... not working this way, yet.
  */
 public class CoffeeSiteDetailFragment extends Fragment {
 
     private static final String TAG = "CoffeeSiteDetailFrag";
+
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -45,7 +47,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
     /**
      * We need to know current to determine if the edit CoffeeSite image can be shown
      */
-    private LoggedInUser currentUser;
+    private static LoggedInUser currentUser;
 
     /**
      * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
@@ -61,6 +63,8 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     private View rootView;
 
+    private static final String UNKNOWN_VALUE = "-";
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -69,17 +73,18 @@ public class CoffeeSiteDetailFragment extends Fragment {
     }
 
     public void setCoffeeSite(CoffeeSite csm) {
-       coffeeSite = csm;
+       this.coffeeSite = csm;
     }
 
-    public void setCurrentUser( LoggedInUser currentUser) {
-       this.currentUser = currentUser;
-        if (currentUser != null
-                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-            editCoffeeSiteIcon.setVisibility(View.VISIBLE);
-        } else {
-            editCoffeeSiteIcon.setVisibility(View.GONE);
-        }
+    public void setCurrentUser(LoggedInUser mCurrentUser) {
+       currentUser = mCurrentUser;
+       if (editCoffeeSiteIcon != null) {
+           if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+               editCoffeeSiteIcon.setVisibility(View.VISIBLE);
+           } else {
+               editCoffeeSiteIcon.setVisibility(View.GONE);
+           }
+       }
     }
 
     @Override
@@ -98,13 +103,21 @@ public class CoffeeSiteDetailFragment extends Fragment {
         if (rootView != null && coffeeSite != null) {
             showAllCoffeeSiteInfo(rootView, coffeeSite);
         }
-        editCoffeeSiteIcon = rootView.findViewById(R.id.edit_coffeesite_detail_imageView);
-        editCoffeeSiteIcon.setOnClickListener(createOnClickListenerForEditCoffeeSiteImageView());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.coffeesite_detail_fragment, container, false);
+        editCoffeeSiteIcon = rootView.findViewById(R.id.edit_coffeesite_detail_imageView);
+        editCoffeeSiteIcon.setOnClickListener(createOnClickListenerForEditCoffeeSiteImageView());
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            coffeeSite = bundle.getParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT);
+            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+                coffeeSite = new CoffeeSiteMovable(coffeeSite);
+            }
+        }
         return rootView;
     }
 
@@ -118,11 +131,13 @@ public class CoffeeSiteDetailFragment extends Fragment {
             if (coffeeSite.getCupTypes().size() > 0) {
                 ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(coffeeSite.getCupTypesOneString());
             } else {
-                rootView.findViewById(R.id.cupTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(UNKNOWN_VALUE);
             }
 
-            if (coffeeSite.getCena() != null) {
+            if (coffeeSite.getCena() != null && !coffeeSite.getCena().toString().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(coffeeSite.getCena().toString());
+            } else {
+                ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(UNKNOWN_VALUE);
             }
 
             if (coffeeSite.getNextToMachineTypes().size() > 0) {
@@ -134,19 +149,19 @@ public class CoffeeSiteDetailFragment extends Fragment {
             if (coffeeSite.getOtherOffers().size() > 0) {
                 ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(coffeeSite.getOtherOffersOneString());
             } else {
-                rootView.findViewById(R.id.nextOfferTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.otherOfferTextView)).setText(UNKNOWN_VALUE);
             }
 
             if (coffeeSite.getCoffeeSorts().size() > 0) {
                 ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(coffeeSite.getCoffeeSortsOneString());
             } else {
-                rootView.findViewById(R.id.coffeeSortTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.coffeeSortTextView)).setText(UNKNOWN_VALUE);
             }
 
             if (!coffeeSite.getUliceCP().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.streetTextView)).setText(coffeeSite.getUliceCP());
             } else {
-                rootView.findViewById(R.id.streetTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.streetTextView)).setText(UNKNOWN_VALUE);
             }
 
             if (!coffeeSite.getOteviraciDobaDny().isEmpty()) {
@@ -158,11 +173,12 @@ public class CoffeeSiteDetailFragment extends Fragment {
             if (!coffeeSite.getOteviraciDobaHod().isEmpty() && !coffeeSite.getOteviraciDobaDny().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.openingTextView)).setText(coffeeSite.getOteviraciDobaDny() + ", " + coffeeSite.getOteviraciDobaHod());
             } else {
-                rootView.findViewById(R.id.openingTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.openingTextView)).setText(UNKNOWN_VALUE);
             }
 
             if (coffeeSite.getHodnoceni() != null
-                    && !coffeeSite.getHodnoceni().toString().isEmpty() && !EMPTY_RATING.equals(coffeeSite.getHodnoceni().toString())) {
+                    && !coffeeSite.getHodnoceni().toString().isEmpty()
+                    && !EMPTY_RATING.equals(coffeeSite.getHodnoceni().toString())) {
                 // Get all cups rating views
                 ratingCupsViews[0] = ((ImageView) rootView.findViewById(R.id.rating_cup_1));
                 ratingCupsViews[1] = ((ImageView) rootView.findViewById(R.id.rating_cup_2));
@@ -173,10 +189,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 ((TableRow) rootView.findViewById(R.id.hodnoceni_tablerow)).setVisibility(View.VISIBLE);
                 populateRatingIcons(ratingCupsViews, coffeeSite.getHodnoceni().getAvgStars());
                 ((TextView) rootView.findViewById(R.id.hodnoceniLabel)).setText(getString(R.string.detail_rating_label, coffeeSite.getHodnoceni().getNumOfHodnoceni()));
-
+                ((TextView) rootView.findViewById(R.id.hodnoceni_detail_TextView)).setText(coffeeSite.getHodnoceni().toStringShort());
             }
             else {
-                rootView.findViewById(R.id.hodnoceni_tablerow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.hodnoceniLabel)).setText(getString(R.string.detail_rating_label, 0));
+                ((TextView) rootView.findViewById(R.id.hodnoceni_detail_TextView)).setText(UNKNOWN_VALUE);
             }
 
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(coffeeSite.getCreatedByUserName());
@@ -185,7 +202,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
             if (coffeeSite.getUvodniKoment() != null && !coffeeSite.getUvodniKoment().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(coffeeSite.getUvodniKoment());
             } else {
-                rootView.findViewById(R.id.authorCommentTableRow).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.initialCommentTextView)).setText(UNKNOWN_VALUE);
             }
         }
     }
@@ -234,16 +251,16 @@ public class CoffeeSiteDetailFragment extends Fragment {
             public void onClick(View view) {
                 // Get selected cup image
                 if (view instanceof ImageView) {
-                        if (currentUser != null
-                                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-                            if (Utils.isOnline()) {
-                                goToEditCoffeeSiteActivity();
-                            } else {
-                                Utils.showNoInternetToast(getActivity().getApplicationContext());
-                            }
+                    if (currentUser != null
+                            && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+                        if (Utils.isOnline()) {
+                            goToEditCoffeeSiteActivity();
+                        } else {
+                            Utils.showNoInternetToast(getActivity().getApplicationContext());
                         }
                     }
                 }
+            }
         };
         return retVal;
     }

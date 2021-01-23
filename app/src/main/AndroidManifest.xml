@@ -153,10 +153,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".activity.ui.coffeesite.CoffeeSiteImageActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />

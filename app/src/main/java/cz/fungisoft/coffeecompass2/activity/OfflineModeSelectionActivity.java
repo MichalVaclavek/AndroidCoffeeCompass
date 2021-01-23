@@ -44,9 +44,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     // Saves OFFLINE mode status
     private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
 
-    //@BindView(R.id.mainOfflineLayout)
-    //ConstraintLayout mainOfflineLayout;
-
     @BindView(R.id.offlineActivityMainLinearLayout)
     LinearLayout mainLinearLayout;
 
@@ -166,7 +163,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }
-
         return true;
     }
 

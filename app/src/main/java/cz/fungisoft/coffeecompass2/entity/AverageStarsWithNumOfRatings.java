@@ -88,6 +88,10 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
         return Utils.round(avgStars, 1) + " (" + numOfHodnoceni + ")";
     }
 
+    public String toStringShort() {
+        return  " (" + Utils.round(avgStars, 1) + ")";
+    }
+
 
     @Override
     public int describeContents() {
