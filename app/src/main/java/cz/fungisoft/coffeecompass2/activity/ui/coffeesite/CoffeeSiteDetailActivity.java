@@ -156,7 +156,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             distanceTextView.setTag(TAG + ". DistanceTextView for " + coffeeSite.getName());
 
             distanceTextView.setCoffeeSite((CoffeeSiteMovable) coffeeSite);
-            ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
             distanceTextView.setText(Utils.getDistanceInBetterReadableForm(coffeeSite.getDistance()));
         } else {
             distanceLinearLayout.setVisibility(View.GONE);
@@ -218,6 +217,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             if (coffeeSite instanceof CoffeeSiteMovable) {
                 ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
                 locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
+                ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
             }
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
@@ -240,7 +240,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     /**
      * locationService.removePropertyChangeListener((CoffeeSiteMovable) coffeeSite); should
-     * be performed here, but if done, then FoundCoffeeSiteListActivity, the respective item
+     * be performed here (or in onStop()), but if done, then FoundCoffeeSiteListActivity, the respective item
      * in FoundCoffeeSitesRecyclerViewAdapter, does not updates CoffeeSite distance in the
      * given label ...
      * TODO found the error ...
@@ -317,7 +317,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                     // Reloads CoffeeSite to show current saved data after edit
                     startCoffeeSiteLoad();
                 } else { // or gets as return value from Edit activity
+                    // add property change listener for new coffeesite
                     coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
+                    ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
+                    locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
+                    ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
                     // Refresh detailFragment to update View with the new CoffeeSiteMovable
                     refreshDetailFragment(coffeeSite);
                 }
@@ -327,14 +331,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
     /* ====== HANDLERS of BUTTONS clicks ======== */
-
-//    public void onImageButtonClick(View v) {
-//        Intent imageIntent = new Intent(this, CoffeeSiteImageActivity.class);
-//        imageIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-//        startActivity(imageIntent);
-//    }
 
     public void onCommentsButtonClick(View v) {
         Intent commentsIntent = new Intent(this, CommentsListActivity.class);
@@ -446,6 +443,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                     loadedCoffeeSite.setDistance(coffeeSite.getDistance());
                 }
                 coffeeSite = new CoffeeSiteMovable(loadedCoffeeSite);
+                ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
                 // add new coffeeSite as a listener of the locationService
                 if (locationService != null) {
                     ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);

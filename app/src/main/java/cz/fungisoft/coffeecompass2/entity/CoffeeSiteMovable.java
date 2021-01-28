@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
@@ -72,6 +73,16 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         changeSupport.removePropertyChangeListener(pcl);
         Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
         //Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+    }
+
+    public void removeAllDistanceChangeListeners() {
+        for (PropertyChangeListener pcl : changeSupport.getPropertyChangeListeners()) {
+            if (pcl instanceof DistanceChangeTextView) {
+                changeSupport.removePropertyChangeListener(pcl);
+                Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
+            }
+        }
+        Log.d(TAG,  "Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public CoffeeSiteMovable() {

@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:paddingTop="10dp"
-            android:text="Vaše hodnocení"
+            android:text="@string/rating_dialog_label"
             android:textAlignment="center"
             android:textStyle="bold" />
 
@@ -74,8 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingLeft="15dp"
-                android:text="nejhorší"
-                android:textColor="@android:color/holo_red_dark"
+                android:text="@string/rating_lowest"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="12sp"
                 android:textStyle="italic" />
 
@@ -84,8 +84,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="průměr"
-                android:textAlignment="center" />
+                android:text="@string/rating_middle"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimary2" />
 
             <TextView
                 android:id="@+id/textView11"
@@ -93,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingRight="15dp"
-                android:text="nejlepší"
+                android:text="@string/rating_best"
                 android:textAlignment="viewEnd"
                 android:textColor="@color/colorPrimary"
                 android:textSize="12sp"
@@ -105,7 +106,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Váš komentář"
+            android:text="@string/your_comment_dialog_label"
             android:textAlignment="center"
             android:textStyle="bold" />
 
@@ -119,7 +120,7 @@
                 android:id="@+id/commentTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="max. 320 znaků"
+                android:hint="@string/dialog_comment_hint"
                 android:inputType="textMultiLine"
                 android:maxLength="320" />
         </com.google.android.material.textfield.TextInputLayout>

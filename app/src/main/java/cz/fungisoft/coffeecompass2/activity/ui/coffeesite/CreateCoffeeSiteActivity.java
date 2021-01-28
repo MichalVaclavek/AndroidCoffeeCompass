@@ -1159,7 +1159,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param v
      */
     public boolean showTimePickerDialog(View v, MotionEvent event) {
-
         if(event.getAction() == MotionEvent.ACTION_UP) {
             timeFromToPicker = newInstance((TextInputEditText) v);
             timeFromToPicker.show(getSupportFragmentManager(), "timePicker");

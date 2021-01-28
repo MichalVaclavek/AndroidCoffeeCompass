@@ -4,9 +4,9 @@
     android:id="@+id/list_empty_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="3dp"
+    android:layout_margin="4dp"
     android:clickable="false"
-    card_view:cardBackgroundColor="@color/white_transparent"
+    card_view:cardBackgroundColor="@color/gray_light"
     card_view:cardCornerRadius="6dp"
     card_view:cardElevation="4dp"
     card_view:contentPadding="2dp">

@@ -107,14 +107,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_list);
 
-        //if (findViewById(R.id.details_fragments_collection) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            //mTwoPane = true;
-        //}
-
         this.searchLocation = (LatLng) getIntent().getExtras().get("latLongFrom");
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
         this.searchRange = (int) getIntent().getExtras().get("searchRange");
@@ -192,8 +184,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
             for (CoffeeSiteMovable csm : currentContent.getItems()) {
                 locationService.removePropertyChangeListener(csm);
             }
+            locationService.removeAllCoffeeSitesLocationChangeListeners();
         }
-
         sitesInRangeUpdateService.removeSitesInRangeFoundListener(coffeeSitesViewModel);
 
         doUnBindSitesInRangeService();

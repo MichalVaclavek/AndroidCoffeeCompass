@@ -622,6 +622,7 @@ public class MainActivity extends ActivityWithLocationService
 
         location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         locationService.addPropertyChangeListener(this);
+        //locationService.addLocationChangeListener(this);
 
         showLocationAccuracy(location);
         updateAccuracyIndicator(location);
@@ -655,6 +656,7 @@ public class MainActivity extends ActivityWithLocationService
 
         if (locationService != null) {
             locationService.addPropertyChangeListener(this);
+            //locationService.addLocationChangeListener(this);
             location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
             showLocationAccuracy(location);
@@ -702,6 +704,7 @@ public class MainActivity extends ActivityWithLocationService
         }
         if (locationService != null) {
             locationService.removePropertyChangeListener(this);
+            //locationService.removeLocationChangeListener(this);
         }
         doUnbindCoffeeSiteLoadOperationsService();
     }

@@ -5,11 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coffeesite_detail_image_fragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:background="@android:color/transparent"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
     tools:context="ui.fragments.CoffeeSiteImageFragment">
 
     <LinearLayout

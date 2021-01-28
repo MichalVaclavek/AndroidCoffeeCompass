@@ -274,16 +274,11 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 CoffeeSiteMovable siteMovable = (CoffeeSiteMovable) view.getTag();
                 if (mTwoPane) {
                     // Open CoffeeSiteDetailFragment, if the siteMovable is clicked and there is
-                    // landscape orientation
-                    // to show details of the CoffeeSiteMovable holding this siteMovable
+                    // landscape orientation to show details of the CoffeeSiteMovable holding this siteMovable
                     Bundle arguments = new Bundle();
                     arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(siteMovable.getId()));
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
                     fragment.setArguments(arguments);
-//                    mParentActivity.getSupportFragmentManager().beginTransaction()
-//                            .addToBackStack(null)
-//                            .replace(R.id.details_fragments_collection, fragment)
-//                            .commit();
                 } else {
                     // Open CoffeeSiteDetailActivity if the siteMovable is clicked
                     // to show details of the CoffeeSiteMovable holding this siteMovable
@@ -312,10 +307,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
                 if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
                     Context context = view.getContext();
-//                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
-//                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-//                    context.startActivity(intent);
-
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
                     intent.putExtra("showImageFirst", true);

@@ -26,7 +26,9 @@ import cz.fungisoft.coffeecompass2.entity.repository.DbDataListsConverters;
  * A CoffeeSite, main app. entity
  */
 @Entity(tableName = "coffee_site_table")
-public class CoffeeSite extends CoffeeSiteEntity implements Serializable, Comparable<CoffeeSite>, Parcelable {
+public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
+                                                            Comparable<CoffeeSite>,
+                                                            Parcelable {
 
     public static final String PHOTO_FILE_NAME_PREFIX = "photo_site_";
 
