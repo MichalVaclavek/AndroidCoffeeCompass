@@ -77,9 +77,9 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="10dp"
                     app:cardCornerRadius="6dp"
                     app:cardElevation="4dp"
                     app:contentPadding="14dp">
@@ -94,7 +94,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -113,6 +113,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -122,8 +123,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -142,6 +143,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -151,8 +153,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -171,6 +173,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -182,8 +185,8 @@
                             android:id="@+id/firstNameLayout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal"
                             android:visibility="visible">
 
@@ -203,6 +206,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -214,8 +218,8 @@
                             android:id="@+id/lastNameLayout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -234,6 +238,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -243,8 +248,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -263,6 +268,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -289,19 +295,26 @@
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/btn_logout"
+                        style="@style/Widget.AppCompat.Button.Colored"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="5dp"
                         android:layout_marginBottom="4dp"
+                        android:background="@drawable/rounded_green_button"
                         android:padding="12dp"
                         android:text="@string/user_profile_logout" />
 
                     <Button
                         android:id="@+id/btn_deleteUser"
-                        android:layout_width="match_parent"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="10dp"
                         android:layout_weight="1"
-                        android:text="@string/user_profile_delete_button" />
+                        android:text="@string/user_profile_delete_button"
+                        android:textColor="@color/colorAccent"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
