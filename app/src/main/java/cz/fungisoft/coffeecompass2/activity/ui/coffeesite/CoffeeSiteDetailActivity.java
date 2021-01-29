@@ -4,12 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.telecom.Call;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -22,7 +19,6 @@ import com.google.android.material.snackbar.Snackbar;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
-import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
@@ -36,7 +32,6 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailsTabsAdapter;
 import cz.fungisoft.coffeecompass2.ui.fragments.DetailsCollectionFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -47,8 +42,8 @@ import static android.view.View.GONE;
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link FoundCoffeeSitesListActivity}.
- * We need CoffeeSiteService to load current instance of CoffeeSite ...
+ * in a {@link FoundCoffeeSitesListActivity} (not working on tablets yet)
+ * We need CoffeeSiteService to load current instance of CoffeeSite.
  */
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                                       implements CoffeeSiteServicesConnectionListener,
@@ -384,8 +379,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other  applications).
         coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
@@ -469,7 +463,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      * @param coffeeSite current CoffeeSite data to be shown in {@code detailFragment}
      */
     private void refreshDetailFragment(CoffeeSite coffeeSite) {
-        //detailFragment.setCoffeeSite(coffeeSite);
         detailsCollectionFragment.setCoffeeSite(coffeeSite);
         final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.detach(detailsCollectionFragment);

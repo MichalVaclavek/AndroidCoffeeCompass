@@ -22,7 +22,8 @@ import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * Fragment of the CoffeeSiteDetailActivity - view to show photo of the CoffeeSite.
+ * Fragment of the {@link CoffeeSiteDetailActivity} - view to show photo of the CoffeeSite
+ * next to details of the CoffeeSite in the {@link CoffeeSiteDetailFragment}.
  */
 public class CoffeeSiteImageFragment extends Fragment {
 

@@ -22,10 +22,10 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * A fragment representing a single CoffeeSite detail screen.
- * This fragment is either contained in a {@link FoundCoffeeSitesListActivity}
- * in two-pane mode (on tablets) or a {@link CoffeeSiteDetailActivity}
- * on handsets ... not working this way, yet.
+ * A fragment representing a single CoffeeSite detail informations list.
+ * This fragment is either contained in a {@link CoffeeSiteDetailActivity} on handsets-mobile
+ * (or should be in a {@link FoundCoffeeSitesListActivity} in two-pane mode (on tablets),
+ * but currently only CoffeeSiteDetailActivity is used to show this fragment) )
  */
 public class CoffeeSiteDetailFragment extends Fragment {
 
@@ -214,7 +214,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
      * @param rating
      */
     private void populateRatingIcons(ImageView[] ratingCupsViews, float rating) {
-
         if (rating > 0 && rating <=5) {
             // Set all cups empty first
             for (ImageView cupImageView : ratingCupsViews) {

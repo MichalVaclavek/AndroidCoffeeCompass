@@ -76,5 +76,4 @@ public class LocationServiceConnector implements ServiceConnection {
         // see this happen.
         mBoundService = null;
     }
-
 }

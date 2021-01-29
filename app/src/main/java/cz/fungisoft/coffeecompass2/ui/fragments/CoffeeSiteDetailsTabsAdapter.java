@@ -10,8 +10,8 @@ import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
- * Adapter class to create fragments CoffeeSiteDetailFragment and CoffeeSiteImageFragment
- * on the CoffeeSiteDetailActivity
+ * Adapter class to create and return fragments {@link CoffeeSiteDetailFragment} and
+ * {@link CoffeeSiteImageFragment} in the CoffeeSiteDetailActivity.
  */
 public class CoffeeSiteDetailsTabsAdapter extends FragmentStateAdapter {
 
@@ -21,7 +21,7 @@ public class CoffeeSiteDetailsTabsAdapter extends FragmentStateAdapter {
 
     public static final String ARG_OBJECT_FRAGMENT = "coffee_site";
 
-    private static int NUM_OF_TABS = 2;
+    private static final int NUM_OF_TABS = 2;
 
     /**
      * The object this fragment is presenting.

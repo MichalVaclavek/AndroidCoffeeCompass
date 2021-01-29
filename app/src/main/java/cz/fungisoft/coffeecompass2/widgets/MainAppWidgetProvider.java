@@ -86,7 +86,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     private static boolean serviceStarted = false;
 
     /**
-     * Widget is always updated calling service CoffeeSitesInRangeFoundService
+     * Widget is always updated by calling of the service {@link CoffeeSitesInRangeWidgetService}
      *
      * @param context
      * @param appWidgetIds
@@ -100,7 +100,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         sitesInRangeServiceIntent.putExtra("coffeeSort", "");
 
         try {
-            //CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
                 if (!serviceStarted) {
                     context.startForegroundService(sitesInRangeServiceIntent);
@@ -119,9 +118,10 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-    *  Called by CoffeeSitesInRangeWidgetService, after finishing its job
-    *  or by WidgetConfigurationActivity after closing (with coffeeSites param. set to null)
-     * @param coffeeSites
+    *  Called by {@link CoffeeSitesInRangeWidgetService}, after finishing its job
+    *  or by {@link WidgetConfigurationActivity} after closing (with coffeeSites param. set to null).
+     *
+     * @param coffeeSites list of nearest CoffeeSites as found by CoffeeSitesInRangeWidgetService
      * @param searchingFinished to indicate if the service, calling this method, already finished searching - then the service can be stopped as it was called by this MainAppWidgetprovider
     */
     public static void updateCoffeeSiteWidget(Context context, List<? extends CoffeeSite> coffeeSites, boolean searchingFinished) {
@@ -136,7 +136,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             }
             // Set update time
             rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
-
             appWidgetManager.updateAppWidget(appWidgetIds, rViews);
         }
 
@@ -164,7 +163,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Handles requests based on user action. I.e. Refresh, Settings and open FoundCoffeeSitesListActivity.
+     * Handles requests based on user action. I.e. Refresh, Settings and open {@link FoundCoffeeSitesListActivity}.
      *
      * @param ctx
      * @param intent
@@ -283,7 +282,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Applies settings to widgets
+     * Applies settings to widgets ... Not yet used as the Widget's view is difficult to change ...
      */
     private static void applySettings(Context context, RemoteViews rViews) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
@@ -344,7 +343,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * Populates widgets with current CoffeeSite data.
+     * Populates widget's view elements with current CoffeeSite data.
      */
     private static void populateData(Context context, RemoteViews remoteViews, int[] appWidgetIds,
                                      List<? extends CoffeeSite> coffeeSites) {
@@ -385,27 +384,6 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 }
             }
         }
-    }
-
-    //this is used to prevent loop
-    //due to work manager ACTION_PACKAGE_CHANGED broadcast
-    //which results in a call to onUpdate method
-    private static boolean isFoundSitesServiceCalledRecently(Context context) {
-        WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
-
-        long lastApiCallTime = sharedPref.getLastServiceCall();
-
-        if (lastApiCallTime != 0) {
-            long currentTime = new Date().getTime();
-            double mins = (currentTime - lastApiCallTime)/60000;
-            if (mins > 5) {
-                sharedPref.putLastServiceCall(currentTime);
-                return false;
-            }
-        } else {
-            sharedPref.putLastServiceCall(new Date().getTime());
-        }
-        return true;
     }
 
 }

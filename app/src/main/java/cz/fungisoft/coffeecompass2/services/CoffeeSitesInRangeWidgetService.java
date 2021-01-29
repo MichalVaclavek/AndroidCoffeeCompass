@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.core.app.JobIntentService;
 
-//import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.beans.PropertyChangeEvent;
@@ -45,7 +44,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Service to obtain CoffeeSites in current search range.
  * <p></>
- * This is variant used by MainAppWidgetProvider only.<br>
+ * This is variant used by {@link MainAppWidgetProvider} only.<br>
  * Extends JobIntentService to call its functionality using enqueueWork() method.
  * Uses either REST API requests from server or DB repository in case of OFFLiNE mode to get
  * requested data about CoffeeSites.<br>
@@ -98,11 +97,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     /**
      * Called for Android API >= 26 using context.startForegroundService(sitesInRangeServiceIntent);
      * from MainAppWidgetProvider
-     *
-     * @param intent
-     * @param flags
-     * @param startId
-     * @return
      */
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
@@ -113,7 +107,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     /**
      * Method to prepare this servie to as a Foreground service. Needed for Android API >= 26
-     * For lower API the enqueue() method is used to invoke this service.
+     * For lower API the enqueue() method is used to invoke this service action.
      */
     private void prepareAndStartForeground() {
         if (Build.VERSION.SDK_INT >= 26) {
@@ -136,7 +130,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                 .build();
 
             startForeground(NOTIFICATION_ID, notification);
-            //startForeground(notification, FOREGROUND_SERVICE_TYPE_LOCATION);
         }
     }
 
@@ -179,8 +172,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         }
         Log.d(TAG, "onHandleWork end");
     }
-
-    //private FusedLocationProviderClient fusedLocationClient;
 
     /**
      * All work, which should be done, if service is invoked from MainAppWidgetProvider
@@ -231,7 +222,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             Location lastLocation =  locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationSearchFinished = false;
             if (lastLocation != null) {
-                Toast.makeText(this, "Hledám nejbližší lokaci ...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.widget_toast_searching_coffee, Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Last location found.");
                 searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 Log.d(TAG, "Last location accuracy: " + lastLocation.getAccuracy());
@@ -242,7 +233,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                     startSearchCurrentSitesForWidget();
                 }
             } else {
-                Toast.makeText(this, "Hledání polohy zařízení ...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.widget_toast_searching_phone_location, Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -366,9 +357,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         };
 
         locationFoundTimer = new Timer("Location_search_finished_timer");
-        long delay = GET_LOCATION_WAITING_TIME;
         Log.d(TAG, "Timer task scheduled.");
-        locationFoundTimer.schedule(task, delay);
+        locationFoundTimer.schedule(task, GET_LOCATION_WAITING_TIME);
     }
 
 

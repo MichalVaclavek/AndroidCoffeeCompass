@@ -21,8 +21,8 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 
 /**
- * Fragment containing child fragments CoffeeSiteImageFragment and CoffeeSiteImageFragment,
- * which is inserted into CoffeeSiteDetailActivity.
+ * Fragment containing child fragments {@link CoffeeSiteDetailFragment} and {@link CoffeeSiteImageFragment},
+ * to be inserted into {@link CoffeeSiteDetailActivity}.
  */
 public class DetailsCollectionFragment extends Fragment {
 
@@ -66,7 +66,7 @@ public class DetailsCollectionFragment extends Fragment {
 
         /*
          * We need to setup height of the imageFragment to be the same as the height of the
-         * details fragment
+         * CoffeeSiteDetailFragment
          */
         viewPager.registerOnPageChangeCallback( new ViewPager2.OnPageChangeCallback() {
 
@@ -82,7 +82,7 @@ public class DetailsCollectionFragment extends Fragment {
 
         }); // registerOnPageChangeCallback
 
-        // TODO - not working yet
+        // TODO? - not working yet
         if (showImageFirstRequest) {
             viewPager.setCurrentItem(1);
         }

@@ -22,8 +22,8 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 1.4.1</string>
-    <string name="about_datum">07. 02. 2021</string>
+    <string name="about_version">v. 1.5.0</string>
+    <string name="about_datum">6. 2. 2021</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
@@ -215,19 +215,13 @@
     <string name="widget_confirm_toast">Káva s sebou - obnoveno.</string>
     <string name="title_activity_widget_configuration">WidgetConfigurationActivity</string>
 
-    <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
-
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
     <string name="widget_notification_title">Hledání nejbližší kávy s sebou</string>
     <string name="widget_notification_message">zjišťování polohy …</string>
     <string name="widget_ticker_text">ticker_coffee_compass</string>
     <string name="widget_no_coffee">Žádná káva poblíž</string>
+    <string name="widget_toast_searching_coffee">Hledám nejbližší kávu …</string>
+    <string name="widget_toast_searching_phone_location">Hledání polohy zařízení …</string>
+
     <string name="rating_dialog_label">Vaše hodnocení</string>
     <string name="rating_lowest">břečka</string>
     <string name="rating_middle">průměr</string>
