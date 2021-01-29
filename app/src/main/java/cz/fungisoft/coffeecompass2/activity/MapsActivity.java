@@ -3,7 +3,10 @@ package cz.fungisoft.coffeecompass2.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,7 +27,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
 /**
  * Activity to show CoffeeSite's location on the map
  */
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
 
@@ -44,9 +47,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private CoffeeSiteMovableListContent content;
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        }
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps_fragment);
+        setContentView(R.layout.activity_show_map);
+
+        Toolbar mainToolbar = (Toolbar) findViewById(R.id.toolbar_show_map);
+        setSupportActionBar(mainToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         currentLoc = (LatLng) getIntent().getExtras().get("currentLocation");
         content = getIntent().getParcelableExtra("listContent");

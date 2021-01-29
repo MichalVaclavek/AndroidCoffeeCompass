@@ -39,14 +39,12 @@ public class SelectLocationMapActivity extends AppCompatActivity implements OnMa
 
     private MarkerOptions movableLocationMarker;
 
-    private Toolbar mainToolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_to_select_location);
 
-        mainToolbar = (Toolbar) findViewById(R.id.toolbar_select_map);
+        Toolbar mainToolbar = (Toolbar) findViewById(R.id.toolbar_select_map);
         setSupportActionBar(mainToolbar);
 
         // When started from CreateCoffeeSiteActivity
