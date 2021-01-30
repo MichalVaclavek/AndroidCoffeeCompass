@@ -130,6 +130,16 @@
                     android:textSize="16sp" />
 
                 <TextView
+                    android:id="@+id/about_widget_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:paddingTop="5dp"
+                    android:text="@string/about_sentence_widget"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="16sp" />
+
+                <TextView
                     android:id="@+id/permissions_textView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
