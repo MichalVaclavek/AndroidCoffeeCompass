@@ -229,8 +229,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         hideDownloadOverview();
         showDownloadOverview(dataOverview);
         lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_download_status, dateFormater.format(new Date())));
-
-        downloadButton.setEnabled(true);
     }
 
     private void showDownloadOverview(DownloadDataOverview dataOverview) {
