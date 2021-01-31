@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -53,8 +55,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -199,8 +203,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private int coffeeSitePositionInRecyclerView;
 
-    private String[] SITE_TYPES;
-    private String[] LOCATION_TYPES;
+    private String[] SITE_TYPES_LOCAL; // array of CoffeeSite types read from local file
+    private List<String> coffeeSiteTypesAvailable; // list of CoffeeSite types. either same as SITE_TYPES_LOCAL or values read from DB
+
+    private String[] LOCATION_TYPES_LOCAL; // array of location types read from local file
+    private List<String> siteLocationTypesAvailable; // list of location types. either same as LOCATION_TYPES_LOCAL or values read from DB
 
     /**
      * To detect if the CoffeeSite/Activity is in
@@ -216,11 +223,20 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private int mode = MODE_CREATE;
 
     /**
-     * To indicate, that user is trying to enter longitude and latitude manually
-     * Used in CREATE mode to block automatic overwriting of long. lat. text view
-     * in such manual enter mode
+     * To indicate, that longitude and latitude TextViews should be entered using LocationService.
+     * Used in both CREATE and MODIFY mode to block automatic overwriting of longitudeTextView or latitudeTextView,
+     * when user is editing them.
      */
-    private boolean locationEnterManualMode = false;
+    private boolean locationEnterAutomaticMode = true; // default true i.e. when CREATE mode is on i.e. new CoffeeSite is being created
+
+    /**
+     * To indicate, that city and street TextViews should be entered using GeocodingService.
+     * Used in both CREATE and MODIFY mode to block automatic overwriting of city/street textViews,
+     * when user is editing them.<br>
+     * This flag is usually changing exactly as locationEnterAutomaticMode flag, but we want to
+     * keep them seaparatelly for possible future use.
+     */
+    private boolean cityOrStreetEnterAutomaticMode = true; // default true i.e. when CREATE mode is on i.e. new CoffeeSite is being created
 
     /**
      * To show snackbar
@@ -268,21 +284,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
         }
 
-        /* It can changed when called from SelectedLocationMapActivity
-         * Probably not needed here as the return from SelectedLocationMapActivity is
-         * processed in onActivityResult() method
-         */
-        if (bundle != null) {
-            selectedCoffeeSiteLocation = (LatLng) getIntent().getExtras().get("selectedLocation");
-            // Location selected by user
-            // stop automatic location refresh in the respective TextInputs
-            // and insert selected coordinates in the input
-            if (selectedCoffeeSiteLocation != null) {
-                locationEnterManualMode = true;
-                showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
-            }
-        }
-
         // Enable/disable bottom navigation menu items
         imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
         saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
@@ -295,6 +296,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // "Edit mode"
         if (currentCoffeeSite != null && currentCoffeeSite.getId() != 0) {
             mode = MODE_MODIFY;
+            locationEnterAutomaticMode = false; // don't change location automatically. wait until user deletes all location info.
+            cityOrStreetEnterAutomaticMode = false; // don't change city/street info automatically. wait until user deletes all location info.
             fillViewWithCoffeeSiteData(currentCoffeeSite);
 
             saveMenuItem.setTitle(R.string.save_coffeesite_updated);
@@ -329,21 +332,26 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.navigation_ulozit_and_or_aktivovat:
+
+                                // Check if locationType and sourceType are selected
+                                boolean errorInInput = false;
+                                if (locationTypeEditText.getText().toString().isEmpty()) {
+                                    locationTypeTextInputLayout.setError(getString(R.string.invalid_locationType));
+                                    errorInInput = true;
+                                }
+                                if (sourceTypeEditText.getText().toString().isEmpty()) {
+                                    sourceTypeTextInputLayout.setError(getString(R.string.invalid_coffeesite_type));
+                                    errorInInput = true;
+                                }
+
+                                if (errorInInput) {
+                                    Toast.makeText(getApplicationContext(),
+                                            getString(R.string.create_site_missing_attributes),
+                                            Toast.LENGTH_SHORT);
+                                    return true;
+                                }
                                 // Create CoffeeSite instance from model
                                 if (mode == MODE_CREATE) {
-                                    // Check if locationType and sourceType are selected
-                                    boolean errorInInput = false;
-                                    if (locationTypeEditText.getText().toString().isEmpty()) {
-                                        locationTypeTextInputLayout.setError(getString(R.string.invalid_locationType));
-                                        errorInInput = true;
-                                    }
-                                    if (sourceTypeEditText.getText().toString().isEmpty()) {
-                                        sourceTypeTextInputLayout.setError(getString(R.string.invalid_coffeesite_type));
-                                        errorInInput = true;
-                                    }
-
-                                    if (errorInInput) return true;
-
                                     currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null);
 
                                     // Show dialog to choose, if the CoffeeSite should be only saved
@@ -355,6 +363,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                         Utils.showNoInternetToast(getApplicationContext());
                                     }
                                 }
+                                // Modify CoffeeSite
                                 if (mode == MODE_MODIFY) {
                                     currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite);
                                     if (Utils.isOnline()) {
@@ -431,6 +440,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                 createCoffeeSiteViewModel.coffeeSiteDataChanged(coffeeSiteNameEditText.getText().toString(),
                         longitudeEditText.getText().toString(), latitudeEditText.getText().toString());
+
                 if (!locationTypeEditText.getText().toString().isEmpty()) {
                     locationTypeTextInputLayout.setError(null);
                 }
@@ -446,7 +456,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         locationTypeEditText.addTextChangedListener(afterTextChangedListener);
         sourceTypeEditText.addTextChangedListener(afterTextChangedListener);
 
-        /**
+        //Listeners to inputTextFields to ensure keyboard hiding when focus lost
+        View.OnFocusChangeListener ofcListener = new MyFocusChangeListener();
+        coffeeSiteNameEditText.setOnFocusChangeListener(ofcListener);
+
+        /*
          * Special TextWatcher to watch if a user entered manually longitudeTextView or latitudeTextView
          */
         TextWatcher afterLongLatTextViewChangedListener = new TextWatcher() {
@@ -466,30 +480,64 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 if (longitudeEditText.getTag() == null || latitudeEditText.getTag() == null) {
                     // Value changed by user, because before setText() programmatically entered, the tag
                     // is set to a special value
-// means from now on, ignore values entered programmatically in showCurrentLocationInView()
-// as user wants to enter values manually
+                    // means from now on, ignore values entered programmatically in showCurrentLocationInView(
+                    // as user wants to enter values manually
                     // but if both  textInputs are cleared, allow automatic enter again
-                    locationEnterManualMode = !longitudeEditText.getText().toString().isEmpty() || !latitudeEditText.getText().toString().isEmpty();
+                    locationEnterAutomaticMode = longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty();
+                    cityOrStreetEnterAutomaticMode = locationEnterAutomaticMode;
                 }
             }
         };
 
         latitudeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
-        locationTypeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
+        longitudeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
+
+        latitudeEditText.setOnFocusChangeListener(ofcListener);
+        longitudeEditText.setOnFocusChangeListener(ofcListener);
+
+        /*
+         * Special TextWatcher to watch if a user entered manually cityTextView or streetTextView
+         */
+        TextWatcher afterCityOrStreetTextViewChangedListener = new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            // Validate input in createCoffeeSiteViewModel
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Detect if the input of city name was changed by setText or by user
+                if (cityEditText.getTag() == null || streetEditText.getTag() == null) {
+                    // Value changed by user, because before setText() programmatically entered, the tag
+                    // is set to a special value
+                    // means that from now on, ignore values entered programmatically in showCurrentLocationInView()
+                    // as user wants to enter values manually
+//                    cityOrStreetEnterAutomaticMode = (!cityEditText.getText().toString().isEmpty() || !streetEditText.getText().toString().isEmpty())
+//                                                    && locationEnterAutomaticMode; // only if the location Enter is in manual mode, then also city and Name is in manual mode
+//                                                                                // this avoids unwanted change of City/street in manual mode
+                    // user wants to change text - don't change it automatically.
+                    // only if longitude/latitude TextView is deleted completely, city and street can be changed automatically
+                    cityOrStreetEnterAutomaticMode = false;
+                }
+            }
+        };
+
+        cityEditText.addTextChangedListener(afterCityOrStreetTextViewChangedListener);
+        streetEditText.addTextChangedListener(afterCityOrStreetTextViewChangedListener);
+
+        cityEditText.setOnFocusChangeListener(ofcListener);
+        streetEditText.setOnFocusChangeListener(ofcListener);
+
 
         openingFromTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingFromTimeEditText, event));
         openingToTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingToTimeEditText, event));
 
-        //Listenrs to inputTextFields to ensure keyboard hiding when focus lost
-        View.OnFocusChangeListener ofcListener = new MyFocusChangeListener();
-        coffeeSiteNameEditText.setOnFocusChangeListener(ofcListener);
-        cityEditText.setOnFocusChangeListener(ofcListener);
-        streetEditText.setOnFocusChangeListener(ofcListener);
-        latitudeEditText.setOnFocusChangeListener(ofcListener);
-        longitudeEditText.setOnFocusChangeListener(ofcListener);
-
         doBindCoffeeSiteImageService();
-
         doBindCoffeeSiteCUDOperationsService();
         doBindCoffeeSiteStatusChangeService();
 
@@ -580,8 +628,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     // stop automatic location refresh in the respective TextInputs
                     // and insert selected coordinates in the input
                     if (selectedCoffeeSiteLocation != null) {
-                        locationEnterManualMode = true;
                         showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+                        showCityStreetInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+                        locationEnterAutomaticMode = false;
+                        cityOrStreetEnterAutomaticMode = false;
                 }
                 break;
                 }
@@ -705,22 +755,25 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
     /** which can be slected by user during new CoffeeSite creation **/
+
     /* ----- START ------- */
 
     private void showCoffeeSiteTypes() {
         // Typ zdroje
-        SITE_TYPES = getResources().getStringArray(R.array.coffee_site_type);
-
-        final ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                new ArrayList<>(Arrays.asList(SITE_TYPES)));
+        SITE_TYPES_LOCAL = getResources().getStringArray(R.array.coffee_site_type);
+        coffeeSiteTypesAvailable =  new ArrayList<>(Arrays.asList(SITE_TYPES_LOCAL));
+        ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popoup_item,
+                coffeeSiteTypesAvailable); // default values
 
         coffeeSiteEntitiesViewModel.getAllCoffeeSiteTypes().observe(this, new Observer<List<CoffeeSiteType>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteType> coffeeSiteTypes) {
-                // Update the cached copy of the words in the adapter.
-                siteTypesAdapter.clear();
+                // Update the cached copy of the words in the adapter by values from DB.
+                //siteTypesAdapter.clear();
+                coffeeSiteTypesAvailable.clear();
                 for (CoffeeSiteType cst : coffeeSiteTypes) {
-                    siteTypesAdapter.add(cst.getCoffeeSiteType());
+                    //siteTypesAdapter.add(cst.getCoffeeSiteType());
+                    coffeeSiteTypesAvailable.add(cst.getCoffeeSiteType());
                 }
             }
         });
@@ -733,17 +786,20 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private void showLocationTypes() {
         // Typ lokality
-        LOCATION_TYPES = getResources().getStringArray(R.array.location_type);
-        final ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                new ArrayList<>(Arrays.asList(LOCATION_TYPES)));
+        LOCATION_TYPES_LOCAL = getResources().getStringArray(R.array.location_type);
+        siteLocationTypesAvailable = new ArrayList<>(Arrays.asList(LOCATION_TYPES_LOCAL));
+        ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popoup_item,
+                siteLocationTypesAvailable); // default values
 
         coffeeSiteEntitiesViewModel.getAllSiteLocationTypes().observe(this, new Observer<List<SiteLocationType>>() {
             @Override
             public void onChanged(@Nullable final List<SiteLocationType> siteLocationTypes) {
-                // Update the cached copy of the words in the adapter.
-                locationTypesAdapter.clear();
+                // Update the cached copy of the words in the adapter by values from DB.
+                //locationTypesAdapter.clear();
+                siteLocationTypesAvailable.clear();
                 for (SiteLocationType cslt : siteLocationTypes) {
-                    locationTypesAdapter.add(cslt.getLocationType());
+                    //locationTypesAdapter.add(cslt.getLocationType());
+                    siteLocationTypesAvailable.add(cslt.getLocationType());
                 }
             }
         });
@@ -751,7 +807,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         AutoCompleteTextView locationTypesDropdown = findViewById(R.id.location_type_dropdown);
         locationTypesDropdown.setAdapter(locationTypesAdapter);
         locationTypesDropdown.setValidator(new LocationTypeValidator());
-
         locationTypesDropdown.setOnFocusChangeListener(new LocationTypeInputFocusListener());
     }
 
@@ -1132,23 +1187,23 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     /* ********************** ****************************** */
 
     /**
-     * Setup locationService listeners ...
-     * If we are in MODIFY CoffeeSite mode,
-     * don't update LatitudeAndLongitudeView
+     * Setup locationService listeners ...<br>
+     * If we are in MODIFY CoffeeSite mode, wait until user deletes both location info
+     * to activate locationEnterManualMode and cityOrStreetEnterManualMode.
      */
     @Override
     public void onLocationServiceConnected() {
-
         super.onLocationServiceConnected();
-        if (mode == MODE_CREATE) {
-            currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-            locationService.addPropertyChangeListener(this);
-            // Initiate coffeeSite location selected by user
-            if (currentLocation != null) {
-                selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                if (!locationEnterManualMode) {
-                    showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
-                }
+        currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        locationService.addPropertyChangeListener(this);
+        // Initiate coffeeSite location selected by user
+        if (currentLocation != null) {
+            selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            if (locationEnterAutomaticMode) {
+                showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+            }
+            if (cityOrStreetEnterAutomaticMode) {
+                showCityStreetInView(currentLocation.getLatitude(), currentLocation.getLongitude());
             }
         }
     }
@@ -1252,7 +1307,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         coffeeSite.setMesto(cityEditText.getText().toString().trim());
 
         String typPodniku = sourceTypeEditText.getText().toString();
-        typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES[0];
+        typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES_LOCAL[0];
 
         Disposable subscribe = coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -1262,7 +1317,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         mDisposable.add(subscribe);
 
         String typLokality = locationTypeEditText.getText().toString();
-        typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES[0];
+        typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES_LOCAL[0];
         subscribe = coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -1322,9 +1377,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void propertyChange(PropertyChangeEvent evt) {
         if (locationService != null) {
             currentLocation = locationService.getCurrentLocation();
-        }
-        if (!locationEnterManualMode) {
-            showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+            if (currentLocation != null) {
+                if (locationEnterAutomaticMode) {
+                    showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+                }
+                if (cityOrStreetEnterAutomaticMode) {
+                    showCityStreetInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+                }
+            }
         }
     }
 
@@ -1349,6 +1409,40 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             longitudeEditText.setText(longitudeString);
             latitudeEditText.setTag( null);
             longitudeEditText.setTag( null);
+        }
+    }
+
+    /**
+     * Shows location selected by user from Map in the respective latitude and longitude view
+     */
+    private void showCityStreetInView(double latitude, double longitude) {
+
+        Geocoder geocoder;
+        List<Address> addresses = null;
+        geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            Log.d(TAG, "Looking for address start ...");
+            addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+        } catch (IOException e) {
+            Log.e(TAG, "Error looking for address: " + e.getMessage());
+        }
+
+        if (addresses != null && addresses.size() > 0) {
+            Log.d(TAG, "Address found");
+            // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            String street = addresses.get(0).getAddressLine(0).split(",")[0]; // getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat
+            String city = addresses.get(0).getLocality();
+//            String state = addresses.get(0).getAdminArea();
+//            String country = addresses.get(0).getCountryName();
+//            String postalCode = addresses.get(0).getPostalCode();
+
+            cityEditText.setTag("cityChangedProgrammatically");
+            streetEditText.setTag("streetChangedProgrammatically");
+            cityEditText.setText(city);
+            streetEditText.setText(street);
+            cityEditText.setTag(null);
+            streetEditText.setTag(null);
         }
     }
 
@@ -1490,7 +1584,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * On permanent denial opens settings dialog
      */
     private void requestStoragePermission(boolean isCamera) {
-        Dexter.withActivity(this)
+        Dexter.withContext(this)
               .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
               .withListener(new MultiplePermissionsListener() {
@@ -1552,22 +1646,25 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     /*  -------------- INNER CLASSES ------------------- */
 
     /**
-     * Validators for CoffeeSiteType input and for CoffeeSiteLocationType input
+     * Helper inner class to check if CoffeeSite's type dropdown input field
+     * is correctly entered as it can be entered manually by user.
+     * If not correct, then it is fixed providing first location type item
+     * from {@link SITE_TYPES_LOCAL} list.
+     * Probably not needed in this Activity as the list of available items are inserted
+     * into list of only selectable items of {@link AutoCompleteTextView} sourceTypeEditText
      */
     class SiteTypeValidator implements AutoCompleteTextView.Validator {
 
         @Override
         public boolean isValid(CharSequence text) {
             Log.v("Test", "Checking if valid: " + text);
-            Arrays.sort(SITE_TYPES);
-            return Arrays.binarySearch(SITE_TYPES, text.toString()) > 0;
+            return coffeeSiteTypesAvailable.contains(text.toString());
         }
 
         @Override
         public CharSequence fixText(CharSequence invalidText) {
             Log.v("Test", "Returning fixed text");
-
-            return SITE_TYPES[0];
+            return SITE_TYPES_LOCAL[0];
         }
     }
 
@@ -1578,29 +1675,31 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.v("Test", "Focus changed");
             if (v.getId() == R.id.site_type_dropdown && !hasFocus) {
                 Log.v("Test", "Performing validation");
-                ((AutoCompleteTextView)v).performValidation();
+                ((AutoCompleteTextView) v).performValidation();
             }
         }
     }
 
     /**
      * Helper inner class to check if CoffeeSite's location type dropdown input field
-     * is correctly entered as it can be entered manually by user. If not correct
-     * then it is fixed providing first location type item from {@link LOCATION_TYPES} list.
+     * is correctly entered as it can be entered manually by user.
+     * If not correct, then it is fixed providing first location type item
+     * from {@link LOCATION_TYPES_LOCAL} list.
+     * Probably not needed in this Activity as the list of available items are inserted
+     * into list of only selectable items of {@link AutoCompleteTextView} locationTypeEditText
      */
     class LocationTypeValidator implements AutoCompleteTextView.Validator {
 
         @Override
         public boolean isValid(CharSequence text) {
             Log.v(TAG, "Checking if valid: " + text);
-            Arrays.sort(LOCATION_TYPES);
-            return Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0;
+            return siteLocationTypesAvailable.contains(text.toString());
         }
 
         @Override
         public CharSequence fixText(CharSequence invalidText) {
             Log.v("Test", "Returning fixed text");
-            return LOCATION_TYPES[0];
+            return LOCATION_TYPES_LOCAL[0];
         }
     }
 
@@ -1611,13 +1710,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.v(TAG, "Focus changed");
             if (v.getId() == R.id.location_type_dropdown && !hasFocus) {
                 Log.v(TAG, "Performing dropdown input validation.");
-                ((AutoCompleteTextView)v).performValidation();
+                ((AutoCompleteTextView) v).performValidation();
             }
         }
     }
 
     /**
-     * Helper inner class to achieve functionality of hiding keyboaard, when the inputTextView
+     * Helper inner class to achieve functionality of hiding keyboard, when the inputTextView
      * loose the focus.
      */
     private class MyFocusChangeListener implements View.OnFocusChangeListener {
@@ -1632,7 +1731,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                 InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
             }
         }
     }

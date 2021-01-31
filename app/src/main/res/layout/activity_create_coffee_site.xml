@@ -587,7 +587,7 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary2"
             app:itemIconTint="@color/card_backround"
-            app:itemTextColor="@color/colorPrimaryDark"
+            app:itemTextColor="@color/text_color_create_site_menu"
             app:menu="@menu/menu_create_site">
 
         </com.google.android.material.bottomnavigation.BottomNavigationView>

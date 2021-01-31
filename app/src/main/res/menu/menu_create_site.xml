@@ -10,6 +10,6 @@
         android:id="@+id/navigation_foto_delete"
         android:enabled="false"
         android:icon="@drawable/ic_delete_picture"
-        android:title="Smazat foto" />
+        android:title="@string/create_site_menu_smazat_foto" />
 
 </menu>

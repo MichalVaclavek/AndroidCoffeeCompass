@@ -77,7 +77,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         rViews.setTextViewText(R.id.widget_update_time, dateFormater.format(new Date()));
 
         // Then Update via service
-        updateViaService(context, appWidgetIds);
+        updateViaService(context, appWidgetIds, false);
 
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
@@ -91,13 +91,14 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
      * @param context
      * @param appWidgetIds
      */
-    private void updateViaService(Context context, int[] appWidgetIds) {
+    private void updateViaService(Context context, int[] appWidgetIds, boolean invokedByUser) {
         WidgetSettingsPreferenceHelper sharedPref = new WidgetSettingsPreferenceHelper(context);
 
         sitesInRangeServiceIntent = new Intent(context, CoffeeSitesInRangeWidgetService.class);
         sitesInRangeServiceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         sitesInRangeServiceIntent.putExtra("searchRange", sharedPref.getSearchDistance());
         sitesInRangeServiceIntent.putExtra("coffeeSort", "");
+        sitesInRangeServiceIntent.putExtra("serviceInvokedByUser", invokedByUser);
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
@@ -179,7 +180,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
         if (action.equals(REFRESH_CLICK)) {  // start refresh using CoffeeSitesInRangeFoundService
             try {
-                updateViaService(context, widgetIds);
+                updateViaService(context, widgetIds, true);
             }
             catch (Exception ex) {
                 Log.e(TAG, ex.getMessage());

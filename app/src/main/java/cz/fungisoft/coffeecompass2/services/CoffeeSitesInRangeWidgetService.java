@@ -95,6 +95,12 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     private int[] allWidgetIds; // currently not used
 
     /**
+     * Indicate that service was invoked by user click on refresh icon.
+     * used to show/not show Toast informing about ongoing searching for nearest site.
+     */
+    private Boolean serviceInvokedByUser = false;
+
+    /**
      * Called for Android API >= 26 using context.startForegroundService(sitesInRangeServiceIntent);
      * from MainAppWidgetProvider
      */
@@ -181,6 +187,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         this.currentSearchRange = (int) intent.getExtras().get("searchRange");
         this.coffeeSort = (String) intent.getExtras().get("coffeeSort");
         this.allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+        this.serviceInvokedByUser = (Boolean) intent.getExtras().get("serviceInvokedByUser");
 
         isSearchingSites = false; // reset
         doBindLocationService();
@@ -222,7 +229,9 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             Location lastLocation =  locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationSearchFinished = false;
             if (lastLocation != null) {
-                Toast.makeText(this, R.string.widget_toast_searching_coffee, Toast.LENGTH_SHORT).show();
+                if (serviceInvokedByUser) {
+                    Toast.makeText(this, R.string.widget_toast_searching_coffee, Toast.LENGTH_SHORT).show();
+                }
                 Log.d(TAG, "Last location found.");
                 searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 Log.d(TAG, "Last location accuracy: " + lastLocation.getAccuracy());

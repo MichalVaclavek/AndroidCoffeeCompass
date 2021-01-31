@@ -229,5 +229,7 @@
     <string name="rating_best">vynikající</string>
     <string name="your_comment_dialog_label">Váš komentář</string>
     <string name="dialog_comment_hint">max. 320 znaků</string>
+    <string name="create_site_missing_attributes">Chybí povinná položka</string>
+    <string name="create_site_menu_smazat_foto">Smazat foto</string>
 
 </resources>

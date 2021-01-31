@@ -33,6 +33,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity
             android:name=".widgets.WidgetConfigurationActivity"
             android:label="@string/title_activity_widget_configuration"></activity>
