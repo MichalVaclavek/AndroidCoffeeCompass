@@ -169,7 +169,7 @@ public class CoffeeSiteEntityRepositories {
     }
 
 
-    public <T extends List<? extends CoffeeSiteEntity>> void setEntities(T response) {
+    public void setEntities(List<? extends CoffeeSiteEntity> response) {
         if (response.size() > 0) {
             if (response.get(0) instanceof CoffeeSiteType) {
                 setAllCoffeeSiteTypes((List<CoffeeSiteType>) response);

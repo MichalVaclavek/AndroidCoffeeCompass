@@ -6,6 +6,8 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -155,7 +157,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
         if (call != null) {
             call.enqueue(new Callback<T>() {
                 @Override
-                public void onResponse(Call<T> call, Response<T> response) {
+                public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
                     incrementEntitiesCallCounter();
                     if (response.isSuccessful()) {
                         if (response.body() != null) {

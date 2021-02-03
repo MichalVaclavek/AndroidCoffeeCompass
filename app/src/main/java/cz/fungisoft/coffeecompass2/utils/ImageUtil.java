@@ -195,7 +195,7 @@ public class ImageUtil {
             protected Void doInBackground(Void... arg0) {
 
                 try {
-                    File sdCard = Environment.getExternalStorageDirectory();
+                    //File sdCard = Environment.getExternalStorageDirectory();
                     //@SuppressLint("DefaultLocale")
                     //String fileName = String.format("%d.jpg", System.currentTimeMillis());
                     ContextWrapper cw = new ContextWrapper(context);
@@ -212,10 +212,6 @@ public class ImageUtil {
                         fos = new FileOutputStream(myImageFile);
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                         alreadySavedImagesCounter++;
-
-//                       Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//                       intent.setData(Uri.fromFile(myImageFile));
-//                       context.sendBroadcast(intent);
                     } catch (IOException e) {
                         Log.e(TAG, e.getMessage());
                     } finally {

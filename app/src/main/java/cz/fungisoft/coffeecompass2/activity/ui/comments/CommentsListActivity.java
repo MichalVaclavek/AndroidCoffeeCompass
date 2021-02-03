@@ -281,8 +281,7 @@ public class CommentsListActivity extends AppCompatActivity
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
 
@@ -469,12 +468,16 @@ public class CommentsListActivity extends AppCompatActivity
                         holder.commentTextView.setText(item.getText());
                         holder.itemView.setTag(item);
 
-                        holder.userAndDateText.setText(item.getUserName() + ", " + item.getCreatedOnString());
-
                         if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())
                            && !this.offLineModeOn) {
                             showButtons(holder);
+                            // user name is not needed if this is user's comment as user can see buttons to edit, hide the user name
+                            holder.dateText.setText(item.getCreatedOnString());
+                            holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.BOLD_ITALIC);
                         } else {
+                            holder.userText.setText(item.getUserName() + ", ");
+                            holder.dateText.setText( item.getCreatedOnString());
+                            holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.ITALIC);
                             hideButtons(holder);
                         }
 
@@ -507,23 +510,27 @@ public class CommentsListActivity extends AppCompatActivity
             }
 
             private void hideRatingSigns(ViewHolder holder) {
+                holder.commentRatingLabel.setVisibility(GONE);
                 for (ImageView starView : holder.starsImageView) {
                     starView.setVisibility(GONE);
                 }
             }
 
             private void showRatingSigns(ViewHolder holder) {
+                holder.commentRatingLabel.setVisibility(VISIBLE);
                 for (ImageView starView : holder.starsImageView) {
                     starView.setVisibility(VISIBLE);
                 }
             }
 
             private void hideNameAndDate(ViewHolder holder) {
-                holder.userAndDateText.setVisibility(GONE);
+                holder.userText.setVisibility(GONE);
+                holder.dateText.setVisibility(GONE);
             }
 
             private void showNameAndDate(ViewHolder holder) {
-                holder.userAndDateText.setVisibility(VISIBLE);
+                holder.userText.setVisibility(VISIBLE);
+                holder.dateText.setVisibility(VISIBLE);
             }
 
             private void hideButtons(ViewHolder holder) {
@@ -559,9 +566,11 @@ public class CommentsListActivity extends AppCompatActivity
             */
             static class ViewHolder extends RecyclerView.ViewHolder {
 
-                final TextView userAndDateText;
+                final TextView userText;
+                final TextView dateText;
                 final TextView commentTextView;
                 final LinearLayout commentAndRatingLayout;
+                final TextView commentRatingLabel;
 
                 final LinearLayout editAndDeleteIconLayout;
                 final ImageView deleteButtonIcon;
@@ -581,8 +590,10 @@ public class CommentsListActivity extends AppCompatActivity
 
                     starsImageView = new ArrayList<>();
 
-                    userAndDateText = (TextView) view.findViewById(R.id.userAndDateText);
+                    userText = (TextView) view.findViewById(R.id.userNameTextView);
+                    dateText = (TextView) view.findViewById(R.id.dateTextView);
                     commentTextView = (TextView) view.findViewById(R.id.commentText);
+                    commentRatingLabel = (TextView) view.findViewById(R.id.comment_rating_label);
                     commentAndRatingLayout = (LinearLayout)  view.findViewById(R.id.user_comment_and_rating_linearlayout);
 
                     editAndDeleteIconLayout = (LinearLayout)  view.findViewById(R.id.edit_delete_comment_images_linearlayout);

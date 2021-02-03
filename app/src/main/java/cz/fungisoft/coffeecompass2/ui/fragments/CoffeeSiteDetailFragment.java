@@ -193,7 +193,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
             }
             else {
                 ((TextView) rootView.findViewById(R.id.hodnoceniLabel)).setText(getString(R.string.detail_rating_label, 0));
-                ((TextView) rootView.findViewById(R.id.hodnoceni_detail_TextView)).setText(UNKNOWN_VALUE);
+                ((TextView) rootView.findViewById(R.id.hodnoceni_detail_TextView)).setText("");
             }
 
             ((TextView) rootView.findViewById(R.id.createdByUserTextView)).setText(coffeeSite.getCreatedByUserName());

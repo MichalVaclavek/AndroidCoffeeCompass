@@ -36,11 +36,23 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/userAndDateText"
+                            android:id="@+id/userNameTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right|top"
                             android:layout_marginLeft="5dp"
+                            android:layout_weight="1"
+                            android:textAlignment="gravity"
+                            android:textAppearance="?attr/textAppearanceListItem"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="10sp"
+                            android:textStyle="italic" />
+
+                        <TextView
+                            android:id="@+id/dateTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right|top"
                             android:layout_marginRight="5dp"
                             android:textAlignment="gravity"
                             android:textAppearance="?attr/textAppearanceListItem"
@@ -48,11 +60,19 @@
                             android:textSize="10sp"
                             android:textStyle="italic" />
 
+                        <TextView
+                            android:id="@+id/comment_rating_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="- hodnocení: "
+                            android:textSize="10sp" />
+
                         <ImageView
                             android:id="@+id/rating_imageView_5"
                             android:layout_width="12dp"
                             android:layout_height="12dp"
-                            android:layout_marginLeft="12dp"
+                            android:layout_marginLeft="4dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
                             android:background="@drawable/rating_star_empty"

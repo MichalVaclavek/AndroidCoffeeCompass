@@ -29,7 +29,7 @@
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
     <string name="about_sentence4">"Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde lze také evidovat další kávové lokace."</string>
     <string name="about_sentence_widget">Součástí aplikace je i Nástroj na domovskou obrazovku (Widget), který zobrazuje nejbližší kávovou lokaci.</string>
-    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem coffeecompass.cz, kde jsou uložena data o lokacích.</string>
+    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
     <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
@@ -195,7 +195,7 @@
     <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
     <string name="data_download_success">Data stažena úspěšně.</string>
     <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
-    <string name="last_offline_data_download_status">Staženo: (%1$s)</string>
+    <string name="last_offline_data_download_status">Naposledy staženo: (%1$s)</string>
     <string name="last_offline_data_not_yet_downloaded">Data zatím nebyla stažena.</string>
     <string name="offline_data_downloaded_sites">Kávové lokace: %1$s</string>
     <string name="offline_data_downloaded_comments">Komentáře: %1$s</string>

@@ -71,7 +71,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()

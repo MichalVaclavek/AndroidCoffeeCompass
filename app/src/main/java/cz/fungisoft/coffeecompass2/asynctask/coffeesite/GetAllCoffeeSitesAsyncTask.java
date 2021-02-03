@@ -56,7 +56,7 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(360, TimeUnit.SECONDS)
+                .readTimeout(180, TimeUnit.SECONDS) // 5 minutes
                 .build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()

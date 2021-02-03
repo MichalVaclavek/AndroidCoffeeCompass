@@ -94,6 +94,8 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         hideDownloadOverview();
 
         lastLoadedStatusTextView.setVisibility(View.VISIBLE);
+        // hide progress bar until the download is in progress
+        downloadProgressBar.setVisibility(View.GONE);
 
         if (dataDownloadPreferenceHelper.getDownloaded()) {
             lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_download_status, dateFormater.format(dataDownloadPreferenceHelper.getDownloadDate())));
@@ -112,10 +114,10 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
                 if (Utils.isOnline()) {
                     downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadButton.setEnabled(false);
+                    withImagesCheckBox.setEnabled(false);
                     downloadingStatusTextView.setTextColor(origStatusColor);
                     coffeeSiteEntitiesService.addDataDownloadFinishedListener(OfflineModeSelectionActivity.this);
                     coffeeSiteEntitiesService.populateCoffeeSites(withImagesCheckBox.isChecked(), downloadProgressBar, downloadingStatusTextView);
-                    //clearDownloadOverview();
                     downloadInProgress = true;
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
@@ -150,7 +152,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
     /**
      * //TODO should process onPause() during ongoing download ... !!! Download should run independently,
-     *
      */
     @Override
     public void onPause() {

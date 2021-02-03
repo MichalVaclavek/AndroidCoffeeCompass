@@ -473,7 +473,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
 
-            // Validate input in createCoffeeSiteViewModel
             @Override
             public void afterTextChanged(Editable s) {
                 // Detect if the input of longitude or latitude was changed by setText or by user
@@ -484,7 +483,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     // as user wants to enter values manually
                     // but if both  textInputs are cleared, allow automatic enter again
                     locationEnterAutomaticMode = longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty();
-                    cityOrStreetEnterAutomaticMode = locationEnterAutomaticMode;
+                    cityOrStreetEnterAutomaticMode = locationEnterAutomaticMode; // only if location is deleted by user, then automatic city/street resolving is enabled
                 }
             }
         };
@@ -508,14 +507,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
 
-            // Validate input in createCoffeeSiteViewModel
             @Override
             public void afterTextChanged(Editable s) {
-                // Detect if the input of city name was changed by setText or by user
+                // Detect if the input of city and street name was changed by setText or by user
                 if (cityEditText.getTag() == null || streetEditText.getTag() == null) {
                     // Value changed by user, because before setText() programmatically entered, the tag
                     // is set to a special value
-                    // means that from now on, ignore values entered programmatically in showCurrentLocationInView()
+                    // means that from now on, ignore values entered programmatically in showCityStreetInView()
                     // as user wants to enter values manually
 //                    cityOrStreetEnterAutomaticMode = (!cityEditText.getText().toString().isEmpty() || !streetEditText.getText().toString().isEmpty())
 //                                                    && locationEnterAutomaticMode; // only if the location Enter is in manual mode, then also city and Name is in manual mode
@@ -715,8 +713,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteImageServiceConnector = new CoffeeSiteImageServiceConnector();
         coffeeSiteImageServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
 
@@ -728,7 +725,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     "exist, or this client isn't allowed access to it.");
         }
     }
-
 
     /**
      * Called when CoffeeSiteImageService is Connected
@@ -754,7 +750,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
-    /** which can be slected by user during new CoffeeSite creation **/
+    /** which can be selected by user during new CoffeeSite creation **/
 
     /* ----- START ------- */
 
@@ -769,10 +765,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteType> coffeeSiteTypes) {
                 // Update the cached copy of the words in the adapter by values from DB.
-                //siteTypesAdapter.clear();
                 coffeeSiteTypesAvailable.clear();
                 for (CoffeeSiteType cst : coffeeSiteTypes) {
-                    //siteTypesAdapter.add(cst.getCoffeeSiteType());
                     coffeeSiteTypesAvailable.add(cst.getCoffeeSiteType());
                 }
             }
@@ -795,10 +789,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             @Override
             public void onChanged(@Nullable final List<SiteLocationType> siteLocationTypes) {
                 // Update the cached copy of the words in the adapter by values from DB.
-                //locationTypesAdapter.clear();
                 siteLocationTypesAvailable.clear();
                 for (SiteLocationType cslt : siteLocationTypes) {
-                    //locationTypesAdapter.add(cslt.getLocationType());
                     siteLocationTypesAvailable.add(cslt.getLocationType());
                 }
             }
@@ -899,8 +891,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
@@ -1291,7 +1282,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * or updates inserted CoffeeSite
      */
     private CoffeeSite createOrUpdateCoffeeSiteFromViewModel(CoffeeSite coffeeSiteToUpdate) {
-
         Log.i(TAG, "Create CoffeeSiteFromViewModel() start");
 
         CoffeeSite coffeeSite = (coffeeSiteToUpdate == null) ? new CoffeeSite() : coffeeSiteToUpdate;
@@ -1376,14 +1366,20 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (locationService != null) {
-            currentLocation = locationService.getCurrentLocation();
-            if (currentLocation != null) {
+            Location newLocation = locationService.getCurrentLocation();
+            if (newLocation != null) {
                 if (locationEnterAutomaticMode) {
-                    showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    showLocationInView(newLocation.getLatitude(), newLocation.getLongitude());
                 }
                 if (cityOrStreetEnterAutomaticMode) {
-                    showCityStreetInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    // revoke Address if the change distance is more then 20 m
+                    // Avoid to many requests to Geolocation API if phone is moving
+                    long newDistance = locationService.getDistanceFromCurrentLocation(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    if (newDistance >= 25) {
+                        showCityStreetInView(newLocation.getLatitude(), newLocation.getLongitude());
+                    }
                 }
+                currentLocation = newLocation;
             }
         }
     }
@@ -1432,11 +1428,19 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.d(TAG, "Address found");
             // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
             String street = addresses.get(0).getAddressLine(0).split(",")[0]; // getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat
+            // Street nemuze zacinat cislem nebo slovy "Unnamed" ...
+            if (street != null && (street.startsWith("Unnamed") || street.matches("^\\d.*"))) {
+                street = "";
+            }
             String city = addresses.get(0).getLocality();
-//            String state = addresses.get(0).getAdminArea();
-//            String country = addresses.get(0).getCountryName();
-//            String postalCode = addresses.get(0).getPostalCode();
-
+            city = (city == null) ? addresses.get(0).getSubLocality() : city;
+            if (city == null) {
+                String adminArea = addresses.get(0).getAdminArea();
+                if (adminArea != null) {
+                    String[] adminAreaSplit = adminArea.split(" ");
+                    city = adminAreaSplit[adminAreaSplit.length - 1]; // get last part of Admin Area. probably relevant only for "Hlavni mesto Praha"
+                }
+            }
             cityEditText.setTag("cityChangedProgrammatically");
             streetEditText.setTag("streetChangedProgrammatically");
             cityEditText.setText(city);
@@ -1650,6 +1654,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * is correctly entered as it can be entered manually by user.
      * If not correct, then it is fixed providing first location type item
      * from {@link SITE_TYPES_LOCAL} list.
+     * <p></>
      * Probably not needed in this Activity as the list of available items are inserted
      * into list of only selectable items of {@link AutoCompleteTextView} sourceTypeEditText
      */
@@ -1685,6 +1690,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * is correctly entered as it can be entered manually by user.
      * If not correct, then it is fixed providing first location type item
      * from {@link LOCATION_TYPES_LOCAL} list.
+     * <p></>
      * Probably not needed in this Activity as the list of available items are inserted
      * into list of only selectable items of {@link AutoCompleteTextView} locationTypeEditText
      */
