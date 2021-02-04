@@ -16,7 +16,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- needed for Widget handling for Pre-Oreo devices -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> -->
 
     <uses-feature
         android:name="android.hardware.camera"

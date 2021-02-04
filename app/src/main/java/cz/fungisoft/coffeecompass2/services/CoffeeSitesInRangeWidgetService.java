@@ -242,7 +242,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                     startSearchCurrentSitesForWidget();
                 }
             } else {
-                Toast.makeText(this, R.string.widget_toast_searching_phone_location, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, R.string.widget_toast_searching_phone_location, Toast.LENGTH_SHORT).show();
             }
         }
 

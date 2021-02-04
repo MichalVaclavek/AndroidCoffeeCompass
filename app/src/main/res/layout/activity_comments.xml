@@ -58,7 +58,7 @@
         android:contentDescription="@string/new_comment"
         android:src="@drawable/baseline_add_white_18dp"
         android:visibility="gone"
-        app:backgroundTint="@color/colorPrimary" />
+        app:backgroundTint="@color/colorPrimary2" />
 
     <ProgressBar
         android:id="@+id/comments_progressBar"

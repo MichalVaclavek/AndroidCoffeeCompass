@@ -468,17 +468,30 @@ public class CommentsListActivity extends AppCompatActivity
                         holder.commentTextView.setText(item.getText());
                         holder.itemView.setTag(item);
 
-                        if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())
-                           && !this.offLineModeOn) {
+                        // Handle click to edit Comment - add the click handler to edit icon only
+                        View.OnClickListener editCommentClickListener = view -> {
+                            selectedComment = item;
+                            parenActivity.currentCommentOperation = CommentOperation.UPDATE;
+                            if (parenActivity.userAccountService != null && parenActivity.userAccountService.isUserLoggedIn()) {
+                                parenActivity.startNumberOfStarsAsyncTask();
+                            }
+                        };
+
+                        if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())) {
                             showButtons(holder);
                             // user name is not needed if this is user's comment as user can see buttons to edit, hide the user name
+                            // to save some space used by edit/delete comment icons
+                            holder.userText.setText("");
                             holder.dateText.setText(item.getCreatedOnString());
                             holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.BOLD_ITALIC);
+                            //holder.commentTextView.setOnClickListener(editCommentClickListener);
+                            holder.editButtonIcon.setOnClickListener(editCommentClickListener);
                         } else {
-                            holder.userText.setText(item.getUserName() + ", ");
+                            hideButtons(holder);
+                            holder.userText.setText(item.getUserName() + " - ");
+                            holder.userText.setTypeface(holder.dateText.getTypeface(), Typeface.BOLD_ITALIC);
                             holder.dateText.setText( item.getCreatedOnString());
                             holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.ITALIC);
-                            hideButtons(holder);
                         }
 
                         holder.deleteButtonIcon.setOnClickListener(
@@ -491,20 +504,6 @@ public class CommentsListActivity extends AppCompatActivity
                                     }
                                 }
                         );
-                        // Handle click to edit Comment - add the click handler to both edit icon and
-                        // whole LinearLayout with Comment and Rating itself
-                        View.OnClickListener editCommentClickListener = view -> {
-                            selectedComment = item;
-                            parenActivity.currentCommentOperation = CommentOperation.UPDATE;
-                            if (parenActivity.userAccountService != null && parenActivity.userAccountService.isUserLoggedIn()) {
-                                parenActivity.startNumberOfStarsAsyncTask();
-                            }
-                        };
-
-                        if (!offLineModeOn) {
-                            holder.commentTextView.setOnClickListener(editCommentClickListener);
-                            holder.editButtonIcon.setOnClickListener(editCommentClickListener);
-                        }
                     }
                 }
             }

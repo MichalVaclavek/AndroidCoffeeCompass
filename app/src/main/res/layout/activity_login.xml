@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
-                android:background="@drawable/rounded_green_button"
+                android:background="@drawable/rounded_orange_button"
                 android:padding="12dp"
                 android:text="@string/action_sign_in_short" />
 
