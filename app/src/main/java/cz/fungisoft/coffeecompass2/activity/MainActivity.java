@@ -295,8 +295,12 @@ public class MainActivity extends ActivityWithLocationService
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
             // read this data only once as they do not change usually
-            if (!Utils.isOfflineModeOn(getApplicationContext()) && !coffeeSiteEntitiesService.isDataReadFromServer()) {
-                coffeeSiteEntitiesService.populateCSEntities();
+            if (Utils.isOnline()) {
+                if (!coffeeSiteEntitiesService.isDataReadFromServer()) {
+                    coffeeSiteEntitiesService.populateCSEntities();
+                }
+            } else {
+                Utils.showNoInternetToast(getApplicationContext());
             }
         }
     }
@@ -575,7 +579,7 @@ public class MainActivity extends ActivityWithLocationService
         if (location == null) {
             return;
         }
-        if (Utils.isOnline() || Utils.isOfflineModeOn(getApplicationContext())) {
+        if (Utils.isOnline() || Utils.offlineDataAvailable(getApplicationContext())) {
             Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
             csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
@@ -622,7 +626,6 @@ public class MainActivity extends ActivityWithLocationService
 
         location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
         locationService.addPropertyChangeListener(this);
-        //locationService.addLocationChangeListener(this);
 
         showLocationAccuracy(location);
         updateAccuracyIndicator(location);
@@ -640,7 +643,7 @@ public class MainActivity extends ActivityWithLocationService
         if (Utils.isOnline()) {
             startReadStatistics();
             startNumberOfCoffeeSitesFromUserCall();
-        } else if (Utils.isOfflineModeOn(getApplicationContext())) {
+        } else if (Utils.offlineDataAvailable(getApplicationContext())) {
             showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
             onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
             } else {
@@ -656,7 +659,6 @@ public class MainActivity extends ActivityWithLocationService
 
         if (locationService != null) {
             locationService.addPropertyChangeListener(this);
-            //locationService.addLocationChangeListener(this);
             location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
             showLocationAccuracy(location);
@@ -666,6 +668,24 @@ public class MainActivity extends ActivityWithLocationService
         }
 
         doBindCoffeeSiteLoadOperationsService();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        searchKafeButton.setEnabled(false);
+        // Kontrola opravneni
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        if (locationService != null) {
+            locationService.removePropertyChangeListener(this);
+        }
+        doUnbindCoffeeSiteLoadOperationsService();
     }
 
     @Override
@@ -688,25 +708,6 @@ public class MainActivity extends ActivityWithLocationService
         doUnbindUserAccountService();
 
         super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        searchKafeButton.setEnabled(false);
-        // Kontrola opravneni
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            return;
-        }
-        if (locationService != null) {
-            locationService.removePropertyChangeListener(this);
-            //locationService.removeLocationChangeListener(this);
-        }
-        doUnbindCoffeeSiteLoadOperationsService();
     }
 
 

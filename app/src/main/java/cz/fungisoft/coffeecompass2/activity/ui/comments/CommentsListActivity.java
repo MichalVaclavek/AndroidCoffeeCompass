@@ -453,6 +453,11 @@ public class CommentsListActivity extends AppCompatActivity
                         showRatingSigns(holder);
                         showNameAndDate(holder);
 
+                        holder.commentTextView.setTypeface(holder.commentTextView.getTypeface(), Typeface.NORMAL);
+                        holder.commentTextView.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
+                        holder.commentTextView.setText(item.getText());
+                        holder.itemView.setTag(item);
+
                         // First clear all ratings signs - show 'empty'
                         // Set all cups empty first
                         for (ImageView ratingImageView : holder.starsImageView) {
@@ -462,11 +467,6 @@ public class CommentsListActivity extends AppCompatActivity
                         for (int i = item.getStarsFromUser() - 1; i >= 0; i--) {
                             holder.starsImageView.get(i).setImageDrawable(this.parenActivity.getDrawable(R.drawable.rating_star_full));
                         }
-
-                        holder.commentTextView.setTypeface(holder.commentTextView.getTypeface(), Typeface.NORMAL);
-                        holder.commentTextView.setTextAlignment(TEXT_ALIGNMENT_TEXT_START);
-                        holder.commentTextView.setText(item.getText());
-                        holder.itemView.setTag(item);
 
                         // Handle click to edit Comment - add the click handler to edit icon only
                         View.OnClickListener editCommentClickListener = view -> {
@@ -489,7 +489,7 @@ public class CommentsListActivity extends AppCompatActivity
                         } else {
                             hideButtons(holder);
                             holder.userText.setText(item.getUserName() + " - ");
-                            holder.userText.setTypeface(holder.dateText.getTypeface(), Typeface.BOLD_ITALIC);
+                            holder.userText.setTypeface(holder.userText.getTypeface(), Typeface.BOLD_ITALIC);
                             holder.dateText.setText( item.getCreatedOnString());
                             holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.ITALIC);
                         }

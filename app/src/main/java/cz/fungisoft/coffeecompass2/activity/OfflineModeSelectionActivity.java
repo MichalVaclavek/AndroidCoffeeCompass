@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -115,7 +116,10 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
                     downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadButton.setEnabled(false);
                     withImagesCheckBox.setEnabled(false);
+
                     downloadingStatusTextView.setTextColor(origStatusColor);
+                    downloadingStatusTextView.setTypeface(downloadingStatusTextView.getTypeface(), Typeface.NORMAL);
+
                     coffeeSiteEntitiesService.addDataDownloadFinishedListener(OfflineModeSelectionActivity.this);
                     coffeeSiteEntitiesService.populateCoffeeSites(withImagesCheckBox.isChecked(), downloadProgressBar, downloadingStatusTextView);
                     downloadInProgress = true;
@@ -225,7 +229,8 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadInProgress = false;
 
         downloadingStatusTextView.setTextColor(getResources().getColor(R.color.colorPrimary));
-        downloadingStatusTextView.setText( R.string.data_download_success);
+        downloadingStatusTextView.setTypeface(downloadingStatusTextView.getTypeface(), Typeface.BOLD);
+        downloadingStatusTextView.setText(R.string.data_download_success);
 
         hideDownloadOverview();
         showDownloadOverview(dataOverview);
@@ -254,6 +259,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadInProgress = false;
         //Info in RED with note that download can be repeated later - stay on this Activity
         downloadingStatusTextView.setTextColor(Color.RED);
+        downloadingStatusTextView.setTypeface(downloadingStatusTextView.getTypeface(), Typeface.BOLD);
         downloadingStatusTextView.setText(R.string.data_download_failure);
         // Allow download button
         downloadButton.setEnabled(true);

@@ -141,10 +141,8 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         }
 
         if (searchingFinished && serviceStarted) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
-                context.stopService(sitesInRangeServiceIntent);
-                serviceStarted = false;
-            }
+            context.stopService(sitesInRangeServiceIntent);
+            serviceStarted = false;
         }
     }
 
@@ -156,8 +154,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 .registerReceiver(this, new IntentFilter(WIDGET_CLICK));
 
         // location access permission is required
-        if (!(ContextCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)) {
+        if (!(ContextCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             Intent mainActivity = new Intent(context, MainActivity.class);
             context.startActivity(mainActivity);
         }
@@ -196,7 +193,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         }
 
         if (action.equals(WIDGET_CLICK)) { // start FoundCoffeeSitesListActivity
-            if (Utils.isOnline() || Utils.isOfflineModeOn(ctx)) {
+            if (Utils.isOnline() || Utils.offlineDataAvailable(ctx)) {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
                 searching.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -205,7 +202,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                 context.startActivity(searching);
                 Log.i(TAG, "Started FoundCoffeeSitesListActivity");
             } else {
-                Toast.makeText(context, context.getResources().getText(R.string.toast_no_internet_no_offline_data), Toast.LENGTH_SHORT).show();
+                Utils.showNoInternetNoOfflineDataToast(ctx);
             }
         }
 

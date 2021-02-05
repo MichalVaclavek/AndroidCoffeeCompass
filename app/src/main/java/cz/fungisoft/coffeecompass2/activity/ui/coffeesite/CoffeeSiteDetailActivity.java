@@ -292,7 +292,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     /**
-     * Receives result from CreateCoffeeSiteActivity, which was requested by this activity,
+     * Receives result from {@link CreateCoffeeSiteActivity}, which was requested by this activity,
      * when user clicked on Edit menu item.
      *
      * @param requestCode
@@ -318,6 +318,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                     locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
                     ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
                     // Refresh detailFragment to update View with the new CoffeeSiteMovable
+                    mainToolbar.setSubtitle(coffeeSite.getName());
                     refreshDetailFragment(coffeeSite);
                 }
             }
@@ -445,6 +446,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 }
             }
             // Refresh detailFragment to update View with the new CoffeeSiteMovable
+            mainToolbar.setSubtitle(coffeeSite.getName());
             refreshDetailFragment(coffeeSite);
         } else {
             // Not needed to change current coffeeSite, only show some message?

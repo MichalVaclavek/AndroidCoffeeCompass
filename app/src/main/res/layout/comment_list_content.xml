@@ -14,7 +14,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="5dp"
-            android:paddingTop="5dp"
             android:paddingRight="5dp"
             android:paddingBottom="5dp">
 
@@ -33,7 +32,8 @@
                         android:layout_height="match_parent"
                         android:layout_alignParentLeft="true"
                         android:gravity="left"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:paddingTop="10dp">
 
                         <TextView
                             android:id="@+id/userNameTextView"
@@ -70,8 +70,8 @@
 
                         <ImageView
                             android:id="@+id/rating_imageView_5"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
                             android:layout_marginLeft="4dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
@@ -80,8 +80,8 @@
 
                         <ImageView
                             android:id="@+id/rating_imageView_4"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
@@ -90,8 +90,8 @@
 
                         <ImageView
                             android:id="@+id/rating_imageView_3"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
@@ -100,8 +100,8 @@
 
                         <ImageView
                             android:id="@+id/rating_imageView_2"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
@@ -110,8 +110,8 @@
 
                         <ImageView
                             android:id="@+id/rating_imageView_1"
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:adjustViewBounds="false"
@@ -132,21 +132,21 @@
 
                         <ImageView
                             android:id="@+id/edit_comment_icon_imageview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_alignParentRight="true"
                             android:layout_gravity="top"
                             android:baselineAlignBottom="false"
                             android:visibility="gone"
-                            app:srcCompat="@android:drawable/ic_menu_edit" />
+                            app:srcCompat="@drawable/ic_baseline_edit_36" />
 
                         <ImageView
                             android:id="@+id/deleteIconImageView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_alignParentRight="true"
                             android:layout_gravity="top"
-                            android:layout_marginLeft="7dp"
+                            android:layout_marginLeft="10dp"
                             android:baselineAlignBottom="false"
                             android:visibility="gone"
                             app:srcCompat="@android:drawable/ic_delete" />
@@ -163,6 +163,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="bottom"
+                android:paddingTop="5dp"
                 android:textAlignment="viewStart"
                 android:textAppearance="?attr/textAppearanceListItem"
                 android:textColor="@color/design_default_color_on_secondary" />

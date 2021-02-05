@@ -49,14 +49,13 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         /**
          * Async task to check if the connection to internet is available after the IP network connectivity
          * is fine (this is the event this Receiver is listening too).
-         * IP network may be available, but not the internet. It has to b checked subsequently.
+         * IP network may be available, but not the internet. It has to be checked subsequently.
          */
         InternetCheckAsyncTask internetCheckAsyncTask = new InternetCheckAsyncTask(this);
 
         this.context = context;
 
         if (intent.getExtras() != null) {
-
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             int networkType = (int) intent.getExtras().get(ConnectivityManager.EXTRA_NETWORK_TYPE);
             boolean isWiFi = networkType == ConnectivityManager.TYPE_WIFI;
@@ -98,7 +97,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             }
             if (intent.getExtras().getBoolean(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
                 online = false;
-                //accept(false);
                 internetCheckAsyncTask.execute(); // we need to if the connection was lost
                 Log.d(TAG, "There's no network connectivity");
             }
@@ -130,8 +128,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         if (isOnline) {
             if (context instanceof CoffeeSiteEntitiesService) {
                 CoffeeSiteEntitiesService coffeeSiteEntitiesService = (CoffeeSiteEntitiesService) context;
-                if (!coffeeSiteEntitiesService.isDataReadFromServer() // read this data only once as they do not change usually
-                      && !Utils.isOfflineModeOn(context)) {
+                if (!coffeeSiteEntitiesService.isDataReadFromServer()) { // read this data only once as they do not change usually
                     coffeeSiteEntitiesService.populateCSEntities();
                 }
             }
@@ -145,7 +142,6 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context calling context, usually Activity which registered this Receiver
      */
     private void startLoadNumberOfSitesOfUserInMainActivity(boolean isOnline, Context context) {
-        //TODO zohlednit OFFLINE mode ???
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;

@@ -241,8 +241,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                 if (!isSearchingSites) {
                     startSearchCurrentSitesForWidget();
                 }
-            } else {
-                //Toast.makeText(this, R.string.widget_toast_searching_phone_location, Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -326,7 +324,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         Log.d(TAG, "Updating widget with found coffeeSites.");
         MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites, locationSearchFinished);
 
-        if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.O) && locationSearchFinished) { // was started using enqueue()
+        if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.O) && locationSearchFinished ) { // was started using enqueue()
             stopSelf();
         }
     }

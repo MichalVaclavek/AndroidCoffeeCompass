@@ -114,6 +114,8 @@
             android:id="@+id/comment_inputlayout"
             android:theme="@style/SiteInput.HintAppearance"
             android:layout_width="match_parent"
+            app:counterEnabled="true"
+            app:counterMaxLength="320"
             android:layout_height="wrap_content">
 
             <EditText
