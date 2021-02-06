@@ -1593,7 +1593,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         Dexter.withContext(this)
               .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
-                          //Manifest.permission.CAMERA)
               .withListener(new MultiplePermissionsListener() {
 
                     @Override
