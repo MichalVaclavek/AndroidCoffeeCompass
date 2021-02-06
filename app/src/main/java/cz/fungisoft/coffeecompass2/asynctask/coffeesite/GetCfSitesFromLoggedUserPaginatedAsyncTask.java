@@ -85,7 +85,7 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(25, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
                     .addInterceptor(headerAuthorizationInterceptor)
                     .build();
 

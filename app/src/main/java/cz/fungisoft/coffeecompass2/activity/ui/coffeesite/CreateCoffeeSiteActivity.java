@@ -1617,7 +1617,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         token.continuePermissionRequest();
                     }
               })
-              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Chyba! ", Toast.LENGTH_SHORT)
+              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Chyba oprávnění! ", Toast.LENGTH_SHORT)
                                                .show())
               .onSameThread()
               .check();
