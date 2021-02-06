@@ -298,6 +298,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             cityOrStreetEnterAutomaticMode = false; // don't change city/street info automatically. wait until user deletes all location info.
             fillViewWithCoffeeSiteData(currentCoffeeSite);
 
+            saveMenuItem.setEnabled(true);
             saveMenuItem.setTitle(R.string.save_coffeesite_updated);
 
              // delete image button
@@ -960,7 +961,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onImageSaveSuccess(String imageSaveResult) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         if (mode == MODE_MODIFY) {
             // If we are in MODIFY MODE, then Image was saved first
             // now the CoffeeSite itself has to be updated/saved too
@@ -979,7 +980,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageSaveFailure(String imageSaveResult) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Toast.makeText(getApplicationContext(),
                 "Problém při ukládání obrázku.", Toast.LENGTH_SHORT);
         if (mode == MODE_MODIFY) {
@@ -1000,7 +1001,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     @Override
     public void onImageDeleteSuccess(String imageDeleteResult) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         String text = getString(R.string.image_delete_ok);
         if (Long.parseLong(imageDeleteResult) == currentCoffeeSite.getId()) {
             text = getString(R.string.image_delete_success);
@@ -1017,7 +1018,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageDeleteFailure(String imageDeleteResult) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Toast toast = Toast.makeText(getApplicationContext(),
                 imageDeleteResult,
                 Toast.LENGTH_SHORT);
@@ -1032,7 +1033,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param coffeeSite
      */
     private void saveCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = false;
         if (coffeeSiteCUDOperationsService != null) {
             coffeeSiteCUDOperationsService.save(coffeeSite);
@@ -1040,7 +1041,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = true;
         if (coffeeSiteCUDOperationsService != null) {
             coffeeSiteCUDOperationsService.save(coffeeSite);
@@ -1048,14 +1049,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void activateCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         if (coffeeSiteStatusChangeService != null) {
             coffeeSiteStatusChangeService.activate(coffeeSite);
         }
     }
 
     private void updateCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         // If there is a photoFile, save it first to be available
         // after CoffeeSite is returned after it's update
         if (imagePhotoFile != null) {
@@ -1068,14 +1069,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void deleteCoffeeSiteImage(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         if (coffeeSiteImageService != null) {
             coffeeSiteImageService.deleteImage(coffeeSite.getId());
         }
     }
 
     private void uploadCoffeeSiteImage(File imageFile, int coffeeSiteId) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         if (coffeeSiteImageService != null) {
             coffeeSiteImageService.uploadImage(imageFile, coffeeSiteId);
         }
@@ -1098,7 +1099,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onCoffeeSiteSaved(CoffeeSite savedCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Save OK?: " + error.isEmpty());
         if (error.isEmpty()) {
             // New CoffeeSite saved successfully
@@ -1120,7 +1121,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Update success?: " + error.isEmpty());
         if (!error.isEmpty()) {
             showCoffeeSiteUpdateFailure(error);
@@ -1134,7 +1135,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Activate success?: " + error.isEmpty());
         if (!error.isEmpty()) {
             showCoffeeSiteActivateFailure(error);
@@ -1519,14 +1520,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
-    public void showProgressbar() {
+    public void showProgressbarAndDisableMenuItems() {
+        saveMenuItem.setEnabled(false);
+        imageDeleteMenuItem.setEnabled(false);
         saveCoffeeSiteProgressBar.setVisibility(View.VISIBLE);
     }
 
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
-    public void hideProgressbar() {
+    public void hideProgressbarAndEnableMenuItems() {
+        saveMenuItem.setEnabled(true);
+        imageDeleteMenuItem.setEnabled(true);
         saveCoffeeSiteProgressBar.setVisibility(View.GONE);
     }
 
