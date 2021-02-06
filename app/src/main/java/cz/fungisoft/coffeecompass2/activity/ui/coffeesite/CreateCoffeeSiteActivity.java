@@ -172,6 +172,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     MenuItem saveMenuItem; // save and/or activate
 
     private Location currentLocation;
+    private boolean firstLocationDetection = true;
 
     private static final long MAX_STARI_DAT = 1000 * 60;
     private static final float LAST_PRESNOST = 100.0f;
@@ -286,9 +287,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Enable/disable bottom navigation menu items
         imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
         saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
-
-        // Enable bottom navigation menu items
-        saveMenuItem.setEnabled(true);
+        saveMenuItem.setEnabled(false);
         saveMenuItem.setTitle(R.string.coffeesite_save_activate);
 
         // We are editing site here - insert input values to View from currentCoffeeSite
@@ -836,8 +835,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
@@ -1188,6 +1186,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         locationService.addPropertyChangeListener(this);
         // Initiate coffeeSite location selected by user
         if (currentLocation != null) {
+            firstLocationDetection = false;
             selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             if (locationEnterAutomaticMode) {
                 showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -1371,14 +1370,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     showLocationInView(newLocation.getLatitude(), newLocation.getLongitude());
                 }
                 if (cityOrStreetEnterAutomaticMode) {
-                    // revoke Address if the change distance is more then 20 m
+                    // revoke Address if the change distance is more then 25 m
                     // Avoid to many requests to Geolocation API if phone is moving
-                    long newDistance = locationService.getDistanceFromCurrentLocation(currentLocation.getLatitude(), currentLocation.getLongitude());
-                    if (newDistance >= 25) {
+                    long newDistance = 0;
+                    if (currentLocation != null) {
+                        newDistance = locationService.getDistanceFromCurrentLocation(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    }
+                    if (newDistance >= 25 || firstLocationDetection) {
                         showCityStreetInView(newLocation.getLatitude(), newLocation.getLongitude());
                     }
                 }
                 currentLocation = newLocation;
+                firstLocationDetection = false;
             }
         }
     }
