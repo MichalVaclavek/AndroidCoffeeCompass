@@ -205,21 +205,12 @@ public class ImageUtil {
                     //dir.mkdirs();
                     //final File myImageFile = new File(dir, imageFileName); // Create image file
                     myImageFileName = myImageFile.getAbsolutePath();
-                    FileOutputStream fos = null;
-                    try {
-                        Bitmap bitmap = Picasso.get().load(myUrl).get();
-
-                        fos = new FileOutputStream(myImageFile);
+                    Bitmap bitmap = Picasso.get().load(myUrl).get();
+                    try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                         alreadySavedImagesCounter++;
                     } catch (IOException e) {
                         Log.e(TAG, e.getMessage());
-                    } finally {
-                        try {
-                            fos.close();
-                        } catch (IOException e) {
-                            Log.e(TAG, e.getMessage());
-                        }
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
@@ -231,7 +222,7 @@ public class ImageUtil {
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
                 mProgressBar.setProgress(alreadySavedImagesCounter);
-                Log.i(TAG, "image saved to >>> " + myImageFileName);
+                Log.i(TAG, "image saved to >>> " + myImageFileName + ". Saved/requested files: " + alreadySavedImagesCounter + "/" + numberOfImagesRequestedToDownload);
                 if (numberOfImagesRequestedToDownload == alreadySavedImagesCounter) {
                     numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
                 }

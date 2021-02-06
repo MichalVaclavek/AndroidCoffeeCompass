@@ -164,7 +164,6 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }
@@ -196,8 +195,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
         coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
@@ -257,12 +255,13 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public void onDataForOfflineModeDownloadFailed() {
         downloadInProgress = false;
-        //Info in RED with note that download can be repeated later - stay on this Activity
+        // Info in RED and Bold with note that download can be repeated later - stay on this Activity
         downloadingStatusTextView.setTextColor(Color.RED);
         downloadingStatusTextView.setTypeface(downloadingStatusTextView.getTypeface(), Typeface.BOLD);
         downloadingStatusTextView.setText(R.string.data_download_failure);
         // Allow download button
         downloadButton.setEnabled(true);
+        withImagesCheckBox.setEnabled(true);
     }
 
     private void hideDownloadOverview() {

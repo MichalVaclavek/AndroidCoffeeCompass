@@ -22,6 +22,9 @@ public interface CoffeeSiteDao {
     @Query("SELECT * FROM coffee_site_table WHERE mainImageURL != \"\" ORDER BY createdOn ASC")
     LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage();
 
+    @Query("SELECT * FROM coffee_site_table WHERE mainImageURL != \"\" ORDER BY createdOn ASC")
+    Single<List<CoffeeSite>> getAllCoffeeSitesWithImageSingle();
+
     @Query("SELECT COUNT(*) FROM coffee_site_table WHERE mainImageURL != \"\"")
     Flowable<Integer> getAllCoffeeSitesWithImageNumber();
 

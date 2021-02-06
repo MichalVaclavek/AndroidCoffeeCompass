@@ -293,11 +293,12 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
         switch (item.getItemId()) {
             case R.id.action_map:
-                if (Utils.isOnline()) {
-                    openMap();
-                } else {
-                    Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
-                }
+                // Map can be opened even in Offline, if the user has downloaded a map ...?
+                //if (Utils.isOnline()) { //
+                openMap();
+                //} else {
+                  //  Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
+                //}
                 return true;
             case android.R.id.home:
                 goToMainActivityAndFinish();

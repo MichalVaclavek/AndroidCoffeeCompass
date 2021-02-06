@@ -34,17 +34,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
 
     private final LiveData<List<CoffeeSite>> mAllCoffeeSites;
     private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
+    private final Single<List<CoffeeSite>> coffeeSitesWithImageSingle;
     // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
-
-
-    public CoffeeSiteRepository(CoffeeSiteDatabase db) {
-        super(db);
-        coffeeSiteDao = db.coffeeSiteDao();
-        mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
-        coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
-        numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
-    }
 
     public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
         return mAllCoffeeSites;
@@ -54,8 +46,25 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesWithImage;
     }
 
+    /**
+     * Needed for service downloading data for OFFLINE mode
+     * @return
+     */
+    public Single<List<CoffeeSite>> getAllCoffeeSitesWithImageSingle() {
+        return coffeeSitesWithImageSingle;
+    }
+
     public  Flowable<Integer> getNumberOfAllCoffeeSitesWithImage() {
         return numberOfSitesWithImage;
+    }
+
+    public CoffeeSiteRepository(CoffeeSiteDatabase db) {
+        super(db);
+        coffeeSiteDao = db.coffeeSiteDao();
+        mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
+        coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
+        coffeeSitesWithImageSingle = coffeeSiteDao.getAllCoffeeSitesWithImageSingle();
+        numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
     }
 
     /**

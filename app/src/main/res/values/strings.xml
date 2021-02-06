@@ -232,4 +232,8 @@
     <string name="create_site_missing_attributes">Chybí povinná položka</string>
     <string name="create_site_menu_smazat_foto">Smazat foto</string>
 
+    <string name="offline_downloading_images_status">Stahování fotek lokací …</string>
+    <string name="download_comments_progress_message">Stahování komentářů k lokacím …</string>
+    <string name="download_sites_inprogress_message">Stahování dat o lokacích …</string>
+
 </resources>
