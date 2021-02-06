@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
@@ -141,7 +142,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         super.onCreate();
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
 
-        // Transform CoffeeSites returned from DB (sites within Rectangel) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
+        // Transform CoffeeSites returned from DB (sites within Rectangle) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
         foundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), coffeeSites -> {
             List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
             for (CoffeeSite cs : coffeeSites) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
@@ -312,8 +313,6 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     /**
      * A callback method to be called, when there are CoffeeSites in range returned by
      * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
-     * Compares returned coffeeSites with currentSitesInRange and finds new and old
-     * CoffeeSites.
      */
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {

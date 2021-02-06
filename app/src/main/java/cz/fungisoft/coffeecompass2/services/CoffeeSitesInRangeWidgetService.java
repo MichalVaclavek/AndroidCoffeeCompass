@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -296,6 +297,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
         isSearchingSites = false;
         Log.d(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
+        Collections.sort(coffeeSites);
         updateWidget(coffeeSites, null);
     }
 
@@ -455,6 +457,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                                     coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocation));
                                 }
                             }
+                            Collections.sort(coffeeSiteMovables);
                             coffeeSitesFromDB = coffeeSiteMovables;
                             latch.countDown();
                         }

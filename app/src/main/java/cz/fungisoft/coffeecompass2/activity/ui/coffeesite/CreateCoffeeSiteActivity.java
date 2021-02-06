@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -539,7 +538,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         doBindCoffeeSiteCUDOperationsService();
         doBindCoffeeSiteStatusChangeService();
 
-        // To compress image/photo files of the CoffeeSIte
+        // To compress image/photo files of the CoffeeSite
         fileCompressor = new FileCompressor(this);
         // To detect, that user did not choose new image file yet
         imagePhotoFile = null;
@@ -655,9 +654,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                         storageDir      /* directory */
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        imagePhotoFile = image;
-        String currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
@@ -676,6 +672,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
+                imagePhotoFile = photoFile;
                 Uri photoURI = FileProvider.getUriForFile(this,
                         getString(R.string.file_provider),
                         photoFile);
@@ -959,7 +956,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /**
      * After succeessful or failed image save we need to save updated
-     * CoffeeSite itsels.
+     * CoffeeSite itself.
      *
      * @param imageSaveResult - load URL of the newly uploaded image is expected
      */
@@ -967,26 +964,26 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void onImageSaveSuccess(String imageSaveResult) {
         hideProgressbar();
         if (mode == MODE_MODIFY) {
-            // If we are in MODIFY MODE, the Image was saved first, now
-            // the CoffeeSite itself has to be updated/saved
+            // If we are in MODIFY MODE, then Image was saved first
+            // now the CoffeeSite itself has to be updated/saved too
             if (coffeeSiteCUDOperationsService != null) {
                 coffeeSiteCUDOperationsService.update(currentCoffeeSite);
             }
+            // Invalidate Picasso as the URL has not changed, but the image itself could
+            Picasso.get().invalidate(currentCoffeeSite.getMainImageURL());
         }
-        // Image saved, button to delete it can be enabled, but probably
+        // Image saved, button to delete can be enabled, but probably
         // not needed as after Save we are going to MyCoffeeSiteActivity
+        // after successful return from coffeeSiteCUDOperationsService.update(currentCoffeeSite);
         imageDeleteMenuItem.setEnabled(true);
-        // Image saved to be shown in siteFotoView (should be same as already
-        // shown image, but as aproval, that it was saved correctly)
         currentCoffeeSite.setMainImageURL(imageSaveResult);
-        if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-            Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
-        }
     }
 
     @Override
     public void onImageSaveFailure(String imageSaveResult) {
         hideProgressbar();
+        Toast.makeText(getApplicationContext(),
+                "Problém při ukládání obrázku.", Toast.LENGTH_SHORT);
         if (mode == MODE_MODIFY) {
             // Even if image save failed, we need to save CoffeeSite itself
             if (coffeeSiteCUDOperationsService != null) {
@@ -1092,7 +1089,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param imageFile
      */
     private void deleteCoffeeSiteImageLocally(File imageFile) {
-        imageFile.delete();
+        if (imageFile != null) {
+            imageFile.delete();
+        }
         imageDeleteMenuItem.setEnabled(false); // nothing to delete now
         // set a default icon to the siteFotoView
         siteFotoView.setImageDrawable(getDrawable(R.drawable.ic_outline_add_photo_alternate_36));
@@ -1104,7 +1103,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         hideProgressbar();
         Log.i(TAG, "Save OK?: " + error.isEmpty());
         if (error.isEmpty()) {
-            // New CoffeeSite saved successfuly
+            // New CoffeeSite saved successfully
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_SAVE, "OK");
             // If there is a photoFile, save it too
             if (imagePhotoFile != null) {
@@ -1591,6 +1590,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         Dexter.withContext(this)
               .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+                          //Manifest.permission.CAMERA)
               .withListener(new MultiplePermissionsListener() {
 
                     @Override
@@ -1615,7 +1615,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         token.continuePermissionRequest();
                     }
               })
-              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT)
+              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Chyba! ", Toast.LENGTH_SHORT)
                                                .show())
               .onSameThread()
               .check();

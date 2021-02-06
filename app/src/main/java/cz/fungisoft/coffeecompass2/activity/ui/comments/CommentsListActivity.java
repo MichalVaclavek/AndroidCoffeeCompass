@@ -274,6 +274,8 @@ public class CommentsListActivity extends AppCompatActivity
         if (Utils.isOnline()) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             new DeleteCommentAsyncTask(recyclerViewAdapter.getCommentIdAfterDeleteIconTap(), userAccountService.getLoggedInUser(), this).execute();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
         }
     }
 

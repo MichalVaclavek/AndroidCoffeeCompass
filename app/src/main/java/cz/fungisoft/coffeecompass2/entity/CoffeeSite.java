@@ -188,7 +188,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
 
     @Expose(serialize = false)
     @SerializedName("canBeDeactivated")
-    protected boolean canBeDeactivated = false;
+    protected boolean canBeDeactivated = false; // default value as in mobile app. ...
 
     @Expose(serialize = false)
     @SerializedName("canBeCanceled")

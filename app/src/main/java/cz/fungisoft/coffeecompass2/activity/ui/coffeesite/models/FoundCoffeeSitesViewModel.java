@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
@@ -152,6 +153,8 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
 
         currentSitesInRange = coffeeSites;
 
+        //Gets newSites as MutableLiveData, sorted
+        Collections.sort(newSitesInRange);
         newSitesInRangeMutable.setValue(newSitesInRange);
         goneSitesOutOfRangeMutable.setValue(goneSitesOutOfRange);
 
