@@ -139,9 +139,9 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
 
     @Override
     protected void onStop() {
+        super.onStop();
         doUnbindCoffeeSiteEntitiesService();
         coffeeSiteEntitiesService.removeDataDownloadFinishedListener(this);
-        super.onStop();
     }
 
     /**

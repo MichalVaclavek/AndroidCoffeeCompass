@@ -23,14 +23,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.beans.PropertyChangeEvent;
@@ -260,6 +264,8 @@ public class MainActivity extends ActivityWithLocationService
         // Lets bind CoffeeSiteEntitiesService and load all CoffeeSiteEntities
         // in onCoffeeSiteEntitiesServiceConnected() method
         doBindCoffeeSiteEntitiesService();
+
+        getFirebaseToken();
     }
 
 
@@ -675,7 +681,6 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onPause() {
         super.onPause();
-
         searchKafeButton.setEnabled(false);
         // Kontrola opravneni
         if (ActivityCompat.checkSelfPermission(this,
@@ -685,7 +690,7 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (locationService != null) {
-            locationService.removePropertyChangeListener(this);
+            locationService.removeAllLocationChangeListeners();
         }
         doUnbindCoffeeSiteLoadOperationsService();
     }
@@ -704,17 +709,17 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     protected void onStop() {
+        super.onStop();
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
         doUnbindUserAccountService();
-        super.onStop();
     }
 
 
     @Override
     protected void onDestroy() {
-        doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
+        doUnbindCoffeeSiteEntitiesService();
     }
 
 
@@ -726,7 +731,6 @@ public class MainActivity extends ActivityWithLocationService
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
         if (firstLocationDetection) { // prvni platna detekce polohy
             firstLocationDetection = false;
             setAccuracyTextColor(barvaBlack);
@@ -829,6 +833,30 @@ public class MainActivity extends ActivityWithLocationService
             unbindService(userAccountServiceConnector);
             mShouldUnbindUserLoginService = false;
         }
+    }
+
+
+    /**
+     * Zatim pomocna metoda k ziskani Firebase tokenu pro aktualni zarizeni - inicializace Firebase
+     */
+    private void getFirebaseToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String token = task.getResult();
+
+                        // Log and toast
+                        String msg = getString(R.string.firebase_token_msg) + token;
+                        Log.d(TAG, msg);
+                    }
+                });
     }
 
 }

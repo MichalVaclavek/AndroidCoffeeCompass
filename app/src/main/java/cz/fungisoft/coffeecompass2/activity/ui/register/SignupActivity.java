@@ -188,8 +188,8 @@ public class SignupActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        doUnbindUserRegisterService();
         super.onDestroy();
+        doUnbindUserRegisterService();
     }
 
     /**

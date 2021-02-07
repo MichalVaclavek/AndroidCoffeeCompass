@@ -171,27 +171,18 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
     @Override
     public void onPause() {
+        super.onPause();
         // save RecyclerView state
         Bundle listState = new Bundle();
         mListState = recyclerView.getLayoutManager().onSaveInstanceState();
         listState.putParcelable(LIST_STATE_KEY, mListState);
-
-        if ((locationService != null) && currentContent.getItems().size() > 0) {
-            for (CoffeeSiteMovable csm : currentContent.getItems()) {
-                locationService.removePropertyChangeListener(csm);
-            }
-            locationService.removeAllCoffeeSitesLocationChangeListeners();
-        }
-
-        super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        sitesInRangeUpdateService.removeSitesInRangeFoundListener(coffeeSitesViewModel);
-
-        doUnBindSitesInRangeService();
         super.onDestroy();
+        sitesInRangeUpdateService.removeSitesInRangeFoundListener(coffeeSitesViewModel);
+        doUnBindSitesInRangeService();
     }
 
 

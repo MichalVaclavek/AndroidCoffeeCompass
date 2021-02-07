@@ -167,8 +167,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     @Override
     protected void onDestroy() {
-        doUnbindUserLoginService();
         super.onDestroy();
+        doUnbindUserLoginService();
     }
 
     /**

@@ -648,7 +648,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //File storageDir = getFilesDir();
+
         File image = File.createTempFile(imageFileName,  /* prefix */
                                    ".jpg",         /* suffix */
                                         storageDir      /* directory */
@@ -1183,8 +1183,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-        locationService.addPropertyChangeListener(this);
+        if (locationService != null) {
+            currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            locationService.addPropertyChangeListener(this);
+        }
         // Initiate coffeeSite location selected by user
         if (currentLocation != null) {
             firstLocationDetection = false;

@@ -178,8 +178,8 @@ public class CommentsListActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        doUnbindUserAccountService();
         super.onDestroy();
+        doUnbindUserAccountService();
     }
 
     @Override

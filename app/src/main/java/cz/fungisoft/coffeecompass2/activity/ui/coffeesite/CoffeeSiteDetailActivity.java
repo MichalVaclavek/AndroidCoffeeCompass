@@ -223,8 +223,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     @Override
     protected void onStop() {
-        doUnbindCoffeeSiteLoadOperationsService();
         super.onStop();
+        doUnbindCoffeeSiteLoadOperationsService();
     }
 
     @Override
@@ -235,16 +235,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     /**
-     * locationService.removePropertyChangeListener((CoffeeSiteMovable) coffeeSite); should
-     * be performed here (or in onStop()), but if done, then FoundCoffeeSiteListActivity, the respective item
-     * in FoundCoffeeSitesRecyclerViewAdapter, does not updates CoffeeSite distance in the
-     * given label ...
-     * TODO found the error ...
      */
     @Override
     protected void onDestroy() {
-        doUnbindUserAccountService();
         super.onDestroy();
+        doUnbindUserAccountService();
     }
 
     public void startCoffeeSiteLoad() {

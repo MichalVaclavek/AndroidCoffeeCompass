@@ -159,8 +159,8 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @Override
     protected void onDestroy() {
-        doUnbindUserLogoutAndDeleteService();
         super.onDestroy();
+        doUnbindUserLogoutAndDeleteService();
     }
 
     private void goToMainActivity() {

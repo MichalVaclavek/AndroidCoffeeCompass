@@ -89,6 +89,8 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     private void doUnbindLocationService() {
         if (mShouldUnbind) {
+            // Remove all locationSerice's listeners
+            //locationService.removeAllLocationChangeListeners();
             // Release information about the service's state.
             unbindService(locationServiceConnector);
             mShouldUnbind = false;

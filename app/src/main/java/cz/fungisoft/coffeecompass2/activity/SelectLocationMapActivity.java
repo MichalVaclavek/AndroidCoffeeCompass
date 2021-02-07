@@ -114,5 +114,4 @@ public class SelectLocationMapActivity extends AppCompatActivity implements OnMa
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation, 16));
         }
     }
-
 }

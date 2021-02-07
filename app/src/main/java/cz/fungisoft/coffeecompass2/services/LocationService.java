@@ -63,13 +63,13 @@ public class LocationService extends Service {
         Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
-    public void removeAllCoffeeSitesLocationChangeListeners() {
+    public void removeAllLocationChangeListeners() {
         for (PropertyChangeListener pcl : support.getPropertyChangeListeners()) {
             if (pcl instanceof CoffeeSiteMovable) {
-                support.removePropertyChangeListener(pcl);
                 ((CoffeeSiteMovable) pcl).removeAllDistanceChangeListeners();
-                Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
             }
+            support.removePropertyChangeListener(pcl);
+            Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
         }
         Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
@@ -179,9 +179,7 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
-
         startServiceOrStopIfNotPermitted();
-
         return START_STICKY;
     }
 
@@ -203,6 +201,7 @@ public class LocationService extends Service {
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION);
         locManager.removeUpdates(locListener);
+        Log.i(TAG, "Service destroyed");
     }
 
     // This is the object that receives interactions from clients.
