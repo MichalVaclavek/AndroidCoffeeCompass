@@ -125,16 +125,6 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
     }
 
     /**
-     * Method to initiate new processing of the "new" and "old" CoffeeSites.<br>
-     * Usually called, when a new instance of the calling activity is created and the new searching of the
-     * CoffeeSites is requested.
-     */
-    public void clear() {
-        currentSitesInRange.clear();
-    }
-
-
-    /**
      * Receives found coffeeSites in range and compares it with current list. Founds new and old coffeeSites.
      *
      * @param coffeeSites

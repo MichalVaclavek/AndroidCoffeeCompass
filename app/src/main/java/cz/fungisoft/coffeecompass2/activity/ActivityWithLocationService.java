@@ -55,10 +55,21 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             requestLocationPermission(this);
-        } else {
-            doBindLocationService();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        doBindLocationService();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+       doUnbindLocationService();
+    }
+
 
     private void doBindLocationService() {
         // Attempts to establish a connection with the service.  We use an
@@ -104,7 +115,7 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
      * Needed for Android 6 ???
      */
     private void requestLocationPermission(AppCompatActivity activity) {
-        Dexter.withActivity(activity)
+        Dexter.withContext(activity)
                 .withPermissions(Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(new MultiplePermissionsListener() {
@@ -162,7 +173,6 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        doUnbindLocationService();
         super.onDestroy();
     }
 

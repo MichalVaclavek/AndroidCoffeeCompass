@@ -139,6 +139,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             fragmentArgs.putBoolean("showImageFirst", showImageFirstRequest);
             detailsCollectionFragment = new DetailsCollectionFragment();
             detailsCollectionFragment.setArguments(fragmentArgs);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
+                    .commit();
         }
 
         // Show distance to the CoffeeSite
@@ -208,15 +212,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     @Override
     public void onLocationServiceConnected() {
         super.onLocationServiceConnected();
-        if (coffeeSite != null ) {
+        if (coffeeSite != null && locationService != null) {
             if (coffeeSite instanceof CoffeeSiteMovable) {
                 ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
                 locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
                 ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
             }
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
-                    .commit();
         }
     }
 

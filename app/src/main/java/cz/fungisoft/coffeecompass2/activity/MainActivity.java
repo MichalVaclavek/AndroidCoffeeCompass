@@ -624,8 +624,10 @@ public class MainActivity extends ActivityWithLocationService
         super.onLocationServiceConnected();
         hideProgressbar();
 
-        location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-        locationService.addPropertyChangeListener(this);
+        if (locationService != null) {
+            location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+            locationService.addPropertyChangeListener(this);
+        }
 
         showLocationAccuracy(location);
         updateAccuracyIndicator(location);
@@ -704,18 +706,17 @@ public class MainActivity extends ActivityWithLocationService
     protected void onStop() {
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
-
         doUnbindUserAccountService();
-
         super.onStop();
     }
 
 
     @Override
     protected void onDestroy() {
-        if (locationService != null) {
-            locationService.removePropertyChangeListener(this);
-        }
+//        if (locationService != null) {
+//            // Probably not needed as it is dne in onPause()
+//            locationService.removePropertyChangeListener(this);
+//        }
         doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
     }
