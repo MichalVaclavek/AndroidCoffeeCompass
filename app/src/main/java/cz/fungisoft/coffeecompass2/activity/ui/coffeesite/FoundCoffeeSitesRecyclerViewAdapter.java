@@ -225,19 +225,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     /**
-     * Returns current CoffeeSitesMovable shown by the Adapter
-     * @return current CoffeeSitesMovable shown by the Adapter
-     */
-//    public List<CoffeeSiteMovable> getShownItems() {
-//        if (mValues != null && mValues.size() >= 1
-//                && (!mValues.get(0).getName().equals("Dummy") || !mValues.get(0).getName().equals("InitialDummy"))) {
-//            return mValues;
-//        } else {
-//            return new ArrayList<>();
-//        }
-//    }
-
-    /**
      * Standard constructor of the class MyCoffeeSiteItemRecyclerViewAdapter
      *
      * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
@@ -305,11 +292,12 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             @Override
             public void onClick(View view) {
                 CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
-                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+                if (coffeeSite != null) {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-                    intent.putExtra("showImageFirst", true);
+                    // unfortunately, when the image is first in details fragment, it's height is not alligned with details fragment height
+                    intent.putExtra("showImageFirst", false);
                     context.startActivity(intent);
                 }
             }
@@ -575,7 +563,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         this.mValues.get(position).addPropertyChangeListener(viewHolder.distanceView);
         viewHolder.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
         Log.d(TAG, ". Distance Text View " + viewHolder.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
-
 
         if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
             if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {

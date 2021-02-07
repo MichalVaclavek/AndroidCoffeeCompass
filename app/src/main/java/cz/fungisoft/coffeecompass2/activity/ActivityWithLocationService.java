@@ -66,8 +66,8 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        super.onPause();
        doUnbindLocationService();
+       super.onPause();
     }
 
 

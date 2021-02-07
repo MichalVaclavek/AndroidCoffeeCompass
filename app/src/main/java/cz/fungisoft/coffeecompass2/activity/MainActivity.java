@@ -713,10 +713,6 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     protected void onDestroy() {
-//        if (locationService != null) {
-//            // Probably not needed as it is dne in onPause()
-//            locationService.removePropertyChangeListener(this);
-//        }
         doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
     }

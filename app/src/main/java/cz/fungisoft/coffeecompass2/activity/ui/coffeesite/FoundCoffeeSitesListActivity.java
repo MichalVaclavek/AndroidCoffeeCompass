@@ -188,13 +188,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
 
     @Override
     public void onDestroy() {
-//        if ((locationService != null) && currentContent.getItems().size() > 0) {
-//            for (CoffeeSiteMovable csm : currentContent.getItems()) {
-//                locationService.removePropertyChangeListener(csm);
-//            }
-//            locationService.removeAllCoffeeSitesLocationChangeListeners();
-//        }
-
         sitesInRangeUpdateService.removeSitesInRangeFoundListener(coffeeSitesViewModel);
 
         doUnBindSitesInRangeService();
