@@ -511,12 +511,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 // Detect if the input of city and street name was changed by setText or by user
                 if (cityEditText.getTag() == null || streetEditText.getTag() == null) {
                     // Value changed by user, because before setText() programmatically entered, the tag
-                    // is set to a special value
-                    // means that from now on, ignore values entered programmatically in showCityStreetInView()
-                    // as user wants to enter values manually
-//                    cityOrStreetEnterAutomaticMode = (!cityEditText.getText().toString().isEmpty() || !streetEditText.getText().toString().isEmpty())
-//                                                    && locationEnterAutomaticMode; // only if the location Enter is in manual mode, then also city and Name is in manual mode
-//                                                                                // this avoids unwanted change of City/street in manual mode
                     // user wants to change text - don't change it automatically.
                     // only if longitude/latitude TextView is deleted completely, city and street can be changed automatically
                     cityOrStreetEnterAutomaticMode = false;
@@ -702,6 +696,16 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        doUnbindCoffeeSiteImageService();
+        doUnbindCoffeeSiteCUDOperationsService();
+        doUnbindCoffeeSiteStatusChangeService();
+
+        mDisposable.clear();
+        super.onDestroy();
     }
 
     /******************* CoffeeSiteImageService ***************************************/
@@ -1535,16 +1539,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         saveMenuItem.setEnabled(true);
         imageDeleteMenuItem.setEnabled(true);
         saveCoffeeSiteProgressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        doUnbindCoffeeSiteImageService();
-        doUnbindCoffeeSiteCUDOperationsService();
-        doUnbindCoffeeSiteStatusChangeService();
-
-        mDisposable.clear();
-        super.onDestroy();
     }
 
     /**

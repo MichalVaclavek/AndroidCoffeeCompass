@@ -42,8 +42,6 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     // Repository to check if a user is logen in
     private static UserAccountRepository userLoginAndRegisterRepository;
 
-    private static UserPreferencesHelper userPreferenceHelper;
-
     private static final MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
     private static final MutableLiveData<LoginOrRegisterResult> registerResult = new MutableLiveData<>();
     private static final MutableLiveData<LogoutOrDeleteResult> logoutResult = new MutableLiveData<>();
@@ -147,7 +145,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     @Override
     public void onCreate() {
         super.onCreate();
-        userPreferenceHelper = new UserPreferencesHelper(this);
+        UserPreferencesHelper userPreferenceHelper = new UserPreferencesHelper(this);
         userLoginAndRegisterRepository = UserAccountRepository.getInstance(new UserAccountDataSource(this), userPreferenceHelper);
         Log.d(TAG, "Service started.");
     }

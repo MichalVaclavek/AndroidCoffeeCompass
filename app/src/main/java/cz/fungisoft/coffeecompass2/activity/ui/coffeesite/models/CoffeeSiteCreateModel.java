@@ -21,7 +21,6 @@ public class CoffeeSiteCreateModel extends ViewModel {
     }
 
     public void coffeeSiteDataChanged(String coffeeSiteName, String longitude, String latitude) {
-
         if (!isCoffeeSiteNameValid(coffeeSiteName)) {
             coffeeSiteFormState.setValue(new CoffeeSiteCreateFormState(R.string.invalid_coffeesitename, null, null));
         } else if (!isLongitudeValid(longitude)) {

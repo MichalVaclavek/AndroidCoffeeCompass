@@ -238,4 +238,14 @@
 
     <string name="firebase_token_msg">"Firebase token: "</string>
 
+    <string name="prompt_subscribe_town_name">Jméno města</string>
+    <string name="title_susbscription_for_news">Novinky</string>
+    <string name="subscription_for_news_description">Zde si můžete objednat odběr novinek, informací o nových \'kávových lokacích\'. Lze objednat upozornění na všechny nové lokace nebo jen pro vybraná města. Lze zadat až 5 různých měst.</string>
+    <string name="action_subscribe_news">ODEBÍRAT</string>
+    <string name="invalid_townname">Chybné jméno města</string>
+    <string name="user_profile_notif_subscription">ODBĚRY NOVINEK</string>
+    <string name="all_towns">všechna města</string>
+    <string name="town_name_already_used">Již vybráno</string>
+    <string name="news_subscribe_label">Novinky</string>
+
 </resources>

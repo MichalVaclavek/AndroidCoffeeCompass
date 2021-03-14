@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import java.util.Objects;
@@ -67,7 +68,7 @@ public class SignupActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        registerViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
+        registerViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginRegisterViewModel.class);
 
         ButterKnife.bind(this);

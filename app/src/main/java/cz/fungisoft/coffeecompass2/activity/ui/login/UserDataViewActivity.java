@@ -25,6 +25,7 @@ import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
@@ -58,6 +59,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @BindView(R.id.btn_logout) Button logoutButton;
     @BindView(R.id.btn_deleteUser) Button deleteUserButton;
+    @BindView(R.id.btn_notif_subscription) Button notificationSubscrActivityButton;
 
     @BindView(R.id.user_profile_toolbar) Toolbar toolbar;
 
@@ -87,7 +89,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         userProfileToShow = (LoggedInUser) this.getIntent().getExtras().get("currentUserProfile");
 
         if (userProfileToShow != null) {
-
             usernameTextView.setText(userProfileToShow.getUserName());
             userEmailTextView.setText(userProfileToShow.getEmail());
             numOfCreatedSitesTextView.setText(String.valueOf(userProfileToShow.getNumOfCreatedSites()));
@@ -109,6 +110,15 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
             doBindUserLogoutAndDeleteService();
         }
+
+        notificationSubscrActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(UserDataViewActivity.this, NewsSubscriptionActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
     }
 
     @Override
