@@ -49,7 +49,7 @@ public class DetailsCollectionFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             coffeeSite = bundle.getParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT);
-            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+            if (coffeeSite != null && !(coffeeSite instanceof CoffeeSiteMovable)) {
                 coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
             showImageFirstRequest = bundle.getBoolean("showImageFirst");

@@ -89,6 +89,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private Toolbar mainToolbar;
 
+    private String coffeeSiteURL;
+
+    long newCoffeeSiteId = 0; // default 0 means no new CoffeeSite
+
     // Calling activity can request to show image fragment first
     private boolean showImageFirstRequest = false;
 
@@ -107,13 +111,22 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
             coffeeSite = bundle.getParcelable("coffeeSite");
-            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+            if (coffeeSite != null && !(coffeeSite instanceof CoffeeSiteMovable)) {
                 coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
             showImageFirstRequest = bundle.getBoolean("showImageFirst");
+
+            // Opened from MainActivity upon receiving notification about new CoffeeSite
+            coffeeSiteURL = bundle.getString("coffeeSiteUrl");
+            if (coffeeSiteURL != null) {
+                // Load CoffeeSite to show current data, when the CoffeeSiteLoadOperationsService is connected
+                // get CoffeeSite id as last characters after /
+                newCoffeeSiteId = Long.parseLong(coffeeSiteURL.substring(coffeeSiteURL.lastIndexOf('/') + 1));
+            }
         }
 
         // Setup main toolbar
+
         mainToolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(mainToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -129,20 +142,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         // In this case, the fragment will automatically be re-added
         // to its container so we don't need to manually add it.
         // For more information, see the Fragments API guide at:
-        //
         // http://developer.android.com/guide/components/fragments.html
         if (savedInstanceState == null) {
             // Create the detailsCollectionFragment and add it to the activity
             // using a fragment transaction.
-            Bundle fragmentArgs = new Bundle();
-            fragmentArgs.putParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT, coffeeSite);
-            fragmentArgs.putBoolean("showImageFirst", showImageFirstRequest);
-            detailsCollectionFragment = new DetailsCollectionFragment();
-            detailsCollectionFragment.setArguments(fragmentArgs);
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
-                    .commit();
+            if (this.coffeeSite != null) {
+                createAndShowDetailsFragments(this.coffeeSite);
+            }
         }
 
         // Show distance to the CoffeeSite
@@ -166,6 +172,19 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
          is created, not in case we returned to it from another Activity
          */
         doBindUserAccountService();
+    }
+
+    private void createAndShowDetailsFragments(CoffeeSite coffeeSite) {
+        Bundle fragmentArgs = new Bundle();
+        fragmentArgs.putParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT, coffeeSite);
+        fragmentArgs.putBoolean("showImageFirst", showImageFirstRequest);
+        detailsCollectionFragment = new DetailsCollectionFragment();
+        detailsCollectionFragment.setArguments(fragmentArgs);
+        detailsCollectionFragment.setCurrentUser(currentUser);
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.coffeesite_detail_container, detailsCollectionFragment)
+                .commit();
     }
 
     /** **************** UserAccountService ******************* START ****/
@@ -193,7 +212,9 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
         //detailsCollectionFragmentAdapter.setCurrentUser(currentUser);
-        detailsCollectionFragment.setCurrentUser(currentUser);
+        if (detailsCollectionFragment != null) {
+            detailsCollectionFragment.setCurrentUser(currentUser);
+        }
     }
 
     /** UnBind UserAccountService ****/
@@ -242,9 +263,9 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         doUnbindUserAccountService();
     }
 
-    public void startCoffeeSiteLoad() {
+    public void startCoffeeSiteLoad(long coffeeSiteId) {
         showProgressbar();
-        coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSite.getId());
+        coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSiteId);
     }
 
     /**
@@ -306,7 +327,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             if (resultCode == RESULT_OK) {
                 if (Utils.isOnline()) {
                     // Reloads CoffeeSite to show current saved data after edit
-                    startCoffeeSiteLoad();
+                    startCoffeeSiteLoad(coffeeSite.getId());
                 } else { // or gets as return value from Edit activity
                     // add property change listener for new coffeesite
                     coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
@@ -399,7 +420,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             // refresh CoffeeSite after start
             if (Utils.isOnline()) {
-               startCoffeeSiteLoad();
+               if (coffeeSite != null) {
+                   startCoffeeSiteLoad(coffeeSite.getId());
+               }
+               if (newCoffeeSiteId != 0) {
+                   startCoffeeSiteLoad(newCoffeeSiteId);
+               }
             }
         }
     }
@@ -461,10 +487,17 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      * @param coffeeSite current CoffeeSite data to be shown in {@code detailFragment}
      */
     private void refreshDetailFragment(CoffeeSite coffeeSite) {
-        detailsCollectionFragment.setCoffeeSite(coffeeSite);
-        final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.detach(detailsCollectionFragment);
-        ft.attach(detailsCollectionFragment);
-        ft.commit();
+        if (coffeeSite != null) {
+            if (detailsCollectionFragment == null) {
+                createAndShowDetailsFragments(this.coffeeSite);
+            }
+            else {
+                detailsCollectionFragment.setCoffeeSite(coffeeSite);
+                final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.detach(detailsCollectionFragment);
+                ft.attach(detailsCollectionFragment);
+                ft.commit();
+            }
+        }
     }
 }

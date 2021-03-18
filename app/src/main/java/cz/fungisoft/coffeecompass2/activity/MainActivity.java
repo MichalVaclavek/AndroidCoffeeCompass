@@ -28,6 +28,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.Observer;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,6 +40,7 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
@@ -46,6 +48,7 @@ import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
@@ -57,6 +60,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.FirebaseMessageService;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
@@ -151,6 +155,14 @@ public class MainActivity extends ActivityWithLocationService
 
     private FloatingActionButton fab;
 
+    private TextView textNotificationBellIconItemCount;
+
+    private int newSitesNotificationCount = 0;
+
+    private String newNotificationCoffeeSiteURL;
+
+    private MenuItem newSitesNotificationMenuItem;
+
     /* ************* METHODS START ********************* */
 
     @Override
@@ -158,6 +170,42 @@ public class MainActivity extends ActivityWithLocationService
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        /*
+         * If there are Extras, the Main activity was opened from notification tray
+         * upon received firebase notification and user's click, i.e. when the
+         * app. was in background
+        */
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            //bundle should contain all info sent in "data" field of the notification
+            // one of data is "coffeeSiteURL"
+            String data = bundle.getString("coffeeSiteURL");
+            if (data != null && !data.isEmpty()) {
+                Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
+                intent.putExtra("coffeeSiteUrl", data);
+                startActivity(intent);
+            }
+        }
+
+        /*
+         * Observer and handle received push message notification, if app is in foreground
+         */
+        FirebaseMessageService.
+                Notification.
+                getInstance().
+                getMessageData().
+                observe(this, new Observer<Map<String, String>>() {
+                    @Override
+                    public void onChanged(Map<String, String> data) {
+                        if (data != null && data.get("coffeeSiteURL") != null) {
+                            startReadStatistics();
+                            newNotificationCoffeeSiteURL = data.get("coffeeSiteURL");
+                            newSitesNotificationCount++;
+                            setupNotificationCountBadge();
+                        }
+                    }
+                });
 
         mainActivityProgressBar = findViewById(R.id.progress_main_activity);
 
@@ -447,13 +495,60 @@ public class MainActivity extends ActivityWithLocationService
         // Default icon for this action
         menu.findItem(R.id.action_login).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
 
+        // Setup menu icon with badge showing number of new CoffeeSites notification
+        newSitesNotificationMenuItem = menu.findItem(R.id.action_new_sites);
+        // Default do not show new CoffeeSite notification menu icon
+        //newSitesNotificationMenuItem.setVisible(false);
+
+        View actionView = newSitesNotificationMenuItem.getActionView();
+        textNotificationBellIconItemCount = (TextView) actionView.findViewById(R.id.notification_bell_badge);
+
+        setupNotificationCountBadge();
+
+        actionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOptionsItemSelected(newSitesNotificationMenuItem);
+            }
+        });
+
         return true;
+    }
+
+    private void setupNotificationCountBadge() {
+        if (textNotificationBellIconItemCount != null) {
+            if (newSitesNotificationCount == 0) {
+                //newSitesNotificationMenuItem.setVisible(false);
+                if (textNotificationBellIconItemCount.getVisibility() != View.GONE) {
+                    textNotificationBellIconItemCount.setVisibility(View.GONE);
+                }
+            } else {
+                //newSitesNotificationMenuItem.setVisible(true);
+                textNotificationBellIconItemCount.setText(String.valueOf(Math.min(newSitesNotificationCount, 99)));
+                if (textNotificationBellIconItemCount.getVisibility() != View.VISIBLE) {
+                    textNotificationBellIconItemCount.setVisibility(View.VISIBLE);
+                }
+            }
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
+            case R.id.action_new_sites: {
+                if (!newNotificationCoffeeSiteURL.isEmpty()) {
+                    Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
+                    intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
+                    startActivity(intent);
+
+                    newNotificationCoffeeSiteURL = "";
+                    newSitesNotificationCount = 0;
+                    setupNotificationCountBadge();
+                }
+                return true;
+            }
+
             case R.id.action_login:
                 if (userAccountService != null && userAccountService.isUserLoggedIn()) {
                     openUserProfileActivity();

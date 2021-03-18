@@ -38,6 +38,8 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
 
     private final android.content.Context context;
 
+    private String allowedCheckChars = "áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ- "; // characters valid in czech town names (plus standrad a-z and A-Z)
+
     public TownNamesArrayAdapter(android.content.Context context, int textViewResourceId) {
         super(context, textViewResourceId);
         this.context = context;
@@ -62,11 +64,16 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
                 if (constraint != null) {
-                    // Retrieve the autocomplete results.
-                    townNameStartChanged(context, constraint.toString());
-                    // Assign the data to the FilterResults
-                    filterResults.values = resultList;
-                    filterResults.count = resultList.size();
+                    // Retrieve the autocomplete results
+                    // ignore special characters, like dots '.' and so on
+                    char endChar = constraint.charAt(constraint.length() -1);
+                    if ((endChar >= 'a' && endChar <= 'z') || (endChar >= 'A' && endChar <= 'Z')
+                       || allowedCheckChars.contains(String.valueOf(endChar))) {
+                        townNameStartChanged(context, constraint.toString());
+                        // Assign the data to the FilterResults
+                        filterResults.values = resultList;
+                        filterResults.count = resultList.size();
+                    }
                 } else {
                     refresh(null); // to clear the drop down list?
                 }
@@ -146,5 +153,4 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
         }
         this.notifyDataSetChanged();
     }
-
 }

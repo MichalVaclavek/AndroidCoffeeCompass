@@ -11,6 +11,13 @@
     <!-- "Mark Favorite", should appear as action button if possible -->
 
     <item
+        android:id="@+id/action_new_sites"
+        android:icon="@drawable/ic_new_coffee_bell_notification"
+        android:title="Novinky"
+        app:actionLayout="@layout/action_notifications_item_layout"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/action_my_coffeesites"
         android:icon="@drawable/ic_coffee_cup_main"
         android:title="Moje lokace"

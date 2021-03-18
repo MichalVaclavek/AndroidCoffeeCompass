@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -23,13 +24,21 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.notification.NotificationSubscription;
+import cz.fungisoft.coffeecompass2.asynctask.notification.NotificationSubscriptionAsyncTask;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static cz.fungisoft.coffeecompass2.activity.ui.notification.SelectedTownFragment.ARG_TOWN_ITEM_ID;
@@ -40,9 +49,10 @@ import static cz.fungisoft.coffeecompass2.activity.ui.notification.SelectedTownF
  */
 public class NewsSubscriptionActivity extends AppCompatActivity
                                       implements NotificationSubscriptionCallListener,
+                                                 UserAccountServiceConnectionListener,
                                                  FragmentRemovableListener {
 
-    private static final String TAG = "NewsSubscriptionActivity";
+    private static final String TAG = "NewsSubscriptionAct";
 
     private NotificationSubscriptionViewModel notificationSubscriptionViewModel;
 
@@ -65,6 +75,15 @@ public class NewsSubscriptionActivity extends AppCompatActivity
     LinearLayout selectedTownsLayout; // layout to show list of fragments of the selected towns
 
     private final int MAX_NUM_OF_TOWNS = 5;
+    /**
+     * Current logged-in user
+     */
+    protected LoggedInUser currentUser;
+
+    private static UserAccountService userAccountService;
+    private static UserAccountServiceConnector userAccountServiceConnector;
+
+    private NotificationSubscriptionPreferencesHelper notificationSubscriptionPreferencesHelper;
 
     /**
      * List of text view Fragments to show selected towns
@@ -90,10 +109,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 if (Utils.isOnline()) {
                     subscriptionProgressBar.setVisibility(View.VISIBLE);
                     subscribeButton.setEnabled(false);
-                    //TODO - call AsyncTask invoking REST API call to server to subscribe for notifications
-//                    userAccountService.login(usernameEditText.getText().toString(),
-//                            passwordEditText.getText().toString(),
-//                            deviceID);
+                    startSubscriptionAsyncTask();
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());
                 }
@@ -179,6 +195,64 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         subscribeButton.requestFocus();
         hideKeyboardForTownNameInput();
         townNameEditTextDropDown.setEnabled(true);
+
+        doBindUserAccountService();
+        notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
+    }
+
+    private void startSubscriptionAsyncTask() {
+        //TODO - call AsyncTask invoking REST API call to server to subscribe for notifications
+        NotificationSubscription notificationSubscription = new NotificationSubscription();
+        notificationSubscription.setToken(notificationSubscriptionPreferencesHelper.getFirebaseToken());
+        notificationSubscription.setTopic(notificationSubscriptionPreferencesHelper.getTopic());
+        if (notificationSubscriptionViewModel.isAllTownsSelected()) {
+            notificationSubscription.setTownNames(Arrays.asList(getString(R.string.all_towns_subtopic)));
+        } else {
+            notificationSubscription.setTownNames(notificationSubscriptionViewModel.getAllValidatedTownNames());
+        }
+        new NotificationSubscriptionAsyncTask(notificationSubscription, getCurrentUser(),this).execute();
+    }
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindUserAccountService;
+
+    private void doBindUserAccountService() {
+        // Attempts to establish a connection with the service.  We use an
+        // explicit class name because we want a specific service
+        // implementation that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other applications).
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
+
+        if (bindService(new Intent(this, UserAccountService.class),
+                userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserAccountService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindUserAccountService() {
+        if (mShouldUnbindUserAccountService) {
+            // Release information about the service's state.
+            unbindService(userAccountServiceConnector);
+            mShouldUnbindUserAccountService = false;
+        }
+    }
+
+    @Override
+    public void onUserAccountServiceConnected() {
+        userAccountService = userAccountServiceConnector.getUserLoginService();
+    }
+
+    /**
+     * Helper method to get current logged-in user from userAccountService
+     * @return
+     */
+    protected LoggedInUser getCurrentUser() {
+        return (userAccountService != null) ? userAccountService.getLoggedInUser() : null;
     }
 
     /**
@@ -200,11 +274,13 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         for (SelectedTownFragment fragment : townsFragments) {
             fragment.removeDeleteFragmentListener(this);
         }
+        doUnbindUserAccountService();
         super.onDestroy();
     }
 
 
     private void showSubscriptionFailed(String errorString) {
+        subscriptionProgressBar.setVisibility(View.GONE);
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
     }
 
@@ -220,9 +296,13 @@ public class NewsSubscriptionActivity extends AppCompatActivity
 
     @Override
     public void onNotificationSubscriptionSuccess(NotificationSubscriptionRequestResult subscriptionRequestResult) {
-
+        subscriptionProgressBar.setVisibility(View.GONE);
         if (subscriptionRequestResult.getSuccess()) {
-//            updateUiWithUser(registerResult.getSuccess());
+            Toast.makeText(getApplicationContext(), getString(R.string.subscription_call_succeeded), Toast.LENGTH_SHORT).show();
+            if (getCurrentUser() != null) {
+                notificationSubscriptionPreferencesHelper.putUserId(getCurrentUser().getUserId());
+            }
+            notificationSubscriptionPreferencesHelper.putTowns(notificationSubscriptionViewModel.getAllValidatedTownNames());
         }
         setResult(Activity.RESULT_OK);
 

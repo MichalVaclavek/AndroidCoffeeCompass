@@ -33,7 +33,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
     private String validatedTownName;
 
     /**
-     * HOlds info, if a user selected 'all_towns' check box
+     * Holds info, if a user selected 'all_towns' check box
      */
     private boolean allTownsSelected = false;
 

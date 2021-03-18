@@ -243,9 +243,11 @@
     <string name="subscription_for_news_description">Zde si můžete objednat odběr novinek, informací o nových \'kávových lokacích\'. Lze objednat upozornění na všechny nové lokace nebo jen pro vybraná města. Lze zadat až 5 různých měst.</string>
     <string name="action_subscribe_news">ODEBÍRAT</string>
     <string name="invalid_townname">Chybné jméno města</string>
-    <string name="user_profile_notif_subscription">ODBĚRY NOVINEK</string>
+    <string name="user_profile_notif_subscription">ODBĚR NOVINEK</string>
     <string name="all_towns">všechna města</string>
+    <string name="all_towns_subtopic">all_towns</string>
     <string name="town_name_already_used">Již vybráno</string>
     <string name="news_subscribe_label">Novinky</string>
+    <string name="subscription_call_succeeded">Notifikace objednány úspěšně</string>
 
 </resources>

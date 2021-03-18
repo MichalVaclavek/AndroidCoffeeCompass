@@ -25,8 +25,6 @@ public class CommentsViewModel extends AndroidViewModel {
     private static final String TAG = "CommentsViewModel";
 
 
-
-
     private CommentRepository commentRepository;
 
     /**

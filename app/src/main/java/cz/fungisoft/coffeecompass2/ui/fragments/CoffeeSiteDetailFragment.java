@@ -78,7 +78,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
 
     public void setCurrentUser(LoggedInUser mCurrentUser) {
        currentUser = mCurrentUser;
-       if (editCoffeeSiteIcon != null) {
+       if (editCoffeeSiteIcon != null && coffeeSite != null) {
            if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
                editCoffeeSiteIcon.setVisibility(View.VISIBLE);
            } else {
@@ -114,7 +114,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             coffeeSite = bundle.getParcelable(CoffeeSiteDetailsTabsAdapter.ARG_OBJECT_FRAGMENT);
-            if (!(coffeeSite instanceof CoffeeSiteMovable)) {
+            if (coffeeSite != null && !(coffeeSite instanceof CoffeeSiteMovable)) {
                 coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
         }

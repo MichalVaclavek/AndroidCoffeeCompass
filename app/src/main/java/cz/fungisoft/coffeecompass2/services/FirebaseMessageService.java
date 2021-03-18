@@ -2,8 +2,15 @@ package cz.fungisoft.coffeecompass2.services;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Map;
+
+import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 
 public class FirebaseMessageService extends FirebaseMessagingService {
 
@@ -32,6 +39,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 // Handle message within 10 seconds
                 //handleNow();
             }
+
+            Notification.getInstance()
+                        .addData(remoteMessage.getData());
+
         }
 
         // Check if message contains a notification payload.
@@ -60,8 +71,36 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         // manage this apps subscriptions on the server side, send the
         // FCM registration token to your app server.
         //sendRegistrationToServer(token);
+        NotificationSubscriptionPreferencesHelper notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
+        notificationSubscriptionPreferencesHelper.putFirebaseToken(token);
+    }
 
-        //TODO save to user preferences if logged in
-        //But user is not required to be logged in!!!!
+    /**
+     * Pomocna inner class to Notify MainActivity, that notification push message was received
+     * using LiveData
+     */
+    public static class Notification {
+
+        private static Notification instance;
+        private final MutableLiveData<Map<String, String>> notificationMessageData;
+
+        private Notification() {
+            notificationMessageData = new MutableLiveData<>();
+        }
+
+        public static Notification getInstance() {
+            if (instance == null) {
+                instance = new Notification();
+            }
+            return instance;
+        }
+
+        public LiveData<Map<String, String>> getMessageData() {
+            return notificationMessageData;
+        }
+
+        public void addData(Map<String, String> data) {
+            notificationMessageData.postValue(data);
+        }
     }
 }

@@ -69,7 +69,7 @@ public class CoffeeSiteDetailsTabsAdapter extends FragmentStateAdapter {
             detailFragment.setCoffeeSite(this.coffeeSite);
         }
         if (imageFragment != null) {
-            imageFragment.setCoffeeSite(coffeeSite);
+            imageFragment.setCoffeeSite(this.coffeeSite);
         }
     }
 

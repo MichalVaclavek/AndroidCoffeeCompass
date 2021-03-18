@@ -120,8 +120,7 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      */
     protected LoggedInUser getCurrentUser() {
         if (userAccountService != null) {
-            LoggedInUser currentUser = userAccountService.getLoggedInUser();
-            return currentUser;
+            return userAccountService.getLoggedInUser();
         } else return null;
     }
 
