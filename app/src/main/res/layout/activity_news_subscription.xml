@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.ui.notification.NewsSubscriptionActivity">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ProgressBar
+            android:id="@+id/progress_subscribe_for_news"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="false"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,16 +54,6 @@
                 android:paddingTop="15dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:id="@+id/subscription_main_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_susbscription_for_news"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="24sp"
-                    android:textStyle="italic" />
-
                 <!--  Name Label -->
                 <TextView
                     android:id="@+id/subscription_text_for_user"
@@ -59,84 +63,143 @@
                     android:text="@string/subscription_for_news_description"
                     android:textAlignment="center"
                     android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
-                <CheckBox
-                    android:id="@+id/all_towns_checkBox"
+                <TextView
+                    android:id="@+id/textView26"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="15dp"
-                    android:focusableInTouchMode="false"
-                    android:text="@string/all_towns" />
+                    android:layout_marginTop="10dp"
+                    android:text="Aktuální seznam notifikací:"
+                    android:textColor="@color/colorPrimaryDark" />
 
-                <LinearLayout
-                    android:id="@+id/selected_towns_list_vertical_layout"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/list_of_subscribed_towns_cardView"
+                    style="@style/Widget.MaterialComponents.CardView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:orientation="vertical"></LinearLayout>
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    app:strokeColor="@color/colorPrimary2"
+                    app:strokeWidth="1dp">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/town_name_input_layout"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="auto"
-                    android:hint="@string/prompt_subscribe_town_name"
-                    android:theme="@style/SiteInput.HintAppearance"
-                    app:endIconMode="clear_text"
-                    app:errorEnabled="true"
-                    app:errorIconTintMode="src_over">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/town_name_dropdown"
+                    <LinearLayout
+                        android:id="@+id/list_of_subscribed_towns_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:cursorVisible="true"
-                        android:inputType="text"
-                        android:lines="1"
-                        android:singleLine="true"
-                        android:textSize="18sp" />
+                        android:layout_margin="5dp"
+                        android:orientation="horizontal">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <TextView
+                            android:id="@+id/subscribed_town_default_TextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Žádné notifikace."
+                            android:textStyle="italic" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <ProgressBar
-                    android:id="@+id/progress_subscribe_for_news"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center_horizontal"
-                    android:visibility="gone" />
+                <LinearLayout
+                    android:id="@+id/edit_cancel_buttons_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/edit_towns_imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:srcCompat="@drawable/outline_edit_black_18" />
+
+                    <ImageButton
+                        android:id="@+id/cancel_all_subscriptions_imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:srcCompat="@drawable/ic_baseline_delete_outline_36" />
+                </LinearLayout>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/edit_towns_CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/close_edit_towns_view_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="5dp"
+                            app:srcCompat="@drawable/quantum_ic_clear_grey600_24" />
+
+                        <CheckBox
+                            android:id="@+id/all_towns_checkBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:focusableInTouchMode="false"
+                            android:text="@string/all_towns" />
+
+                        <LinearLayout
+                            android:id="@+id/selected_towns_list_vertical_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="10dp"
+                            android:orientation="vertical"></LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/town_name_input_layout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="auto"
+                            android:hint="@string/prompt_subscribe_town_name"
+                            android:theme="@style/SiteInput.HintAppearance"
+                            app:endIconMode="clear_text"
+                            app:errorEnabled="true"
+                            app:errorIconTintMode="src_over">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/town_name_dropdown"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:cursorVisible="true"
+                                android:inputType="text"
+                                android:lines="1"
+                                android:singleLine="true"
+                                android:textSize="18sp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_subscribe_for_notifications"
+                            style="@style/Widget.AppCompat.Button.Colored"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:layout_marginBottom="24dp"
+                            android:background="@drawable/rounded_orange_button"
+                            android:focusableInTouchMode="true"
+                            android:padding="12dp"
+                            android:text="@string/action_subscribe_news" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
                 <!-- Signup Button -->
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_subscribe_for_notifications"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="24dp"
-                    android:background="@drawable/rounded_orange_button"
-                    android:focusableInTouchMode="true"
-                    android:padding="12dp"
-                    android:text="@string/action_subscribe_news" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_unsubscribe_all_notifications"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="24dp"
-                    android:background="@drawable/rounded_grey_button"
-                    android:focusableInTouchMode="true"
-                    android:padding="12dp"
-                    android:text="@string/action_unsubscribe_news"
-                    tools:visibility="visible" />
 
             </LinearLayout>
         </ScrollView>
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -131,8 +131,6 @@ public class NotificationSubscriptionViewModel extends ViewModel {
         // Validating list of town
         if (validatedTownNames != null) {
             this.allValidatedTownNames = validatedTownNames;
-        } else {
-            this.allValidatedTownNames.clear();
         }
 
         // we are checking allTownsSelected flag and this.allValidatedTownNames
@@ -141,13 +139,21 @@ public class NotificationSubscriptionViewModel extends ViewModel {
 
         if (allTownsSelected) {
             this.allTownsSelected = true;
-            this.allValidatedTownNames.clear();
             notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(true));
         } else if (allValidatedTownNames.size() > 0) {
             notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(true));
         } else {
             notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(false));
         }
+    }
+
+    /**
+     * Clears data of the model before new usage
+     */
+    public void clear() {
+        this.allTownsSelected = false;
+        this.validatedTownName = "";
+        this.allValidatedTownNames.clear();
     }
 
     /**
@@ -185,6 +191,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
         if (allValidatedTownNames.contains(townName)) {
             return true;
         } else {
+            allTownsSelected = false;
             allValidatedTownNames.add(townName);
             return false;
         }
