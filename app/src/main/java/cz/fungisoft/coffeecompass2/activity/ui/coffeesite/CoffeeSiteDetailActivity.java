@@ -89,9 +89,9 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private Toolbar mainToolbar;
 
-    private String coffeeSiteURL;
+    private String coffeeSiteURL = "";
 
-    long newCoffeeSiteId = 0; // default 0 means no new CoffeeSite
+    //long newCoffeeSiteId = 0; // default 0 means no new CoffeeSite
 
     // Calling activity can request to show image fragment first
     private boolean showImageFirstRequest = false;
@@ -118,11 +118,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
             // Opened from MainActivity upon receiving notification about new CoffeeSite
             coffeeSiteURL = bundle.getString("coffeeSiteUrl");
-            if (coffeeSiteURL != null) {
-                // Load CoffeeSite to show current data, when the CoffeeSiteLoadOperationsService is connected
-                // get CoffeeSite id as last characters after /
-                newCoffeeSiteId = Long.parseLong(coffeeSiteURL.substring(coffeeSiteURL.lastIndexOf('/') + 1));
-            }
         }
 
         // Setup main toolbar
@@ -266,6 +261,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     public void startCoffeeSiteLoad(long coffeeSiteId) {
         showProgressbar();
         coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSiteId);
+    }
+
+    public void startCoffeeSiteLoad(String coffeeSiteURL) {
+        showProgressbar();
+        coffeeSiteLoadOperationsService.findCoffeeSiteByURL(coffeeSiteURL);
     }
 
     /**
@@ -423,8 +423,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                if (coffeeSite != null) {
                    startCoffeeSiteLoad(coffeeSite.getId());
                }
-               if (newCoffeeSiteId != 0) {
-                   startCoffeeSiteLoad(newCoffeeSiteId);
+               if (!coffeeSiteURL.isEmpty()) {
+                   startCoffeeSiteLoad(coffeeSiteURL);
                }
             }
         }

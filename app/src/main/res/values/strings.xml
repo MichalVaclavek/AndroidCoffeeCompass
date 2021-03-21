@@ -249,5 +249,9 @@
     <string name="town_name_already_used">Již vybráno</string>
     <string name="news_subscribe_label">Novinky</string>
     <string name="subscription_call_succeeded">Notifikace objednány úspěšně</string>
+    <string name="action_unsubscribe_news">Zrušit odběr</string>
+    <string name="cancel_subscription_call_succeeded">Zrušení odběru novinek úspěšné</string>
+    <string name="subscription_call_failed">Objednání novinek selhalo, prosím zkuste později.</string>
+    <string name="cancel_subscription_call_failed">Zrušení odběru selhalo, zkuste prosím později.</string>
 
 </resources>

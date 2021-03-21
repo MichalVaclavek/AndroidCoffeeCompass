@@ -29,13 +29,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * AsyncTask to call REST methods/interface performing notification subscription.
+ * AsyncTask to call REST methods/interface performing cancel of all previuosly subscribed notifications.
  * If user is not null, then it calls Secured API otherwise public API.
  */
-public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Void> {
+public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    static final String REQ_TAG = "NotifSubscriptionAsyncT";
+    static final String REQ_TAG = "CancelSubscriptAsyncT";
 
+    /**
+     * Subscription to be canceled. Empty fields of NotificationSubscription are evaluated by server
+     * as the request to cancel ALL previous subscription of the Token.
+     */
     private final NotificationSubscription notificationSubscription;
 
     private final LoggedInUser user;
@@ -47,13 +51,13 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
 
 
     /**
-     * User can be null, then Public API endpoint is used to subscribe.
+     * User can be null, then Public API endpoint is used to cancel subscription.
      *
-     * @param notificationSubscription
+     * @param notificationSubscription subscription to be canceled, in this case empty fields (except Token) are expected as it means All subscription to be canceled
      * @param user
      * @param subscriptionActivity
      */
-    public NotificationSubscriptionAsyncTask(NotificationSubscription notificationSubscription, LoggedInUser user, NotificationSubscriptionCallListener subscriptionActivity) {
+    public CancelNotificationSubscriptionAsyncTask(NotificationSubscription notificationSubscription, LoggedInUser user, NotificationSubscriptionCallListener subscriptionActivity) {
         this.notificationSubscription = notificationSubscription;
         this.subscriptionActivity = subscriptionActivity;
         this.user = user;
@@ -61,7 +65,7 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
 
     @Override
     protected Void doInBackground(Void... voids) {
-        Log.d(REQ_TAG, "NotificationSubscriptionAsyncTask REST request initiated");
+        Log.d(REQ_TAG, "CancelNotificationSubscriptionAsyncTask REST request initiated");
         OkHttpClient client;
         String baseUrl;
 
@@ -100,7 +104,7 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
         Call<String> call = null;
         try {
             NotificationSubscriptionRESTInterface api = retrofit.create(NotificationSubscriptionRESTInterface.class);
-            call = api.notificationSubscribe(this.notificationSubscription);
+            call = api.notificationUnSubscribeAll(this.notificationSubscription);
         } catch (Exception ex) {
             Log.e(REQ_TAG, "Error creating API request." + ex.getMessage());
         }
@@ -115,37 +119,36 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
                             if (subscriptionActivity != null) {
                                 if (response.body().contains("accepted")) {
                                     NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(true);
-                                    subscriptionActivity.onNotificationSubscriptionSuccess(result);
+                                    subscriptionActivity.onCancelNotificationSubscriptionSuccess(result);
                                 }
                             }
                         } else {
-                            Log.i(REQ_TAG, "Returned empty response for notification subscription API request.");
+                            Log.i(REQ_TAG, "Returned empty response for cancel notification subscription API request.");
                             NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(new Result.Error("Empty response"));
-                            subscriptionActivity.onNotificationSubscriptionFailure(result);
+                            subscriptionActivity.onCancelNotificationSubscriptionFailure(result);
                         }
                     } else {
                         try {
                             String errorBody = response.errorBody().string();
                             NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(new Result.Error(Utils.getRestError(errorBody)));
-                            subscriptionActivity.onNotificationSubscriptionFailure(result);
+                            subscriptionActivity.onCancelNotificationSubscriptionFailure(result);
                         } catch (IOException e) {
-                            Log.e(REQ_TAG, "Error response for notification subscription API request." + e.getMessage());
-                            NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(new Result.Error("Error notification subscription API."));
-                            subscriptionActivity.onNotificationSubscriptionFailure(result);
+                            Log.e(REQ_TAG, "Error response for cancel notification subscription API request." + e.getMessage());
+                            NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(new Result.Error("Error cancel notification subscription API."));
+                            subscriptionActivity.onCancelNotificationSubscriptionFailure(result);
                         }
                     }
                 }
 
                 @Override
                 public void onFailure(@NotNull Call<String> call, Throwable t) {
-                    Log.e(REQ_TAG, "Error for notification subscription API request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error for notification subscription API request", t));
+                    Log.e(REQ_TAG, "Error for cancel notification subscription API request." + t.getMessage());
+                    Result.Error error = new Result.Error(new IOException("Error for cancel notification subscription API request", t));
                     NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(error);
-                    subscriptionActivity.onNotificationSubscriptionFailure(result);
+                    subscriptionActivity.onCancelNotificationSubscriptionFailure(result);
                 }
             });
         }
-
         return null;
     }
 

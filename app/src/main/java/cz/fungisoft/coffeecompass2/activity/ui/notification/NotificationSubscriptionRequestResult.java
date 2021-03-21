@@ -6,7 +6,7 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 
 /**
- * Push Notification subscription result : success (accepted) or error message.
+ * Push Notification subscription (or subscription cancel) result : success (accepted) or error message.
  */
 public class NotificationSubscriptionRequestResult {
 

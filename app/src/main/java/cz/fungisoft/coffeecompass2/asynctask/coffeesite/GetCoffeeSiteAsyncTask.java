@@ -40,11 +40,22 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private Result.Error error;
 
+    private String coffeeSiteURL = "";
+
+    /**
+     * Starts AsyncTask to load CoffeeSite either by coffeeSiteId or by CoffeeSiteURL
+     *
+     * @param requestedRESTOperationCode - requested load operation
+     * @param callingService - service implementing CoffeeSiteRESTResultListener
+     * @param coffeeSiteId - can be 0, means that coffeeSiteURL is used
+     * @param coffeeSiteURL - REST endpoint URL to load CoffeeSite. Can be empty, then coffeeSiteId is used.
+     */
     public GetCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                  CoffeeSiteRESTResultListener callingService, long coffeeSiteId) {
+                                  CoffeeSiteRESTResultListener callingService, long coffeeSiteId, String coffeeSiteURL) {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         this.callingListenerService = callingService;
         this.coffeeSiteId = coffeeSiteId;
+        this.coffeeSiteURL = coffeeSiteURL;
     }
 
     @Override
@@ -63,14 +74,19 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
+                .baseUrl(this.coffeeSiteURL.isEmpty() ? CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL : this.coffeeSiteURL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-        Call<CoffeeSite> call = api.getCoffeeSiteById(coffeeSiteId);
+        Call<CoffeeSite> call;
+        if (this.coffeeSiteURL.isEmpty()) {
+            call = api.getCoffeeSiteById(coffeeSiteId);
+        } else {
+            call = api.getCoffeeSiteByURL();
+        }
 
         Log.i(TAG, "start call");
 

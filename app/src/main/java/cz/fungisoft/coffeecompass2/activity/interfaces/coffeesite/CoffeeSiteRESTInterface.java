@@ -43,6 +43,16 @@ public interface CoffeeSiteRESTInterface {
     Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") long siteId);
 
     /**
+     * REST call for obtaining one CoffeeSite by it's URL returned from server
+     *
+     * URL example https://coffeecompass.cz/rest/site/50
+     *
+     * @return
+     */
+    @GET
+    Call<CoffeeSite> getCoffeeSiteByURL();
+
+    /**
      * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
      *
      * @return

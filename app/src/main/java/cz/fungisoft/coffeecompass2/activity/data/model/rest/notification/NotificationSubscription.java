@@ -3,7 +3,8 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.notification;
 import java.util.List;
 
 /**
- * Class for holding info about list of towns for notification subscription.
+ * Class for holding info about list of towns for notification subscription, or
+ * for Cancel of notification subscription.
  * <p>
  * Used by REST interface to perform subscribe operation on server coffeecompass.cz
  * Name of fields according coffeecompass.cz REST API

@@ -43,6 +43,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
@@ -189,7 +190,7 @@ public class MainActivity extends ActivityWithLocationService
         }
 
         /*
-         * Observer and handle received push message notification, if app is in foreground
+         * Observes and handles received push message notification, when app is in foreground
          */
         FirebaseMessageService.
                 Notification.
@@ -314,6 +315,8 @@ public class MainActivity extends ActivityWithLocationService
         doBindCoffeeSiteEntitiesService();
 
         getFirebaseToken();
+
+        //showCurrentFirebaseToken();
     }
 
 
@@ -940,7 +943,7 @@ public class MainActivity extends ActivityWithLocationService
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            Log.w(TAG, "Fetching FCM registration token failed: ", task.getException());
                             return;
                         }
 
@@ -952,6 +955,15 @@ public class MainActivity extends ActivityWithLocationService
                         Log.d(TAG, msg);
                     }
                 });
+    }
+
+    /**
+     * Pomocn8 metoda k vypsani aktualniho Firebase token, ulozeneho v NotificationSubscriptionPreferencesHelper,
+     * do logu
+     */
+    private void showCurrentFirebaseToken() {
+        NotificationSubscriptionPreferencesHelper preferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
+        Log.i(TAG, "Current firebase token: " + preferencesHelper.getFirebaseToken());
     }
 
 }

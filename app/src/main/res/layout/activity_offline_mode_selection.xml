@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
-                android:checked="true"
+                android:checked="false"
                 android:gravity="center"
                 android:text="včetně obrázků" />
         </LinearLayout>

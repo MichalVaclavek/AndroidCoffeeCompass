@@ -17,9 +17,10 @@ import java.util.Locale;
 import cz.fungisoft.coffeecompass2.R;
 
 /**
- * This model is used to provide and validate list of towns entered by user for push notifications about
- * new CoffeeSites in these towns.<br>
- * Uses Google Geolocation API for validating name of the town and checks if every town in the selected list us unique.
+ * This model is used to keep and validate list of towns entered by user for push notifications about
+ * new CoffeeSites in these towns in respective Form of {@link NewsSubscriptionActivity}<br>
+ * Uses Google Geolocation API for validating name of the individual town and checks if every town
+ * in the selected list is unique.
  */
 public class NotificationSubscriptionViewModel extends ViewModel {
 
@@ -44,7 +45,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
     /**
      * Already validated and selected town names
      */
-    private final List<String> allValidatedTownNames = new ArrayList<>();
+    private List<String> allValidatedTownNames = new ArrayList<>();
 
     public String getValidatedTownName() {
         return this.validatedTownName;
@@ -59,8 +60,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
     }
 
     /**
-     * Validates currently entered start of townName using GeoLocation API other already entered town names,
-     * so all the names are different.
+     * Validates currently entered start of townName using GeoLocation API.
      *
      * @param context - required by  GeoLocation API to initialize
      * @param townName - town name to be validated using GeoLocation API
@@ -108,14 +108,15 @@ public class NotificationSubscriptionViewModel extends ViewModel {
    }
 
     /**
-     * Validates currently selected townName or 'all_towns' flag. Previously selected town name are taken
-     * int account during validation.
+     * Validates currently selected townName or 'all_towns' flag or list of towns.
+     * Previously entered town names are also taken into account during validation.
      *
      * @param context - required by Geolocation API to be created
      * @param townName - name of town to be validated. Can be empty, then allTownsSelected parameter is evaluated
      * @param allTownsSelected - flag to indicate, if a user selected 'all_towns' check box or not
+     * @param validatedTownNames - list of already validated town names, usually from preference helper (not needed to validate again)
      */
-    public void townDataChanged(Context context, String townName, boolean allTownsSelected) {
+    public void townDataChanged(Context context, String townName, boolean allTownsSelected, List<String> validatedTownNames) {
         if (!townName.isEmpty()) { // we are checking town name only here
             if (!isTownNameValid(context, townName)) {
                 notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(R.string.invalid_townname, null));
@@ -127,12 +128,20 @@ public class NotificationSubscriptionViewModel extends ViewModel {
             return; // other parameters are not to be evaluated
         }
 
-        // we are checking allTownsSelected flag only
+        // Validating list of town
+        if (validatedTownNames != null) {
+            this.allValidatedTownNames = validatedTownNames;
+        } else {
+            this.allValidatedTownNames.clear();
+        }
+
+        // we are checking allTownsSelected flag and this.allValidatedTownNames
         this.allTownsSelected = false;
-        validatedTownName = "";
+        this.validatedTownName = "";
 
         if (allTownsSelected) {
             this.allTownsSelected = true;
+            this.allValidatedTownNames.clear();
             notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(true));
         } else if (allValidatedTownNames.size() > 0) {
             notificationSubscriptionFormState.setValue(new NotificationSubscriptionFormValidationState(true));
@@ -167,7 +176,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
     }
 
     /**
-     * A placeholder for validation of town name against other already selected town names.
+     * A placeholder for validation of town name against other already entered town names.
      */
     private boolean isTownNameAlreadyUsed(String townName) {
         if (townName == null || townName.isEmpty()) {

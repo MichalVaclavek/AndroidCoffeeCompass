@@ -12,6 +12,9 @@ import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 
+/**
+ * Service Class to process incoming Firebase notification messages.
+ */
 public class FirebaseMessageService extends FirebaseMessagingService {
 
     public FirebaseMessageService() {
@@ -24,7 +27,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Log.d(TAG, "Nazev: " + remoteMessage.getNotification().getTitle());
         Log.d(TAG, "Zprava: " + remoteMessage.getNotification().getBody());
 
-        // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
@@ -40,9 +42,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 //handleNow();
             }
 
+            /**
+             * Notifies those observing events about new Notification message data (usually MainActivity)
+             */
             Notification.getInstance()
                         .addData(remoteMessage.getData());
-
         }
 
         // Check if message contains a notification payload.
@@ -56,6 +60,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     /**
      * There are two scenarios when onNewToken is called:
+     * <p>
      * 1) When a new token is generated on initial app startup
      * 2) Whenever an existing token is changed
      * Under #2, there are three scenarios when the existing token is changed:

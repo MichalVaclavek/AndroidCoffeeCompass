@@ -23,6 +23,8 @@ public class NotificationSubscriptionPreferencesHelper {
 
     private final String TOPIC = "topic"; // subscription main topic
 
+    private final String ALL_TOWNS_TOPIC = "all_towns_topic";
+
     private final SharedPreferences app_prefs;
     private final Context context;
 
@@ -73,6 +75,16 @@ public class NotificationSubscriptionPreferencesHelper {
 
     public List<String> getTowns() {
         return new ArrayList<>(app_prefs.getStringSet(TOWNS_SET, new HashSet<>()));
+    }
+
+    public void putAllTownsTopicSelected(boolean allTowns) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putBoolean(ALL_TOWNS_TOPIC, allTowns);
+        edit.apply();
+    }
+
+    public boolean getAllTownsTopicSelected() {
+        return app_prefs.getBoolean(ALL_TOWNS_TOPIC, false);
     }
 
 }
