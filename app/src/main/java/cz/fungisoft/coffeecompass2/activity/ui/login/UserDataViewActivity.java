@@ -140,8 +140,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         //userAccountServiceConnector = new UserAccountServiceConnector(this);
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);

@@ -2,7 +2,9 @@ package cz.fungisoft.coffeecompass2.activity.ui.notification;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -41,6 +44,8 @@ import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPrefere
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.notification.NotificationSubscription;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.CancelCoffeeSiteDialogFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.InsertAuthorCommentDialogFragment;
 import cz.fungisoft.coffeecompass2.asynctask.notification.CancelNotificationSubscriptionAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.notification.NotificationSubscriptionAsyncTask;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -57,7 +62,8 @@ import static cz.fungisoft.coffeecompass2.activity.ui.notification.SelectedTownF
 public class NewsSubscriptionActivity extends AppCompatActivity
                                       implements NotificationSubscriptionCallListener,
                                                  UserAccountServiceConnectionListener,
-                                                 FragmentRemovableListener {
+                                                 FragmentRemovableListener,
+                                                 CancelSubscriptionDialogFragment.CancelSubscriptionDialogListener {
 
     private static final String TAG = "NewsSubscriptionAct";
 
@@ -127,6 +133,13 @@ public class NewsSubscriptionActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.subscribe_notification_toolbar);
+        setSupportActionBar(toolbar);
+        // Setup main toolbar with back button arrow
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.notif_subscription_appbar_title));
+
         subscribeButton.setEnabled(false);
 
         subscribeButton.setOnClickListener(new View.OnClickListener() {
@@ -145,24 +158,19 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         unSubscribeAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
-                    unSubscribeAllButton.setEnabled(false);
-                    subscribeButton.setEnabled(false);
-                    startCancelSubscriptionAsyncTask();
-                } else {
-                    Utils.showNoInternetToast(getApplicationContext());
-                }
+                showConfirmCancelSubscriptionsDialog();
             }
         });
 
         editTownsCardView.setVisibility(View.GONE);
+
+        notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
 
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // allow/show card view to edit towns
                 editTownsCardView.setVisibility(View.VISIBLE);
-                //townNameEditTextDropDown.setEnabled(true);
                 // clear list of selected towns
                 removeAllTownsFragments();
                 // Clear model before new Edit
@@ -171,7 +179,6 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 // show current data saved in NotificationSubscriptionPreferencesHelper
                 // enter initial data to model
                 if (notificationSubscriptionPreferencesHelper.getAllTownsTopicSelected()) {
-//                    townNameEditTextDropDown.setEnabled(false);
                     notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", true, null);
                 } else {
                     List<String> townNames = notificationSubscriptionPreferencesHelper.getTowns();
@@ -184,9 +191,8 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             }
         });
 
-        notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
-
         unSubscribeAllButton.setVisibility(View.GONE);
+
         // Something is subscribed, allow to unsubscribe and edit
         if (notificationSubscriptionPreferencesHelper.getAllTownsTopicSelected()
             || !notificationSubscriptionPreferencesHelper.getTowns().isEmpty()) {
@@ -262,7 +268,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                     notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), townName, false, null);
                     townNameEditTextDropDown.clearListSelection();
                     townNameEditTextDropDown.setText("");
-                    hideKeyboardForTownNameInput();
+                    //hideKeyboardForTownNameInput();
                     subscribeButton.requestFocus();
                 }
             }
@@ -286,8 +292,17 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             }
         });
 
-        //subscribeButton.requestFocus();
         doBindUserAccountService();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            this.onBackPressed();
+            onBackPressed();
+        }
+        return true;
     }
 
     private void showTownName(String townName) {
@@ -540,6 +555,35 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         townsFragments.clear();
     }
 
+    /**
+     * Show the dialog to confirm all Subscriptions cancelation
+     */
+    private void showConfirmCancelSubscriptionsDialog() {
+        // Create an instance of the dialog fragment and show it
+        CancelSubscriptionDialogFragment dialog = new CancelSubscriptionDialogFragment();
+        dialog.show(getSupportFragmentManager(), "CancelSubscriptionDialogFragment");
+    }
+
+    /*** CANCEL Subscriptions DIALOGS LISTENERS ****/
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (Utils.isOnline()) {
+            unSubscribeAllButton.setEnabled(false);
+            subscribeButton.setEnabled(false);
+            startCancelSubscriptionAsyncTask();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+    /*** DIALOGS LISTENERS *** END ***/
+
+
 
     private void hideKeyboardForTownNameInput() {
         InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -559,19 +603,22 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             List<String> townNames = notificationSubscriptionPreferencesHelper.getTowns();
             if (!townNames.isEmpty()) {
                 int i=0; // to count if it is last item of the list
+                StringBuilder allTowns = new StringBuilder();
                 for (String townName : townNames) {
                     i++;
-                    TextView townTextView = new TextView(this);
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    params.setMargins(10,0,0,0);
-                    townTextView.setLayoutParams(params);
                     if (i < townNames.size()) {
-                        townName = townName + ",";
+                        allTowns.append( townName + ", ");
+                    } else {
+                        allTowns.append(townName);
                     }
-                    townTextView.setText(townName);
-                    townTextView.setTypeface(Typeface.DEFAULT_BOLD);
-                    alreadySelectedSubscriptionTownsLayout.addView(townTextView);
                 }
+                TextView townTextView = new TextView(this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.setMargins(10,0,0,0);
+                townTextView.setLayoutParams(params);
+                townTextView.setText(allTowns.toString());
+                townTextView.setTypeface(Typeface.DEFAULT_BOLD);
+                alreadySelectedSubscriptionTownsLayout.addView(townTextView);
             }
         }
     }

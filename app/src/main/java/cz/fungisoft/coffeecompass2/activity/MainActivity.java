@@ -55,6 +55,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListAc
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
@@ -160,7 +161,7 @@ public class MainActivity extends ActivityWithLocationService
 
     private int newSitesNotificationCount = 0;
 
-    private String newNotificationCoffeeSiteURL;
+    private String newNotificationCoffeeSiteURL = "";
 
     private MenuItem newSitesNotificationMenuItem;
 
@@ -499,7 +500,7 @@ public class MainActivity extends ActivityWithLocationService
         menu.findItem(R.id.action_login).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_24px));
 
         // Setup menu icon with badge showing number of new CoffeeSites notification
-        newSitesNotificationMenuItem = menu.findItem(R.id.action_new_sites);
+        newSitesNotificationMenuItem = menu.findItem(R.id.new_sites_notification);
         // Default do not show new CoffeeSite notification menu icon
         //newSitesNotificationMenuItem.setVisible(false);
 
@@ -539,7 +540,7 @@ public class MainActivity extends ActivityWithLocationService
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.action_new_sites: {
+            case R.id.new_sites_notification: {
                 if (!newNotificationCoffeeSiteURL.isEmpty()) {
                     Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
@@ -548,6 +549,10 @@ public class MainActivity extends ActivityWithLocationService
                     newNotificationCoffeeSiteURL = "";
                     newSitesNotificationCount = 0;
                     setupNotificationCountBadge();
+                } else { // notification subscription setup
+                    Intent i = new Intent(MainActivity.this, NewsSubscriptionActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(i);
                 }
                 return true;
             }

@@ -341,7 +341,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Show the dialog to confirm CoffeeSite cancelation
      */
-    private void showConfirmDeleteAccountDialog() {
+    private void showConfirmCanceCoffeeSiteDialog() {
         // Create an instance of the dialog fragment and show it
         CancelCoffeeSiteDialogFragment dialog = new CancelCoffeeSiteDialogFragment();
         dialog.show(mParentActivity.getSupportFragmentManager(), "CancelCoffeeSiteDialogFragment");
@@ -546,7 +546,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         if (Utils.isOnline()) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
-            showConfirmDeleteAccountDialog();
+            showConfirmCanceCoffeeSiteDialog();
         } else {
             Utils.showNoInternetToast(mParentActivity.getApplicationContext());
         }
