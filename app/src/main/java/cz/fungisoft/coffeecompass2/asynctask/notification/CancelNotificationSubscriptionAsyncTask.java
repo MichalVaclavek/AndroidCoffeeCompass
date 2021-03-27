@@ -29,7 +29,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * AsyncTask to call REST methods/interface performing cancel of all previuosly subscribed notifications.
+ * AsyncTask to call REST methods/interface performing cancel of all previously subscribed notifications.
  * If user is not null, then it calls Secured API otherwise public API.
  */
 public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Void> {

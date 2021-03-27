@@ -223,6 +223,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.ui.notification.NotificationNewCoffeeSitesListActivity"
+            android:label="@string/notification_new_sites_list_appbar"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
+        </activity>
     </application>
+
 
 </manifest>

@@ -40,6 +40,8 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -56,6 +58,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.M
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.NotificationNewCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
@@ -83,6 +86,8 @@ import static android.view.View.VISIBLE;
  *  - basic statistics info about CoffeeSites and Users
  *  - show icon allowing to sign-in into application
  *  - show icon indicating, that logged-in user has created coffee sites and which leads to
+ *  - show icon to load Notifications settings or to show list of new CoffeeSites received upon notification from Firebase
+ *
  *  {@link MyCoffeeSitesListActivity}
  *
  *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
@@ -163,6 +168,8 @@ public class MainActivity extends ActivityWithLocationService
 
     private String newNotificationCoffeeSiteURL = "";
 
+    private ArrayList<String> newNotificationCoffeeSiteURLs = new ArrayList<>();
+
     private MenuItem newSitesNotificationMenuItem;
 
     /* ************* METHODS START ********************* */
@@ -180,7 +187,7 @@ public class MainActivity extends ActivityWithLocationService
         */
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            //bundle should contain all info sent in "data" field of the notification
+            // bundle should contain all info sent in "data" field of the notification
             // one of data is "coffeeSiteURL"
             String data = bundle.getString("coffeeSiteURL");
             if (data != null && !data.isEmpty()) {
@@ -203,6 +210,7 @@ public class MainActivity extends ActivityWithLocationService
                         if (data != null && data.get("coffeeSiteURL") != null) {
                             startReadStatistics();
                             newNotificationCoffeeSiteURL = data.get("coffeeSiteURL");
+                            newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
                             newSitesNotificationCount++;
                             setupNotificationCountBadge();
                         }
@@ -301,7 +309,7 @@ public class MainActivity extends ActivityWithLocationService
             @Override
             public void onClick(View view) {
                 if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-                    openNewCoffeeSiteActivity();
+                    openCreateNewCoffeeSiteActivity();
                 } else {
                     Snackbar mySnackbar = Snackbar.make(view, R.string.new_site_only_for_registered_user, Snackbar.LENGTH_LONG);
                     mySnackbar.show();
@@ -541,6 +549,18 @@ public class MainActivity extends ActivityWithLocationService
 
         switch (item.getItemId()) {
             case R.id.new_sites_notification: {
+
+                if (newNotificationCoffeeSiteURLs.size() > 1) {
+                    Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
+                    intent.putStringArrayListExtra("newCoffeeSitesURLs", newNotificationCoffeeSiteURLs);
+                    startActivity(intent);
+
+                    newNotificationCoffeeSiteURL = "";
+                    newNotificationCoffeeSiteURLs.clear();
+                    newSitesNotificationCount = 0;
+                    setupNotificationCountBadge();
+                    return true;
+                }
                 if (!newNotificationCoffeeSiteURL.isEmpty()) {
                     Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
@@ -599,7 +619,7 @@ public class MainActivity extends ActivityWithLocationService
         this.startActivity(activityIntent);
     }
 
-    private void openNewCoffeeSiteActivity() {
+    private void openCreateNewCoffeeSiteActivity() {
         Intent activityIntent = new Intent(this, CreateCoffeeSiteActivity.class);
         //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);

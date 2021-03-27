@@ -160,7 +160,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
          * int numberOfMyCoffeeSites = getIntent().getIntExtra("myCoffeeSitesNumber", 0);
          */
 
-        // Load content CoffeeSites in case of returnign back to this activity?
+        // Load content CoffeeSites in case of returnig back to this activity?
         // Usually the content is loaded after the UserAccountService is connected
         content = getIntent().getParcelableExtra("myCoffeeSites");
 
@@ -276,8 +276,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
 
@@ -329,8 +328,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
@@ -548,7 +546,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesNextPage(coffeeSitesPage.getContent());
-
                 if (!coffeeSitesPage.getLast()) {
                     recyclerViewAdapter.addFooter();
                 } else {

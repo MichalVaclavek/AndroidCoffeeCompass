@@ -22,11 +22,12 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 1.5.2</string>
-    <string name="about_datum">9. 2. 2021</string>
+    <string name="about_version">v. 1.6.0</string>
+    <string name="about_datum">4. 4. 2021</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
+    <string name="about_sentence5">Také si lze objednat odběr novinek, tj. upozornění, že byla zaevidována nová kávová lokace.</string>
     <string name="about_sentence4">Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, a pomozte evidovat další kávové lokace.</string>
     <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>
     <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
@@ -240,7 +241,7 @@
 
     <string name="prompt_subscribe_town_name">Jméno města</string>
     <string name="title_susbscription_for_news">Novinky</string>
-    <string name="subscription_for_news_description">Zde si můžete objednat odběr novinek, informací o nových \'kávových lokacích\'. Lze objednat upozornění na všechny nové lokace nebo jen ve vybraných městech. Lze zadat až 5 různých měst.</string>
+    <string name="subscription_for_news_description">Zde si můžete objednat odběr novinek, tj. upozornění o nově zaevidovaných \'kávových lokacích\'. Lze objednat upozornění na všechny nové lokace nebo jen na lokace ve vybraných městech. Lze zadat až 5 různých měst.</string>
     <string name="action_subscribe_news">ODEBÍRAT</string>
     <string name="invalid_townname">Chybné jméno města</string>
     <string name="user_profile_notif_subscription">ODBĚR NOVINEK</string>
@@ -253,9 +254,10 @@
     <string name="cancel_subscription_call_succeeded">Zrušení odběru novinek úspěšné</string>
     <string name="subscription_call_failed">Objednání novinek selhalo, prosím zkuste později.</string>
     <string name="cancel_subscription_call_failed">Zrušení odběru selhalo, zkuste prosím později.</string>
-    <string name="notif_subscription_appbar_title">Novinky</string>
+    <string name="notif_subscription_appbar_title">Odběr novinek</string>
+    <string name="notification_new_sites_list_appbar">Novinky</string>
     <string name="no_notifications_subscribed">Žádné notifikace.</string>
-    <string name="cancel_subscriptions_dialog_question">Zrušit notifikace?</string>
+    <string name="cancel_subscriptions_dialog_question">Zrušit všechny notifikace?</string>
     <string name="cancel_subscriptions_confirm">Zrušit</string>
 
 </resources>

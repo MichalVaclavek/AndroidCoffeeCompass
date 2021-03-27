@@ -229,11 +229,10 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
      *
      * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
-     * @param twoPane
+     * @param twoPane - not used probably
      */
     public FoundCoffeeSitesRecyclerViewAdapter(FoundCoffeeSitesListActivity parent,
-                                               int currentSearchRange,
-                                               boolean twoPane) {
+                                               int currentSearchRange, boolean twoPane) {
         this.currentSearchRange = currentSearchRange;
         mParentActivity = parent;
         mTwoPane = twoPane;
@@ -248,7 +247,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     /**
      * OnClick listener to open CoffeeSiteDetailActivity to show details
-     * of the CoffeeSite as it is shown when searching and looking into the detailes.
+     * of the CoffeeSite as it is shown when searching and looking into the details.
      *
      * @return
      */

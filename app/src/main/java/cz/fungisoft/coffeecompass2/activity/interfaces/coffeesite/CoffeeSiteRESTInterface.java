@@ -13,6 +13,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 /**
  * Retrofit calls interface for CoffeeSite operations
@@ -50,7 +51,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET
-    Call<CoffeeSite> getCoffeeSiteByURL();
+    Call<CoffeeSite> getCoffeeSiteByURL(@Url String CoffeeSiteUrl);
 
     /**
      * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;

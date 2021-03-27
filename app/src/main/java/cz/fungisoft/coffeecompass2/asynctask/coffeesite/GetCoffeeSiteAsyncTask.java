@@ -74,7 +74,7 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(this.coffeeSiteURL.isEmpty() ? CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL : this.coffeeSiteURL)
+                .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
@@ -85,7 +85,7 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
         if (this.coffeeSiteURL.isEmpty()) {
             call = api.getCoffeeSiteById(coffeeSiteId);
         } else {
-            call = api.getCoffeeSiteByURL();
+            call = api.getCoffeeSiteByURL(this.coffeeSiteURL);
         }
 
         Log.i(TAG, "start call");
