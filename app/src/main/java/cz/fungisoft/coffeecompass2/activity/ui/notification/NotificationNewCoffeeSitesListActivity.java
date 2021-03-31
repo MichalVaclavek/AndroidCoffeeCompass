@@ -32,20 +32,22 @@ import static android.view.View.GONE;
 
 
 /**
- * Activity to show list of new CoffeeSites received upon subscribed notification.
+ * Activity to show list of new CoffeeSites received upon subscribed notification.<br>
+ * Or after user's click on Statistics View on MainActivity, which leads to load
+ * CoffeeSites created in last week/7 days.<br>
  * Allows to select the new CoffeeSite and open detail activity for that new CoffeeSite.
  */
 public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
                                                     implements CoffeeSiteServicesConnectionListener,
                                                                CoffeeSiteLoadServiceOperationsListener  {
 
-    private static final String TAG = "NotificationsListAct";
+    private static final String TAG = "LatestSitesListAct";
 
     /**
      * The main attribute of activity containing all new CoffeeSites to show
      * within this Activities
      */
-    private final List<CoffeeSite> content = new ArrayList<>();
+    private List<CoffeeSite> content = new ArrayList<>();
 
     /**
      * URLs of the new CoffeeSites
@@ -66,6 +68,12 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
     private ProgressBar loadCoffeeSiteProgressBar;
 
     /**
+     * Number of days back from now to load latest ACTIVated CoffeeSites
+     * Used, when this activity is called upon user's click on Statistics View
+     */
+    private int numOfDaysToLoadLatestSites = 0; // 0 means not valid
+
+    /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device. Not used, now.
      */
@@ -84,6 +92,7 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
         loadCoffeeSiteProgressBar = findViewById(R.id.progress_notification_new_coffeesites_load);
 
         newCoffeeSitesURLs = getIntent().getStringArrayListExtra("newCoffeeSitesURLs");
+        numOfDaysToLoadLatestSites = getIntent().getIntExtra("daysBack", 0);
 
         if (savedInstanceState != null && content != null) { // i.e. after orientation was changed
             Collections.sort(content);
@@ -102,7 +111,6 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
         if (id == android.R.id.home) {
             this.onBackPressed();
@@ -120,15 +128,27 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
     private void loadAllNewCoffeeSites() {
         if (Utils.isOnline()) {
-            for (String coffeeSiteURL : newCoffeeSitesURLs) {
-                startCoffeeSiteLoad(coffeeSiteURL);
+            if (this.numOfDaysToLoadLatestSites > 0) {
+                startLatestCoffeeSitesLoad(this.numOfDaysToLoadLatestSites);
+                return;
+            }
+            if (!newCoffeeSitesURLs.isEmpty()) {
+                content.clear();
+                for (String coffeeSiteURL : newCoffeeSitesURLs) {
+                    startCoffeeSiteLoad(coffeeSiteURL);
+                }
             }
         }
     }
 
-    public void startCoffeeSiteLoad(String coffeeSiteURL) {
+    private void startCoffeeSiteLoad(String coffeeSiteURL) {
         showProgressbar();
         coffeeSiteLoadOperationsService.findCoffeeSiteByURL(coffeeSiteURL);
+    }
+
+    private void startLatestCoffeeSitesLoad(int numOfDaysBack) {
+        showProgressbar();
+        coffeeSiteLoadOperationsService.getCoffeeSitesActivatedLastDays(numOfDaysBack);
     }
 
     /**
@@ -158,7 +178,6 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
         hideProgressbar();
         Log.i(TAG, "CoffeeSite load success?: " + error.isEmpty());
         if (error.isEmpty()) {
-            // Loaded actual instance of CoffeeSite - transform it to CoffeeSiteMovable
             if (loadedCoffeeSite != null) {
                 content.add(loadedCoffeeSite);
             }
@@ -167,6 +186,28 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
             }
         } else {
             showCoffeeSiteLoadFailure(error);
+        }
+    }
+
+    /**
+     * Latest CoffeeSites data loaded from server, show the data or error.
+     *
+     * @param loadedCoffeeSite - CoffeeSite's data loaded from server
+     * @param error - indication, if there was error during loading
+     */
+    @Override
+    public void onLatestCoffeeSitesLoaded(List<CoffeeSite> loadedCoffeeSites, String error) {
+        hideProgressbar();
+        if (!error.isEmpty()) {
+            showCoffeeSiteLoadFailure(error);
+            return;
+        }
+        Log.i(TAG, "CoffeeSites load success?: " + error.isEmpty());
+        if (loadedCoffeeSites != null) {
+            content = loadedCoffeeSites;
+            if (!content.isEmpty()) {
+                prepareAndActivateRecyclerView(content);
+            }
         }
     }
 
@@ -206,7 +247,7 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            // refresh CoffeeSite after start
+            // refresh CoffeeSites after start
             if (content.isEmpty()) {
                 loadAllNewCoffeeSites();
             }

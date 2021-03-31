@@ -98,13 +98,24 @@ public interface CoffeeSiteRESTInterface {
     Call<List<CoffeeSite>> getAllCoffeeSites();
 
     /**
-     * REST call for obtaining all CoffeeSites
+     * REST call for obtaining all CoffeeSites paginated
      * https://coffeecompass.cz/rest/site/allSitesPaginated/
      *
      * @return
      */
     @GET("allSitesPaginated/")
     Call<CoffeeSitePageEnvelope> getAllCoffeeSitesPaginated(@Query("page") int page, @Query("size") int size);
+
+    /**
+     * REST call for obtaining CoffeeSites created within last X days
+     *
+     * https://coffeecompass.cz/rest/site/activeSitesInLastDays/7
+     *
+     * @return
+     */
+    @GET("activeSitesInLastDays/{numOfDays}")
+
+    Call<List<CoffeeSite>> getLatestCoffeeSites(@Path("numOfDays") int numOfDays);
 
     /**
      * REST call for obtaining number of CoffeeSites created by current User

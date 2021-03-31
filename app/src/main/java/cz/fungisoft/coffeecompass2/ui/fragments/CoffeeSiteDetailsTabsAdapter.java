@@ -32,7 +32,6 @@ public class CoffeeSiteDetailsTabsAdapter extends FragmentStateAdapter {
         super(fragment);
         this.coffeeSite = coffeeSite;
 
-        //detailFragment.setCoffeeSite(coffeeSite);
         Bundle detailsArgs = new Bundle();
         detailFragment = new CoffeeSiteDetailFragment();
         detailsArgs.putParcelable(ARG_OBJECT_FRAGMENT, coffeeSite);

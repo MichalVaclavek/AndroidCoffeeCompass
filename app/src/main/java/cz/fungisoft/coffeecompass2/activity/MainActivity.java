@@ -139,6 +139,16 @@ public class MainActivity extends ActivityWithLocationService
 
     private ProgressBar mainActivityProgressBar;
 
+    private LinearLayout statisticsLayout;
+
+    private final int DAYS_BACK_FOR_LOAD_STATISTICS = 7;
+
+    /**
+     * To indocate if a user clicked on statistics View, to load latest
+     * CoffeeSites after reading statistics.
+     */
+    private boolean calledUponUsersClick = false;
+
     /**
      * Needed to decide if the menu icon for starting MyCoffeeSitesListActivity
      * should be visible or not
@@ -326,6 +336,7 @@ public class MainActivity extends ActivityWithLocationService
         getFirebaseToken();
 
         //showCurrentFirebaseToken();
+        statisticsLayout = findViewById(R.id.statistics_layout);
     }
 
 
@@ -665,6 +676,9 @@ public class MainActivity extends ActivityWithLocationService
      */
     public synchronized void startReadStatistics() {
         //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
+        if (calledUponUsersClick) {
+            showProgressbar();
+        }
         new ReadStatsAsyncTask(this).execute();
     }
 
@@ -688,6 +702,18 @@ public class MainActivity extends ActivityWithLocationService
             sites7View.setText(stats.numOfSitesLastWeek);
             usersView.setText(stats.numOfUsers);
         }
+
+        if (calledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
+            calledUponUsersClick = false;
+            if (Utils.isOnline()) {
+                Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
+                intent.putExtra("daysBack", DAYS_BACK_FOR_LOAD_STATISTICS);
+                startActivity(intent);
+            } else {
+                Snackbar mySnackbar = Snackbar.make(statisticsLayout, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
+                mySnackbar.show();
+            }
+        }
     }
 
     /**
@@ -704,7 +730,6 @@ public class MainActivity extends ActivityWithLocationService
 
 
     public void onSearchCoffeeClick(View view) {
-
         if (location == null) {
             return;
         }
@@ -720,6 +745,17 @@ public class MainActivity extends ActivityWithLocationService
             Snackbar mySnackbar = Snackbar.make(view, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
             mySnackbar.show();
         }
+    }
+
+    /**
+     * After click on Statistics View, load the latest statistics and if there are some new
+     * CoffeeSites, load and show them.
+     *
+     * @param view
+     */
+    public void onStatisticsClick(View view) {
+        calledUponUsersClick = true;
+        startReadStatistics();
     }
 
 

@@ -23,4 +23,12 @@ public interface CoffeeSiteLoadServiceOperationsListener {
     default void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {}
 
     default void onAllCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
+
+    /**
+     * on load of CoffeeSites activated in last days
+     *
+     * @param coffeeSites
+     * @param error
+     */
+    default void onLatestCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
 }

@@ -164,6 +164,12 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 ((TextView) rootView.findViewById(R.id.streetTextView)).setText(UNKNOWN_VALUE);
             }
 
+            if (!coffeeSite.getMesto().isEmpty()) {
+                ((TextView) rootView.findViewById(R.id.townNameTextView)).setText(coffeeSite.getMesto());
+            } else {
+                ((TextView) rootView.findViewById(R.id.townNameTextView)).setText(UNKNOWN_VALUE);
+            }
+
             if (!coffeeSite.getOteviraciDobaDny().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.openingTextView)).setText(coffeeSite.getOteviraciDobaDny());
             }

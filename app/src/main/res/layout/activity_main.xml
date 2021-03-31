@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
-            android:text="Statistika"
+            android:text="@string/main_statistics_news_label"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
@@ -46,11 +46,13 @@
             app:contentPadding="2dp">
 
             <LinearLayout
+                android:id="@+id/statistics_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@color/card_backround"
                 android:baselineAligned="true"
+                android:onClick="onStatisticsClick"
                 android:orientation="horizontal"
                 android:padding="8dp">
 

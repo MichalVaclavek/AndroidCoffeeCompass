@@ -27,7 +27,6 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      *  Needed to distinguish correct action call within RESTListener methods
      */
     public enum CoffeeSiteRESTOper {
-
         COFFEE_SITE_ENTITIES_LOAD,
 
         COFFEE_SITE_SAVE,
@@ -47,7 +46,8 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
         COFFEE_SITES_FROM_CURRENT_USER_LOAD,
         COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD,
         COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD,
-        COFFEE_SITES_NUMBER_FROM_CURRENT_USER
+        COFFEE_SITES_NUMBER_FROM_CURRENT_USER,
+        COFFEE_SITES_LOAD_LATEST
     }
 
     /**

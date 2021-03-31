@@ -12,10 +12,10 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCfSitesFromLoggedUserPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetLatestCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
@@ -124,6 +124,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                     case COFFEE_SITES_FROM_USER_LOAD:
                     case COFFEE_SITE_LOAD_ALL:
                     case COFFEE_SITES_FROM_CURRENT_USER_LOAD:
+                    case COFFEE_SITES_LOAD_LATEST:
                         informClientAboutLoadedCoffeeSitesList(oper, coffeeSites, "");
                         break;
                 }
@@ -158,7 +159,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     }
 
     public void findNumberOfCoffeeSitesFromCurrentUser() {
-
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_NUMBER_FROM_CURRENT_USER;
         currentUser = getCurrentUser();
         if (currentUser != null) {
@@ -166,6 +166,11 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         } else {
             Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
+    }
+
+    public void getCoffeeSitesActivatedLastDays(int daysBack) {
+        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_LOAD_LATEST;
+        new GetLatestCoffeeSitesAsyncTask(requestedRESTOperation, this, daysBack).execute();
     }
 
     public void findAllCoffeeSitesFromCurrentUser() {
@@ -234,6 +239,8 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 case COFFEE_SITE_LOAD_ALL_FROM_RANGE: listener.onCoffeeSitesFromRangeLoaded(coffeeSites, error);
                     break;
                 case COFFEE_SITE_LOAD_ALL: listener.onAllCoffeeSitesLoaded(coffeeSites, error);
+                    break;
+                case COFFEE_SITES_LOAD_LATEST: listener.onLatestCoffeeSitesLoaded(coffeeSites, error);
                     break;
                 default: break;
             }

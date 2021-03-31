@@ -91,8 +91,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private String coffeeSiteURL = "";
 
-    //long newCoffeeSiteId = 0; // default 0 means no new CoffeeSite
-
     // Calling activity can request to show image fragment first
     private boolean showImageFirstRequest = false;
 
