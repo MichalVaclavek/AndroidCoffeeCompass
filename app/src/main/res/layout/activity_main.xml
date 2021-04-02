@@ -34,13 +34,18 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statistics_news_main_card_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:layout_marginTop="10dp"
             android:layout_marginRight="4dp"
             android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/white_transparent"
+            app:strokeColor="@color/colorPrimary2"
+            app:strokeWidth="1dp"
+            android:clickable="true"
             app:cardCornerRadius="6dp"
             app:cardElevation="4dp"
             app:contentPadding="2dp">
@@ -150,7 +155,7 @@
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="match_parent"

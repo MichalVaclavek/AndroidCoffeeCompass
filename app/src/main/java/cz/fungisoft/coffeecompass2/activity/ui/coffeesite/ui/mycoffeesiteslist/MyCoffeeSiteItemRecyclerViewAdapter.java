@@ -371,7 +371,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /* ********************************************************************* */
 
     void onCancelCoffeeSiteDialogPositiveClick() {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             if (coffeeSiteStatusChangeService != null) {
                 mParentActivity.showProgressbarAndDisableMenuItems();
                 coffeeSiteStatusChangeService.cancel(selectedCoffeeSite);
@@ -386,7 +386,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     void onInsertAuthorCommentDialogPositiveClick(InsertAuthorCommentDialogFragment dialog) {
         if (dialog != null && !dialog.getAuthorComment().equals(selectedCoffeeSite.getUvodniKoment())) {
-            if (Utils.isOnline()) {
+            if (Utils.isOnline(mParentActivity.getApplicationContext())) {
                 if (coffeeSiteStatusChangeService != null) {
                     mParentActivity.showProgressbarAndDisableMenuItems();
                     updatingCommentOnly = true;
@@ -503,7 +503,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
 
     private void onEditButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
@@ -517,7 +517,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
     private void onActivateButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             if (coffeeSiteStatusChangeService != null) {
@@ -530,7 +530,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     private void onDeactivateButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             if (coffeeSiteStatusChangeService != null) {
@@ -543,7 +543,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     private void onCancelButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             showConfirmCanceCoffeeSiteDialog();
@@ -553,7 +553,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     private void onInsertCommentButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             showInsertAuthorsCommentDialog();

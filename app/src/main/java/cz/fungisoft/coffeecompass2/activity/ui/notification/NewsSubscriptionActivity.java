@@ -29,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
@@ -44,8 +45,6 @@ import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPrefere
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.notification.NotificationSubscription;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.CancelCoffeeSiteDialogFragment;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.InsertAuthorCommentDialogFragment;
 import cz.fungisoft.coffeecompass2.asynctask.notification.CancelNotificationSubscriptionAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.notification.NotificationSubscriptionAsyncTask;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -82,10 +81,10 @@ public class NewsSubscriptionActivity extends AppCompatActivity
     TextView defaultNoSubscriptionTextView;
 
     @BindView(R.id.edit_towns_imageButton)
-    ImageButton editButton;
+    MaterialButton editButton;
 
     @BindView(R.id.cancel_all_subscriptions_imageButton)
-    ImageButton unSubscribeAllButton;
+    MaterialButton unSubscribeAllButton;
 
     @BindView(R.id.close_edit_towns_view_icon)
     ImageView closeEditTownsIcon;
@@ -94,13 +93,19 @@ public class NewsSubscriptionActivity extends AppCompatActivity
     CardView editTownsCardView;
 
     @BindView(R.id.list_of_subscribed_towns_layout)
-     LinearLayout alreadySelectedSubscriptionTownsLayout;
+    LinearLayout alreadySelectedSubscriptionTownsLayout;
 
     @BindView(R.id.progress_subscribe_for_news)
     ProgressBar subscriptionProgressBar;
 
     @BindView(R.id.all_towns_checkBox)
     CheckBox allTownsCheckBox;
+
+    // CardView with layout to show list of fragments of the selected towns
+    // Used to add onClick Listener to bahave same way as Edit button
+    @BindView(R.id.list_of_subscribed_towns_cardView)
+    CardView selectedTownsCardView;
+
 
     @BindView(R.id.selected_towns_list_vertical_layout)
     LinearLayout selectedTownsLayout; // layout to show list of fragments of the selected towns
@@ -145,7 +150,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         subscribeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     subscribeButton.setEnabled(false);
                     unSubscribeAllButton.setEnabled(false);
                     startSubscriptionAsyncTask();
@@ -166,30 +171,9 @@ public class NewsSubscriptionActivity extends AppCompatActivity
 
         notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
 
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // allow/show card view to edit towns
-                editTownsCardView.setVisibility(View.VISIBLE);
-                // clear list of selected towns
-                removeAllTownsFragments();
-                // Clear model before new Edit
-                notificationSubscriptionViewModel.clear();
+        selectedTownsCardView.setOnClickListener(createEditOnClickListener());
 
-                // show current data saved in NotificationSubscriptionPreferencesHelper
-                // enter initial data to model
-                if (notificationSubscriptionPreferencesHelper.getAllTownsTopicSelected()) {
-                    notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", true, null);
-                } else {
-                    List<String> townNames = notificationSubscriptionPreferencesHelper.getTowns();
-                    if (!townNames.isEmpty()) {
-                        notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", false, townNames);
-                    }
-                }
-                // disable edit button
-                editButton.setEnabled(false);
-            }
-        });
+        editButton.setOnClickListener(createEditOnClickListener());
 
         unSubscribeAllButton.setVisibility(View.GONE);
 
@@ -198,6 +182,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             || !notificationSubscriptionPreferencesHelper.getTowns().isEmpty()) {
             unSubscribeAllButton.setVisibility(View.VISIBLE);
             editButton.setEnabled(true);
+            selectedTownsCardView.setEnabled(true);
             clearCurrentSubscriptionsCardView();
             fillInCurrentSubscriptionsCardView(notificationSubscriptionPreferencesHelper);
         }
@@ -209,6 +194,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 editTownsCardView.setVisibility(View.GONE);
                 // enable edit button
                 editButton.setEnabled(true);
+                selectedTownsCardView.setEnabled(true);
             }
         });
 
@@ -464,6 +450,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             editTownsCardView.setVisibility(View.GONE);
             // enable edit button
             editButton.setEnabled(true);
+            selectedTownsCardView.setEnabled(true);
         }
 
         setResult(Activity.RESULT_OK);
@@ -482,6 +469,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 }
             }
             Toast.makeText(getApplicationContext(), getString(R.string.subscription_call_failed), Toast.LENGTH_SHORT).show();
+            subscribeButton.setEnabled(true);
         }
     }
 
@@ -513,6 +501,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             editTownsCardView.setVisibility(View.GONE);
             // enable edit button
             editButton.setEnabled(true);
+            selectedTownsCardView.setEnabled(true);
 
             notificationSubscriptionViewModel.townDataChanged(this, "", false, null);
         }
@@ -534,6 +523,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 }
             }
             Toast.makeText(getApplicationContext(), getString(R.string.cancel_subscription_call_failed), Toast.LENGTH_SHORT).show();
+            unSubscribeAllButton.setEnabled(true);
         }
     }
 
@@ -568,7 +558,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             unSubscribeAllButton.setEnabled(false);
             subscribeButton.setEnabled(false);
             startCancelSubscriptionAsyncTask();
@@ -629,5 +619,34 @@ public class NewsSubscriptionActivity extends AppCompatActivity
      */
     private void clearCurrentSubscriptionsCardView() {
         alreadySelectedSubscriptionTownsLayout.removeAllViews();
+    }
+
+    private View.OnClickListener createEditOnClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // allow/show card view to edit towns
+                editTownsCardView.setVisibility(View.VISIBLE);
+                // clear list of selected towns
+                removeAllTownsFragments();
+                // Clear model before new Edit
+                notificationSubscriptionViewModel.clear();
+
+                // show current data saved in NotificationSubscriptionPreferencesHelper
+                // enter initial data to model
+                if (notificationSubscriptionPreferencesHelper.getAllTownsTopicSelected()) {
+                    notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", true, null);
+                } else {
+                    List<String> townNames = notificationSubscriptionPreferencesHelper.getTowns();
+                    if (!townNames.isEmpty()) {
+                        notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", false, townNames);
+                    }
+                }
+                // disable edit button
+                editButton.setEnabled(false);
+                // disable selectedTownsCardView to disallow onClick
+                selectedTownsCardView.setEnabled(false);
+            }
+        };
     }
 }

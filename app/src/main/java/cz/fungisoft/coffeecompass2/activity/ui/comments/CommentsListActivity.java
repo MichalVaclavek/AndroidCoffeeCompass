@@ -166,7 +166,7 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     private void startNumberOfStarsAsyncTask() {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             // Async task for loading current user's rating for this CoffeeSite
             // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes
@@ -249,7 +249,7 @@ public class CommentsListActivity extends AppCompatActivity
      */
     @Override
     public void onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             if (currentCommentOperation == CommentOperation.SAVE) {
                 new SaveCommentAndStarsAsyncTask(cs.getId(), userAccountService.getLoggedInUser(), this, dialog.getCommentAndStars()).execute();
@@ -271,7 +271,7 @@ public class CommentsListActivity extends AppCompatActivity
      */
     @Override
     public void onDeleteCommentDialogPositiveClick(DeleteCommentDialogFragment dialog) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             new DeleteCommentAsyncTask(recyclerViewAdapter.getCommentIdAfterDeleteIconTap(), userAccountService.getLoggedInUser(), this).execute();
         } else {
@@ -393,7 +393,7 @@ public class CommentsListActivity extends AppCompatActivity
      */
     public void processNumberOfComments(int numberOfCommentsAfterDelete) {
         if (numberOfCommentsAfterDelete > 0) {
-            if (Utils.isOnline()) {
+            if (Utils.isOnline(getApplicationContext())) {
                 new GetCommentsForCoffeeSiteAsyncTask(this, cs.getId()).execute();
             }
         } else { // number of comments for this CoffeeSite is 0

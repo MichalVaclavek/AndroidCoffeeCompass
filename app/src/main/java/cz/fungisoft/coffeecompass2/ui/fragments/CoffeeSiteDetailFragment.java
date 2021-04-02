@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.ui.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -258,10 +259,11 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 if (view instanceof ImageView) {
                     if (currentUser != null
                             && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-                        if (Utils.isOnline()) {
+                        Context ctx = getActivity().getApplicationContext();
+                        if (Utils.isOnline(ctx)) {
                             goToEditCoffeeSiteActivity();
                         } else {
-                            Utils.showNoInternetToast(getActivity().getApplicationContext());
+                            Utils.showNoInternetToast(ctx);
                         }
                     }
                 }

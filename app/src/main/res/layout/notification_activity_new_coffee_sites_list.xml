@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Nové lokace" />
+            app:title="@string/notification_new_sites_list_appbar" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.ProgressBar;
 
@@ -207,7 +206,7 @@ public class ImageUtil {
                     myImageFileName = myImageFile.getAbsolutePath();
                     Bitmap bitmap = Picasso.get().load(myUrl).get();
                     try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
                         alreadySavedImagesCounter++;
                     } catch (IOException e) {
                         Log.e(TAG, e.getMessage());

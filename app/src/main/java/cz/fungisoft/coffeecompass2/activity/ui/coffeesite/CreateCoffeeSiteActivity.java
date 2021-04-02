@@ -355,7 +355,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                                     // Show dialog to choose, if the CoffeeSite should be only saved
                                     // or saved and activated
-                                    if (Utils.isOnline()) {
+                                    if (Utils.isOnline(getApplicationContext())) {
                                         SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
                                         dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
                                     } else {
@@ -365,7 +365,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                 // Modify CoffeeSite
                                 if (mode == MODE_MODIFY) {
                                     currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite);
-                                    if (Utils.isOnline()) {
+                                    if (Utils.isOnline(getApplicationContext())) {
                                         updateCoffeeSite(currentCoffeeSite);
                                     } else {
                                         Utils.showNoInternetToast(getApplicationContext());
@@ -929,7 +929,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 imagePhotoFile = null;
             }
             if (currentCoffeeSite != null && !currentCoffeeSite.getMainImageURL().isEmpty()) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     deleteCoffeeSiteImage(currentCoffeeSite);
                 } else {
                     Utils.showNoInternetToast(getApplicationContext());

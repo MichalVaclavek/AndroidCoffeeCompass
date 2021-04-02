@@ -232,7 +232,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if (Utils.isOnline()) {
+                    if (Utils.isOnline(getApplicationContext())) {
                         userAccountService.login(usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 deviceID);
@@ -247,7 +247,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     loginProgressBar.setVisibility(View.VISIBLE);
                     loginButton.setEnabled(false);
 

@@ -166,6 +166,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     }
 
     // *** Methods implementing InternetCheckAsyncTask.Consumer interface * //
+
     // Needed to react on internet connectivity AsyncTask check result //
 
     @Override

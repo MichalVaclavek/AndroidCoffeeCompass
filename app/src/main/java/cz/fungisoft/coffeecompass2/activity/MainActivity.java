@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -41,7 +42,6 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -182,6 +182,13 @@ public class MainActivity extends ActivityWithLocationService
 
     private MenuItem newSitesNotificationMenuItem;
 
+    private CardView statisticsAndNewsCardView; // needed to change backround color, when statistics shows new CoffeeSites last week
+
+    /**
+     * Save info about latest processed new notified CoffeeSite URL
+     */
+    private NotificationSubscriptionPreferencesHelper notificationSubscriptionPreferencesHelper;
+
     /* ************* METHODS START ********************* */
 
     @Override
@@ -207,29 +214,46 @@ public class MainActivity extends ActivityWithLocationService
             }
         }
 
+        notificationSubscriptionPreferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
+
         /*
-         * Observes and handles received push message notification, when app is in foreground
+         * Observes and handles received push message notification, when app is in foreground.
+         * onChanged is called every time, the activity is created (for example gous from backround
+         * to foreground) and it was already called fro some previous new coffeeSite URL
+         * notification. So, we need to check, if onChange() is called because of
+         * another ne URL or if it is already processed URL.
          */
-        FirebaseMessageService.
-                Notification.
-                getInstance().
-                getMessageData().
-                observe(this, new Observer<Map<String, String>>() {
+        FirebaseMessageService
+                .Notification
+                .getInstance()
+                .getMessageData()
+                .observe(this, new Observer<Map<String, String>>() {
                     @Override
                     public void onChanged(Map<String, String> data) {
                         if (data != null && data.get("coffeeSiteURL") != null) {
-                            startReadStatistics();
                             newNotificationCoffeeSiteURL = data.get("coffeeSiteURL");
-                            newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
-                            newSitesNotificationCount++;
-                            setupNotificationCountBadge();
+                            // is this a new URL to be processed?
+                            if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().equals(newNotificationCoffeeSiteURL)) {
+                                startReadStatistics();
+                                notificationSubscriptionPreferencesHelper.putLatestReceivedUrl(newNotificationCoffeeSiteURL);
+                                newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
+                                newSitesNotificationCount++;
+                                setupNotificationCountBadge();
+                            } else {
+                                newSitesNotificationCount = 0;
+                            }
                         }
                     }
                 });
 
         mainActivityProgressBar = findViewById(R.id.progress_main_activity);
 
+        statisticsAndNewsCardView = findViewById(R.id.statistics_news_main_card_view);
+
         statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
+        if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
+            statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
         userPreferencesHelper = new UserPreferencesHelper(this);
 
         // there is an attempt to connect to LocationService in super Activity
@@ -372,7 +396,7 @@ public class MainActivity extends ActivityWithLocationService
         if (coffeeSiteEntitiesService != null) {
             coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
             // read this data only once as they do not change usually
-            if (Utils.isOnline()) {
+            if (Utils.isOnline(getApplicationContext())) {
                 if (!coffeeSiteEntitiesService.isDataReadFromServer()) {
                     coffeeSiteEntitiesService.populateCSEntities();
                 }
@@ -541,12 +565,10 @@ public class MainActivity extends ActivityWithLocationService
     private void setupNotificationCountBadge() {
         if (textNotificationBellIconItemCount != null) {
             if (newSitesNotificationCount == 0) {
-                //newSitesNotificationMenuItem.setVisible(false);
                 if (textNotificationBellIconItemCount.getVisibility() != View.GONE) {
                     textNotificationBellIconItemCount.setVisibility(View.GONE);
                 }
             } else {
-                //newSitesNotificationMenuItem.setVisible(true);
                 textNotificationBellIconItemCount.setText(String.valueOf(Math.min(newSitesNotificationCount, 99)));
                 if (textNotificationBellIconItemCount.getVisibility() != View.VISIBLE) {
                     textNotificationBellIconItemCount.setVisibility(View.VISIBLE);
@@ -560,7 +582,6 @@ public class MainActivity extends ActivityWithLocationService
 
         switch (item.getItemId()) {
             case R.id.new_sites_notification: {
-
                 if (newNotificationCoffeeSiteURLs.size() > 1) {
                     Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
                     intent.putStringArrayListExtra("newCoffeeSitesURLs", newNotificationCoffeeSiteURLs);
@@ -572,7 +593,8 @@ public class MainActivity extends ActivityWithLocationService
                     setupNotificationCountBadge();
                     return true;
                 }
-                if (!newNotificationCoffeeSiteURL.isEmpty()) {
+                if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().isEmpty()
+                    && newSitesNotificationCount == 1) {
                     Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
                     startActivity(intent);
@@ -607,7 +629,7 @@ public class MainActivity extends ActivityWithLocationService
                 openOfflineSettingsActivity();
                 return true;
             case R.id.action_map:
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     openMap();
                 } else {
                     Utils.showMapNotAvailableIfNoInternetToast(getApplicationContext());
@@ -638,7 +660,7 @@ public class MainActivity extends ActivityWithLocationService
     }
 
     private void openLoginActivity() {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             Intent activityIntent = new Intent(this, LoginActivity.class);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             this.startActivity(activityIntent);
@@ -689,26 +711,35 @@ public class MainActivity extends ActivityWithLocationService
      */
     public void showAndSaveStatistics(Statistics stats) {
         hideProgressbar();
+        if (Integer.parseInt(statisticsPrefencesHelper.getNumOfSitesLastWeek()) < Integer.parseInt(stats.numOfSitesLastWeek)) {
+            statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(true);
+        }
         statisticsPrefencesHelper.saveStatistics(stats);
 
-        if (stats != null) {
-            TextView sitesView = (TextView) findViewById(R.id.all_sites_TextView);
-            TextView sites7View = (TextView) findViewById(R.id.AllSites7TextView);
-            TextView sitesToday = (TextView) findViewById(R.id.TodaySitesTextView);
-            TextView usersView = (TextView) findViewById(R.id.AllUsersTextView);
+        TextView sitesView = findViewById(R.id.all_sites_TextView);
+        TextView sites7View = findViewById(R.id.AllSites7TextView);
+        TextView sitesToday = findViewById(R.id.TodaySitesTextView);
+        TextView usersView = findViewById(R.id.AllUsersTextView);
 
-            sitesView.setText(stats.numOfSites);
-            sitesToday.setText(stats.numOfSitesToday);
-            sites7View.setText(stats.numOfSitesLastWeek);
-            usersView.setText(stats.numOfUsers);
+        sitesView.setText(stats.numOfSites);
+        sitesToday.setText(stats.numOfSitesToday);
+        sites7View.setText(stats.numOfSitesLastWeek);
+        if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
+            statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
+        usersView.setText(stats.numOfUsers);
 
+        // Where the statistics shown upon user's click on Statistics CardView
         if (calledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
             calledUponUsersClick = false;
-            if (Utils.isOnline()) {
+            if (Utils.isOnline(getApplicationContext())) {
                 Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
                 intent.putExtra("daysBack", DAYS_BACK_FOR_LOAD_STATISTICS);
                 startActivity(intent);
+                // user now checked the new CoffeeSites of the week, so background of the Statistics CardView can
+                // changed back to it's original color
+                statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.white_transparent));
+                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
             } else {
                 Snackbar mySnackbar = Snackbar.make(statisticsLayout, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
                 mySnackbar.show();
@@ -733,7 +764,7 @@ public class MainActivity extends ActivityWithLocationService
         if (location == null) {
             return;
         }
-        if (Utils.isOnline() || Utils.offlineDataAvailable(getApplicationContext())) {
+        if (Utils.isOnline(getApplicationContext()) || Utils.offlineDataAvailable(getApplicationContext())) {
             Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
             csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
@@ -755,6 +786,7 @@ public class MainActivity extends ActivityWithLocationService
      */
     public void onStatisticsClick(View view) {
         calledUponUsersClick = true;
+        statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.white_transparent));
         startReadStatistics();
     }
 
@@ -807,7 +839,7 @@ public class MainActivity extends ActivityWithLocationService
 
         // Read stats if internet is available
         // Can be read later after internet becomes available, see NetworkStateReceiver
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             startReadStatistics();
             startNumberOfCoffeeSitesFromUserCall();
         } else if (Utils.offlineDataAvailable(getApplicationContext())) {

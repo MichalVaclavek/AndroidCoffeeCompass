@@ -5,13 +5,11 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
@@ -44,14 +42,25 @@ public class Utils {
      *
      * @return true if internet connection is available
      */
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    /**
+     * Checks if the connection to INTERNET is available.
+     * Basic method, can be used in UI thread.
+     *
+     * @return true if internet connection is available
+     */
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
-            boolean exited = false;
+            boolean exited;
             int exitValue = -1;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                exited = ipProcess.waitFor(3, TimeUnit.SECONDS);
+                exited = ipProcess.waitFor(2, TimeUnit.SECONDS);
                 if (exited) {
                     exitValue = ipProcess.exitValue();
                 }
@@ -280,7 +289,7 @@ public class Utils {
      */
     public static boolean isOfflineModeOn(Context context) {
         DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
-        return !isOnline() && offlineModePreferenceHelper.getDownloaded();
+        return !isOnline(context) && offlineModePreferenceHelper.getDownloaded();
     }
 
     /**

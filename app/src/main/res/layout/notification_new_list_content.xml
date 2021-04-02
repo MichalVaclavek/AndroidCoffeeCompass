@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
-    app:strokeColor="@color/colorPrimary2"
+    app:strokeColor="@color/colorPrimary"
     app:strokeWidth="1dp"
     android:clickable="true"
     card_view:cardCornerRadius="6dp"

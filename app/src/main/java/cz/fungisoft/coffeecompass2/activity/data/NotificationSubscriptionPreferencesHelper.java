@@ -25,15 +25,19 @@ public class NotificationSubscriptionPreferencesHelper {
 
     private final String ALL_TOWNS_TOPIC = "all_towns_topic";
 
+    /**
+     * To save info, about latest new CoffeeSite URL received upon Firebase notification.
+     * Used in MainActivity.
+     */
+    private final String LATEST_RECEIVED_NOTIFICATION_URL = "latest_received_url";
+
     private final SharedPreferences app_prefs;
-    private final Context context;
 
     private final String nameOfSharedPreferences = "shared_notifications_subscription";
 
     public NotificationSubscriptionPreferencesHelper(Context context) {
         app_prefs = context.getSharedPreferences(nameOfSharedPreferences,
                 Context.MODE_PRIVATE);
-        this.context = context;
     }
 
     // If 0, means no user for the subscription, only Firebase token is the identity
@@ -87,4 +91,14 @@ public class NotificationSubscriptionPreferencesHelper {
         return app_prefs.getBoolean(ALL_TOWNS_TOPIC, false);
     }
 
+
+    public void putLatestReceivedUrl(String latestURL) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putString(LATEST_RECEIVED_NOTIFICATION_URL, latestURL);
+        edit.apply();
+    }
+
+    public String getLatestReceivedUrl() {
+        return app_prefs.getString(LATEST_RECEIVED_NOTIFICATION_URL, "");
+    }
 }

@@ -127,12 +127,13 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void loadAllNewCoffeeSites() {
-        if (Utils.isOnline()) {
-            if (this.numOfDaysToLoadLatestSites > 0) {
+        if (Utils.isOnline(getApplicationContext())) {
+            if (this.numOfDaysToLoadLatestSites > 0) { // load latest CoffeeSites, user request for Statistics
+                content.clear();
                 startLatestCoffeeSitesLoad(this.numOfDaysToLoadLatestSites);
                 return;
             }
-            if (!newCoffeeSitesURLs.isEmpty()) {
+            if (newCoffeeSitesURLs != null && !newCoffeeSitesURLs.isEmpty()) { // load newly notified CoffeeSites
                 content.clear();
                 for (String coffeeSiteURL : newCoffeeSitesURLs) {
                     startCoffeeSiteLoad(coffeeSiteURL);
@@ -181,8 +182,10 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
             if (loadedCoffeeSite != null) {
                 content.add(loadedCoffeeSite);
             }
-            if (content.size() == newCoffeeSitesURLs.size()) {
-                prepareAndActivateRecyclerView(content);
+            if (newCoffeeSitesURLs != null && !newCoffeeSitesURLs.isEmpty()) {
+                if (content.size() == newCoffeeSitesURLs.size()) {
+                    prepareAndActivateRecyclerView(content);
+                }
             }
         } else {
             showCoffeeSiteLoadFailure(error);
@@ -275,6 +278,22 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
         //boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         recyclerViewAdapter = new NotificationNewCoffeeSitesRecyclerViewAdapter(this, coffeeSites, mTwoPane);
         recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    @Override
+    protected void onPause() {
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
+        }
     }
 
     /**

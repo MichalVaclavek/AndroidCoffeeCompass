@@ -112,7 +112,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     downloadProgressBar.setVisibility(View.VISIBLE);
                     downloadButton.setEnabled(false);
                     withImagesCheckBox.setEnabled(false);

@@ -230,7 +230,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     logoutDeleteProgressBar.setVisibility(View.VISIBLE);
                     logoutButton.setEnabled(false);
                     deleteUserButton.setEnabled(false);
@@ -269,7 +269,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
      */
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             logoutDeleteProgressBar.setVisibility(View.VISIBLE);
             logoutButton.setEnabled(false);
             deleteUserButton.setEnabled(false);

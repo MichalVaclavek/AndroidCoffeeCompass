@@ -322,7 +322,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (requestCode == EDIT_COFFEESITE_REQUEST) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     // Reloads CoffeeSite to show current saved data after edit
                     startCoffeeSiteLoad(coffeeSite.getId());
                 } else { // or gets as return value from Edit activity
@@ -350,7 +350,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     public void onMapButtonClick(View v) {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             if (locationService != null) {
                 Intent mapIntent = new Intent(this, MapsActivity.class);
                 mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
@@ -416,7 +416,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             // refresh CoffeeSite after start
-            if (Utils.isOnline()) {
+            if (Utils.isOnline(getApplicationContext())) {
                if (coffeeSite != null) {
                    startCoffeeSiteLoad(coffeeSite.getId());
                }

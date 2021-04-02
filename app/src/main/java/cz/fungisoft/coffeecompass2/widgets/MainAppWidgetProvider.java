@@ -193,7 +193,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         }
 
         if (action.equals(WIDGET_CLICK)) { // start FoundCoffeeSitesListActivity
-            if (Utils.isOnline() || Utils.offlineDataAvailable(ctx)) {
+            if (Utils.isOnline(ctx) || Utils.offlineDataAvailable(ctx)) {
                 Intent searching = new Intent(context, FoundCoffeeSitesListActivity.class);
                 searching.setAction(WIDGET_CLICK);
                 searching.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -202,7 +202,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      **/
 
     private void readAndSaveAllEntitiesFromServer() {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             downloadInProgress = true;
             CoffeeSiteEntityRepositories entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
@@ -268,7 +268,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      * is finished, Comments download follows.
      */
     private void readAndSaveAllCoffeeSitesPaginatedFromServer() {
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(getApplicationContext())) {
             requestedPage = 1;
             sitesAlreadyDownloaded = 0;
             numOfSitesWithImages = 0;

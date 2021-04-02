@@ -87,26 +87,44 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/edit_cancel_buttons_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                    android:paddingTop="5dp">
 
-                    <ImageButton
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/edit_towns_imageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        app:srcCompat="@drawable/outline_edit_black_18" />
+                        android:layout_alignParentLeft="true"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                        app:backgroundTint="@color/green_emptycard"
+                        app:icon="@drawable/ic_baseline_edit_36"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="?attr/actionMenuTextColor" />
 
-                    <ImageButton
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/cancel_all_subscriptions_imageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        app:srcCompat="@drawable/ic_baseline_delete_outline_36" />
-                </LinearLayout>
+                        android:layout_alignParentRight="true"
+                        android:backgroundTint="@color/gray_transparent"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                        app:icon="@drawable/ic_baseline_delete_outline_36"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="@color/quantum_deeporange800" />
+                </RelativeLayout>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/edit_towns_CardView"

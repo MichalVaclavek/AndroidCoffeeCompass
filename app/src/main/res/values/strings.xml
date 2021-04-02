@@ -259,6 +259,6 @@
     <string name="no_notifications_subscribed">Žádné notifikace.</string>
     <string name="cancel_subscriptions_dialog_question">Zrušit všechna upozornění?</string>
     <string name="cancel_subscriptions_confirm">Zrušit</string>
-    <string name="main_statistics_news_label">Statistika/Novinky</string>
+    <string name="main_statistics_news_label">Statistika</string>
 
 </resources>
