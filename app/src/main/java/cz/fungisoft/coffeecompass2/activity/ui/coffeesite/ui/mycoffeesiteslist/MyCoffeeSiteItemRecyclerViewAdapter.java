@@ -325,9 +325,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.createdOnLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
         viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
-
-        //viewHolder.activateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeActivated());
-        //viewHolder.deactivateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeDeactivated());
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
@@ -352,7 +349,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private void showInsertAuthorsCommentDialog() {
         // Create an instance of the dialog fragment and show it
-        //Passes CoffeeSite's author comment into the dialog
+        // Passes CoffeeSite's author comment into the dialog
         InsertAuthorCommentDialogFragment dialog = newInstance(this.selectedCoffeeSite.getUvodniKoment());
         dialog.show(mParentActivity.getSupportFragmentManager(), "InsertAuthorCommentDialogFragment");
     }

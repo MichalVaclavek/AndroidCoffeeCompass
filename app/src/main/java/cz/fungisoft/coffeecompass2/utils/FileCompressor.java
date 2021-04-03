@@ -10,7 +10,9 @@ import java.util.concurrent.Callable;
 import io.reactivex.Flowable;
 
 /**
- * Copy from https://androidwave.com/capture-image-from-camera-gallery/
+ * Copy from https://androidwave.com/capture-image-from-camera-gallery/ <br>
+ *
+ * Used for compress CoffeeSites images created by user's mobile phone
  */
 public class FileCompressor {
 
@@ -20,6 +22,7 @@ public class FileCompressor {
     private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     private int quality = 85;
     private String destinationDirectoryPath;
+
 
     public FileCompressor(Context context) {
         destinationDirectoryPath = context.getCacheDir().getPath() + File.separator + "images";

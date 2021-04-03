@@ -36,7 +36,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Activity to show logged-in user profile details.
  * Allows to log-out or delete user's account.
  */
-public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener, UserAccountServiceConnectionListener,
+public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener,
+                                                                       UserAccountServiceConnectionListener,
                                                                        DeleteUserAccountDialogFragment.DeleteUserAccountDialogListener {
 
     private static final String TAG = "UserDataViewActivity";

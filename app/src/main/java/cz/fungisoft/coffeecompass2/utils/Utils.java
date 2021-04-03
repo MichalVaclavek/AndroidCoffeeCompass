@@ -97,7 +97,6 @@ public class Utils {
      * @return
      */
     public static boolean hasInternetAccess(Context context) {
-
         if (isNetworkAvailable(context)) {
             try {
                 HttpURLConnection urlc = (HttpURLConnection)

@@ -22,7 +22,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -55,8 +54,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 import static cz.fungisoft.coffeecompass2.activity.ui.notification.SelectedTownFragment.ARG_TOWN_ITEM_ID;
 
 /**
- * Activity to subscribe for push notifications about CoffeeSites
- * created.
+ * Activity to allow user to subscribe for push notifications about new CoffeeSites
+ * created/activated.
  */
 public class NewsSubscriptionActivity extends AppCompatActivity
                                       implements NotificationSubscriptionCallListener,
@@ -195,6 +194,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 // enable edit button
                 editButton.setEnabled(true);
                 selectedTownsCardView.setEnabled(true);
+                hideKeyboardForTownNameInput();
             }
         });
 
@@ -254,7 +254,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                     notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), townName, false, null);
                     townNameEditTextDropDown.clearListSelection();
                     townNameEditTextDropDown.setText("");
-                    //hideKeyboardForTownNameInput();
+                    hideKeyboardForTownNameInput();
                     subscribeButton.requestFocus();
                 }
             }
@@ -269,6 +269,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                     selectedTownsLayout.setVisibility(View.GONE);
                     townNameTextInputLayout.setEnabled(false);
                     townNameEditTextDropDown.setText("");
+                    subscribeButton.requestFocus();
                     notificationSubscriptionViewModel.townDataChanged(getApplicationContext(), "", true, null);
                 } else {
                     selectedTownsLayout.setVisibility(View.VISIBLE);
@@ -574,14 +575,13 @@ public class NewsSubscriptionActivity extends AppCompatActivity
     /*** DIALOGS LISTENERS *** END ***/
 
 
-
     private void hideKeyboardForTownNameInput() {
         InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(townNameEditTextDropDown.getWindowToken(), 0);
     }
 
     /**
-     * Shows all currently subscribed town names into respective CardView
+     * Shows all currently subscribed town names in respective CardView
      */
     private void fillInCurrentSubscriptionsCardView(NotificationSubscriptionPreferencesHelper notificationSubscriptionPreferencesHelper) {
         if (notificationSubscriptionPreferencesHelper.getAllTownsTopicSelected()) {
@@ -615,13 +615,18 @@ public class NewsSubscriptionActivity extends AppCompatActivity
 
     /**
      * Clears list of currently subscribed town names within respective CardView
-     * and inserts default TextView
      */
     private void clearCurrentSubscriptionsCardView() {
         alreadySelectedSubscriptionTownsLayout.removeAllViews();
     }
 
+    /**
+     * onClick listener for editButton and for selectedTownsCardView
+     *
+     * @return
+     */
     private View.OnClickListener createEditOnClickListener() {
+
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {

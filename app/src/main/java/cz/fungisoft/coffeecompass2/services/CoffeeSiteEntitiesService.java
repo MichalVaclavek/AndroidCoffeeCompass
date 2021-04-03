@@ -52,7 +52,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * A Service class to hold CoffeeSite entities classes.
  * Is able to load all available instancies of CoffeeSite entities
  * and save them into EntitiesRepository.
- *
+ * <p>
  * It has its own Service connector and is not part of other
  * CoffeeSiteServices with their common service connector.
  */
@@ -527,7 +527,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 Log.d(TAG, "Thread to check and cancel image loading thread, started.");
                 if (imageDownloadHandle != null && !imageDownloadHandle.isDone()) {
                     imageDownloadHandle.cancel(true);
-                    Log.d(TAG, "Thread for loading images canceled.");
+                    Log.d(TAG, "Thread for loading images canceled due to timeout.");
                 }
             }
         }, 60 * 10, SECONDS); // 10 minutes to wait before start and check

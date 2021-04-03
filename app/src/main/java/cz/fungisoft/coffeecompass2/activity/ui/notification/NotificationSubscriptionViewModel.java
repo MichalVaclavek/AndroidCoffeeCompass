@@ -61,50 +61,57 @@ public class NotificationSubscriptionViewModel extends ViewModel {
 
     /**
      * Validates currently entered start of townName using GeoLocation API.
+     * Not exactly needed as the Places API used to search valid town names
+     * as user enters characters in {@link TownNamesArrayAdapter}, is enough.<br>
+     * Moreover, it could happen, that town name confirmed by Places API is not validated by
+     * this Geolocation API validation (for example town 'Prace' is not validated).<br>
+     * So, in currrent implementation, let the method return true still.
      *
      * @param context - required by  GeoLocation API to initialize
      * @param townName - town name to be validated using GeoLocation API
      */
     private boolean validateTownName(Context context, String townName) {
-        this.validatedTownName = "";
+        return true;
 
-        String city;
-        Geocoder geocoder;
-        List<Address> addresses = null;
-        geocoder = new Geocoder(context, new Locale("cs"));
-
-        try {
-            Log.d(TAG, "Looking for address start ...");
-            addresses = geocoder.getFromLocationName(townName, 5, 48.5, 12.0,
-                    51.1,  18.9);
-        } catch (IOException e) {
-            Log.e(TAG, "Error looking for address: " + e.getMessage());
-        }
-
-        if (addresses != null && addresses.size() > 0) {
-            Log.d(TAG, "Address found");
-            for (Address address : addresses) {
-                // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                city = address.getLocality();
-                city = (city == null) ? address.getSubLocality() : city;
-                if (city == null) {
-                    String adminArea = address.getAdminArea();
-                    if (adminArea != null) {
-                        String[] adminAreaSplit = adminArea.split(" ");
-                        city = adminAreaSplit[adminAreaSplit.length - 1]; // get last part of Admin Area. probably relevant only for "Hlavni mesto Praha"
-                    }
-                }
-                if (city == null || city.isEmpty()) {
-                    city = address.getFeatureName();
-                }
-                if (!city.isEmpty() && city.contains(townName)
-                    || (address.getFeatureName() != null && address.getFeatureName().contains(townName))) {
-                    validatedTownName = townName;
-                    return true;
-                }
-            }
-        }
-        return false;
+//        this.validatedTownName = "";
+//
+//        String city;
+//        Geocoder geocoder;
+//        List<Address> addresses = null;
+//        geocoder = new Geocoder(context, new Locale("cs"));
+//
+//        try {
+//            Log.d(TAG, "Looking for address start ...");
+//            addresses = geocoder.getFromLocationName(townName, 5, 48.5, 12.0,
+//                    51.1,  18.9);
+//        } catch (IOException e) {
+//            Log.e(TAG, "Error looking for address: " + e.getMessage());
+//        }
+//
+//        if (addresses != null && addresses.size() > 0) {
+//            Log.d(TAG, "Address found");
+//            for (Address address : addresses) {
+//                // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//                city = address.getLocality();
+//                city = (city == null) ? address.getSubLocality() : city;
+//                if (city == null) {
+//                    String adminArea = address.getAdminArea();
+//                    if (adminArea != null) {
+//                        String[] adminAreaSplit = adminArea.split(" ");
+//                        city = adminAreaSplit[adminAreaSplit.length - 1]; // get last part of Admin Area. probably relevant only for "Hlavni mesto Praha"
+//                    }
+//                }
+//                if (city == null || city.isEmpty()) {
+//                    city = address.getFeatureName();
+//                }
+//                if (!city.isEmpty() && city.contains(townName)
+//                    || (address.getFeatureName() != null && address.getFeatureName().contains(townName))) {
+//                    validatedTownName = townName;
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
    }
 
     /**

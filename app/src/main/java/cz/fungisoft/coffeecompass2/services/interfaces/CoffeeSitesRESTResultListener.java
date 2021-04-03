@@ -13,7 +13,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
  * which for example, loads CoffeeSites created by current user.
  * <p>
  * Usually called by AsyncTasks with Retrofit call with {@code List<CoffeeSite>}
- * as return value of REST call
+ * as return value of REST call.
  */
 public interface CoffeeSitesRESTResultListener {
 

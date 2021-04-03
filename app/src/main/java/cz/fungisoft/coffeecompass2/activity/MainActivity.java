@@ -256,12 +256,6 @@ public class MainActivity extends ActivityWithLocationService
         }
         userPreferencesHelper = new UserPreferencesHelper(this);
 
-        // there is an attempt to connect to LocationService in super Activity
-        // lets show progress bar as it can take some time, when the
-        // MainActivity runs for the first time
-        // Progress bar is hidden in onLocationServiceConnected()
-        //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
-
         // Get current serachDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
         searchRange = searchRangePreferenceHelper.getSearchDistanc();
@@ -483,7 +477,6 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     public void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {
         hideProgressbar();
-
         if (error.isEmpty()) {
             numberOfCoffeeSitesCreatedByLoggedInUser = coffeeSitesNumber;
             numberOfCoffeeSitesCreatedByLoggedInUserChecked = true;
@@ -600,6 +593,7 @@ public class MainActivity extends ActivityWithLocationService
                     startActivity(intent);
 
                     newNotificationCoffeeSiteURL = "";
+                    newNotificationCoffeeSiteURLs.clear();
                     newSitesNotificationCount = 0;
                     setupNotificationCountBadge();
                 } else { // notification subscription setup
@@ -697,7 +691,6 @@ public class MainActivity extends ActivityWithLocationService
      * Starts AsyncTask to read app. statistics to be shown in MainActivity
      */
     public synchronized void startReadStatistics() {
-        //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
         if (calledUponUsersClick) {
             showProgressbar();
         }

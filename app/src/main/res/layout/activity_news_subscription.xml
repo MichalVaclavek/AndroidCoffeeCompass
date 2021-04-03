@@ -49,13 +49,13 @@
                     android:text="@string/subscription_for_news_description"
                     android:textAlignment="center"
                     android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textView26"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="15dp"
                     android:text="Aktuální seznam notifikací:"
                     android:textColor="@color/colorPrimaryDark" />
 
@@ -83,6 +83,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/no_notifications_subscribed"
+                            android:textSize="18sp"
                             android:textStyle="italic" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

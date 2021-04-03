@@ -199,11 +199,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         }
     }
 
-//    public void getAllCoffeeSites() {
-//        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
-//        new GetAllCoffeeSitesAsyncTask(requestedRESTOperation, this).execute();
-//    }
-
     public void findCoffeeSiteById(long coffeeSiteId) {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD;
         new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, coffeeSiteId, "").execute();
