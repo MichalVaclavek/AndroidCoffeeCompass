@@ -157,7 +157,7 @@ public class NotificationSubscriptionViewModel extends ViewModel {
     /**
      * Clears data of the model before new usage
      */
-    public void clear() {
+    public void clearData() {
         this.allTownsSelected = false;
         this.validatedTownName = "";
         this.allValidatedTownNames.clear();

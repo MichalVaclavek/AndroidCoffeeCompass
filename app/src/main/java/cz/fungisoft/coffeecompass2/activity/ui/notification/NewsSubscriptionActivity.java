@@ -635,7 +635,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 // clear list of selected towns
                 removeAllTownsFragments();
                 // Clear model before new Edit
-                notificationSubscriptionViewModel.clear();
+                notificationSubscriptionViewModel.clearData();
 
                 // show current data saved in NotificationSubscriptionPreferencesHelper
                 // enter initial data to model
