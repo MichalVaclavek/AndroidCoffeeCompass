@@ -252,7 +252,7 @@ public class MainActivity extends ActivityWithLocationService
 
         statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
         if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
-            statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         userPreferencesHelper = new UserPreferencesHelper(this);
 
@@ -718,7 +718,7 @@ public class MainActivity extends ActivityWithLocationService
         sitesToday.setText(stats.numOfSitesToday);
         sites7View.setText(stats.numOfSitesLastWeek);
         if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
-            statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         usersView.setText(stats.numOfUsers);
 
@@ -731,7 +731,7 @@ public class MainActivity extends ActivityWithLocationService
                 startActivity(intent);
                 // user now checked the new CoffeeSites of the week, so background of the Statistics CardView can
                 // changed back to it's original color
-                statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.white_transparent));
+                statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.white_transparent));
                 statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
             } else {
                 Snackbar mySnackbar = Snackbar.make(statisticsLayout, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
@@ -779,7 +779,7 @@ public class MainActivity extends ActivityWithLocationService
      */
     public void onStatisticsClick(View view) {
         calledUponUsersClick = true;
-        statisticsAndNewsCardView.setBackgroundColor(getResources().getColor(R.color.white_transparent));
+        statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.white_transparent));
         startReadStatistics();
     }
 
