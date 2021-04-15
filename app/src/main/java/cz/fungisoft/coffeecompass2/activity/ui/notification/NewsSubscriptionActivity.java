@@ -207,6 +207,8 @@ public class NewsSubscriptionActivity extends AppCompatActivity
                 }
                 subscribeButton.setEnabled(notificationSubscriptionFormState.isDataValid());
 
+                townNameEditTextDropDown.setError(null); // clears error icon and text
+
                 if (notificationSubscriptionFormState.getTownNameError() != null) {
                     townNameEditTextDropDown.setError(getString(notificationSubscriptionFormState.getTownNameError()));
                     return;

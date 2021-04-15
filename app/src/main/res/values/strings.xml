@@ -260,5 +260,6 @@
     <string name="cancel_subscriptions_dialog_question">Zrušit všechna upozornění?</string>
     <string name="cancel_subscriptions_confirm">Zrušit</string>
     <string name="main_statistics_news_label">Statistika</string>
+    <string name="coffeesite_saved_to_db">Lokace uložena do databáze telefonu.</string>
 
 </resources>

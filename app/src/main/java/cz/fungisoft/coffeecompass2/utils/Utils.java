@@ -287,8 +287,8 @@ public class Utils {
      * @return
      */
     public static boolean isOfflineModeOn(Context context) {
-        DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
-        return !isOnline(context) && offlineModePreferenceHelper.getDownloaded();
+        //DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
+        return !isOnline(context) && offlineDataAvailable(context);
     }
 
     /**

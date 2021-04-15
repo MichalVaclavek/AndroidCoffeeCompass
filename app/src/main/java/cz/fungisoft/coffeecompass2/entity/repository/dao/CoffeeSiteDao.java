@@ -28,6 +28,10 @@ public interface CoffeeSiteDao {
     @Query("SELECT COUNT(*) FROM coffee_site_table WHERE mainImageURL != \"\"")
     Flowable<Integer> getAllCoffeeSitesWithImageNumber();
 
+    // savedOnServer == 0 means false
+    @Query("SELECT * FROM coffee_site_table WHERE savedOnServer == 0 ORDER BY createdOn ASC")
+    Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServerSingle();
+
     /**
      *
      * @param searchRangeAsDegreePart to be calculated as searchRange in meters * {@link ONE_METER_IN_DEGREE}

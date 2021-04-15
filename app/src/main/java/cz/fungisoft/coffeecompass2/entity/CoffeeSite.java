@@ -210,6 +210,14 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
     @SerializedName("isAnyOtherSiteActiveOnSamePosition")
     protected boolean isAnyOtherSiteActiveOnSamePosition = false;
 
+    /**
+     * Flag to indicate, if the coffeeSite is saved on server.
+     * Used when creating/updating coffee site in OFFLINE mode.<br>
+     * Default true as the only situation, when the Coffee site is
+     * not saved on server, is the CoffeeSite is created/edited in OFFLINE mode.
+     */
+    private boolean savedOnServer = true;
+
 
     public String getName() {
         return name;
@@ -672,6 +680,13 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
         this.createdOn = created;
     }
 
+    public boolean isSavedOnServer() {
+        return savedOnServer;
+    }
+
+    public void setSavedOnServer(boolean savedOnServer) {
+        this.savedOnServer = savedOnServer;
+    }
 
     @Override
     public int compareTo(CoffeeSite o) {

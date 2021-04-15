@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
@@ -42,7 +43,11 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
 
@@ -129,6 +134,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private MyCoffeeSitesViewModel myCoffeeSitesViewModel;
 
     /**
+     * Disposable of the Single DB request
+     */
+    private static Disposable d;
+
+    /**
      * Getter and setter to be synchronized to update status correctly when
      * CoffeeSites load async task is running.
      * Really needed?
@@ -160,9 +170,31 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
          * int numberOfMyCoffeeSites = getIntent().getIntExtra("myCoffeeSitesNumber", 0);
          */
 
-        // Load content CoffeeSites in case of returnig back to this activity?
+        // Load content CoffeeSites in case of returning back to this activity?
         // Usually the content is loaded after the UserAccountService is connected
         content = getIntent().getParcelableExtra("myCoffeeSites");
+
+        // add CoffeeSites not saved on server yet
+        d = myCoffeeSitesViewModel.getCoffeeSitesNotSavedOnServer()
+                .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
+                .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
+
+                    @Override
+                    public void onStart() {
+                        Log.i(TAG, "Start DB Single request for CoffeeSites not saved on server.");
+                    }
+
+                    @Override
+                    public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesNotSavedOnServer) {
+                        Log.i(TAG, "DB Single onSuccess()");
+                        content.addAll(coffeeSitesNotSavedOnServer);
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        Log.e(TAG, "Failed DB Single request for CoffeeSites not saved on server: " + error.getMessage());
+                    }
+                });
 
         if (savedInstanceState != null) { // i.e. after orientation was changed
             Collections.sort(content);
@@ -783,6 +815,10 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         currentPage = 1;
         recyclerView.removeOnScrollListener(recyclerViewOnScrollListener);
+
+        if (d != null) {
+            d.dispose();
+        }
         super.onDestroy();
     }
 

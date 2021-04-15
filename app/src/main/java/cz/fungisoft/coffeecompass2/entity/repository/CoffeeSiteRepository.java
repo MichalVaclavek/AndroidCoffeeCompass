@@ -25,7 +25,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     /**
      * A multiply factor, found by experiment, which has to be used,
      * when searching from current location within circle range, when
-     * the searching itself in DB can be only performed like searching
+     * the searching itself in DB can only be performed like searching
      * within square.
      */
     final double MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE = 1.4;
@@ -35,6 +35,10 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     private final LiveData<List<CoffeeSite>> mAllCoffeeSites;
     private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
     private final Single<List<CoffeeSite>> coffeeSitesWithImageSingle;
+
+    // list of coffeeSites created/updated during OFFLINE mode
+    private final Single<List<CoffeeSite>> coffeeSitesNotSavedOnServer;
+
     // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
 
@@ -58,6 +62,14 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return numberOfSitesWithImage;
     }
 
+    /**
+     * Needed to show and save list of CoffeeSites, which are not saved on server yet
+     * @return
+     */
+    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
+        return coffeeSitesNotSavedOnServer;
+    }
+
     public CoffeeSiteRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSiteDao = db.coffeeSiteDao();
@@ -65,6 +77,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
         coffeeSitesWithImageSingle = coffeeSiteDao.getAllCoffeeSitesWithImageSingle();
         numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
+
+        coffeeSitesNotSavedOnServer = coffeeSiteDao.getCoffeeSitesNotSavedOnServerSingle();
     }
 
     /**

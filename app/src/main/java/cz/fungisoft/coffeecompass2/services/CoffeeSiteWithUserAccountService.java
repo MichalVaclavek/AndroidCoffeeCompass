@@ -27,6 +27,7 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      *  Needed to distinguish correct action call within RESTListener methods
      */
     public enum CoffeeSiteRESTOper {
+
         COFFEE_SITE_ENTITIES_LOAD,
 
         COFFEE_SITE_SAVE,
@@ -139,12 +140,10 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         if (userAccountService == null) {
             userAccountServiceConnector = new UserAccountServiceConnector(this);
             Intent intent = new Intent(this, UserAccountService.class);
-            //Intent intent = new Intent(getApplicationContext(), UserAccountService.class);
             if (mShouldBindUserLoginService)
                 if (bindService(intent, userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
                     mShouldUnbindUserLoginService = true;

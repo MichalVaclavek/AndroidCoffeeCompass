@@ -14,6 +14,8 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServ
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteCreateUpdateAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.CoffeeSiteDeleteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteIdRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 
@@ -23,6 +25,8 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
 /**
  * Service to call all Async tasks related to Create, Update and Delete CoffeeSite operations
  * and pass the results to calling Activity.
+ * <p>
+ * Also can perform saving of the created/updated CoffeeSite into DB when operating OFFLINE.
  */
 public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountService
                                             implements CoffeeSiteRESTResultListener,
@@ -31,11 +35,17 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
     static final String TAG = "CoffeeSiteCUDOpService";
 
     /**
+     * To save coffee site into DB, when OFFLINE
+     */
+    private static CoffeeSiteRepository coffeeSiteRepository;
+
+    /**
      * Enum type to identify CoffeeSite operations
      * Can be used in Activities using this service
      */
     public enum CUDOperation {
         COFFEE_SITE_SAVE,
+        COFFEE_SITE_SAVE_TO_DB,
         COFFEE_SITE_UPDATE,
         COFFEE_SITE_DELETE
     }
@@ -96,6 +106,20 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             coffeeSite.setCreatedByUserName(currentUser.getUserName());
             new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
                     this).execute();
+        }
+    }
+    /**
+     * @param coffeeSite
+     */
+    public void saveToDB(CoffeeSite coffeeSite) {
+        CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase(getApplicationContext());
+        coffeeSiteRepository = new CoffeeSiteRepository(db);
+        db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
+        currentUser = getCurrentUser();
+        if (currentUser != null) {
+            coffeeSite.setCreatedByUserName(currentUser.getUserName());
+            coffeeSite.setSavedOnServer(false);
+            coffeeSiteRepository.insert(coffeeSite);
         }
     }
 

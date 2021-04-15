@@ -14,6 +14,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
+import io.reactivex.Single;
 
 public class MyCoffeeSitesViewModel extends AndroidViewModel {
 
@@ -34,6 +35,10 @@ public class MyCoffeeSitesViewModel extends AndroidViewModel {
     public LiveData<List<CoffeeSite>> getUsersCoffeeSites(LoggedInUser loggedInUser) {
         setInput(loggedInUser);
         return  usersCoffeeSitesInDB;
+    }
+
+    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
+        return  coffeeSiteRepository.getCoffeeSitesNotSavedOnServer();
     }
 
     public MyCoffeeSitesViewModel(@NonNull Application application) {

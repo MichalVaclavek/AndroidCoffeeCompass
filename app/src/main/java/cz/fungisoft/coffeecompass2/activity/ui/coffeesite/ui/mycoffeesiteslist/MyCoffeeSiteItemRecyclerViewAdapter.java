@@ -325,6 +325,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.createdOnLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
         viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
+
+        viewHolder.notSavedOnServerMark.setVisibility(this.mValues.get(position).isSavedOnServer() ? View.GONE : View.VISIBLE);
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
@@ -661,6 +663,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         final TextView statusView; // to show record status of the CoffeeSite
         final TextView cityView; // to show city name of the CoffeeSite
 
+        final ImageView notSavedOnServerMark; // shows red mark if the CoffeeSite is not saved on server, yet
+
         /**
          * To insert listener to whole group of TextViews
          */
@@ -690,6 +694,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             statusView = (TextView) view.findViewById(R.id.cs_status_TextView);
             cityView = (TextView) view.findViewById(R.id.city_TextView);
             siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+            notSavedOnServerMark = (ImageView) view.findViewById(R.id.notSavedOnServerImageView);
 
             editCoffeeSiteButton = view.findViewById(R.id.button_edit_coffeesite);
             editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);

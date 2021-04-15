@@ -213,9 +213,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * To detect if the CoffeeSite/Activity is in
      * mode for Creation of a new CoffeeSite or
      * if it modifies already created CoffeeSites.
+     * or if we are creating/editing in OFFLINE
      */
     private static final int MODE_CREATE = 0;
     private static final int MODE_MODIFY = 1;
+    private static final int MODE_OFFLINE = 2;
 
     /**
      * Default mode is create
@@ -359,7 +361,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                         SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
                                         dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
                                     } else {
-                                        Utils.showNoInternetToast(getApplicationContext());
+                                        //Utils.showNoInternetToast(getApplicationContext());
+                                        saveCoffeeSiteToDB(currentCoffeeSite);
                                     }
                                 }
                                 // Modify CoffeeSite
@@ -368,7 +371,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                     if (Utils.isOnline(getApplicationContext())) {
                                         updateCoffeeSite(currentCoffeeSite);
                                     } else {
-                                        Utils.showNoInternetToast(getApplicationContext());
+                                        saveCoffeeSiteToDB(currentCoffeeSite);
+//                                        Utils.showNoInternetToast(getApplicationContext());
                                     }
                                 }
 
@@ -523,7 +527,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         cityEditText.setOnFocusChangeListener(ofcListener);
         streetEditText.setOnFocusChangeListener(ofcListener);
-
 
         openingFromTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingFromTimeEditText, event));
         openingToTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingToTimeEditText, event));
@@ -940,7 +943,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /**
      * Negative and Neutral are swapped here as we require to have
-     * Neutral item as second one in the Dialog.
+     * Neutral item as second one in the Dialog's options list.
+     *
      * @param dialog
      */
     @Override
@@ -986,7 +990,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void onImageSaveFailure(String imageSaveResult) {
         hideProgressbarAndEnableMenuItems();
         Toast.makeText(getApplicationContext(),
-                "Problém při ukládání obrázku.", Toast.LENGTH_SHORT);
+                "Problém při ukládání obrázku.", Toast.LENGTH_SHORT)
+             .show();
         if (mode == MODE_MODIFY) {
             // Even if image save failed, we need to save CoffeeSite itself
             if (coffeeSiteCUDOperationsService != null) {
@@ -997,7 +1002,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /**
      * Called when REST Image delete request was successful.
-     * Show the inform Toast, then
+     * Show the inform Toast, then.
      * Disable imageDeleteButton as there is no image to delete, now
      * Clear imageView and set the default icon to it.
      *
@@ -1042,6 +1047,19 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (coffeeSiteCUDOperationsService != null) {
             coffeeSiteCUDOperationsService.save(coffeeSite);
         }
+    }
+
+    private void saveCoffeeSiteToDB(CoffeeSite coffeeSite) {
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.saveToDB(coffeeSite);
+        }
+        // New CoffeeSite saved successfully to DB
+        Toast toast = Toast.makeText(getApplicationContext(),
+                getString(R.string.coffeesite_saved_to_db),
+                Toast.LENGTH_SHORT);
+        toast.show();
+        
+        goToMyCoffeeSitesActivity();
     }
 
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {

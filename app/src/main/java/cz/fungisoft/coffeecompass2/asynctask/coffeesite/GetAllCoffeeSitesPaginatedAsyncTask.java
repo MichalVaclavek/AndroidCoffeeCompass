@@ -44,9 +44,9 @@ public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, V
 
 
     public GetAllCoffeeSitesPaginatedAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                                           int requestedPage,
-                                                           int pageSize,
-                                                           CoffeeSitesRESTResultListener callingService) {
+                                               int requestedPage,
+                                               int pageSize,
+                                               CoffeeSitesRESTResultListener callingService) {
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         this.requestedPage = requestedPage;
