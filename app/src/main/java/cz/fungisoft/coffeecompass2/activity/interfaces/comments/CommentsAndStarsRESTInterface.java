@@ -54,7 +54,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @POST("saveStarsAndComment/{siteID}")
-    Call<List<Comment>> saveCommentAndStars(@Path("siteID") int siteID, @Body CommentAndStars commentAndStarsToSave);
+    Call<List<Comment>> saveCommentAndStars(@Path("siteID") long siteID, @Body CommentAndStars commentAndStarsToSave);
 
     /**
      * Calls REST updating of Comment and Stars for CoffeeSiteID=siteID. Returns updated Comment.

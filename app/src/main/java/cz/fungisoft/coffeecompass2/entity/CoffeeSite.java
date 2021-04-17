@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.google.gson.annotations.Expose;
@@ -26,11 +27,22 @@ import cz.fungisoft.coffeecompass2.entity.repository.DbDataListsConverters;
  * A CoffeeSite, main app. entity
  */
 @Entity(tableName = "coffee_site_table")
-public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
+public class CoffeeSite implements Serializable,
                                                             Comparable<CoffeeSite>,
                                                             Parcelable {
 
     public static final String PHOTO_FILE_NAME_PREFIX = "photo_site_";
+
+    @PrimaryKey(autoGenerate = true)
+    protected long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     @Expose
     @SerializedName("siteName")
@@ -136,7 +148,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
     @Expose
     @SerializedName("recordStatus")
     @TypeConverters(DbDataConverters.class)
-    protected CoffeeSiteRecordStatus statusZaznamu;
+    protected CoffeeSiteRecordStatus statusZaznamu = new CoffeeSiteRecordStatus();
 
     @Expose
     @SerializedName("cena")
@@ -302,7 +314,7 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeLong(id);
         dest.writeString(name);
         dest.writeLong(distance);
 
@@ -655,6 +667,9 @@ public class CoffeeSite extends CoffeeSiteEntity implements Serializable,
 
     public void setCreated(Date created) {
         this.createdOn = created;
+        if (this.createdOn == null) {
+            this.createdOn = new Date();
+        }
         this.createdOnString = dateFormater.format(this.createdOn);
     }
 

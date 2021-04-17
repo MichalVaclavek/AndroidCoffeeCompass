@@ -37,18 +37,21 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     private final Single<List<CoffeeSite>> coffeeSitesWithImageSingle;
 
     // list of coffeeSites created/updated during OFFLINE mode
-    private final Single<List<CoffeeSite>> coffeeSitesNotSavedOnServer;
+    private final Single<List<CoffeeSite>> coffeeSitesNotSavedOnServerSingle;
+
+    // list of coffeeSites created/updated during OFFLINE mode
+    private final LiveData<List<CoffeeSite>> coffeeSitesNotSavedOnServer;
 
     // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
 
-    public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
-        return mAllCoffeeSites;
-    }
+//    public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
+//        return mAllCoffeeSites;
+//    }
 
-    public LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage() {
-        return coffeeSitesWithImage;
-    }
+//    public LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage() {
+//        return coffeeSitesWithImage;
+//    }
 
     /**
      * Needed for service downloading data for OFFLINE mode
@@ -58,15 +61,19 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesWithImageSingle;
     }
 
-    public  Flowable<Integer> getNumberOfAllCoffeeSitesWithImage() {
-        return numberOfSitesWithImage;
-    }
+//    public  Flowable<Integer> getNumberOfAllCoffeeSitesWithImage() {
+//        return numberOfSitesWithImage;
+//    }
 
     /**
      * Needed to show and save list of CoffeeSites, which are not saved on server yet
      * @return
      */
-    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
+    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServerSingle() {
+        return coffeeSitesNotSavedOnServerSingle;
+    }
+
+    public LiveData<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
         return coffeeSitesNotSavedOnServer;
     }
 
@@ -78,7 +85,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         coffeeSitesWithImageSingle = coffeeSiteDao.getAllCoffeeSitesWithImageSingle();
         numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
 
-        coffeeSitesNotSavedOnServer = coffeeSiteDao.getCoffeeSitesNotSavedOnServerSingle();
+        coffeeSitesNotSavedOnServerSingle = coffeeSiteDao.getCoffeeSitesNotSavedOnServerSingle();
+        coffeeSitesNotSavedOnServer  = coffeeSiteDao.getCoffeeSitesNotSavedOnServer();
     }
 
     /**
@@ -173,14 +181,14 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     /* ***** Insert CoffeeSite procedures and AsyncTask ***** */
 
     public void insert (CoffeeSite coffeeSite) {
-        new insertAsyncTask(coffeeSiteDao).execute(coffeeSite);
+        new InsertAsyncTask(coffeeSiteDao).execute(coffeeSite);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+    private static class InsertAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
-        insertAsyncTask(CoffeeSiteDao dao) {
+        InsertAsyncTask(CoffeeSiteDao dao) {
             mAsyncTaskDao = dao;
         }
 

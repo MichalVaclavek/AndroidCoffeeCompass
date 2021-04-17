@@ -183,6 +183,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @return
      */
     private View.OnClickListener createOnClickListenerForShowImageActivityStart() {
+
         View.OnClickListener retVal;
 
         retVal = new View.OnClickListener() {
@@ -242,9 +243,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private void setupBasicViewHolder(int position, ViewHolder viewHolder) {
 
-        viewHolder.csNameView.setText(this.mValues.get(position).getName());
-        viewHolder.locAndTypeView.setText(this.mValues.get(position).getTypPodniku().toString() + ", " +  this.mValues.get(position).getTypLokality().toString());
-        viewHolder.createdOnView.setText(this.mValues.get(position).getCreatedOnString());
+        CoffeeSite coffeeSite = this.mValues.get(position);
+
+        viewHolder.csNameView.setText(coffeeSite.getName());
+        if (coffeeSite.getTypPodniku() != null && coffeeSite.getTypLokality() != null) {
+            viewHolder.locAndTypeView.setText(coffeeSite.getTypPodniku().toString() + ", " + coffeeSite.getTypLokality().toString());
+        }
+        viewHolder.createdOnView.setText(coffeeSite.getCreatedOnString());
 
         // Default enable all buttons
         enableDisableAllButtons(viewHolder, true);
@@ -252,7 +257,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         // Set default color for CoffeeSite Status view
         viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
         // Prelozeni jmen statusu CoffeeSitu a nastaveni active/inactive na obrazky tlacitek
-        String status = this.mValues.get(position).getStatusZaznamu().toString();
+        String status = coffeeSite.getStatusZaznamu().toString();
         switch(status) {
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
@@ -284,22 +289,22 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             default: // CANCELED too, all buttons disabled.
-                viewHolder.statusView.setText(this.mValues.get(position).getStatusZaznamu().toString());
+                viewHolder.statusView.setText(coffeeSite.getStatusZaznamu().toString());
                 enableDisableAllButtons(viewHolder, false);
         }
 
-        if (!this.mValues.get(position).getMesto().isEmpty()) {
-            viewHolder.cityView.setText(this.mValues.get(position).getMesto());
+        if (!coffeeSite.getMesto().isEmpty()) {
+            viewHolder.cityView.setText(coffeeSite.getMesto());
         }
 
         // Set CoffeeSite's image
-        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
+        if (!coffeeSite.getMainImageURL().isEmpty()) {
             if (!offlineModeOn) {
-                Picasso.get().load(this.mValues.get(position).getMainImageURL())
+                Picasso.get().load(coffeeSite.getMainImageURL())
                              .fit().placeholder(R.drawable.kafe_backround_120x160)
                              .into(viewHolder.siteFoto);
             } else {
-                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
+                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, coffeeSite.getMainImageFileName()))
                         .fit().placeholder(R.drawable.kafe_backround_120x160)
                         .into(viewHolder.siteFoto);
             }
@@ -309,24 +314,24 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         // Set CoffeeSite instance of this RecyclerView item as a tag to all buttons
         // to be available later in button's onClick methods
-        viewHolder.editCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.activateCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.deactivateCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.cancelCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.insertCommentButton.setTag(this.mValues.get(position));
+        viewHolder.editCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.activateCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.deactivateCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.cancelCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.insertCommentButton.setTag(coffeeSite);
 
         // Foto and main Label with CoffeeSite name are clickable
-        viewHolder.siteFoto.setTag(this.mValues.get(position));
+        viewHolder.siteFoto.setTag(coffeeSite);
         viewHolder.siteFoto.setOnClickListener(mOnClickListenerToCoffeeSiteImageActivityStart);
 
-        viewHolder.csNameView.setTag(this.mValues.get(position));
+        viewHolder.csNameView.setTag(coffeeSite);
         viewHolder.csNameView.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
-        viewHolder.createdOnLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.createdOnLinearLayout.setTag(coffeeSite);
         viewHolder.createdOnLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
-        viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.locationAndStatusLinearLayout.setTag(coffeeSite);
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
 
-        viewHolder.notSavedOnServerMark.setVisibility(this.mValues.get(position).isSavedOnServer() ? View.GONE : View.VISIBLE);
+        viewHolder.notSavedOnServerMark.setVisibility(coffeeSite.isSavedOnServer() ? View.GONE : View.VISIBLE);
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
@@ -454,7 +459,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         Iterator<CoffeeSite> iter = inputCoffeeSiteList.iterator();
         while (iter.hasNext()) {
             CoffeeSite p = iter.next();
-            if (p.getStatusZaznamu().toString().equalsIgnoreCase("CANCELED")) {
+            if (p != null && "CANCELED".equalsIgnoreCase(p.getStatusZaznamu().toString())) {
                 iter.remove();
             }
         }
@@ -502,16 +507,17 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
 
     private void onEditButtonClick(View v) {
-        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
+        // We can edit even if Offline. CoffeeSite Will be uploaded later, when become Online
+        //if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
             Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
             activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
             activityIntent.putExtra("coffeeSitePosition", selectedPosition);
             mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
-        } else {
-            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
-        }
+//        } else {
+//            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
+//        }
     }
 
 

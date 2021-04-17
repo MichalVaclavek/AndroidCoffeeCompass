@@ -32,7 +32,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("number/")
-    Call<Integer> getNumberOfStars(@Query("siteID") int siteID, @Query("userID") long userID);
+    Call<Integer> getNumberOfStars(@Query("siteID") long siteID, @Query("userID") long userID);
 
     /**
      * REST call for obtaining one CoffeeSite by it's ID
@@ -151,7 +151,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @PUT("update/{siteId}")
-    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") int siteId, @Body CoffeeSite coffeeSite);
+    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") long siteId, @Body CoffeeSite coffeeSite);
 
     /**
      * Calls update of CoffeeSite instance. Expects same siteId returned as positive response.
@@ -160,18 +160,18 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @DELETE("delete/{siteId}")
-    Call<Integer> deleteCoffeeSite(@Path("siteId") int siteId);
+    Call<Integer> deleteCoffeeSite(@Path("siteId") long siteId);
 
 
     /** STATUS change operations **/
 
     @PUT("{siteId}/activate")
-    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") long siteId);
 
     @PUT("{siteId}/deactivate")
-    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") long siteId);
 
     @PUT("{siteId}/cancel")
-    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") long siteId);
 
 }

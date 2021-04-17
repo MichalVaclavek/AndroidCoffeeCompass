@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -22,9 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
@@ -43,11 +44,7 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
 
 import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
 
@@ -71,12 +68,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
-    private List<CoffeeSite> content;
+    private static List<CoffeeSite> content = new ArrayList<>();
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
-    private MyCoffeeSiteItemRecyclerViewAdapter recyclerViewAdapter;
+    private static MyCoffeeSiteItemRecyclerViewAdapter recyclerViewAdapter;
     private Parcelable mListState;
 
     private static final String LIST_STATE_KEY = "CoffeeSiteList";
@@ -134,11 +131,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private MyCoffeeSitesViewModel myCoffeeSitesViewModel;
 
     /**
-     * Disposable of the Single DB request
-     */
-    private static Disposable d;
-
-    /**
      * Getter and setter to be synchronized to update status correctly when
      * CoffeeSites load async task is running.
      * Really needed?
@@ -165,36 +157,36 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
 
         /* If called from MainActivity, we can pass the number of CoffeeSites from user
-         * to be shown/loaded
+         * to be shown/loadedGetNumSitesFromUserAT
          * Not used yet
          * int numberOfMyCoffeeSites = getIntent().getIntExtra("myCoffeeSitesNumber", 0);
          */
 
+        layoutManager = new LinearLayoutManager(this);
+        prepareAndActivateRecyclerView();
+
         // Load content CoffeeSites in case of returning back to this activity?
         // Usually the content is loaded after the UserAccountService is connected
-        content = getIntent().getParcelableExtra("myCoffeeSites");
+        if (getIntent().getParcelableExtra("myCoffeeSites") != null) {
+            content = getIntent().getParcelableExtra("myCoffeeSites");
+        }
 
-        // add CoffeeSites not saved on server yet
-        d = myCoffeeSitesViewModel.getCoffeeSitesNotSavedOnServer()
-                .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
-                .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
-
-                    @Override
-                    public void onStart() {
-                        Log.i(TAG, "Start DB Single request for CoffeeSites not saved on server.");
-                    }
-
-                    @Override
-                    public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesNotSavedOnServer) {
-                        Log.i(TAG, "DB Single onSuccess()");
-                        content.addAll(coffeeSitesNotSavedOnServer);
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        Log.e(TAG, "Failed DB Single request for CoffeeSites not saved on server: " + error.getMessage());
-                    }
-                });
+        /**
+         * Get CoffeeSites saved in local DB, which are not uploaded to server, yet.
+         * Only in ONLINE mode as in OFFLINE mode such CoffeeSites are read from
+         * DB among all other CoffeeSites created by current logged-in user.
+         */
+        myCoffeeSitesViewModel.getCoffeeSitesNotSavedOnServer().observe(this, new Observer<List<CoffeeSite>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSite> notSavedCoffeeSites) {
+                // Update the cached copy of the CoffeeSites in the adapter.
+                if (Utils.isOnline(getApplicationContext())) {
+                    content = notSavedCoffeeSites;
+                    recyclerViewAdapter.setCoffeeSites(content);
+                    hideProgressbarAndEnableMenuItems();
+                }
+            }
+        });
 
         if (savedInstanceState != null) { // i.e. after orientation was changed
             Collections.sort(content);
@@ -206,11 +198,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        layoutManager = new LinearLayoutManager(this);
-
         currentPage = 1;
-
-        prepareAndActivateRecyclerView();
 
         /*
          Must be called here, in onCreate(), as after successful connection to UserAccountService
@@ -246,8 +234,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
          is being loaded, otherwise enable.
          This method is invoked by invalidateOptionsMenu
          called before and after loading i.e. in showProgressBar()
-         and hideProgressBar() methods
-        */
+         and hideProgressBar() methods  */
         if (isLoadingPage()) {
             addCoffeeSiteMenuItem.setEnabled(false);
             reloadMyCoffeeSitesMenuItem.setEnabled(false);
@@ -326,6 +313,16 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         userAccountService = userAccountServiceConnector.getUserLoginService();
         currentUser = userAccountService.getLoggedInUser();
 
+        // If OFFLINE mode is active, the list will be loaded from DB at start of Activity.
+        // Can take some time, show progressBar
+        if (Utils.isOfflineModeOn(getApplicationContext()) && recyclerViewAdapter.getItemCount() == 0) {
+            showProgressbarAndDisableMenuItems();
+        }
+
+        /**
+         * Shows all CoffeeSites saved in local DB created by logged-in user. This includes
+         * CoffeeSites not already uploaded to server.
+         */
         myCoffeeSitesViewModel.getUsersCoffeeSites(currentUser).observe(this, new Observer<List<CoffeeSite>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSite> myCoffeeSites) {
@@ -426,8 +423,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
@@ -457,8 +453,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
@@ -500,9 +495,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (coffeeSiteLoadOperationsService == null) {
                 coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
                 coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-                // All services ready, start loading all coffeesites
-                boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-                if (!offLineModeOn) {
+                // All services ready, start loading all CoffeeSites
+                if (Utils.isOnline(getApplicationContext())) {
                     startMyCoffeeSitesLoadOperation();
                 }
             }
@@ -532,8 +526,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
         else {
             showMyCoffeeSitesLoadSuccess();
-            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: " + "OK");
-            content = coffeeSites;
+            Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_LOAD. Result: OK");
+            //content = coffeeSites;
+            content.addAll(coffeeSites);
             if (content != null) {
                 recyclerViewAdapter.setCoffeeSites(content);
             }
@@ -554,7 +549,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             Log.i(TAG, "COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD. Result: " + "OK");
             if (coffeeSitesPage != null) {
                 recyclerViewAdapter.addCoffeeSitesFirstPage(coffeeSitesPage.getContent());
-
                 if (!coffeeSitesPage.getLast()) {
                     recyclerViewAdapter.addFooter();
                 } else {
@@ -603,8 +597,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (!isLoadingPage() && !isLastPage) {
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0) {
-                    boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-                    if (!offLineModeOn) {
+                    if (Utils.isOnline(getApplicationContext())) {
                         loadMoreItems();
                     }
                 }
@@ -616,7 +609,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         currentPage += 1;
         showProgressbarAndDisableMenuItems();
         setLoadingPage(true);
-        coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(currentPage, PAGE_SIZE);
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.findCoffeeSitesPageFromCurrentUser(currentPage, PAGE_SIZE);
+        }
     }
 
 
@@ -788,11 +783,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     protected void onStart() {
-        // If OFFLINE mode is active, the list will be loaded from DB at start of Activity.
-        // Can take some time, show progressBar
-        if (Utils.isOfflineModeOn(getApplicationContext()) && recyclerViewAdapter.getItemCount() == 0) {
-            showProgressbarAndDisableMenuItems();
-        }
         super.onStart();
     }
 
@@ -816,9 +806,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         currentPage = 1;
         recyclerView.removeOnScrollListener(recyclerViewOnScrollListener);
 
-        if (d != null) {
-            d.dispose();
-        }
         super.onDestroy();
     }
 

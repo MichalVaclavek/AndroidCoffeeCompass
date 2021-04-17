@@ -39,7 +39,7 @@ public class Utils {
     /**
      * Checks if the connection to INTERNET is available.
      * Basic method, can be used in UI thread.
-     *
+     * This is preffered verison
      * @return true if internet connection is available
      */
     public static boolean isOnline(Context context) {
@@ -53,6 +53,7 @@ public class Utils {
      *
      * @return true if internet connection is available
      */
+    @Deprecated
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {

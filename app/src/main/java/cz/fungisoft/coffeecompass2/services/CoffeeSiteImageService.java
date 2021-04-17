@@ -143,12 +143,12 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
 
     /** Methods to be called by Activity **/
 
-    public void uploadImage(File imageFile, int coffeeSiteId) {
+    public void uploadImage(File imageFile, long coffeeSiteId) {
         currentUser = getCurrentUser();
         new ImageUploadAsyncTask(this, currentUser, imageFile, coffeeSiteId).execute();
     }
 
-    public void deleteImage(int coffeeSiteId) {
+    public void deleteImage(long coffeeSiteId) {
         currentUser = getCurrentUser();
         new ImageDeleteAsyncTask(this, currentUser, coffeeSiteId).execute();
     }

@@ -355,6 +355,8 @@ public class MainActivity extends ActivityWithLocationService
 
         //showCurrentFirebaseToken();
         statisticsLayout = findViewById(R.id.statistics_layout);
+
+        fab.setVisibility(VISIBLE);
     }
 
 
@@ -467,9 +469,11 @@ public class MainActivity extends ActivityWithLocationService
 
 
     public void startNumberOfCoffeeSitesFromUserCall() {
-        if (coffeeSiteLoadOperationsService != null && !numberOfCoffeeSitesCreatedByLoggedInUserChecked) {
-            //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
-            coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
+        if (Utils.isOnline(getApplicationContext())) {
+            if (coffeeSiteLoadOperationsService != null && !numberOfCoffeeSitesCreatedByLoggedInUserChecked) {
+                //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
+                coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
+            }
         }
     }
 
@@ -689,12 +693,16 @@ public class MainActivity extends ActivityWithLocationService
 
     /**
      * Starts AsyncTask to read app. statistics to be shown in MainActivity
+     * if internet is available.<br>
+     * Can also be read later, after internet becomes available, see {@link NetworkStateReceiver}
      */
     public synchronized void startReadStatistics() {
-        if (calledUponUsersClick) {
-            showProgressbar();
+        if (Utils.isOnline(getApplicationContext())) {
+            if (calledUponUsersClick) {
+                showProgressbar();
+            }
+            new ReadStatsAsyncTask(this).execute();
         }
-        new ReadStatsAsyncTask(this).execute();
     }
 
     /**
@@ -830,17 +838,15 @@ public class MainActivity extends ActivityWithLocationService
     protected void onResume() {
         super.onResume();
 
-        // Read stats if internet is available
-        // Can be read later after internet becomes available, see NetworkStateReceiver
-        if (Utils.isOnline(getApplicationContext())) {
-            startReadStatistics();
-            startNumberOfCoffeeSitesFromUserCall();
-        } else if (Utils.offlineDataAvailable(getApplicationContext())) {
+        // Read statistics
+        startReadStatistics();
+        startNumberOfCoffeeSitesFromUserCall();
+        if (Utils.offlineDataAvailable(getApplicationContext())) {
             showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
             onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
-            } else {
-                Utils.showNoInternetToast(getApplicationContext());
-            }
+        } else {
+             Utils.showNoInternetToast(getApplicationContext());
+        }
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

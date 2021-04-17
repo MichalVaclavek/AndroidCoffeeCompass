@@ -28,7 +28,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     /**
      * Id of the CoffeeSite whose image is requested to be deleted
      */
-    private final int coffeeSiteId;
+    private final long coffeeSiteId;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
 
@@ -38,7 +38,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "ImageDeleteAsyncTask";
 
 
-    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, int coffeeSiteId) {
+    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, long coffeeSiteId) {
         this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
         this.coffeeSiteId = coffeeSiteId;

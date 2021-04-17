@@ -32,6 +32,10 @@ public interface CoffeeSiteDao {
     @Query("SELECT * FROM coffee_site_table WHERE savedOnServer == 0 ORDER BY createdOn ASC")
     Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServerSingle();
 
+    // savedOnServer == 0 means false
+    @Query("SELECT * FROM coffee_site_table WHERE savedOnServer == 0 ORDER BY createdOn ASC")
+    LiveData<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer();
+
     /**
      *
      * @param searchRangeAsDegreePart to be calculated as searchRange in meters * {@link ONE_METER_IN_DEGREE}

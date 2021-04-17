@@ -39,9 +39,9 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
 
     private List<Comment> comments;
 
-    private final int coffeeSiteID;
+    private final long coffeeSiteID;
 
-    public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, int coffeeSiteID) {
+    public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, long coffeeSiteID) {
         this.parentActivity = new WeakReference<>(parentActivity);
         this.coffeeSiteID = coffeeSiteID;
 

@@ -23,7 +23,7 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
 
     @Expose
     @SerializedName("status")
-    private String status;
+    private String status = "CREATED"; // default value
 
     @Ignore
     protected CoffeeSiteRecordStatus(Parcel in) {

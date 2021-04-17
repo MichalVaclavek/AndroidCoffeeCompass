@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -75,6 +76,8 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
+import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageServiceConnector;
@@ -290,7 +293,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
         saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
         saveMenuItem.setEnabled(false);
-        saveMenuItem.setTitle(R.string.coffeesite_save_activate);
+        saveMenuItem.setTitle(R.string.coffeesite_save_menu_item);
 
         // We are editing site here - insert input values to View from currentCoffeeSite
         // "Edit mode"
@@ -348,31 +351,28 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                 if (errorInInput) {
                                     Toast.makeText(getApplicationContext(),
                                             getString(R.string.create_site_missing_attributes),
-                                            Toast.LENGTH_SHORT);
+                                            Toast.LENGTH_SHORT).show();
                                     return true;
                                 }
                                 // Create CoffeeSite instance from model
                                 if (mode == MODE_CREATE) {
-                                    currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null);
-
-                                    // Show dialog to choose, if the CoffeeSite should be only saved
-                                    // or saved and activated
                                     if (Utils.isOnline(getApplicationContext())) {
+                                        // Show dialog to choose, if the CoffeeSite should be only saved
+                                        // or saved and activated
+                                        currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null, coffeeSiteEntitiesViewModel);
                                         SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
                                         dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
                                     } else {
-                                        //Utils.showNoInternetToast(getApplicationContext());
-                                        saveCoffeeSiteToDB(currentCoffeeSite);
+                                        new CreateUpdateCoffeeSiteAsyncTask(coffeeSiteEntitiesViewModel).execute(currentCoffeeSite);
                                     }
                                 }
                                 // Modify CoffeeSite
                                 if (mode == MODE_MODIFY) {
-                                    currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite);
                                     if (Utils.isOnline(getApplicationContext())) {
+                                        currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite, coffeeSiteEntitiesViewModel);
                                         updateCoffeeSite(currentCoffeeSite);
                                     } else {
-                                        saveCoffeeSiteToDB(currentCoffeeSite);
-//                                        Utils.showNoInternetToast(getApplicationContext());
+                                        new CreateUpdateCoffeeSiteAsyncTask(coffeeSiteEntitiesViewModel).execute(currentCoffeeSite);
                                     }
                                 }
 
@@ -698,6 +698,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     protected void onStop() {
+        mDisposable.clear();
         super.onStop();
     }
 
@@ -707,7 +708,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         doUnbindCoffeeSiteCUDOperationsService();
         doUnbindCoffeeSiteStatusChangeService();
 
-        mDisposable.clear();
+        //mDisposable.clear();
+        //mDisposable.dispose();
         super.onDestroy();
     }
 
@@ -1045,6 +1047,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = false;
         if (coffeeSiteCUDOperationsService != null) {
+            // If we are in Create new CoffeeSite and uploading to server, set new CoffeeSite ID to 0
+            if (mode == MODE_CREATE) {
+                coffeeSite.setId(0);
+            }
             coffeeSiteCUDOperationsService.save(coffeeSite);
         }
     }
@@ -1058,8 +1064,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 getString(R.string.coffeesite_saved_to_db),
                 Toast.LENGTH_SHORT);
         toast.show();
-        
-        goToMyCoffeeSitesActivity();
     }
 
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {
@@ -1097,7 +1101,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
     }
 
-    private void uploadCoffeeSiteImage(File imageFile, int coffeeSiteId) {
+    private void uploadCoffeeSiteImage(File imageFile, long coffeeSiteId) {
         showProgressbarAndDisableMenuItems();
         if (coffeeSiteImageService != null) {
             coffeeSiteImageService.uploadImage(imageFile, coffeeSiteId);
@@ -1301,17 +1305,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Creates CoffeeSite instance based on data from this Activity View data.
-     * or updates inserted CoffeeSite
+     * Creates CoffeeSite instance based on data from this Activity View data
+     * or updates inserted CoffeeSite.
      */
-    private CoffeeSite createOrUpdateCoffeeSiteFromViewModel(CoffeeSite coffeeSiteToUpdate) {
+    private CoffeeSite createOrUpdateCoffeeSiteFromViewModel(CoffeeSite coffeeSiteToUpdate, CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel) {
         Log.i(TAG, "Create CoffeeSiteFromViewModel() start");
 
         CoffeeSite coffeeSite = (coffeeSiteToUpdate == null) ? new CoffeeSite() : coffeeSiteToUpdate;
 
-        if (coffeeSiteToUpdate == null) {
-            coffeeSite.setId(0);
-        }
         coffeeSite.setName(coffeeSiteNameEditText.getText().toString().trim());
 
         coffeeSite.setLatitude(Double.parseDouble(latitudeEditText.getText().toString()));
@@ -1335,14 +1336,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(coffeeSite::setTypLokality,
-                        error -> Log.e(TAG, error.getMessage()));
+                           error -> Log.e(TAG, error.getMessage()));
         mDisposable.add(subscribe);
 
         subscribe = coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(coffeeSite::setCena,
-                        error -> Log.e(TAG, error.getMessage()));
+                           error -> Log.e(TAG, error.getMessage()));
         mDisposable.add(subscribe);
 
         String[] selectedCoffeeSorts = getSelectedChipsStrings(coffeeSortsChipGroup);
@@ -1359,13 +1360,44 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(coffeeSite::setStatusZarizeni,
-                            error -> Log.e(TAG, error.getMessage()));
+                               error -> Log.e(TAG, error.getMessage()));
             mDisposable.add(subscribe);
         }
 
         Log.i(TAG, "CoffeeSite created/updated");
         return coffeeSite;
     }
+
+    /**
+     * Creates or updates CoffeeSite from this Activity form data, saves it to DB
+     * and goes to MyCoffeeSitesActivity.
+     * <p>
+     * The creation of the CoffeeSite must be called in separate thread of the AsyncTask
+     * as the CoffeeSiteEntitiesViewModel uses repositories Single.observe() requests (to get
+     * correct values of some CS entities), which are not invoked in main UI thread.
+     */
+    private class CreateUpdateCoffeeSiteAsyncTask extends AsyncTask<CoffeeSite, Void, CoffeeSite> {
+
+        private final CoffeeSiteEntitiesViewModel model;
+
+        CreateUpdateCoffeeSiteAsyncTask(CoffeeSiteEntitiesViewModel model) {
+            this.model = model;
+        }
+
+        @Override
+        // coffeeSite to update
+        protected CoffeeSite doInBackground(final CoffeeSite... params) {
+            return createOrUpdateCoffeeSiteFromViewModel(params[0], model);
+        }
+
+        @Override
+        protected void onPostExecute(CoffeeSite result) {
+            saveCoffeeSiteToDB(result);
+            goToMyCoffeeSitesActivity();
+        }
+    }
+
+
 
 
     private String[] getSelectedChipsStrings(ChipGroup chipGroup) {

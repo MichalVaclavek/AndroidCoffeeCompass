@@ -37,7 +37,7 @@ public class MyCoffeeSitesViewModel extends AndroidViewModel {
         return  usersCoffeeSitesInDB;
     }
 
-    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
+    public LiveData<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
         return  coffeeSiteRepository.getCoffeeSitesNotSavedOnServer();
     }
 

@@ -153,7 +153,9 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     }
 
     /**
-     * Calls MainActivity method to enable/disable FAB button (which runs CreateCoffeeSiteActivity)
+     * Calls MainActivity method to enable/disable FAB button (which runs CreateCoffeeSiteActivity).
+     * Probably not more needed as it is allowed to create and save CoffeeSite to internal DB,
+     * if internet is not available from 1.9.0 version.
      *
      * @param isOnline status of internet connectivity
      * @param context calling context, usually Activity which registered this Receiver
@@ -161,7 +163,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     private void enableDisableFabInMainActivity(boolean isOnline, Context context) {
         if (context instanceof MainActivity) {
             MainActivity ma = (MainActivity) context;
-                ma.enableFab(isOnline);
+            //ma.enableFab(isOnline);
         }
     }
 
@@ -177,7 +179,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             startLoadCSEntities(online, this.context);
             startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
         }
-        enableDisableFabInMainActivity(online, this.context);
+        //enableDisableFabInMainActivity(online, this.context);
     }
 
     @Override

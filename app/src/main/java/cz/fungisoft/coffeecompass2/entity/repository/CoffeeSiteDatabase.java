@@ -49,7 +49,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-                      version = 7, exportSchema = false)
+                      version = 19, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
