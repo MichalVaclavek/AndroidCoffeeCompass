@@ -8,7 +8,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:background="@android:color/transparent"
-    tools:context="ui.fragments.CoffeeSiteImageFragment">
+    tools:context=".activity.ui.fragments.CoffeeSiteImageFragment">
 
     <LinearLayout
         android:layout_width="wrap_content"

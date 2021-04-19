@@ -16,6 +16,9 @@ public interface CoffeeSortDao {
     @Query("SELECT * FROM coffee_sort_table")
     LiveData<List<CoffeeSort>> getAllCoffeeSorts();
 
+    @Query("SELECT * FROM coffee_sort_table")
+    Single<List<CoffeeSort>> getAllCoffeeSortsSingle();
+
     @Query("SELECT * FROM coffee_sort_table WHERE coffeeSort = :stringValue LIMIT 1")
     Single<CoffeeSort> getCoffeeSort(String stringValue);
 

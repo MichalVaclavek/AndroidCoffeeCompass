@@ -1,7 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
+import android.content.Context;
+
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -33,11 +36,17 @@ public class CoffeeSiteEntityRepositories {
     // Indication that data are available in the repository i.e. where read from server
     private static boolean dataSaved = false;
 
+    // To save data to PreferencesHelper
+    private static Context mContext;
+
     public static boolean isDataSaved() {
         return dataSaved;
     }
+
     public static void setDataSaved(boolean dataSaved) {
         CoffeeSiteEntityRepositories.dataSaved = dataSaved;
+        DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(mContext);
+        dataForOfflineModePreferenceHelper.putCSEntitiesDownloaded(dataSaved);
     }
 
     public AverageStarsWithNumOfRatingsRepository getAverageStarsWithNumOfHodnoceniRepository() {
@@ -115,10 +124,11 @@ public class CoffeeSiteEntityRepositories {
         starsQualityDescriptionRepository = new StarsQualityDescriptionRepository(db);
     }
 
-    public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db) {
+    public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db, Context context) {
         if (instance == null) {
             instance = new CoffeeSiteEntityRepositories(db);
         }
+        mContext = context;
         return instance;
     }
 

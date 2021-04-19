@@ -4,7 +4,7 @@
         android:id="@+id/navigation_ulozit_and_or_aktivovat"
         android:enabled="false"
         android:icon="@drawable/ic_floppy_disk"
-        android:title="@string/coffeesite_save_activate" />
+        android:title="@string/coffeesite_save_menu_item" />
 
     <item
         android:id="@+id/navigation_foto_delete"

@@ -30,8 +30,6 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeWidgetService;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -368,7 +366,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
             }
             remoteViews.setTextViewText(R.id.widget_number_of_other_sites, coffeeSites.size() > 1 ? "+" + (coffeeSites.size() - 1) : "" );
 
-            picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFileName()
+            picturePath = Utils.isOfflineModeOn(context) ? coffeeSites.get(0).getMainImageFilePath()
                                                          : coffeeSites.get(0).getMainImageURL();
             if (!picturePath.isEmpty()) {
                 if (!Utils.isOfflineModeOn(context)) {

@@ -23,10 +23,11 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListe
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
 
 /**
- * Service to perform CoffeeSite load operations i.e. loading of one CoffeeSite,
- * loading of all CoffeeSites created by user and so on.
+ * Service to perform CoffeeSite load operations i.e.: downloading of one CoffeeSite,
+ * downloading of all CoffeeSites created by user and so on.<br>
+ * <p>
  * It has to listen some interface, especially those called by AsyncTasks when REST
- * calls are performed to load CoffeeSites
+ * calls are performed to load CoffeeSites.
  */
 public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountService
                                              implements CoffeeSiteRESTResultListener,
@@ -50,6 +51,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteLoadOperationsService.LocalBinder();
+
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -154,7 +156,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         if (currentUser != null) {
             new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
@@ -164,7 +166,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         if (currentUser != null) {
             new GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
@@ -179,7 +181,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         if (currentUser != null) {
             new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
@@ -195,7 +197,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         if (currentUser != null) {
             new GetCfSitesFromLoggedUserPaginatedAsyncTask(requestedRESTOperation, pageNumber, pageSize, currentUser, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 

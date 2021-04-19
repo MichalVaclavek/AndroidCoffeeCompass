@@ -30,7 +30,7 @@ import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeUpdateListener;
-import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
@@ -563,18 +563,29 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
         Log.d(TAG, ". Distance Text View " + viewHolder.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
-        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {
-                Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-                             .into(viewHolder.siteFoto);
-            } else {
-                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
-                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-                             .into(viewHolder.siteFoto);
-            }
+//        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
+//            if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {
+//                Picasso.get().load(this.mValues.get(position).getMainImageURL())
+//                             .fit().placeholder(R.drawable.kafe_backround_120x160)
+//                             .into(viewHolder.siteFoto);
+//            } else {
+//                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
+//                             .fit().placeholder(R.drawable.kafe_backround_120x160)
+//                             .into(viewHolder.siteFoto);
+//            }
+//        } else {
+//            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+//        }
+
+        boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
+        if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {
+            Picasso.get().load(this.mValues.get(position).getMainImageURL())
+                    .fit().placeholder(R.drawable.kafe_backround_120x160)
+                    .into(viewHolder.siteFoto);
         } else {
-            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+            Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
+                    .fit().placeholder(R.drawable.kafe_backround_120x160)
+                    .into(viewHolder.siteFoto);
         }
 
         viewHolder.itemView.setTag(this.mValues.get(position));

@@ -16,6 +16,9 @@ public interface CoffeeSiteStatusDao {
     @Query("SELECT * FROM coffee_site_status_table")
     LiveData<List<CoffeeSiteStatus>> getAllCoffeeSiteStatuses();
 
+    @Query("SELECT * FROM coffee_site_status_table")
+    Single<List<CoffeeSiteStatus>> getAllCoffeeSiteStatusesSingle();
+
     @Query("SELECT * FROM coffee_site_status_table WHERE status = :stringValue LIMIT 1")
     Single<CoffeeSiteStatus> getCoffeeSiteStatus(String stringValue);
 

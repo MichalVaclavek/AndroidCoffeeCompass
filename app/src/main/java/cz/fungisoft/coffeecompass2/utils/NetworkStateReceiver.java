@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 
 /**
@@ -153,17 +153,15 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     }
 
     /**
-     * Calls MainActivity method to enable/disable FAB button (which runs CreateCoffeeSiteActivity).
-     * Probably not more needed as it is allowed to create and save CoffeeSite to internal DB,
-     * if internet is not available from 1.9.0 version.
+     * Calls MainActivity method to start loading number of CoffeeSite created by user.
      *
      * @param isOnline status of internet connectivity
      * @param context calling context, usually Activity which registered this Receiver
      */
-    private void enableDisableFabInMainActivity(boolean isOnline, Context context) {
-        if (context instanceof MainActivity) {
-            MainActivity ma = (MainActivity) context;
-            //ma.enableFab(isOnline);
+    private void startMyCoffeeSitesListActivityUI(boolean isOnline, Context context) {
+        if (context instanceof MyCoffeeSitesListActivity) {
+            MyCoffeeSitesListActivity myCoffeeSitesListActivity = (MyCoffeeSitesListActivity) context;
+            myCoffeeSitesListActivity.updateActivityUI(isOnline);
         }
     }
 
@@ -179,7 +177,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             startLoadCSEntities(online, this.context);
             startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
         }
-        //enableDisableFabInMainActivity(online, this.context);
+        startMyCoffeeSitesListActivityUI(online, this.context);
     }
 
     @Override

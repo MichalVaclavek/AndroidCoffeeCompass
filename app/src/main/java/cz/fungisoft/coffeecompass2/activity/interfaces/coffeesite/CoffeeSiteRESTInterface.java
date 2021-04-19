@@ -174,4 +174,13 @@ public interface CoffeeSiteRESTInterface {
     @PUT("{siteId}/cancel")
     Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") long siteId);
 
+
+    /**
+     * Calls upload of CoffeeSites. Expects boolean as return value
+     *
+     * @param coffeeSitesToUpload - CoffeeSites to be uploaded to server
+     * @return list of CoffeeSites saved/updated returned by server (with actual IDs)
+     */
+    @POST("insertCoffeeSitesWithResult")
+    Call<List<CoffeeSite>> uploadCoffeeSites(@Body List<CoffeeSite> coffeeSitesToUpload);
 }

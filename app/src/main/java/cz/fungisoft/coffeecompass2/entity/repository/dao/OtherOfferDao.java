@@ -16,6 +16,9 @@ public interface OtherOfferDao {
     @Query("SELECT * FROM other_offer_table")
     LiveData<List<OtherOffer>> getAllOtherOffers();
 
+    @Query("SELECT * FROM other_offer_table")
+    Single<List<OtherOffer>> getOtherOffersSingle();
+
     @Query("SELECT * FROM other_offer_table WHERE offer = :stringValue LIMIT 1")
     Single<OtherOffer> getOtherOffer(String stringValue);
 

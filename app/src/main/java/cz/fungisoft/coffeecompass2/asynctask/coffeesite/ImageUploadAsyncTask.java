@@ -6,11 +6,13 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.security.InvalidParameterException;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImageRESTInterface;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -31,28 +33,31 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final File imageFile;
 
+    private final CoffeeSite coffeeSite;
     private final long coffeeSiteId;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
 
-    private String operationResult = "";
     private String operationError = "";
 
     private static final String TAG = "ImageUploadAsyncTask";
 
 
-    public ImageUploadAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, File imageFile, long coffeeSiteId) {
+    public ImageUploadAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, File imageFile, CoffeeSite coffeeSite) {
         this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
+        if (!imageFile.exists()) {
+            throw new IllegalArgumentException();
+        }
         this.imageFile = imageFile;
-        this.coffeeSiteId = coffeeSiteId;
+        this.coffeeSite = coffeeSite;
+        this.coffeeSiteId = coffeeSite.getId();
     }
 
 
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(TAG, "start");
-        operationResult = "";
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + (currentUser == null));
@@ -102,16 +107,15 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");
-                            operationResult = "OK";
                             String imageURL = response.body();
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageSaveResult(new Result.Success<>(imageURL.trim()));
+                                callingService.get().evaluateImageSaveResult(coffeeSite, new Result.Success<>(imageURL.trim()));
                             }
                         } else {
                             Log.i(TAG, "Returned empty response for uploading image request.");
                             Result.Error error = new Result.Error(new IOException("Error uploading image. Response empty."));
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageSaveResult(error);
+                                callingService.get().evaluateImageSaveResult(coffeeSite, error);
                             }
                         }
                     } else {
@@ -125,7 +129,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                         }
                         Result.Error error = new Result.Error(new IOException(operationError));
                         if (callingService.get() != null) {
-                            callingService.get().evaluateImageSaveResult(error);
+                            callingService.get().evaluateImageSaveResult(coffeeSite, error);
                         }
                     }
                 }
@@ -136,7 +140,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                     Result.Error error = new Result.Error(new IOException("Error uploading image.", t));
                     //operationError = error.toString();
                     if (callingService.get() != null) {
-                        callingService.get().evaluateImageSaveResult(error);
+                        callingService.get().evaluateImageSaveResult(coffeeSite, error);
                     }
                 }
             });

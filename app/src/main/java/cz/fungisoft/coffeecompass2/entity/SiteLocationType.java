@@ -21,7 +21,7 @@ public class SiteLocationType extends CoffeeSiteEntity implements Parcelable {
         super();
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected SiteLocationType(Parcel in) {
         this.id = in.readInt();
         locationType = in.readString();

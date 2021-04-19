@@ -7,7 +7,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 
 /**
- * Listener interface implemented by Activities/Services to listen async results
+ * Listener interface implemented by Activities/Services to listen Results
  * of operations performed by {@link CoffeeSiteLoadOperationsService}
  */
 public interface CoffeeSiteLoadServiceOperationsListener {

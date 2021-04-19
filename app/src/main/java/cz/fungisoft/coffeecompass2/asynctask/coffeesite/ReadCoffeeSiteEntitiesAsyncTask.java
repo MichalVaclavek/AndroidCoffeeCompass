@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
@@ -167,7 +168,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
 
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
                                 Log.i(REQ_ENTITIES_TAG, "onResponse() success ALL.");
-                                CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
+                                //CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
                                 Result.Success<Boolean> result = new Result.Success<>(true);
                                 if (callingListenerService != null) {
                                     callingListenerService.onCoffeeSiteEntitiesLoaded(result);

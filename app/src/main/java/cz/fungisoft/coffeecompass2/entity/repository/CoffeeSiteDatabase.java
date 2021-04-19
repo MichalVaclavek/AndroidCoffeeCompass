@@ -49,7 +49,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-                      version = 19, exportSchema = false)
+                      version = 22, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
@@ -120,9 +120,15 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
     public void deleteCSEntitiesAsync() {
         new DeleteCSEntitiesAsync(DB_INSTANCE).execute();
     }
+
     public void deleteCoffeeSitesAsync() {
         new DeleteCoffeeSitesAsync(DB_INSTANCE).execute();
     }
+
+    public void deleteCoffeeSitesExceptOfflineAsyncT() {
+        new DeleteCoffeeSitesExceptOfflineAsyncT(DB_INSTANCE).execute();
+    }
+
     public void deleteCommentsAsync() {
         new DeleteCommentsAsync(DB_INSTANCE).execute();
     }
@@ -169,8 +175,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         @Override
         protected Void doInBackground(final Void... params) {
             // Start the app with a clean database every time.
-            // Not needed if you only populate the database
-            // when it is first created
+            // Not needed if you only populate the database when it is first created
             averageStarsWithNumOfRatingsDao.deleteAll();
             coffeeSiteRecordStatusDao.deleteAll();
             coffeeSiteStatusDao.deleteAll();
@@ -206,10 +211,35 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
         @Override
         protected Void doInBackground(final Void... params) {
-            // Start the app with a clean database every time.
-            // Not needed if you only populate the database
-            // when it is first created
+            // Not needed if you only populate the database when it is first created
             coffeeSiteDao.deleteAll();
+            mDB.fireCoffeeSitesContentDeleted();
+
+            return null;
+        }
+    }
+
+    /**
+     * Deletes the CoffeeSites database, except CoffeeSites created in Offline mode, in the background.
+     * Used, when there are already some Offline created sites (not saved on server)
+     * and CoffeeSites are downloaded for Offline mode by user.
+     */
+    private static class DeleteCoffeeSitesExceptOfflineAsyncT extends AsyncTask<Void, Void, Void> {
+
+        private final CoffeeSiteDatabase mDB;
+
+        private final CoffeeSiteDao coffeeSiteDao;
+
+        DeleteCoffeeSitesExceptOfflineAsyncT(CoffeeSiteDatabase db) {
+            this.mDB = db;
+            coffeeSiteDao = db.coffeeSiteDao();
+        }
+
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            // Not needed if you only populate the database when it is first created
+            coffeeSiteDao.deleteAllExceptNotSavedOnServer();
             mDB.fireCoffeeSitesContentDeleted();
 
             return null;
@@ -233,8 +263,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         @Override
         protected Void doInBackground(final Void... params) {
             // Start the app with a clean database every time.
-            // Not needed if you only populate the database
-            // when it is first created
+            // Not needed if you only populate the database when it is first created
             commentDao.deleteAll();
             mDB.fireCommentsContentDeleted();
 

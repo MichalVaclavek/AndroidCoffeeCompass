@@ -19,10 +19,17 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
     private final CoffeeSortDao coffeeSortDao;
     private final LiveData<List<CoffeeSort>> mAllCoffeeSorts;
 
+    private final Single<List<CoffeeSort>> mAllCoffeeSortsSingle;
+
+    public Single<List<CoffeeSort>> getAllCoffeeSortsSingle() {
+        return mAllCoffeeSortsSingle;
+    }
+
     CoffeeSortRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSortDao = db.coffeeSortDao();
         mAllCoffeeSorts = coffeeSortDao.getAllCoffeeSorts();
+        mAllCoffeeSortsSingle = coffeeSortDao.getAllCoffeeSortsSingle();
     }
 
     public LiveData<List<CoffeeSort>> getAllCoffeeSorts() {

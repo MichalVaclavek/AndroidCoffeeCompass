@@ -282,25 +282,28 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     protected void onPause() {
-        if (coffeeSiteLoadOperationsService != null) {
-            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
-        }
+//        if (coffeeSiteLoadOperationsService != null) {
+//            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+//        }
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (coffeeSiteLoadOperationsService != null) {
-            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-        }
+//        if (coffeeSiteLoadOperationsService != null) {
+//            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
+//        }
     }
 
     /**
      */
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        if (coffeeSiteLoadOperationsService != null) {
+            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
+        }
         doUnbindCoffeeSiteLoadOperationsService();
+        super.onDestroy();
     }
 }

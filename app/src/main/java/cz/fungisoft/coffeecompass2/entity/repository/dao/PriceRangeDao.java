@@ -16,6 +16,9 @@ public interface PriceRangeDao {
     @Query("SELECT * FROM price_range_table")
     LiveData<List<PriceRange>> getAllPriceRanges();
 
+    @Query("SELECT * FROM price_range_table")
+    Single<List<PriceRange>> getAllPriceRangesSingle();
+
     @Query("SELECT * FROM price_range_table WHERE priceRange = :stringValue LIMIT 1")
     Single<PriceRange> getPriceRange(String stringValue);
 
@@ -27,4 +30,5 @@ public interface PriceRangeDao {
 
     @Insert
     void insertPriceRange(PriceRange priceRange);
+
 }

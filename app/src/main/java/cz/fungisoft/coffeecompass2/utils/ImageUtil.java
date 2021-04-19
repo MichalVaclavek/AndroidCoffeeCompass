@@ -119,6 +119,20 @@ public class ImageUtil {
         return new File(directory, imageFileName);
     }
 
+    public static File getImageFile(Context appContext, String imageFilePath) {
+        ContextWrapper cw = new ContextWrapper(appContext);
+        return new File(imageFilePath);
+    }
+
+    public static void deleteImageFile(String imageFilePath) {
+        File target = new File(imageFilePath);
+        Log.d(" target_path", "" + imageFilePath);
+        if (target.exists() && target.isFile() && target.canWrite()) {
+            target.delete();
+            Log.d("d_file", "" + target.getName());
+        }
+    }
+
     /* ============== DOWNLOAD and SAVING IMAGE using Picasso and FileOutputStream =========== */
 
     /**

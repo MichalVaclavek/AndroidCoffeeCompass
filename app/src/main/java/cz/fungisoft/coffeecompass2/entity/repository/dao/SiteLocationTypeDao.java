@@ -16,6 +16,9 @@ public interface SiteLocationTypeDao {
     @Query("SELECT * FROM site_location_type_table")
     LiveData<List<SiteLocationType>> getAllSiteLocationTypes();
 
+    @Query("SELECT * FROM site_location_type_table")
+    Single<List<SiteLocationType>> getAllSiteLocationTypesSingle();
+
     @Query("SELECT * FROM site_location_type_table WHERE locationType = :locationType LIMIT 1")
     Single<SiteLocationType> getSiteLocationType(String locationType);
 

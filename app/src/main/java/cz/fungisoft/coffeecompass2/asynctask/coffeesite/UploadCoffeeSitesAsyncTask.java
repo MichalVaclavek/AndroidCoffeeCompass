@@ -7,18 +7,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesUploadRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,12 +27,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * AsyncTasky pro Create, Update operace s CoffeeSite
+ * AsyncTask to call REST API to upload CoffeeSites created/updated when Offline.
  */
-public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private final CoffeeSite coffeeSite;
-
+    private static final String TAG = "UploadCoffeeSitesAsyncT";
     /**
      * Current logged-in user
      */
@@ -41,32 +40,33 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
-    private final CoffeeSiteRESTResultListener callingListenerService;
+    private final CoffeeSitesUploadRESTResultListener callingListenerService;
 
     private Result.Error error;
 
-    private final String tag;
+    private List<CoffeeSite> coffeeSitesToUpload;
 
-    public CoffeeSiteCreateUpdateAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                           CoffeeSite coffeeSite,
-                                           LoggedInUser currentUser,
-                                           CoffeeSiteRESTResultListener callingService) {
-
-        this.coffeeSite = coffeeSite;
-        this.currentUser = currentUser;
-        this.callingListenerService = callingService;
+    /**
+     * Starts AsyncTask to load CoffeeSite either by coffeeSiteId or by CoffeeSiteURL
+     *
+     * @param requestedRESTOperationCode - requested load operation
+     * @param callingService - service implementing CoffeeSiteRESTResultListener
+     */
+    public UploadCoffeeSitesAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                      LoggedInUser currentUser, List<CoffeeSite> coffeeSitesToUpload,
+                                      CoffeeSitesUploadRESTResultListener callingService) {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
-
-        tag = "SiteOperationAsyncTask";
+        this.callingListenerService = callingService;
+        this.coffeeSitesToUpload = coffeeSitesToUpload;
+        this.currentUser = currentUser;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        Log.i(tag, "start");
-        //operationResult = "";
+        Log.i(TAG, "start");
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + (currentUser == null));
+        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
         if (currentUser != null) {
 
             // Inserts user authorization token to Authorization header
@@ -80,13 +80,13 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                 }
             };
 
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+//            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(headerAuthorizationInterceptor)
-                    .addInterceptor(logging)
+                    //.addInterceptor(logging)
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
@@ -102,37 +102,27 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
 
             CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-            Call<CoffeeSite> call = null;
+            Call<List<CoffeeSite>> call = api.uploadCoffeeSites(this.coffeeSitesToUpload);
 
-            switch (this.requestedRESTOperationCode) {
-                case COFFEE_SITE_SAVE:
-                    call = api.createCoffeeSite(coffeeSite);
-                    break;
-                case COFFEE_SITE_UPDATE:
-                    call = api.updateCoffeeSite(coffeeSite.getId(), coffeeSite);
-                    break;
-            }
+            Log.i(TAG, "start call");
 
-            Log.i(tag, "start call");
-
-            call.enqueue(new Callback<CoffeeSite>() {
+            call.enqueue(new Callback<List<CoffeeSite>>() {
                 @Override
-                public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
+                public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
-                            Log.i(tag, "onSuccess()");
-                            //operationResult = "OK";
-                            CoffeeSite coffeeSite = response.body();
-                            Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
+                            Log.i(TAG, "onSuccess()");
+                            List<CoffeeSite> returnedCoffeeSites = response.body();
+                            Result.Success<List<CoffeeSite>> result = new Result.Success<>(returnedCoffeeSites);
                             if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+                                callingListenerService.onCoffeeSitesUploadedAndReturned(requestedRESTOperationCode, result);
                             }
                         } else {
-                            Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            Log.i(TAG, "Returned empty REST response when uploading CoffeeSites.");
+                            error = new Result.Error(new IOException("Error uploading CoffeeSite. Response empty."));
                             operationError = error.toString();
                             if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                                callingListenerService.onCoffeeSitesUploadedAndReturned(requestedRESTOperationCode, error);
                             }
                         }
                     } else {
@@ -140,25 +130,25 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
                             error = new Result.Error(Utils.getRestError(response.errorBody().string()));
                         } catch (IOException e) {
-                            Log.e(tag, e.getMessage());
+                            Log.e(TAG, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";
                         }
                         if (error == null) {
                             error = new Result.Error(operationError);
                         }
                         if (callingListenerService != null) {
-                            callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                            callingListenerService.onCoffeeSitesUploadedAndReturned(requestedRESTOperationCode, error);
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(Call<CoffeeSite> call, Throwable t) {
-                    Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
+                    Log.e(TAG, "Error uploading CoffeeSites REST request." + t.getMessage());
+                    error = new Result.Error(new IOException("Error uploading CoffeeSites.", t));
                     operationError = error.toString();
                     if (callingListenerService != null) {
-                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                        callingListenerService.onCoffeeSitesUploadedAndReturned(requestedRESTOperationCode, error);
                     }
                 }
             });

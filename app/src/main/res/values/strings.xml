@@ -22,11 +22,11 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 1.9.0</string>
-    <string name="about_datum">10. 5. 2021</string>
+    <string name="about_version">v. 2.0.0</string>
+    <string name="about_datum">6. 6. 2021</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
-    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
+    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokaci,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. Lokaci lze vytvořit i bez aktuálního připojení k internetu a nahrát na server později.</string>
     <string name="about_sentence5">Lze si také objednat odběr novinek, tj. upozornění, že byla zaevidována nová kávová lokace.</string>
     <string name="about_sentence4">Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, a pomozte evidovat další kávové lokace.</string>
     <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>
@@ -189,7 +189,7 @@
     <string name="permissions_location_cancel">Zrušit</string>
 
     <string name="action_offline">Offline …</string>
-    <string name="offline_seetings_description">Stažení dat o lokacích vám umožní vyhledávat kávové lokace i bez připojení k internetu. V Offline režimu zatím není možné vytvářet nové lokace, ani zadávat komentáře.</string>
+    <string name="offline_seetings_description">Stažení dat o lokacích vám umožní vyhledávat kávové lokace i bez připojení k internetu.</string>
     <string name="offline_seetings_main_label"> OFFLINE režim</string>
     <string name="offline_seetings_includes_photos"> včetně obrázků?</string>
     <string name="offline_seetings_download_button"> Stáhnout</string>
@@ -261,5 +261,15 @@
     <string name="cancel_subscriptions_confirm">Zrušit</string>
     <string name="main_statistics_news_label">Statistika</string>
     <string name="coffeesite_saved_to_db">Lokace uložena do databáze telefonu.</string>
+    <string name="data_for_offline_coffee_site_create_not_available">Data pro vytvoření lokace nejsou k dispocizi. Pro úvodní synchronizaci je potřebný přístup k internetu.</string>
+    <string name="action_upload_coffeesites">ulož na server</string>
+    <string name="coffeesites_upload_failure">Uložení na serveru neúspěšné. Zkuste to prosím později.</string>
+    <string name="coffeesites_upload_success">Uložení na server úspěšné.</string>
+    <string name="coffeesites_image_upload_failure">Chyba při nahrávání fotky na server.</string>
+    <string name="toast_site_not_saved_on_server">Lokaci nejprve uložte na server.</string>
+    <string name="coffeesites_images_upload_success">Obrázky k lokacím nahrány na server úspěšně.</string>
+
+    <string name="my_sites_activity_toolbar_mainlabel">Moje lokace</string>
+    <string name="my_sites_activity_toolbar_tosave_label">K uložení</string>
 
 </resources>

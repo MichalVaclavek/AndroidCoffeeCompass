@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -11,6 +12,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 /**
@@ -42,16 +44,10 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     // list of coffeeSites created/updated during OFFLINE mode
     private final LiveData<List<CoffeeSite>> coffeeSitesNotSavedOnServer;
 
+
     // Probably not needed
     private final Flowable<Integer> numberOfSitesWithImage;
 
-//    public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
-//        return mAllCoffeeSites;
-//    }
-
-//    public LiveData<List<CoffeeSite>> getAllCoffeeSitesWithImage() {
-//        return coffeeSitesWithImage;
-//    }
 
     /**
      * Needed for service downloading data for OFFLINE mode
@@ -61,9 +57,6 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesWithImageSingle;
     }
 
-//    public  Flowable<Integer> getNumberOfAllCoffeeSitesWithImage() {
-//        return numberOfSitesWithImage;
-//    }
 
     /**
      * Needed to show and save list of CoffeeSites, which are not saved on server yet
@@ -86,8 +79,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
 
         coffeeSitesNotSavedOnServerSingle = coffeeSiteDao.getCoffeeSitesNotSavedOnServerSingle();
-        coffeeSitesNotSavedOnServer  = coffeeSiteDao.getCoffeeSitesNotSavedOnServer();
+        coffeeSitesNotSavedOnServer = coffeeSiteDao.getCoffeeSitesNotSavedOnServer();
     }
+
 
     /**
      * Inner class to hold input data of CoffeeSites LiveData searching parameters.
@@ -155,6 +149,10 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSiteLive;
     }
 
+    public Maybe<CoffeeSite> getCoffeeSiteByIdMaybe(long siteId) {
+        return coffeeSiteDao.getCoffeeSiteByIdMaybe(siteId);
+    }
+
     /**
      * LiveData input holder for CoffeeSite creator user name
      */
@@ -171,11 +169,95 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesFromUser;
     }
 
+    // list of coffeeSites saved in DB (downloaded) and not modified, i.e. saved on server from user
+    LiveData<List<CoffeeSite>> coffeeSitesFromUserSavedOnServer = Transformations.switchMap(coffeeSiteAuthorUserNameInput, userName -> coffeeSiteDao.getCoffeeSitesFromUserSavedOnServer(userName));
+
+    public LiveData<List<CoffeeSite>> getCoffeeSitesFromUserSavedOnServer(String userName) {
+        setCoffeeSiteAuthorUserNameInput(userName);
+        return coffeeSitesFromUserSavedOnServer;
+    }
+
     /* Data for MainAppWidget */
 
     public Single<List<CoffeeSite>> getCoffeeSitesInRangeSingle(double latitudeFrom, double longitudeFrom, double searchRange) {
         double searchRangeAsDegreePart = searchRange * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
         return coffeeSiteDao.getCoffeeSitesInRectangleSingle(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+    }
+
+    /* Get number of CoffeeSites not saved on server, i.e. only saved in local DB */
+    public LiveData<Integer> getNumOfCoffeeSitesNotSavedOnServer() {
+        return coffeeSiteDao.getNumOfCoffeeSitesNotSavedOnServer();
+    }
+
+    /* Delete CoffeeSites not saved on server. Used when they are already saved on server */
+
+    public void deleteCoffeeSiteSavedOnServerFromDB() {
+        new DeleteCoffeeSitesNotSavedOnServerAsyncT(coffeeSiteDao).execute();
+    }
+
+    /**
+     * Deletes the CoffeeSites created in Offline mode, in the background.
+     *  Used when they are already saved on server
+     */
+    private static class DeleteCoffeeSitesNotSavedOnServerAsyncT extends AsyncTask<Void, Void, Integer> {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        DeleteCoffeeSitesNotSavedOnServerAsyncT(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Integer doInBackground(final Void... params) {
+            //int deletedNum = mAsyncTaskDao.deleteAllCreatedAndNotSavedOnServer(CoffeeSiteRecordStatus.CREATED);
+            int deletedNum = mAsyncTaskDao.deleteAllNotSavedOnServer();
+            Log.i("DeleteCoffeeSitesAsyncT", "CoffeeSites not saved on server deleted. " + deletedNum);
+            return deletedNum;
+        }
+    }
+
+
+
+    //*** Delete CoffeeSite from DB **/
+    //*** Must run in a separate thread */
+    public void deleteCoffeeSiteFromDB(CoffeeSite coffeeSite) {
+        new DeleteAsyncTask(coffeeSiteDao).execute(coffeeSite);
+    }
+
+    private static class DeleteAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        DeleteAsyncTask(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final CoffeeSite... params) {
+            mAsyncTaskDao.delete(params[0]);
+            return null;
+        }
+    }
+
+    /* ***** Update CoffeeSite procedures and AsyncTask ***** */
+
+    public void update(CoffeeSite coffeeSite) {
+        new UpdateAsyncTask(coffeeSiteDao).execute(coffeeSite);
+    }
+
+    private static class UpdateAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        UpdateAsyncTask(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final CoffeeSite... params) {
+            mAsyncTaskDao.updateCoffeeSite(params[0]);
+            return null;
+        }
     }
 
     /* ***** Insert CoffeeSite procedures and AsyncTask ***** */

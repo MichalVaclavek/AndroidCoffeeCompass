@@ -1,6 +1,5 @@
-package cz.fungisoft.coffeecompass2.ui.fragments;
+package cz.fungisoft.coffeecompass2.activity.ui.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -259,12 +258,7 @@ public class CoffeeSiteDetailFragment extends Fragment {
                 if (view instanceof ImageView) {
                     if (currentUser != null
                             && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-                        Context ctx = getActivity().getApplicationContext();
-                        if (Utils.isOnline(ctx)) {
-                            goToEditCoffeeSiteActivity();
-                        } else {
-                            Utils.showNoInternetToast(ctx);
-                        }
+                        goToEditCoffeeSiteActivity();
                     }
                 }
             }
@@ -275,6 +269,9 @@ public class CoffeeSiteDetailFragment extends Fragment {
     private void goToEditCoffeeSiteActivity() {
         Intent activityIntent = new Intent(getActivity(), CreateCoffeeSiteActivity.class);
         activityIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+        // to indicate to CreateCoffeeSiteActivity that it was called from this Activity to correctly return back
+        // as this Activity can be also called from MyCoffeeSitesListActivity
+        activityIntent.putExtra("coffeeSitePosition", -1);
         // Return value handled in owner CoffeeSiteDetailActivity
         startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }

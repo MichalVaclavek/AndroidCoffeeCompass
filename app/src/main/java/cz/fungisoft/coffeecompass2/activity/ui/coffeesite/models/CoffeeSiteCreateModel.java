@@ -1,18 +1,43 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
+import io.reactivex.Maybe;
 
 /**
  * Model for creation of CoffeeSite in {@link cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity}
  * Validation of some obligatory CoffeeSite attributes.
+ *
+ * Also used as model when editing CoffeeSite saved in DB
  */
 public class CoffeeSiteCreateModel extends ViewModel {
 
+    private CoffeeSiteRepository coffeeSiteRepository;
+
     private final int SITE_NAME_LENGTH = 35;
+
+    public CoffeeSiteCreateModel(@NonNull Application application) {
+        super();
+        coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(application.getApplicationContext()));
+    }
+
+    public Maybe<CoffeeSite> getCoffeeSiteById(long siteId) {
+        return coffeeSiteRepository.getCoffeeSiteByIdMaybe(siteId);
+    }
+
+    public LiveData<CoffeeSite> getCoffeeSite(long siteId) {
+        return coffeeSiteRepository.getCoffeeSiteById(siteId);
+    }
+
 
     private final MutableLiveData<CoffeeSiteCreateFormState> coffeeSiteFormState = new MutableLiveData<>();
 

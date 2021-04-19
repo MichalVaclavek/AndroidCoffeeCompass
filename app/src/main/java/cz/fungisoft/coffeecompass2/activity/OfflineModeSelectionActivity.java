@@ -25,7 +25,7 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.entity.DownloadDataOverview;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
@@ -42,7 +42,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     private static final String TAG = "OfflineModeSelectionAct";
 
     // Saves OFFLINE mode status
-    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
+    private DataForOfflineModePreferenceHelper dataDownloadPreferenceHelper;
 
     @BindView(R.id.offlineActivityMainLinearLayout)
     LinearLayout mainLinearLayout;
@@ -90,7 +90,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Offline");
 
-        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+        dataDownloadPreferenceHelper = new DataForOfflineModePreferenceHelper(this);
         hideDownloadOverview();
 
         lastLoadedStatusTextView.setVisibility(View.VISIBLE);

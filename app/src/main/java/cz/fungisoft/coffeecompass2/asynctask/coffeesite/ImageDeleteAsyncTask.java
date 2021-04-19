@@ -10,6 +10,7 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImageRESTInterface;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -29,6 +30,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
      * Id of the CoffeeSite whose image is requested to be deleted
      */
     private final long coffeeSiteId;
+    private final CoffeeSite coffeeSite;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
 
@@ -38,10 +40,11 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "ImageDeleteAsyncTask";
 
 
-    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, long coffeeSiteId) {
+    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, CoffeeSite coffeeSite) {
         this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
-        this.coffeeSiteId = coffeeSiteId;
+        this.coffeeSite = coffeeSite;
+        this.coffeeSiteId = coffeeSite.getId();
     }
 
     @Override
@@ -94,13 +97,13 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                             operationResult = "OK";
                             int coffeeSiteID = response.body();
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageDeleteResult(new Result.Success<>(coffeeSiteID));
+                                callingService.get().evaluateImageDeleteResult(coffeeSite, new Result.Success<>(coffeeSiteID));
                             }
                         } else {
                             Log.i(TAG, "Returned empty response for deleting image request.");
                             Result.Error error = new Result.Error(new IOException("Error deleting image. Response empty."));
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageDeleteResult(error);
+                                callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                             }
                         }
                     } else {
@@ -114,7 +117,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                         }
                         Result.Error error = new Result.Error(new IOException(operationError));
                         if (callingService.get() != null) {
-                            callingService.get().evaluateImageDeleteResult(error);
+                            callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                         }
                     }
                 }
@@ -125,7 +128,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     Result.Error error = new Result.Error(new IOException("Error deleting image.", t));
                     operationError = error.toString();
                     if (callingService.get() != null) {
-                        callingService.get().evaluateImageDeleteResult(error);
+                        callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                     }
                 }
             });

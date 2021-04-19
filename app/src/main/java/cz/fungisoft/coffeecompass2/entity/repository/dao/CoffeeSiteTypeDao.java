@@ -16,6 +16,9 @@ public interface CoffeeSiteTypeDao {
     @Query("SELECT * FROM coffee_site_type_table")
     LiveData<List<CoffeeSiteType>> getAllCoffeeSiteTypes();
 
+    @Query("SELECT * FROM coffee_site_type_table")
+    Single<List<CoffeeSiteType>> getAllCoffeeSiteTypesSingle();
+
     @Query("SELECT * FROM coffee_site_type_table WHERE coffeeSiteType = :stringValue")
     Single<CoffeeSiteType> getCoffeeSiteType(String stringValue);
 

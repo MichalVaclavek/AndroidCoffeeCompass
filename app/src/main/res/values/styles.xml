@@ -72,4 +72,26 @@
         <item name="android:textColor">@color/activityBackround</item>
     </style>
 
+    <!--    Switch Button on MyCoffeeSitesListActivity menu bar-->
+    <style name="AppTheme.SwitchAB">
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+        <!-- When switch ON -->
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- When switch ON ?? -->
+        <item name="colorControlActivated">@color/colorAccent</item>
+
+        <!-- When switch OFF -->
+        <item name="colorSwitchThumbNormal">@color/site_status_dark_gray</item>
+
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
+
+    </style>
+
 </resources>

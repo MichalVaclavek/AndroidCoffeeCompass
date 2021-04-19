@@ -20,7 +20,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
@@ -71,8 +71,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     private static CoffeeSiteRepository coffeeSiteRepository;
 
+    private CoffeeSiteEntityRepositories entitiesRepository;
+
     // Saves OFFLINE mode status
-    private DataForOfflineModeDownloadPreferenceHelper dataDownloadPreferenceHelper;
+    private DataForOfflineModePreferenceHelper dataDownloadPreferenceHelper;
 
     private static boolean downloadInProgress = false;
 
@@ -155,7 +157,9 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         coffeeSiteRepository = new CoffeeSiteRepository(db);
         db.getOpenHelper().getWritableDatabase(); // to invoke onOpen() of the DB
 
-        dataDownloadPreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(this);
+        dataDownloadPreferenceHelper = new DataForOfflineModePreferenceHelper(this);
+
+        entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db, getApplicationContext());
 
         Log.d(TAG, "Service started.");
     }
@@ -193,7 +197,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     @Override
     public void onCSEntitiesDeletedEnd() {
-        CoffeeSiteEntityRepositories.setDataSaved(false);
+        //CoffeeSiteEntityRepositories.setDataSaved(false);
+        entitiesRepository.setDataSaved(false);
         readAndSaveAllEntitiesFromServer();
     }
 
@@ -204,7 +209,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void readAndSaveAllEntitiesFromServer() {
         if (Utils.isOnline(getApplicationContext())) {
             downloadInProgress = true;
-            CoffeeSiteEntityRepositories entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db);
+            //entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db, getApplicationContext());
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
         }
     }
@@ -213,6 +218,9 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     public void onCoffeeSiteEntitiesLoaded(Result<Boolean> result) {
         if (result instanceof Result.Success) {
             downloadInProgress = false;
+            if (entitiesRepository != null) {
+                entitiesRepository.setDataSaved(true); // all data saved
+            }
             informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
         }
     }
@@ -246,7 +254,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         this.downloadProgressBar = downloadProgressBar;
         this.downloadingStatusTextView = downloadingStatusTextView;
         this.downloadingStatusTextView.setText(R.string.download_sites_inprogress_message);
-        db.deleteCoffeeSitesAsync();
+        //db.deleteCoffeeSitesAsync();
+        db.deleteCoffeeSitesExceptOfflineAsyncT();
     }
 
     /**
@@ -298,7 +307,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 for (CoffeeSite cs : allCoffeeSites) {
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImages++;
-                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
+                        cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
                     }
                 }
             } else {
@@ -504,8 +514,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                             // Download images
                             downloadInProgress = true;
                             for (CoffeeSite cs : coffeeSitesWithImage) {
-                                if (cs != null && !cs.getMainImageFileName().isEmpty()) {
-                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFileName());
+                                if (cs != null && !cs.getMainImageFilePath().isEmpty()) {
+                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFilePath());
                                 }
                             }
                         }

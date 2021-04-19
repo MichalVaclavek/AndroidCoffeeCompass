@@ -22,7 +22,7 @@
             android:layout_height="?attr/actionBarSize"
             app:menu="@menu/menu_my_coffeesites_list"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Moje lokace" />
+            app:title="@string/my_sites_activity_toolbar_mainlabel" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

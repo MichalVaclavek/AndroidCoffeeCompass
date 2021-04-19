@@ -23,7 +23,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromCoffeeSorts(List<CoffeeSort> coffeeSorts){
-        if(coffeeSorts == null){
+        if (coffeeSorts == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -34,7 +34,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<CoffeeSort> toCoffeeSorts(String coffeeSortsString){
-        if(coffeeSortsString == null){
+        if (coffeeSortsString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -47,7 +47,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromCupTypes(List<CupType> cupTypes){
-        if(cupTypes == null) {
+        if (cupTypes == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -58,7 +58,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<CupType> toCupTypes(String cupTypesString){
-        if(cupTypesString == null) {
+        if (cupTypesString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -71,7 +71,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromNextToMachineTypes(List<NextToMachineType> nextToMachineTypes){
-        if(nextToMachineTypes == null){
+        if (nextToMachineTypes == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -82,7 +82,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<NextToMachineType> toNextToMachineTypes(String nextToMachineTypesString){
-        if(nextToMachineTypesString == null) {
+        if (nextToMachineTypesString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -95,7 +95,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromOtherOffers(List<OtherOffer> otherOffers){
-        if(otherOffers == null) {
+        if (otherOffers == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -106,7 +106,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<OtherOffer> toOtherOffers(String otherOffersString){
-        if(otherOffersString == null){
+        if (otherOffersString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -114,5 +114,4 @@ public class DbDataListsConverters implements Serializable {
         List<OtherOffer> otherOffers = gson.fromJson(otherOffersString, type);
         return otherOffers;
     }
-
 }

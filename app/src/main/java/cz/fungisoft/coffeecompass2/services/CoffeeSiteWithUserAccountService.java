@@ -38,6 +38,8 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
         COFFEE_SITE_ACTIVATE,
         COFFEE_SITE_DEACTIVATE,
 
+        COFFEE_SITES_UPLOAD,
+
         COFFEE_SITE_LOAD,
         COFFEE_SITE_LOAD_ALL,
         COFFEE_SITE_LOAD_ALL_FIRST_PAGE,

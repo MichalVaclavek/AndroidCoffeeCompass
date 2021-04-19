@@ -22,7 +22,7 @@ public class PriceRange extends CoffeeSiteEntity implements Parcelable {
         super();
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected PriceRange(Parcel in) {
         this.id = in.readInt();
         priceRange = in.readString();

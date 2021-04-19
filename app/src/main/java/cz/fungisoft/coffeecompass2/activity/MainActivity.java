@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
@@ -174,7 +175,27 @@ public class MainActivity extends ActivityWithLocationService
 
     private TextView textNotificationBellIconItemCount;
 
+    /**
+     * Counts number of new CoffeeSitess notifications received
+     */
     private int newSitesNotificationCount = 0;
+
+    /**
+     * Should be synchronized as called from more threads
+     * @return
+     */
+    private synchronized int getNewSitesNotificationCount() {
+        return newSitesNotificationCount;
+    }
+
+    private synchronized void setNewSitesNotificationCount(int newSitesNotificationCount) {
+        this.newSitesNotificationCount = newSitesNotificationCount;
+    }
+
+    private synchronized void increaseNewSitesNotificationCount() {
+        this.newSitesNotificationCount++;
+    }
+
 
     private String newNotificationCoffeeSiteURL = "";
 
@@ -195,6 +216,8 @@ public class MainActivity extends ActivityWithLocationService
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
+
         setContentView(R.layout.activity_main);
 
         /*
@@ -211,6 +234,8 @@ public class MainActivity extends ActivityWithLocationService
                 Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSiteUrl", data);
                 startActivity(intent);
+                // User now see the new CoffeeSites, trigger to show statistics view in original coloe
+                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
             }
         }
 
@@ -218,7 +243,7 @@ public class MainActivity extends ActivityWithLocationService
 
         /*
          * Observes and handles received push message notification, when app is in foreground.
-         * onChanged is called every time, the activity is created (for example gous from backround
+         * onChanged is called every time, the activity is created (for example goes from background
          * to foreground) and it was already called fro some previous new coffeeSite URL
          * notification. So, we need to check, if onChange() is called because of
          * another ne URL or if it is already processed URL.
@@ -237,10 +262,8 @@ public class MainActivity extends ActivityWithLocationService
                                 startReadStatistics();
                                 notificationSubscriptionPreferencesHelper.putLatestReceivedUrl(newNotificationCoffeeSiteURL);
                                 newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
-                                newSitesNotificationCount++;
+                                increaseNewSitesNotificationCount();
                                 setupNotificationCountBadge();
-                            } else {
-                                newSitesNotificationCount = 0;
                             }
                         }
                     }
@@ -250,7 +273,6 @@ public class MainActivity extends ActivityWithLocationService
 
         statisticsAndNewsCardView = findViewById(R.id.statistics_news_main_card_view);
 
-        statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
         if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
             statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
@@ -337,7 +359,12 @@ public class MainActivity extends ActivityWithLocationService
             @Override
             public void onClick(View view) {
                 if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-                    openCreateNewCoffeeSiteActivity();
+                    if (coffeeSiteEntitiesService != null && coffeeSiteEntitiesService.isDataReadFromServer()) {
+                        openCreateNewCoffeeSiteActivity();
+                    } else {
+                        Snackbar mySnackbar = Snackbar.make(view, R.string.data_for_offline_coffee_site_create_not_available, Snackbar.LENGTH_LONG);
+                        mySnackbar.show();
+                    }
                 } else {
                     Snackbar mySnackbar = Snackbar.make(view, R.string.new_site_only_for_registered_user, Snackbar.LENGTH_LONG);
                     mySnackbar.show();
@@ -373,8 +400,7 @@ public class MainActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
         coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
@@ -429,8 +455,7 @@ public class MainActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other  applications).
         coffeeSiteLoadOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteLoadOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteLoadOperationsService.class),
@@ -447,9 +472,7 @@ public class MainActivity extends ActivityWithLocationService
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            if (Utils.isOfflineModeOn(getApplicationContext())) {
-                onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
-            } else {
+            if (Utils.isOnline(getApplicationContext())) {
                 startNumberOfCoffeeSitesFromUserCall();
             }
         }
@@ -486,11 +509,23 @@ public class MainActivity extends ActivityWithLocationService
             numberOfCoffeeSitesCreatedByLoggedInUserChecked = true;
             userPreferencesHelper.putNumOfNotCanceledSites(numberOfCoffeeSitesCreatedByLoggedInUser);
 
-            MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
-            if (myCoffeeSitesMenuItem != null) {
-                if (numberOfCoffeeSitesCreatedByLoggedInUser > 0) {
-                    myCoffeeSitesMenuItem.setVisible(true);
-                }
+            updateMyCoffeeSitesMenuItem();
+        }
+    }
+
+    /**
+     * Shows/hides MenuItem myCoffeeSitesMenuItem according data saved in Preferences helpers
+     * to allow/disallow user to open MyCoffeeSitesListActivity with CoffeeSites created by the user.
+     */
+    private void updateMyCoffeeSitesMenuItem() {
+        DataForOfflineModePreferenceHelper offlineDataPreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
+        MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
+
+        if (myCoffeeSitesMenuItem != null) {
+            if (offlineDataPreferenceHelper.getDataSavedOfflineAvailable() || userPreferencesHelper.getNumOfNotCanceledSites() > 0) {
+                myCoffeeSitesMenuItem.setVisible(true);
+            } else {
+                myCoffeeSitesMenuItem.setVisible(false);
             }
         }
     }
@@ -509,12 +544,12 @@ public class MainActivity extends ActivityWithLocationService
      */
     private void updateAccuracyIndicator(Location location) {
 
-        Drawable  locIndic = getResources().getDrawable(R.drawable.location_bad);
+        Drawable  locIndic = getDrawable(R.drawable.location_bad);
         if (location != null) {
-            locIndic = getResources().getDrawable(R.drawable.location_better);
+            locIndic = getDrawable(R.drawable.location_better);
 
             if (location.getAccuracy() <= GOOD_PRESNOST) {
-                locIndic = getResources().getDrawable(R.drawable.location_good);
+                locIndic = getDrawable(R.drawable.location_good);
             }
         }
         locationImageView.setBackground(locIndic);
@@ -561,12 +596,12 @@ public class MainActivity extends ActivityWithLocationService
 
     private void setupNotificationCountBadge() {
         if (textNotificationBellIconItemCount != null) {
-            if (newSitesNotificationCount == 0) {
+            if (getNewSitesNotificationCount() == 0) {
                 if (textNotificationBellIconItemCount.getVisibility() != View.GONE) {
                     textNotificationBellIconItemCount.setVisibility(View.GONE);
                 }
             } else {
-                textNotificationBellIconItemCount.setText(String.valueOf(Math.min(newSitesNotificationCount, 99)));
+                textNotificationBellIconItemCount.setText(String.valueOf(Math.min(getNewSitesNotificationCount(), 99)));
                 if (textNotificationBellIconItemCount.getVisibility() != View.VISIBLE) {
                     textNotificationBellIconItemCount.setVisibility(View.VISIBLE);
                 }
@@ -586,19 +621,19 @@ public class MainActivity extends ActivityWithLocationService
 
                     newNotificationCoffeeSiteURL = "";
                     newNotificationCoffeeSiteURLs.clear();
-                    newSitesNotificationCount = 0;
+                    setNewSitesNotificationCount(0);
                     setupNotificationCountBadge();
                     return true;
                 }
                 if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().isEmpty()
-                    && newSitesNotificationCount == 1) {
+                       && getNewSitesNotificationCount() == 1) {
                     Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
                     startActivity(intent);
 
                     newNotificationCoffeeSiteURL = "";
                     newNotificationCoffeeSiteURLs.clear();
-                    newSitesNotificationCount = 0;
+                    setNewSitesNotificationCount(0);
                     setupNotificationCountBadge();
                 } else { // notification subscription setup
                     Intent i = new Intent(MainActivity.this, NewsSubscriptionActivity.class);
@@ -647,6 +682,8 @@ public class MainActivity extends ActivityWithLocationService
         //activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.putExtra("myCoffeeSitesNumber", numberOfCoffeeSitesCreatedByLoggedInUser);
+        activityIntent.putExtra("showListNotModifiedCoffeeSites", true);
+
         this.startActivity(activityIntent);
     }
 
@@ -730,8 +767,8 @@ public class MainActivity extends ActivityWithLocationService
         }
         usersView.setText(stats.numOfUsers);
 
-        // Where the statistics shown upon user's click on Statistics CardView
-        if (calledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
+        // Where the statistics shown upon user's click on Statistics CardView ?
+        if (calledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0 ) {
             calledUponUsersClick = false;
             if (Utils.isOnline(getApplicationContext())) {
                 Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
@@ -840,13 +877,14 @@ public class MainActivity extends ActivityWithLocationService
 
         // Read statistics
         startReadStatistics();
+        // Read number of CoffeeSites created by current user to show/hide menu icon to open list of MyCoffeeSitesActivity
         startNumberOfCoffeeSitesFromUserCall();
-        if (Utils.offlineDataAvailable(getApplicationContext())) {
+
+        if (!Utils.isOnline(getApplicationContext()) && Utils.offlineDataAvailable(getApplicationContext())) {
             showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
-            onNumberOfCoffeeSiteFromLoggedInUserLoaded(userPreferencesHelper.getNumOfNotCanceledSites(), "");
-        } else {
-             Utils.showNoInternetToast(getApplicationContext());
         }
+
+        updateMyCoffeeSitesMenuItem();
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -947,8 +985,7 @@ public class MainActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         userAccountServiceConnector = new UserAccountServiceConnector();
         userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
         if (bindService(new Intent(this, UserAccountService.class),
@@ -964,7 +1001,9 @@ public class MainActivity extends ActivityWithLocationService
     public void onUserAccountServiceConnected() {
         userAccountService = userAccountServiceConnector.getUserLoginService();
         evaluateLoginMenuIcon();
-        evaluateMyCoffeeSitesIcon();
+        if (userAccountService.isUserLoggedIn()) {
+            updateMyCoffeeSitesMenuItem();
+        }
     }
 
     /**
@@ -982,20 +1021,6 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
-    /**
-     * Evaluates if the MyCoffeeSitesIcon should be displayd or not.
-     * This icon is shown only if logged in user has more then 0
-     * CoffeeSites created.
-     * So, the Service call to find number of created sites is started,
-     * and the result is evaluated in callback method of this service call
-     */
-    private void evaluateMyCoffeeSitesIcon() {
-        // Not show icon as a default
-        MenuItem myCoffeeSitesMenuItem = mainToolbar.getMenu().size() > 1 ? mainToolbar.getMenu().findItem(R.id.action_my_coffeesites) : null;
-        if (myCoffeeSitesMenuItem != null) {
-            myCoffeeSitesMenuItem.setVisible(false);
-        }
-    }
 
     /**
      * Helper method. Not used currently, but ready for the future, if thre would be a long running job
@@ -1050,12 +1075,12 @@ public class MainActivity extends ActivityWithLocationService
     }
 
     /**
-     * Pomocn8 metoda k vypsani aktualniho Firebase token, ulozeneho v NotificationSubscriptionPreferencesHelper,
+     * Pomocna metoda k vypsani aktualniho Firebase token, ulozeneho v NotificationSubscriptionPreferencesHelper,
      * do logu
      */
-    private void showCurrentFirebaseToken() {
-        NotificationSubscriptionPreferencesHelper preferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
-        Log.i(TAG, "Current firebase token: " + preferencesHelper.getFirebaseToken());
-    }
+//    private void showCurrentFirebaseToken() {
+//        NotificationSubscriptionPreferencesHelper preferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
+//        Log.i(TAG, "Current firebase token: " + preferencesHelper.getFirebaseToken());
+//    }
 
 }

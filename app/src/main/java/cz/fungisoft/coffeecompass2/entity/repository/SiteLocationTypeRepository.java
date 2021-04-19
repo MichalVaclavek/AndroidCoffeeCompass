@@ -17,16 +17,23 @@ import io.reactivex.Single;
 public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
 
     private final SiteLocationTypeDao siteLocationTypeDao;
+
     private final LiveData<List<SiteLocationType>> mAllSiteLocationTypes;
+    private final Single<List<SiteLocationType>> mAllSiteLocationTypesSingle;
 
     SiteLocationTypeRepository(CoffeeSiteDatabase db) {
         super(db);
         siteLocationTypeDao = db.siteLocationTypeDao();
         mAllSiteLocationTypes = siteLocationTypeDao.getAllSiteLocationTypes();
+        mAllSiteLocationTypesSingle = siteLocationTypeDao.getAllSiteLocationTypesSingle();
     }
 
     public LiveData<List<SiteLocationType>> getAllSiteLocationTypes() {
         return mAllSiteLocationTypes;
+    }
+
+    public Single<List<SiteLocationType>> getAllSiteLocationTypesSingle() {
+        return mAllSiteLocationTypesSingle;
     }
 
     public Single<SiteLocationType> getSiteLocationType(String siteLocationTypeValue) {

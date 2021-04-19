@@ -9,6 +9,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescriptionDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 /**
  * Repository class for StarsQualityDescription objects.
@@ -18,16 +19,24 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
 
     private final StarsQualityDescriptionDao starsQualityDescriptionDao;
     private final LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
+    private final Single<List<StarsQualityDescription>> mAllStarsQualityDescriptionsSingle;
+
 
     StarsQualityDescriptionRepository(CoffeeSiteDatabase db) {
         super(db);
         starsQualityDescriptionDao = db.starsQualityDescriptionDao();
         mAllStarsQualityDescriptions = starsQualityDescriptionDao.getAllStarsQualityDescriptions();
+        mAllStarsQualityDescriptionsSingle = starsQualityDescriptionDao.getAllStarsQualityDescriptionsSingle();
     }
 
     public LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions() {
         return mAllStarsQualityDescriptions;
     }
+
+    public Single<List<StarsQualityDescription>> getAllCoffeeSiteTypesSingle() {
+        return mAllStarsQualityDescriptionsSingle;
+    }
+
 
     public Flowable<StarsQualityDescription> getStarsQualityDescription(int starsQualityDescriptionValue) {
         return starsQualityDescriptionDao.getStarsQualityDescriptionByNumber(starsQualityDescriptionValue);

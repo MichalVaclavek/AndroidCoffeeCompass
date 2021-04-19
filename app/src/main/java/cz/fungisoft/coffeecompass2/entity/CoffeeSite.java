@@ -28,11 +28,13 @@ import cz.fungisoft.coffeecompass2.entity.repository.DbDataListsConverters;
  */
 @Entity(tableName = "coffee_site_table")
 public class CoffeeSite implements Serializable,
-                                                            Comparable<CoffeeSite>,
-                                                            Parcelable {
+                                   Comparable<CoffeeSite>,
+                                   Parcelable {
 
     public static final String PHOTO_FILE_NAME_PREFIX = "photo_site_";
 
+    @Expose
+    @SerializedName("id")
     @PrimaryKey(autoGenerate = true)
     protected long id;
 
@@ -42,6 +44,21 @@ public class CoffeeSite implements Serializable,
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    /**
+     * Pomocny atribute to save local DB id. Used in case the CoffeeSite upload fails and we
+     * need to restore original id as it has to be changed to 0 before uploading brand new CoffeeSite
+     */
+    @Ignore
+    private long localDBid;
+
+    public void saveId() {
+        this.localDBid = id;
+    }
+
+    public void restoreId() {
+        this.id = this.localDBid;
     }
 
     @Expose
@@ -59,7 +76,7 @@ public class CoffeeSite implements Serializable,
     protected Date createdOn;
 
     @ColumnInfo(name = "createdOnString")
-    private String createdOnString;
+    private String createdOnString = "";
 
     @Ignore
     private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
@@ -88,10 +105,10 @@ public class CoffeeSite implements Serializable,
     protected String mainImageURL = ""; // default empty, means image not available
 
     /**
-     * File name of the CoffeeSite image saved
+     * File name and path of the CoffeeSite image saved
      */
     @ColumnInfo(name = "mainImageFileName")
-    protected String mainImageFileName = ""; // default empty, means image not available
+    protected String mainImageFilePath = ""; // default empty, means image not available
 
     @Expose
     @SerializedName("uliceCP")
@@ -116,34 +133,34 @@ public class CoffeeSite implements Serializable,
     @Expose
     @SerializedName("initialComment")
     @ColumnInfo(name = "initialComment")
-    protected String uvodniKoment;
+    protected String uvodniKoment = "";
 
     @Expose
     @SerializedName("pristupnostDny")
     @ColumnInfo(name = "opening_days")
-    protected String oteviraciDobaDny;
+    protected String oteviraciDobaDny = "";
 
     @Expose
     @SerializedName("pristupnostHod")
     @ColumnInfo(name = "pristupnostHod")
-    protected String oteviraciDobaHod;
+    protected String oteviraciDobaHod = "";
 
     /* Many to One relations */
 
     @Expose
     @SerializedName("typPodniku")
     @TypeConverters(DbDataConverters.class)
-    protected CoffeeSiteType typPodniku;
+    protected CoffeeSiteType typPodniku = new CoffeeSiteType();
 
     @Expose
     @SerializedName("typLokality")
     @TypeConverters(DbDataConverters.class)
-    protected SiteLocationType typLokality;
+    protected SiteLocationType typLokality = new SiteLocationType();
 
     @Expose
     @SerializedName("statusZarizeni")
     @TypeConverters(DbDataConverters.class)
-    protected CoffeeSiteStatus statusZarizeni;
+    protected CoffeeSiteStatus statusZarizeni = new CoffeeSiteStatus();
 
     @Expose
     @SerializedName("recordStatus")
@@ -153,7 +170,7 @@ public class CoffeeSite implements Serializable,
     @Expose
     @SerializedName("cena")
     @TypeConverters(DbDataConverters.class)
-    protected PriceRange cena;
+    protected PriceRange cena = new PriceRange();
 
     @Expose
     @SerializedName("averageStarsWithNumOfHodnoceni")
@@ -165,26 +182,26 @@ public class CoffeeSite implements Serializable,
     @Expose
     @SerializedName("cupTypes")
     @TypeConverters(DbDataListsConverters.class)
-    protected List<CupType> cupTypes;
+    protected List<CupType> cupTypes = new ArrayList<>();
 
     @Expose
     @SerializedName("coffeeSorts")
     @TypeConverters(DbDataListsConverters.class)
-    protected List<CoffeeSort> coffeeSorts;
+    protected List<CoffeeSort> coffeeSorts = new ArrayList<>();
 
     @Expose
     @SerializedName("otherOffers")
     @TypeConverters(DbDataListsConverters.class)
-    protected List<OtherOffer> otherOffers;
+    protected List<OtherOffer> otherOffers = new ArrayList<>();
 
     @Expose
     @SerializedName("nextToMachineTypes")
     @TypeConverters(DbDataListsConverters.class)
-    protected List<NextToMachineType> nextToMachineTypes;
+    protected List<NextToMachineType> nextToMachineTypes = new ArrayList<>();
 
     /* One to Many relation */
     @Ignore
-    protected List<Comment> comments;
+    protected List<Comment> comments = new ArrayList<>();
 
 
     /** Properties of CoffeeSiteDTO which describes allowed operations **/
@@ -256,50 +273,49 @@ public class CoffeeSite implements Serializable,
     /* Parcelable implementation -- START -- */
 
     protected CoffeeSite(Parcel in) {
-        id = in.readInt();
-        name = in.readString();
-        distance = in.readLong();
-
-        createdOn = (java.util.Date) in.readSerializable();
-        createdOnString = in.readString();
-        latitude = in.readDouble();
-        longitude = in.readDouble();
-
-        mainImageURL = in.readString();
-        mainImageFileName = in.readString();
-
+        // Read Parcelable first
         statusZarizeni = in.readParcelable(CoffeeSiteStatus.class.getClassLoader());
         typPodniku = in.readParcelable(CoffeeSiteType.class.getClassLoader());
         typLokality = in.readParcelable(SiteLocationType.class.getClassLoader());
         cena = in.readParcelable(PriceRange.class.getClassLoader());
-
-        mesto = in.readString();
-        uliceCP = in.readString();
         hodnoceni = in.readParcelable(AverageStarsWithNumOfRatings.class.getClassLoader());
-
-        createdByUserName = in.readString();
-        lastEditUserName = in.readString();
-        uvodniKoment = in.readString();
+        statusZaznamu = in.readParcelable(CoffeeSiteRecordStatus.class.getClassLoader());
 
         cupTypes = new ArrayList<>();
         in.readTypedList(cupTypes, CupType.CREATOR);
-
         coffeeSorts = new ArrayList<>();
         in.readTypedList(coffeeSorts, CoffeeSort.CREATOR);
-
         otherOffers = new ArrayList<>();
         in.readTypedList(otherOffers, OtherOffer.CREATOR);
-
         nextToMachineTypes = new ArrayList<>();
         in.readTypedList(nextToMachineTypes, NextToMachineType.CREATOR);
-
-        oteviraciDobaDny = in.readString();
-        oteviraciDobaHod = in.readString();
 
         if (in.dataAvail() > 0) {
             comments = new ArrayList<>();
             comments = in.readArrayList(Comment.class.getClassLoader());
         }
+
+        id = in.readLong();
+        name = in.readString();
+        distance = in.readLong();
+
+        createdOn = new Date(in.readLong());
+        createdOnString = in.readString();
+        latitude = in.readDouble();
+        longitude = in.readDouble();
+
+        mainImageURL = in.readString();
+        mainImageFilePath = in.readString();
+
+        mesto = in.readString();
+        uliceCP = in.readString();
+
+        createdByUserName = in.readString();
+        lastEditUserName = in.readString();
+        uvodniKoment = in.readString();
+
+        oteviraciDobaDny = in.readString();
+        oteviraciDobaHod = in.readString();
 
         canBeModified = in.readByte() != 0;
         canBeActivated  = in.readByte() != 0;
@@ -309,45 +325,47 @@ public class CoffeeSite implements Serializable,
         canBeDeleted = in.readByte() != 0;
         canBeRatedByStars = in.readByte() != 0;
 
-        statusZaznamu = in.readParcelable(CoffeeSiteRecordStatus.class.getClassLoader());
+        savedOnServer = in.readByte() != 0;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
-        dest.writeString(name);
-        dest.writeLong(distance);
-
-        dest.writeSerializable(createdOn);
-        dest.writeString(createdOnString);
-        dest.writeDouble(latitude);
-        dest.writeDouble(longitude);
-
-        dest.writeString(mainImageURL);
-        dest.writeString(mainImageFileName);
-
+        // Write Parcelable first
         dest.writeParcelable(statusZarizeni, flags);
         dest.writeParcelable(typPodniku, flags);
         dest.writeParcelable(typLokality, flags);
         dest.writeParcelable(cena, flags);
-
-        dest.writeString(mesto);
-        dest.writeString(uliceCP);
         dest.writeParcelable(hodnoceni, flags);
-
-        dest.writeString(createdByUserName);
-        dest.writeString(lastEditUserName);
-        dest.writeString(uvodniKoment);
+        dest.writeParcelable(statusZaznamu, flags);
 
         dest.writeTypedList(cupTypes);
         dest.writeTypedList(coffeeSorts);
         dest.writeTypedList(otherOffers);
         dest.writeTypedList(nextToMachineTypes);
 
+        dest.writeList(comments);
+
+        dest.writeLong(id);
+        dest.writeString(name);
+        dest.writeLong(distance);
+
+        dest.writeLong(createdOn.getTime());
+        dest.writeString(getCreatedOnString());
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+
+        dest.writeString(getMainImageURL());
+        dest.writeString(getMainImageFilePath());
+
+        dest.writeString(mesto);
+        dest.writeString(uliceCP);
+
+        dest.writeString(createdByUserName);
+        dest.writeString(lastEditUserName);
+        dest.writeString(uvodniKoment);
+
         dest.writeString(oteviraciDobaDny);
         dest.writeString(oteviraciDobaHod);
-
-        dest.writeList(comments);
 
         dest.writeByte((byte) (canBeModified ? 1 : 0));
         dest.writeByte((byte) (canBeActivated  ? 1 : 0));
@@ -357,7 +375,7 @@ public class CoffeeSite implements Serializable,
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
         dest.writeByte((byte) (canBeRatedByStars ? 1 : 0));
 
-        dest.writeParcelable(statusZaznamu, flags);
+        dest.writeByte((byte) (savedOnServer ? 1 : 0));
     }
 
     @Override
@@ -388,6 +406,10 @@ public class CoffeeSite implements Serializable,
     }
 
     public void setCreatedOn(Date createdOn) {
+        if (this.createdOn == null) {
+           this.createdOn = new Date();
+        }
+        this.createdOnString = dateFormater.format(this.createdOn);
         this.createdOn = createdOn;
     }
 
@@ -413,14 +435,16 @@ public class CoffeeSite implements Serializable,
         this.mainImageURL = mainImageURL;
     }
 
-    public String getMainImageFileName() {
-        // Default name for the image file
-        mainImageFileName = PHOTO_FILE_NAME_PREFIX + this.id;
-        return mainImageFileName;
+    public String getMainImageFilePath() {
+        return mainImageFilePath;
     }
 
-    public void setMainImageFileName(String mainImageFileName) {
-        this.mainImageFileName = mainImageFileName;
+    public void setMainImageFilePath(String mainImageFilePath) {
+        this.mainImageFilePath = mainImageFilePath;
+    }
+
+    public String getDefaultImageFileName() {
+        return PHOTO_FILE_NAME_PREFIX + getId();
     }
 
     public String getCreatedByUserName() {
@@ -665,23 +689,17 @@ public class CoffeeSite implements Serializable,
         isAnyOtherSiteActiveOnSamePosition = anyOtherSiteActiveOnSamePosition;
     }
 
-    public void setCreated(Date created) {
-        this.createdOn = created;
-        if (this.createdOn == null) {
-            this.createdOn = new Date();
-        }
-        this.createdOnString = dateFormater.format(this.createdOn);
-    }
-
     public String getCreatedOnString() {
-        if (createdOnString == null) {
-            setCreated(createdOn);
+        if (createdOnString.isEmpty()) {
+            if (this.createdOn == null) {
+                this.createdOn = new Date();
+            }
+            this.createdOnString = dateFormater.format(this.createdOn);
         }
         return createdOnString;
     }
 
     public void setCreatedOnString(String createdOnString) {
-
         this.createdOnString = createdOnString;
 
         Date created;

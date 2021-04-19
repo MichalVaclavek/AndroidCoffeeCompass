@@ -32,11 +32,12 @@ import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.ui.fragments.CoffeeSiteDetailsTabsAdapter;
-import cz.fungisoft.coffeecompass2.ui.fragments.DetailsCollectionFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.fragments.CoffeeSiteDetailsTabsAdapter;
+import cz.fungisoft.coffeecompass2.activity.ui.fragments.DetailsCollectionFragment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
+import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity.CREATE_COFFEESITE_REQUEST;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
@@ -119,7 +120,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
 
         // Setup main toolbar
-
         mainToolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(mainToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -315,14 +315,22 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
         Log.i(TAG, "onActivityResult() from CreateCoffeeSiteActivity. Request code: " + requestCode + ". Result code: " + resultCode);
+
+        // When returning from CreateCoffeeSiteActivity the parameter onActivityResult(int requestCode
+        // has the wrong, unassigned value. Therefore we pass the requestCode using Extras
+        int requestC = data.getExtras().getInt("requestCode");
+        if (requestC == EDIT_COFFEESITE_REQUEST) {
+            requestCode = EDIT_COFFEESITE_REQUEST;
+        }
 
         // Check which request we're responding to
         if (requestCode == EDIT_COFFEESITE_REQUEST) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                if (Utils.isOnline(getApplicationContext())) {
+                if (Utils.isOnline(getApplicationContext()) && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // do no load if this is CoffeeSIte creteted offline, not saved yet
                     // Reloads CoffeeSite to show current saved data after edit
                     startCoffeeSiteLoad(coffeeSite.getId());
                 } else { // or gets as return value from Edit activity
@@ -337,8 +345,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 }
             }
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /* ====== HANDLERS of BUTTONS clicks ======== */
@@ -415,10 +421,11 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-            // refresh CoffeeSite after start
+            // refresh CoffeeSite after start if possible
             if (Utils.isOnline(getApplicationContext())) {
-               if (coffeeSite != null) {
+               if (coffeeSite != null && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
                    startCoffeeSiteLoad(coffeeSite.getId());
+                   return;
                }
                if (coffeeSiteURL != null && !coffeeSiteURL.isEmpty()) {
                    startCoffeeSiteLoad(coffeeSiteURL);

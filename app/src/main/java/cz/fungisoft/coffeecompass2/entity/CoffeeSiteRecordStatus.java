@@ -9,8 +9,12 @@ import androidx.room.Ignore;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Objects;
+
 @Entity(tableName = "coffee_site_record_status_table")
 public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelable {
+
+    public static final CoffeeSiteRecordStatus CREATED = new CoffeeSiteRecordStatus();
 
     public CoffeeSiteRecordStatus() {
         super();
@@ -23,9 +27,9 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
 
     @Expose
     @SerializedName("status")
-    private String status = "CREATED"; // default value
+    private String status = ""; // default value when CoffeeSite created Offline
 
-    @Ignore
+    @Ignore // for Room processing
     protected CoffeeSiteRecordStatus(Parcel in) {
         id = in.readInt();
         status = in.readString();
@@ -67,4 +71,17 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
         return  status;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CoffeeSiteRecordStatus that = (CoffeeSiteRecordStatus) o;
+        return status.equalsIgnoreCase(that.status);
+//        return Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status);
+    }
 }

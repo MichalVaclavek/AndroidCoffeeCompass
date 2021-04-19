@@ -17,12 +17,15 @@ import io.reactivex.Single;
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     private final PriceRangeDao priceRangeDao;
+
     private final LiveData<List<PriceRange>> mAllPriceRanges;
+    private final Single<List<PriceRange>> mAllPriceRangesSingle;
 
     PriceRangeRepository(CoffeeSiteDatabase db) {
         super(db);
         priceRangeDao = db.priceRangeDao();
         mAllPriceRanges = priceRangeDao.getAllPriceRanges();
+        mAllPriceRangesSingle = priceRangeDao.getAllPriceRangesSingle();
     }
 
     public LiveData<List<PriceRange>> getAllPriceRanges() {
@@ -35,6 +38,10 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
     public void insert (PriceRange priceRange) {
         new PriceRangeRepository.insertAsyncTask(priceRangeDao).execute(priceRange);
+    }
+
+    public Single<List<PriceRange>> getAllPriceRangesSingle() {
+        return mAllPriceRangesSingle;
     }
 
     private static class insertAsyncTask extends AsyncTask<PriceRange, Void, Void> {

@@ -17,8 +17,10 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageDeleteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageUploadAsyncTask;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 
 /**
  * Service to handle requests for saving or deleting Image/Photo of the CoffeeSite.
@@ -92,8 +94,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         if (userAccountService == null) {
             userAccountServiceConnector = new UserAccountServiceConnector(this);
             Intent intent = new Intent(this, UserAccountService.class);
@@ -143,38 +144,49 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
 
     /** Methods to be called by Activity **/
 
-    public void uploadImage(File imageFile, long coffeeSiteId) {
+    public void uploadImage(File imageFile, CoffeeSite cs) {
         currentUser = getCurrentUser();
-        new ImageUploadAsyncTask(this, currentUser, imageFile, coffeeSiteId).execute();
+        if (imageFile.exists() && currentUser != null) {
+            new ImageUploadAsyncTask(this, currentUser, imageFile, cs).execute();
+        }
     }
 
-    public void deleteImage(long coffeeSiteId) {
+    public void deleteImage(CoffeeSite cs) {
         currentUser = getCurrentUser();
-        new ImageDeleteAsyncTask(this, currentUser, coffeeSiteId).execute();
+        new ImageDeleteAsyncTask(this, currentUser, cs).execute();
+    }
+
+    /**
+     * Deletes image of the CoffeeSite saved in phone
+     *
+     * @param cs
+     */
+    public void deleteLocalImageFile(CoffeeSite cs) {
+        ImageUtil.deleteImageFile(cs.getMainImageFilePath());
     }
 
     /** Methods to be called from AsyncTask REST calls */
 
-    public void evaluateImageSaveResult(Result result) {
+    public void evaluateImageSaveResult(CoffeeSite cs, Result result) {
         if (result instanceof Result.Success) {
-            onImageSaveSuccess(((Result.Success) result).getData().toString());
+            onImageSaveSuccess(cs, ((Result.Success) result).getData().toString());
         } else {
             Result.Error error = (Result.Error) result;
             if (error != null) {
                 Log.e(TAG, "Error REST call. " + error.getDetail());
-                onImageSaveFailure(error.getDetail());
+                onImageSaveFailure(cs, error.getDetail());
             }
         }
     }
 
-    public void evaluateImageDeleteResult(Result result) {
+    public void evaluateImageDeleteResult(CoffeeSite cs, Result result) {
         if (result instanceof Result.Success) {
-            onImageDeleteSuccess(((Result.Success) result).getData().toString());
+            onImageDeleteSuccess(cs, ((Result.Success) result).getData().toString());
         } else {
             Result.Error error = (Result.Error) result;
             if (error != null) {
                 Log.e(TAG, "Error REST call. " + error.getDetail());
-                onImageDeleteFailure(error.getDetail());
+                onImageDeleteFailure(cs, error.getDetail());
             }
         }
     }
@@ -182,26 +194,26 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     // Fire-up methods for login/register/logout events to be processed by listeners
 
     /* ---- Om Image Save ----  */
-    private void onImageSaveSuccess(String result) {
+    private void onImageSaveSuccess(CoffeeSite cs, String result) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
-            listener.onImageSaveSuccess(result);
+            listener.onImageSaveSuccess(cs, result);
         }
     }
-    private void onImageSaveFailure(String error) {
+    private void onImageSaveFailure(CoffeeSite cs, String error) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
-            listener.onImageSaveFailure(error);
+            listener.onImageSaveFailure(cs, error);
         }
     }
 
     /* ---- On Image Delete ----  */
-    private void onImageDeleteSuccess(String result) {
+    private void onImageDeleteSuccess(CoffeeSite cs, String result) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
-            listener.onImageDeleteSuccess(result);
+            listener.onImageDeleteSuccess(cs, result);
         }
     }
-    private void onImageDeleteFailure(String error) {
+    private void onImageDeleteFailure(CoffeeSite cs, String error) {
         for (CoffeeSiteImageServiceCallResultListener listener : imageOperationsResultListeners) {
-            listener.onImageDeleteFailure(error);
+            listener.onImageDeleteFailure(cs, error);
         }
     }
 

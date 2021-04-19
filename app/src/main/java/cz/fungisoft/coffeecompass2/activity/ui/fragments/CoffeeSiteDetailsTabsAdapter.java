@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.ui.fragments;
+package cz.fungisoft.coffeecompass2.activity.ui.fragments;
 
 import android.os.Bundle;
 

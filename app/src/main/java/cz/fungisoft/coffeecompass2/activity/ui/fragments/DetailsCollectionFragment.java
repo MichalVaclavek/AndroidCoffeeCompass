@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.ui.fragments;
+package cz.fungisoft.coffeecompass2.activity.ui.fragments;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -82,7 +82,7 @@ public class DetailsCollectionFragment extends Fragment {
 
         }); // registerOnPageChangeCallback
 
-        // TODO? - not working yet
+        // TODO? - not working yet ??
         if (showImageFirstRequest) {
             viewPager.setCurrentItem(1);
         }

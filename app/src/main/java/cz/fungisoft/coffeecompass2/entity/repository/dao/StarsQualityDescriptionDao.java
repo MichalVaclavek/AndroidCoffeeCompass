@@ -9,12 +9,16 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 @Dao
 public interface StarsQualityDescriptionDao {
 
     @Query("SELECT * FROM stars_quality_description_table")
     LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions();
+
+    @Query("SELECT * FROM stars_quality_description_table")
+    Single<List<StarsQualityDescription>> getAllStarsQualityDescriptionsSingle();
 
     @Query("SELECT * FROM stars_quality_description_table WHERE numOfStars = :number  LIMIT 1")
     Flowable<StarsQualityDescription> getStarsQualityDescriptionByNumber(int number);

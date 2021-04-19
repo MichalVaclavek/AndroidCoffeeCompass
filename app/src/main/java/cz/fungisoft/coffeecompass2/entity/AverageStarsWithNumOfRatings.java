@@ -31,13 +31,14 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
 
     public AverageStarsWithNumOfRatings() {}
 
+    @Ignore // for Room processing
     public AverageStarsWithNumOfRatings(float avgStars, int numOfHodnoceni, String common) {
         this.avgStars = avgStars;
         this.numOfHodnoceni = numOfHodnoceni;
         this.common = common;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
@@ -47,7 +48,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     public static final Creator<AverageStarsWithNumOfRatings> CREATOR = new Creator<AverageStarsWithNumOfRatings>() {
 
         @NotNull
-        @Contract("_ -> new")
+        //@Contract("_ -> new")
         @Override
         public AverageStarsWithNumOfRatings createFromParcel(Parcel in) {
             return new AverageStarsWithNumOfRatings(in);

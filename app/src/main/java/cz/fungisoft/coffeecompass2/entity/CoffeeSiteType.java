@@ -33,7 +33,7 @@ public class CoffeeSiteType extends CoffeeSiteEntity implements Parcelable {
         this.coffeeSiteType = coffeeSiteType;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected CoffeeSiteType(Parcel in) {
         this.id = in.readInt();
         coffeeSiteType = in.readString();

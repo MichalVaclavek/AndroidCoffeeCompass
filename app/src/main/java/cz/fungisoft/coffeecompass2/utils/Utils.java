@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModeDownloadPreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 
 /**
@@ -123,6 +123,16 @@ public class Utils {
     public static void showNoInternetToast(Context appContext) {
         Toast toast = Toast.makeText(appContext,
                 R.string.toast_no_internet,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showSiteNotSavedOnServerToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_site_not_saved_on_server,
                 Toast.LENGTH_SHORT);
         toast.show();
     }
@@ -288,18 +298,27 @@ public class Utils {
      * @return
      */
     public static boolean isOfflineModeOn(Context context) {
-        //DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
         return !isOnline(context) && offlineDataAvailable(context);
     }
 
     /**
-     * Finds from Preferences if the OFFLINE mode is switched ON or OFF
+     * Finds from Preferences if some CoffeeSites data are saved in DB after download.
      *
      * @return
      */
     public static boolean offlineDataAvailable(Context context) {
-        DataForOfflineModeDownloadPreferenceHelper offlineModePreferenceHelper = new DataForOfflineModeDownloadPreferenceHelper(context);
+        DataForOfflineModePreferenceHelper offlineModePreferenceHelper = new DataForOfflineModePreferenceHelper(context);
         return offlineModePreferenceHelper.getDownloaded();
+    }
+
+    /**
+     * Finds from Preferences, if some CoffeeSites data are saved in DB after creation in OFFLINE mode.
+     *
+     * @return
+     */
+    public static boolean offlineDataSavedAvailable(Context context) {
+        DataForOfflineModePreferenceHelper offlineModePreferenceHelper = new DataForOfflineModePreferenceHelper(context);
+        return offlineModePreferenceHelper.getDataSavedOfflineAvailable();
     }
 
     /**

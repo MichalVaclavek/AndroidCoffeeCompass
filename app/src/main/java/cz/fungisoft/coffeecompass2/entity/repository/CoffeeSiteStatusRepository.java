@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteStatusDao;
 import io.reactivex.Single;
 
@@ -18,15 +19,21 @@ public class CoffeeSiteStatusRepository extends CoffeeSiteRepositoryBase {
 
     private final CoffeeSiteStatusDao coffeeSiteStatusDao;
     private final LiveData<List<CoffeeSiteStatus>> mAllCoffeeSiteStatuses;
+    private final Single<List<CoffeeSiteStatus>> mAllCoffeeSiteStatusesSingle;
 
     CoffeeSiteStatusRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSiteStatusDao = db.coffeeSiteStatusDao();
         mAllCoffeeSiteStatuses = coffeeSiteStatusDao.getAllCoffeeSiteStatuses();
+        mAllCoffeeSiteStatusesSingle = coffeeSiteStatusDao.getAllCoffeeSiteStatusesSingle();
     }
 
     public LiveData<List<CoffeeSiteStatus>> getAllCoffeeSiteStatuses() {
         return mAllCoffeeSiteStatuses;
+    }
+
+    public Single<List<CoffeeSiteStatus>> getAllCoffeeSiteStatusesSingle() {
+        return mAllCoffeeSiteStatusesSingle;
     }
 
     public Single<CoffeeSiteStatus> getCoffeeSiteStatus(String siteStatus) {

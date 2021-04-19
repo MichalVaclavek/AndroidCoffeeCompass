@@ -27,18 +27,40 @@ public class MyCoffeeSitesViewModel extends AndroidViewModel {
     }
 
     /**
-     * Actual list of CoffeeSites in the search range from current position of the equipment as
-     * found in DB.
+     * List of all CoffeeSites created by current user found in DB (i.e. downloaded or created/modified Offline)
      */
     private final LiveData<List<CoffeeSite>> usersCoffeeSitesInDB = Transformations.switchMap(userInput, (ui) -> coffeeSiteRepository.getCoffeeSitesByAuthorUserName(ui.getUserName()));
 
-    public LiveData<List<CoffeeSite>> getUsersCoffeeSites(LoggedInUser loggedInUser) {
+    public LiveData<List<CoffeeSite>> getAllUsersCoffeeSitesInDB(LoggedInUser loggedInUser) {
         setInput(loggedInUser);
         return  usersCoffeeSitesInDB;
     }
 
+    /**
+     * List of all CoffeeSites created by current user not saved on server, yet. Includes completelly new sites
+     * or sites already saved on server, but modified when Offline.
+     */
     public LiveData<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
         return  coffeeSiteRepository.getCoffeeSitesNotSavedOnServer();
+    }
+
+    public LiveData<Integer> getNumOfCoffeeSitesNotSavedOnServer() {
+        return coffeeSiteRepository.getNumOfCoffeeSitesNotSavedOnServer();
+    }
+
+    /**
+     * List of all CoffeeSites created by current and saved on server, i.e. sites already downloaded
+     * and not modified nor newly created.
+     */
+    private final LiveData<List<CoffeeSite>> usersCoffeeSitesInDBNotModified = Transformations.switchMap(userInput, (ui) -> coffeeSiteRepository.getCoffeeSitesFromUserSavedOnServer(ui.getUserName()));
+
+    /**
+     * List of all CoffeeSites created by current and saved on server, i.e. sites already downloaded
+     * and not modified (or newly created)
+     */
+    public LiveData<List<CoffeeSite>> getUsersCoffeeSitesInDBNotModified(LoggedInUser loggedInUser) {
+        setInput(loggedInUser);
+        return  usersCoffeeSitesInDBNotModified;
     }
 
     public MyCoffeeSitesViewModel(@NonNull Application application) {

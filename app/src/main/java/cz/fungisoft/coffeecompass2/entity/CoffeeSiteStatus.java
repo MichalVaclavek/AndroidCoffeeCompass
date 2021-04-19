@@ -21,7 +21,7 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
         this.status = entityValue;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected CoffeeSiteStatus(Parcel in) {
         this.id = in.readInt();
         status = in.readString();
