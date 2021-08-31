@@ -321,27 +321,29 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         // When returning from CreateCoffeeSiteActivity the parameter onActivityResult(int requestCode
         // has the wrong, unassigned value. Therefore we pass the requestCode using Extras
-        int requestC = data.getExtras().getInt("requestCode");
-        if (requestC == EDIT_COFFEESITE_REQUEST) {
-            requestCode = EDIT_COFFEESITE_REQUEST;
-        }
+        if (data != null) {
+            int requestC = data.getExtras().getInt("requestCode");
+            if (requestC == EDIT_COFFEESITE_REQUEST) {
+                requestCode = EDIT_COFFEESITE_REQUEST;
+            }
 
-        // Check which request we're responding to
-        if (requestCode == EDIT_COFFEESITE_REQUEST) {
-            // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                if (Utils.isOnline(getApplicationContext()) && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // do no load if this is CoffeeSIte creteted offline, not saved yet
-                    // Reloads CoffeeSite to show current saved data after edit
-                    startCoffeeSiteLoad(coffeeSite.getId());
-                } else { // or gets as return value from Edit activity
-                    // add property change listener for new coffeesite
-                    coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
-                    ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
-                    locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
-                    ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
-                    // Refresh detailFragment to update View with the new CoffeeSiteMovable
-                    mainToolbar.setSubtitle(coffeeSite.getName());
-                    refreshDetailFragment(coffeeSite);
+            // Check which request we're responding to
+            if (requestCode == EDIT_COFFEESITE_REQUEST) {
+                // Make sure the request was successful
+                if (resultCode == RESULT_OK) {
+                    if (Utils.isOnline(getApplicationContext()) && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // do no load if this is CoffeeSIte creteted offline, not saved yet
+                        // Reloads CoffeeSite to show current saved data after edit
+                        startCoffeeSiteLoad(coffeeSite.getId());
+                    } else { // or gets as return value from Edit activity
+                        // add property change listener for new coffeesite
+                        coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
+                        ((CoffeeSiteMovable) coffeeSite).setLocationService(locationService);
+                        locationService.addPropertyChangeListener((CoffeeSiteMovable) coffeeSite);
+                        ((CoffeeSiteMovable) coffeeSite).addPropertyChangeListener(distanceTextView);
+                        // Refresh detailFragment to update View with the new CoffeeSiteMovable
+                        mainToolbar.setSubtitle(coffeeSite.getName());
+                        refreshDetailFragment(coffeeSite);
+                    }
                 }
             }
         }

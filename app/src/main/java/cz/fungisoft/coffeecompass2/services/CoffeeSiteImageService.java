@@ -15,8 +15,8 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageDeleteAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageUploadAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;

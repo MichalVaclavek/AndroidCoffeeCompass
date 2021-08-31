@@ -31,4 +31,12 @@ public interface CoffeeSiteLoadServiceOperationsListener {
      * @param error
      */
     default void onLatestCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
+
+    /**
+     * on load of CoffeeSites in town
+     *
+     * @param coffeeSites
+     * @param error
+     */
+    default void onCoffeeSitesInTownLoaded(List<CoffeeSite> coffeeSites, String error) {}
 }

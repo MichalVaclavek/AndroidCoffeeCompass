@@ -15,22 +15,22 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
 
 /**
  * Data Model to be hold by {@link FoundCoffeeSitesListActivity}.<br>
  * <p>
  * Collects following information:
  *
- * - all currently found Coffee sites
+ * - all currently found Coffee sites on current location within given range
  * - new CoffeeSites
  * - old CoffeeSites to be displayed by the activity's RecyclerViewAdapter
  * <p>
  * Class is a singleton.
  */
 public class FoundCoffeeSitesViewModel extends AndroidViewModel
-                                       implements CoffeeSitesInRangeFoundListener {
+                                       implements CoffeeSitesFoundListener {
 
     private static final String TAG = "FoundCoffeeSitesModel";
 
@@ -49,7 +49,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
      * @param sitesInRangeUpdateService service to return coffee sites in range
      */
     public FoundCoffeeSitesViewModel(@NonNull AppCompatActivity ownerActivity,
-                                     @NonNull CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+                                     @NonNull CoffeeSitesFoundService sitesInRangeUpdateService) {
         this(ownerActivity);
         foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
     }
@@ -65,7 +65,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
         this.ownerActivity = new WeakReference<>(ownerActivity);
     }
 
-    public void setCoffeeSitesInRangeFoundService(CoffeeSitesInRangeFoundService sitesInRangeUpdateService) {
+    public void setCoffeeSitesInRangeFoundService(CoffeeSitesFoundService sitesInRangeUpdateService) {
         foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
         foundCoffeeSites.observe(ownerActivity.get(), new Observer<List<CoffeeSiteMovable>>() {
             @Override

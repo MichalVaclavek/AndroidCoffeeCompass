@@ -13,5 +13,5 @@
     android:scrollbars="vertical"
     android:theme="@style/Theme.MaterialComponents.Light.Bridge"
     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-    tools:context=".activity.ui.notification.NotificationNewCoffeeSitesListActivity"
+    tools:context=".activity.ui.notification.StaticCoffeeSitesListActivity"
     tools:listitem="@layout/notification_new_list_content" />

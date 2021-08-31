@@ -22,8 +22,8 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 2.0.0</string>
-    <string name="about_datum">6. 6. 2021</string>
+    <string name="about_version">v. 2.1.0</string>
+    <string name="about_datum">29. 9. 2021</string>
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokaci,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. Lokaci lze vytvořit i bez aktuálního připojení k internetu a nahrát na server později.</string>
@@ -40,6 +40,7 @@
     <string name="local_service_disconnected">Disconnected from location service.</string>
 
     <string name="no_site_in_range">Žádná káva poblíž &#128533;</string>
+    <string name="no_site_in_town">Káva ve městě %1$s neevidována.</string>
     <string name="current_range_label">"Aktuální okruh vyhledávání: "</string>
     <string name="still_searching">vyhledávám ... </string>
 
@@ -271,5 +272,18 @@
 
     <string name="my_sites_activity_toolbar_mainlabel">Moje lokace</string>
     <string name="my_sites_activity_toolbar_tosave_label">K uložení</string>
+    <string name="upload_coffeesites_dialog_label">Uložit na server?</string>
+    <string name="upload_dialog_number_of_new_coffeesites">nové nebo upravené lokace: %1$s</string>
+    <string name="upload_coffeesites_dialog_title">Uložení</string>
+
+    <string name="search_by_city_hint">hledat ve městě</string>
+    <string name="found_coffeesite_activity_title">Nejbližší</string>
+    <string name="coffeesite_not_found_in_town">Káva s sebou neevidována.</string>
+
+    <string name="all_data_to_download_size">(%1$d MB)</string>
+    <string name="data_without_images_to_download_size">(%1$s MB)</string>
+
+    <string name="moje_lokace">Moje lokace</string>
+    <string name="novinky">Novinky</string>
 
 </resources>

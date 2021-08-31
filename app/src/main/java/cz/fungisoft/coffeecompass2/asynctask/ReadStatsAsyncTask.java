@@ -26,6 +26,7 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
  * AsyncTask to read basic statistics from coffeecompass.cz about saved CoffeeSites.
  * The task runs at the start of the MainActivity.
  */
+// TODO refactor to read by Retrofit lib.
 public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Read statistics";
@@ -57,7 +58,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
             StringBuilder sb = new StringBuilder();
             String radek = null;
 
-            while((radek = reader.readLine()) != null) {
+            while ((radek = reader.readLine()) != null) {
                 sb.append(radek + "\n");
             }
 
@@ -86,6 +87,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
         JSONObject jsonObject;
 
         try {
+            assert sJSON != null;
             jsonObject = new JSONObject(sJSON);
 
             stats = new Statistics(jsonObject.getString("numOfAllSites"),
@@ -93,7 +95,7 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
                     jsonObject.getString("numOfNewSitesToday"),
                     jsonObject.getString("numOfAllUsers"));
 
-        } catch (JSONException e) {
+        } catch (JSONException | NullPointerException | AssertionError e) {
             Log.e(TAG, "Parsing JSON Exception: " + e.getMessage());
         }
 
@@ -102,9 +104,8 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if (parentActivity.get() != null) {
+        if (parentActivity.get() != null && result != null) {
             parentActivity.get().showAndSaveStatistics(stats);
         }
     }
-
 }

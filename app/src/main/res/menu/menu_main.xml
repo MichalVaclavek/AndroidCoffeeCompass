@@ -2,26 +2,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--
-    <item android:id="@+id/action_map"
-        android:icon="@drawable/google_maps_48"
-        android:title="@string/action_map"
-        app:showAsAction="ifRoom"/>
-        -->
-    <!-- "Mark Favorite", should appear as action button if possible -->
-
     <item
         android:id="@+id/new_sites_notification"
         android:icon="@drawable/ic_new_coffee_bell_notification"
-        android:title="Novinky"
+        android:title="@string/novinky"
         app:actionLayout="@layout/action_notifications_item_layout"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_my_coffeesites"
         android:icon="@drawable/ic_coffee_cup_main"
-        android:title="Moje lokace"
-        app:showAsAction="always"></item>
+        android:title="@string/moje_lokace"
+        app:showAsAction="ifRoom">
+    </item>
+
+    <item
+        android:id="@+id/action_search_main"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="Search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
 
     <item
         android:id="@+id/action_login"

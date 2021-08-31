@@ -62,6 +62,15 @@ public interface CoffeeSiteRESTInterface {
     Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range, @Query("sort") String sort);
 
     /**
+     * URL example https://coffeecompass.cz/rest/site/getSitesInTown/?townName=Tišnov
+     *
+     * @return
+     */
+    @GET("getSitesInTown/")
+    Call<List<CoffeeSite>> getCoffeeSitesInTown(@Query("townName") String townName);
+
+
+    /**
      * REST call for obtaining all CoffeeSites created by userId
      *
      * @param userId

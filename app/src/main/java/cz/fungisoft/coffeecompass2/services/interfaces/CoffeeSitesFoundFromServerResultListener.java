@@ -7,7 +7,8 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 /**
  * Interface to define methods called from process reading CoffeeSites in range
  */
-public interface CoffeeSitesInRangeFoundListener {
+public interface CoffeeSitesFoundFromServerResultListener {
 
-    void onSitesInRangeFound(List<CoffeeSiteMovable> coffeeSiteMovables);
+    void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSiteMovables);
+    void onSitesInRangeReturnedFromServerError(String error);
 }

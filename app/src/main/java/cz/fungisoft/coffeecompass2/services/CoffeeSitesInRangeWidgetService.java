@@ -34,7 +34,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
 import io.reactivex.annotations.NonNull;
@@ -53,7 +53,7 @@ import io.reactivex.schedulers.Schedulers;
  * Requires using Location service.
  */
 public class CoffeeSitesInRangeWidgetService extends JobIntentService
-                                             implements CoffeeSitesInRangeFromServerResultListener,
+                                             implements CoffeeSitesFoundFromServerResultListener,
                                                         PropertyChangeListener {
 
     public static final int JOB_ID = 1010;

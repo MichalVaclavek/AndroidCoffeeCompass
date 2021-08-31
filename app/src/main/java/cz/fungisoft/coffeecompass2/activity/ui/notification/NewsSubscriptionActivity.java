@@ -243,7 +243,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         TownNamesArrayAdapter townNamesArrayAdapter = new TownNamesArrayAdapter(this, R.layout.dropdown_menu_popoup_item);
         townNamesArrayAdapter.setNotifyOnChange(true);
 
-        townNameEditTextDropDown.setThreshold(2); // at least to characters must be entered before other actions
+        townNameEditTextDropDown.setThreshold(2); // at least 2 characters must be entered before other actions
 
         /**
          * Handle item/town selection from the drop down list

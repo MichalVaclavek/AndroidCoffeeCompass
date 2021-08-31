@@ -120,7 +120,7 @@
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".services.CoffeeSitesInRangeFoundService"
+            android:name=".services.CoffeeSitesFoundService"
             android:enabled="true"
             android:exported="true" />
         <service
@@ -192,7 +192,12 @@
             android:name=".activity.ui.coffeesite.FoundCoffeeSitesListActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
+
+            <!-- enable the search dialog to send searches to StaticCoffeeSitesListActivity -->
+            <meta-data android:name="android.app.default_searchable"
+                       android:value=".activity.ui.coffeesite.StaticCoffeeSitesListActivity" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
@@ -220,15 +225,24 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- enable the search dialog to send searches to StaticCoffeeSitesListActivity -->
+            <meta-data android:name="android.app.default_searchable"
+                       android:value=".activity.ui.coffeesite.StaticCoffeeSitesListActivity" />
         </activity>
+
         <activity
-            android:name=".activity.ui.notification.NotificationNewCoffeeSitesListActivity"
+            android:name=".activity.ui.notification.StaticCoffeeSitesListActivity"
             android:label="@string/notification_new_sites_list_appbar"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
+            <!--            Performing search of CoffeeSites by city name-->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable"/>
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />

@@ -50,13 +50,16 @@ public class Result<T> {
             this.exception = error;
             this.detailToDisplay = error.getMessage();
         }
+
         public Error(RestError error) {
             this.error = error;
             this.detailToDisplay = error.getDetail();
         }
+
         public Error(String error) {
             this.detailToDisplay = error;
         }
+
         public Exception getException() {
             return this.exception;
         }

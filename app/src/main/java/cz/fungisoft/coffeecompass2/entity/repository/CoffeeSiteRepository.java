@@ -114,23 +114,28 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     /**
      * LiveData input holder for coffee sites in range input parameters
      */
-    private final MutableLiveData<SearchParamsDataInput> searchParamsInput = new MutableLiveData<>();
+    private final MutableLiveData<SearchParamsDataInput> searchLatLongRangeInput = new MutableLiveData<>();
 
-    private void setInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
-        searchParamsInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart));
+    private void setLatLongRangeInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
+        searchLatLongRangeInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart));
     }
 
     private final LiveData<List<CoffeeSite>> coffeeSitesInRange =
-            Transformations.switchMap(searchParamsInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
+            Transformations.switchMap(searchLatLongRangeInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
 
 
-    public void setNewSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
+    public void setNewLatLongRangeSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
         double searchRangeAsDegreePart = searchRangeInMeters * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
-        setInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+        setLatLongRangeInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
     }
 
     public LiveData<List<CoffeeSite>> getCoffeeSitesInRange() {
         return coffeeSitesInRange;
+    }
+
+
+    public Single<List<CoffeeSite>> getCoffeeSitesInTownSingle(String townName) {
+        return coffeeSiteDao.getCoffeeSitesInTownSingle(townName);
     }
 
     /**

@@ -35,6 +35,7 @@
             android:text="@string/offline_seetings_main_label"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
@@ -49,7 +50,8 @@
             android:inputType="textMultiLine"
             android:text="@string/offline_seetings_description"
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,24 +59,57 @@
             android:layout_marginTop="40dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textOfflineDownloadLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Stažení dat o lokacích:"
-                android:textAlignment="center"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/checkBoxOfflinePicturesIncluded"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="5dp"
-                android:checked="false"
-                android:gravity="center"
-                android:text="včetně obrázků" />
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textOfflineDownloadLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stažení dat o lokacích  "
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/download_size_no_image_textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/checkBoxOfflinePicturesIncluded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:checked="false"
+                    android:gravity="center"
+                    android:minHeight="40dp"
+                    android:text="včetně obrázků  " />
+
+                <TextView
+                    android:id="@+id/download_size_with_image_textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryDark" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <Button

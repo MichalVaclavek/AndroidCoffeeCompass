@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.ui.notification;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,11 +36,12 @@ import static android.view.View.GONE;
  * Activity to show list of new CoffeeSites received upon subscribed notification.<br>
  * Or after user's click on Statistics View on MainActivity, which leads to load
  * CoffeeSites created in last week/7 days.<br>
+ * Or after user searches CoffeeSites in town.<br>
  * Allows to select the new CoffeeSite and open detail activity for that new CoffeeSite.
  */
-public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
-                                                    implements CoffeeSiteServicesConnectionListener,
-                                                               CoffeeSiteLoadServiceOperationsListener  {
+public class StaticCoffeeSitesListActivity extends AppCompatActivity
+                                           implements CoffeeSiteServicesConnectionListener,
+                                                      CoffeeSiteLoadServiceOperationsListener  {
 
     private static final String TAG = "LatestSitesListAct";
 
@@ -74,12 +76,21 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
     private int numOfDaysToLoadLatestSites = 0; // 0 means not valid
 
     /**
+     * Name of town to search CoffeeSites in
+     */
+    private String townName = "";
+
+    /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device. Not used, now.
      */
     private boolean mTwoPane;
 
-    public NotificationNewCoffeeSitesListActivity() {
+    private ProgressBar findingSitesInTownProgressBar;
+
+    private Toolbar toolbar;
+
+    public StaticCoffeeSitesListActivity() {
     }
 
 
@@ -91,14 +102,11 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
         loadCoffeeSiteProgressBar = findViewById(R.id.progress_notification_new_coffeesites_load);
 
-        newCoffeeSitesURLs = getIntent().getStringArrayListExtra("newCoffeeSitesURLs");
-        numOfDaysToLoadLatestSites = getIntent().getIntExtra("daysBack", 0);
-
         if (savedInstanceState != null && content != null) { // i.e. after orientation was changed
             Collections.sort(content);
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.notification_new_sitesList_Toolbar);
+        toolbar = (Toolbar) findViewById(R.id.notification_new_sitesList_Toolbar);
         setSupportActionBar(toolbar);
         // Setup main toolbar with back button arrow
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -106,7 +114,33 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
         layoutManager = new LinearLayoutManager(this);
 
+        newCoffeeSitesURLs = getIntent().getStringArrayListExtra("newCoffeeSitesURLs");
+        numOfDaysToLoadLatestSites = getIntent().getIntExtra("daysBack", 0);
+
+        if (numOfDaysToLoadLatestSites == 0) {
+            handleSearchInTownIntent(getIntent());
+        }
+
         doBindCoffeeSiteLoadOperationsService();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleSearchInTownIntent(intent);
+    }
+
+    /**
+     * To handle search intent from SearchManager - searchViews in this Activity and in MainActivity
+     * @param intent
+     */
+    private void handleSearchInTownIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            this.townName = query.trim();
+            toolbar.setTitle(this.townName + " (0)");
+        }
     }
 
     @Override
@@ -120,7 +154,7 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void goToMainActivity() {
-        Intent i = new Intent(NotificationNewCoffeeSitesListActivity.this, MainActivity.class);
+        Intent i = new Intent(StaticCoffeeSitesListActivity.this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
         finish();
@@ -150,6 +184,11 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
     private void startLatestCoffeeSitesLoad(int numOfDaysBack) {
         showProgressbar();
         coffeeSiteLoadOperationsService.getCoffeeSitesActivatedLastDays(numOfDaysBack);
+    }
+
+    private void startCoffeeSitesInTownLoad(String townName) {
+        showProgressbar();
+        coffeeSiteLoadOperationsService.getCoffeeSitesInTown(townName);
     }
 
     /**
@@ -214,6 +253,29 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * CoffeeSites in town data loaded from server/DB, show the data or error.
+     *
+     * @param loadedCoffeeSite - CoffeeSite's data loaded from server
+     * @param error - indication, if there was error during loading
+     */
+    @Override
+    public void onCoffeeSitesInTownLoaded(List<CoffeeSite> loadedCoffeeSites, String error) {
+        hideProgressbar();
+        if (!error.isEmpty()) {
+            showCoffeeSiteLoadFailure(error);
+            return;
+        }
+        Log.i(TAG, "CoffeeSites in town load success?: " + error.isEmpty());
+        if (loadedCoffeeSites != null) {
+            content = loadedCoffeeSites;
+            if (!content.isEmpty()) {
+                toolbar.setTitle(this.townName + " (" + content.size() + ")");
+                prepareAndActivateRecyclerView(content);
+            }
+        }
+    }
+
     private void showCoffeeSiteLoadFailure(String error) {
         error = !error.isEmpty() ? error : getString(R.string.coffee_site_load_failure);
         Toast toast = Toast.makeText(getApplicationContext(),
@@ -251,8 +313,11 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             // refresh CoffeeSites after start
-            if (content.isEmpty()) {
+            if (content.isEmpty() && numOfDaysToLoadLatestSites > 0) {
                 loadAllNewCoffeeSites();
+            }
+            if (content.isEmpty() && !townName.isEmpty()) {
+                startCoffeeSitesInTownLoad(townName);
             }
         }
     }
@@ -282,18 +347,12 @@ public class NotificationNewCoffeeSitesListActivity extends AppCompatActivity
 
     @Override
     protected void onPause() {
-//        if (coffeeSiteLoadOperationsService != null) {
-//            coffeeSiteLoadOperationsService.removeLoadOperationsListener(this);
-//        }
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        if (coffeeSiteLoadOperationsService != null) {
-//            coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
-//        }
     }
 
     /**

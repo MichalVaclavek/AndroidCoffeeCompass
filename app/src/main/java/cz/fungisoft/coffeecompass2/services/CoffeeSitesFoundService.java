@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -18,25 +19,33 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInTownAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFoundListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
- * Service to find CoffeeSites in current search range. Uses other objects to get such data<br>
+ * Service to find CoffeeSites in current search range from current geo location. Uses other objects to get such data<br>
  * either from server or from DB (for OFFLINE mode).<br>
+ * Also used to find all CoffeeSites in given Town.<br>
  * Implements PropertyChangeListener of the LocationService, which is needed for equipment move
  * detection.<br>
  */
-public class CoffeeSitesInRangeFoundService extends Service implements PropertyChangeListener,
-                                                                       CoffeeSitesInRangeFromServerResultListener {
+public class CoffeeSitesFoundService extends Service implements PropertyChangeListener,
+                                                                CoffeeSitesFoundFromServerResultListener {
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -68,19 +77,20 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      */
     private boolean isSearching = false;
 
+
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
      * IPC.
      */
     public class LocalBinder extends Binder {
-        CoffeeSitesInRangeFoundService getService() {
-            return CoffeeSitesInRangeFoundService.this;
+        CoffeeSitesFoundService getService() {
+            return CoffeeSitesFoundService.this;
         }
     }
 
     // This is the object that receives interactions from clients.
-    private final IBinder mBinder = new CoffeeSitesInRangeFoundService.LocalBinder();
+    private final IBinder mBinder = new CoffeeSitesFoundService.LocalBinder();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -89,7 +99,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
 
 
     /**
-     * Cislo vetsi nez 0 a menzi nez 1, vyjadrujici, kdy se ma provest
+     * Cislo vetsi nez 0 a mensi nez 1, vyjadrujici, kdy se ma provest
      * novy dotaz na server pro aktualni CoffeeSites.
      * Pri zmene lokace se vypocita o jakou vzdalenost se telefon posunul
      * a pokud je tato zmenu vetsi jako moveToRangeNewSearchRatio * currentSearchRange
@@ -103,29 +113,27 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     private final List<CoffeeSitesInRangeSearchOperationListener> sitesInRangeSearchOperationListeners = new ArrayList<>();
 
 
-    public void addSitesInRangeSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
+    public void addFoundSitesSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
         sitesInRangeSearchOperationListeners.add(sitesInRangeUpdateListener);
-        Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeSearchOperationListeners.size());
+        Log.d(TAG,  ". Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
     }
 
-    public void removeSitesInRangeSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
+    public void removeFoundSitesSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
         sitesInRangeSearchOperationListeners.remove(sitesInRangeUpdateListener);
-        Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeSearchOperationListeners.size());
+        Log.d(TAG,  ". Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
     }
 
     /**
      * Listeners to listen event of new coffeesites search result
      */
-    private final List<CoffeeSitesInRangeFoundListener> sitesInRangeFoundListeners = new ArrayList<>();
+    private final List<CoffeeSitesFoundListener> sitesFoundListeners = new ArrayList<>();
 
-    public void addSitesInRangeFoundListener(CoffeeSitesInRangeFoundListener sitesInRangeUpdateListener) {
-        sitesInRangeFoundListeners.add(sitesInRangeUpdateListener);
-        //Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeSearchOperationListeners.size());
+    public void addSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
+        sitesFoundListeners.add(sitesInRangeUpdateListener);
     }
 
-    public void removeSitesInRangeFoundListener(CoffeeSitesInRangeFoundListener sitesInRangeUpdateListener) {
-        sitesInRangeFoundListeners.remove(sitesInRangeUpdateListener);
-        //Log.d(TAG,  ". Pocet posluchacu zmeny CoffeeSites in Range: " + sitesInRangeSearchOperationListeners.size());
+    public void removeSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
+        sitesFoundListeners.remove(sitesInRangeUpdateListener);
     }
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -146,10 +154,9 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
         foundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), coffeeSites -> {
             List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
             for (CoffeeSite cs : coffeeSites) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
-                if (searchLocationOfCurrentSites != null) {
-                    if (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange) {
+                if ((searchLocationOfCurrentSites != null)
+                    && (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange)) {
                         coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocationOfCurrentSites));
-                    }
                 }
             }
             return coffeeSiteMovables;
@@ -196,14 +203,14 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     }
 
     /**
-     * Set new input search data to repository to initiate new DB search.
+     * Set new input search data (lat, long, range) to repository to initiate new DB search.
      *
      * @param latitudeFrom
      * @param longitudeFrom
      * @param searchRange
      */
-    private void setInput(double latitudeFrom, double longitudeFrom, int searchRange) {
-        coffeeSiteRepository.setNewSearchCriteria(latitudeFrom, longitudeFrom, searchRange);
+    private void setDBInput(double latitudeFrom, double longitudeFrom, int searchRange) {
+        coffeeSiteRepository.setNewLatLongRangeSearchCriteria(latitudeFrom, longitudeFrom, searchRange);
     }
 
 
@@ -238,10 +245,11 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
                     firstLocationDetection = false;
                     // get current location for searching
                     this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-                    if (this.searchLocationOfCurrentSites != null && this.coffeeSort != null) {
-                        startSearchingSites(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                    if (this.searchLocationOfCurrentSites != null
+                            && this.coffeeSort != null) {
+                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
                         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                            listener.onStartSearchingSitesInRange();
+                            listener.onStartSearchingSites();
                         }
                     }
                 }
@@ -250,7 +258,7 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     }
 
     /**
-     * Validates prerequisites for CoffeeSites search and starts searching fro CoffeeSites in range.<br>
+     * Validates prerequisites for CoffeeSites search and starts searching for CoffeeSites in range.<br>
      * Also calls onStartSearchingSitesInRange of the listeners to perform action required at search begin.
      */
     public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
@@ -264,13 +272,14 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
                 }
             }
         }
+
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
 
         if (this.searchLocationOfCurrentSites != null) {
-            startSearchingSites(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                listener.onStartSearchingSitesInRange();
+                listener.onStartSearchingSites();
             }
         }
     }
@@ -284,19 +293,19 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
      * @param longitude
      * @param range
      */
-    private void startSearchingSites(String coffeeSort, double latitude, double longitude, int range) {
+    private void startSearchingSitesInRange(String coffeeSort, double latitude, double longitude, int range) {
         if (!isSearching) {
             if (!Utils.isOfflineModeOn(getApplicationContext())) {
                 startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
             }
             else { // updates LiveData returned from DB
-                setInput(latitude, longitude, range);
+                setDBInput(latitude, longitude, range);
             }
         }
     }
 
     /**
-     * Calls REST async. task. or requests DB if in OFFLINE mode
+     * Calls REST async. task.
      *
      * @param coffeeSort
      */
@@ -317,11 +326,11 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
         isSearching = false;
-        for (CoffeeSitesInRangeFoundListener listener : sitesInRangeFoundListeners) {
+        for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
             listener.onSitesInRangeFound(coffeeSites);
         }
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesInRangeFinished();
+            listener.onSearchingSitesFinished();
         }
         Log.i(TAG, "Returned search from server. Number of coffee sites found: " + coffeeSites.size());
     }
@@ -330,15 +339,15 @@ public class CoffeeSitesInRangeFoundService extends Service implements PropertyC
     public void onSitesInRangeReturnedFromServerError(String error) {
         isSearching = false;
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesInRangeError(error);
-            listener.onSearchingSitesInRangeFinished();
+            listener.onSearchingSitesError(error);
+            listener.onSearchingSitesFinished();
         }
     }
 
+
     @Override
     public void onDestroy() {
-        super.onDestroy();
         doUnbindLocationService();
+        super.onDestroy();
     }
-
 }

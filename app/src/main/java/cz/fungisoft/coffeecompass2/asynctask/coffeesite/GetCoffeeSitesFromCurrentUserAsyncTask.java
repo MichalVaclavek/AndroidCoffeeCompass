@@ -117,7 +117,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
                             }
                         } else {
                             Log.i(TAG, "Returned empty response for loading CoffeeSites from user REST request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            error = new Result.Error(new IOException("Errorloading CoffeeSites from user. Response empty."));
                             operationError = error.toString();
                             if (callingListenerService != null) {
                                 callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,7 +34,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
     /**
      * A Service, which invokes this async. task
      */
-    private final CoffeeSitesInRangeFromServerResultListener callingService;
+    private final CoffeeSitesFoundFromServerResultListener callingService;
 
     private String error;
 
@@ -44,7 +44,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
     private String coffeeSort;
 
 
-    public GetCoffeeSitesInRangeAsyncTask(CoffeeSitesInRangeFromServerResultListener parentService,
+    public GetCoffeeSitesInRangeAsyncTask(CoffeeSitesFoundFromServerResultListener parentService,
                                           double latFrom, double longFrom, int range, String coffeeSort) {
         this.callingService = parentService;
         initSearchParameters(latFrom, longFrom, range, coffeeSort);

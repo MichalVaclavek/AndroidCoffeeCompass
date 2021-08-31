@@ -36,7 +36,7 @@ public class NotificationNewCoffeeSitesRecyclerViewAdapter extends RecyclerView.
 
     private final boolean mTwoPane;
 
-    private final NotificationNewCoffeeSitesListActivity mParentActivity;
+    private final StaticCoffeeSitesListActivity mParentActivity;
 
     /**
      * List of CoffeeSites to show in RecyclerView
@@ -59,7 +59,7 @@ public class NotificationNewCoffeeSitesRecyclerViewAdapter extends RecyclerView.
      * @param mValues - list of CoffeeSites to be shown by the NotificationNewCoffeeSitesListActivity
      * @param parent - parent Activity for the Adapter, in this case this NotificationNewCoffeeSitesListActivity
      */
-    public NotificationNewCoffeeSitesRecyclerViewAdapter(NotificationNewCoffeeSitesListActivity parent,
+    public NotificationNewCoffeeSitesRecyclerViewAdapter(StaticCoffeeSitesListActivity parent,
                                                          List<CoffeeSite> mValues, boolean twoPane) {
         mParentActivity = parent;
         this.mValues = mValues;

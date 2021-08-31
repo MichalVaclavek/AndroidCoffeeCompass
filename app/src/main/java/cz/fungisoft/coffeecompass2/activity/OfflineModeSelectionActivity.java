@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,10 +27,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.asynctask.GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.GetSizeOfCoffeeSitesWithoutImagesToDownloadAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.DownloadDataOverview;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.DataDownloadSizeRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
@@ -37,6 +42,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * and used in case of OFFLINE mode.
  */
 public class OfflineModeSelectionActivity extends AppCompatActivity implements CoffeeSiteEntitiesServiceConnectionListener,
+                                                                               DataDownloadSizeRESTResultListener,
                                                                                CoffeeSiteEntitiesService.DataDownloadIndicatorListener {
 
     private static final String TAG = "OfflineModeSelectionAct";
@@ -73,6 +79,12 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @BindView(R.id.downloaded_offline_images)
     TextView downloadedImagesOverview;
 
+    @BindView(R.id.download_size_no_image_textView)
+    TextView sizeOfDataWithoutImageTextView;
+
+    @BindView(R.id.download_size_with_image_textView)
+    TextView sizeOfDataWithImageTextView;
+
     private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy, HH:mm");
 
     private boolean downloadInProgress = false;
@@ -104,7 +116,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
             lastLoadedStatusTextView.setText(getString(R.string.last_offline_data_not_yet_downloaded));
         }
 
-        origStatusColor =  downloadingStatusTextView.getTextColors(); //saves original color
+        origStatusColor =  downloadingStatusTextView.getTextColors(); // saves original color
 
         downloadingStatusTextView.setText("");
 
@@ -127,6 +139,10 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
                 }
             }
         });
+
+        // Try to get sizes of data to be downloaded
+        new GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask(this).execute();
+        new GetSizeOfCoffeeSitesWithoutImagesToDownloadAsyncTask(this).execute();
     }
 
 
@@ -277,4 +293,34 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         downloadedImagesOverview.setText("");
     }
 
+    @Override
+    public void onSizeOfAllDataToDownload(Result<Integer> result) {
+        if (result instanceof Result.Success) {
+            int sizeOfAllDataToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024;
+            sizeOfDataWithImageTextView.setText(getString(R.string.all_data_to_download_size, sizeOfAllDataToDownloadMB));
+        }
+    }
+
+    @Override
+    public void onSizeOfAllDataWithoutImagesToDownload(Result<Integer> result) {
+        if (result instanceof Result.Success) {
+            int sizeOfDataWithoutImagesToDownloadKB = ((Result.Success<Integer>) result).getData();
+            if (sizeOfDataWithoutImagesToDownloadKB < 1024) {
+                float sizeOfDataWithoutImagesToDownloadMBFloat = ((Result.Success<Integer>) result).getData() / 1024f;
+                DecimalFormat df = new DecimalFormat("#.#");
+                sizeOfDataWithoutImageTextView.setText(getString(R.string.data_without_images_to_download_size, df.format(sizeOfDataWithoutImagesToDownloadMBFloat)));
+            } else {
+                int sizeOfDataWithoutImagesToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024;
+                sizeOfDataWithoutImageTextView.setText(getString(R.string.data_without_images_to_download_size, String.valueOf(sizeOfDataWithoutImagesToDownloadMB)));
+            }
+
+        }
+    }
+
+    @Override
+    public void onSizeOfDataToDownloadError(Result.Error error) {
+        if (error != null) {
+            // TODO - show error Toast or not?
+        }
+    }
 }

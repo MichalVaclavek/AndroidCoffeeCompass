@@ -69,12 +69,13 @@ import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesite
  * Allows to go back to MainActivity, to go to CreateCoffeeSiteActivity to create new CoffeeSite,
  * and reload the list of sites.
  * <p>
- * Also uploads CoffeeSites created when Offline.
+ * Also allows upload of the CoffeeSites created when offline.
  */
 public class MyCoffeeSitesListActivity extends AppCompatActivity
                                        implements UserAccountServiceConnectionListener,
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,
+                                                  UploadCoffeeSitesDialogFragment.UploadCoffeeSitesDialogListener,
                                                   CoffeeSiteServicesConnectionListener,
                                                   CoffeeSiteImageServiceConnectionListener,
                                                   CoffeeSiteImageServiceCallResultListener,
@@ -387,15 +388,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
         // Upload unsaved CoffeeSites to server
         if (id == R.id.action_upload_coffeesites) {
-            if (Utils.isOnline(getApplicationContext())) {
-                DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
-                if (currentUser != null && dataForOfflineModePreferenceHelper.getDataSavedOfflineAvailable()
-                        && getNotSavedCoffeeSites() != null) {
-                    startUploadCoffeeSitesOperation(getNotSavedCoffeeSites());
-                }
-            } else {
-                Utils.showNoInternetToast(getApplicationContext());
-            }
+            showUploadCoffeeSitesConfirmDialog();
             return true;
         }
 
@@ -1156,6 +1149,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (dialog instanceof InsertAuthorCommentDialogFragment) {
                 recyclerViewAdapter.onInsertAuthorCommentDialogPositiveClick((InsertAuthorCommentDialogFragment) dialog);
             }
+            if (dialog instanceof UploadCoffeeSitesDialogFragment) {
+                onUploadCoffeeSitesDialogPositiveClick((UploadCoffeeSitesDialogFragment) dialog);
+            }
         }
     }
 
@@ -1168,8 +1164,29 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             if (dialog instanceof InsertAuthorCommentDialogFragment) {
                 recyclerViewAdapter.onInsertAuthorCommentDialogNegativeClick((InsertAuthorCommentDialogFragment) dialog);
             }
+            if (dialog instanceof UploadCoffeeSitesDialogFragment) {
+                onUploadCoffeeSitesDialogNegativeClick((UploadCoffeeSitesDialogFragment) dialog);
+            }
         }
     }
+
+
+    void onUploadCoffeeSitesDialogPositiveClick(UploadCoffeeSitesDialogFragment dialog) {
+        // upload CoffeeSites after user's confirmation
+        if (Utils.isOnline(getApplicationContext())) {
+//            DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
+//            if (currentUser != null && dataForOfflineModePreferenceHelper.getDataSavedOfflineAvailable()
+//                    && getNotSavedCoffeeSites() != null) {
+            //DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
+            if (currentUser != null && getNotSavedCoffeeSites() != null) {
+                startUploadCoffeeSitesOperation(getNotSavedCoffeeSites());
+            }
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    void onUploadCoffeeSitesDialogNegativeClick(UploadCoffeeSitesDialogFragment dialog) {}
 
     /*** DIALOGS LISTENERS *** END ***/
 
@@ -1242,9 +1259,27 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         super.onDestroy();
     }
 
-    public boolean isSwitchABChecked() {
-        return switchAB != null ? switchAB.isChecked() : false;
+    /**
+     * Show the dialog to insert CoffeeSite's author comment
+     */
+    private void showUploadCoffeeSitesConfirmDialog() {
+        // Create an instance of the dialog fragment and show it
+        // Passes CoffeeSite's author comment into the dialog
+        UploadCoffeeSitesDialogFragment dialog = newInstance(getNotSavedCoffeeSites().size());
+        dialog.show(getSupportFragmentManager(), "UploadCoffeeSitesDialogFragment");
     }
+
+    private static UploadCoffeeSitesDialogFragment newInstance(int numOfNewOrUpdatedCoffeeSites) {
+        UploadCoffeeSitesDialogFragment f = new UploadCoffeeSitesDialogFragment();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putInt("numOfNewOrUpdatedCoffeeSites", numOfNewOrUpdatedCoffeeSites);
+        f.setArguments(args);
+
+        return f;
+    }
+
 
     /**
      * Used when internet connectivity status has changed in NetworkStateReceiver

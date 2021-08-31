@@ -69,6 +69,15 @@ public interface CoffeeSiteDao {
 
     /**
      *
+     * @param townName
+     * @return
+     */
+    @Query("SELECT * FROM coffee_site_table WHERE mesto LIKE :townName")
+    Single<List<CoffeeSite>> getCoffeeSitesInTownSingle(String townName);
+
+
+    /**
+     *
      * @param userName
      * @return
      */

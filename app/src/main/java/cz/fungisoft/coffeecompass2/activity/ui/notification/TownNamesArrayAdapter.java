@@ -66,10 +66,10 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
-                if (constraint != null) {
+                if (constraint != null && constraint.length() > 0) {
                     // Retrieve the autocomplete results
                     // ignore special characters, like dots '.' and so on
-                    char endChar = constraint.charAt(constraint.length() -1);
+                    char endChar = constraint.charAt(constraint.length() - 1);
                     if ((endChar >= 'a' && endChar <= 'z') || (endChar >= 'A' && endChar <= 'Z')
                            || allowedCheckChars.contains(String.valueOf(endChar))) {
                         townNameStartChanged(constraint.toString());
@@ -117,7 +117,6 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
             CuzkCandidates candidates = ((Result.Success<CuzkCandidates>) result).getData();
             for (Candidate candidate : candidates.getCandidates()) {
                 matchingTowns.add(candidate.getAddress());
-                //Log.i(TAG, candidate.getAddress());
             }
             refresh(matchingTowns); // update the drop down list
         }
@@ -176,7 +175,6 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
         placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
             for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
                 matchingTowns.add(prediction.getPrimaryText(null).toString());
-                //Log.i(TAG, prediction.getPrimaryText(null).toString());
             }
             refresh(matchingTowns); // update the drop down list
         }).addOnFailureListener((exception) -> {
@@ -186,5 +184,4 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
             }
         });
     }
-
 }

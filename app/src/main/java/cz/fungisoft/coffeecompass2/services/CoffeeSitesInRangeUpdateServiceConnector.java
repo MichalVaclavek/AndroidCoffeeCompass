@@ -19,15 +19,15 @@ public class CoffeeSitesInRangeUpdateServiceConnector implements ServiceConnecti
 
     // To invoke the bound service, first make sure that this value
     // is not null.
-    private CoffeeSitesInRangeFoundService mBoundService;
+    private CoffeeSitesFoundService mBoundService;
 
-    public CoffeeSitesInRangeFoundService getSitesInRangeUpdateService() {
+    public CoffeeSitesFoundService getSitesInRangeUpdateService() {
         return mBoundService;
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mBoundService = ((CoffeeSitesInRangeFoundService.LocalBinder)service).getService();
+        mBoundService = ((CoffeeSitesFoundService.LocalBinder)service).getService();
 
         if (this.callingActivity != null) {
             this.callingActivity.onCoffeeSitesInRangeUpdateServiceConnected();

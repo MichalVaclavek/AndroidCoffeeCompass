@@ -18,9 +18,9 @@ public class LocationServiceConnector implements ServiceConnection {
         this.callingActivity = callingActivity;
     }
 
-    private CoffeeSitesInRangeFoundService callingService;
+    private CoffeeSitesFoundService callingService;
 
-    public LocationServiceConnector(CoffeeSitesInRangeFoundService callingService) {
+    public LocationServiceConnector(CoffeeSitesFoundService callingService) {
         this.callingService = callingService;
     }
 

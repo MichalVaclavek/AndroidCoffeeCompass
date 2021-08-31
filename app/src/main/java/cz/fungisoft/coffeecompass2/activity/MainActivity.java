@@ -1,6 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
+import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,6 +18,7 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -59,7 +63,8 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.M
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.notification.NotificationNewCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.StaticCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.TownNamesArrayAdapter;
 import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
@@ -145,10 +150,10 @@ public class MainActivity extends ActivityWithLocationService
     private final int DAYS_BACK_FOR_LOAD_STATISTICS = 7;
 
     /**
-     * To indocate if a user clicked on statistics View, to load latest
+     * To indicate if a user clicked on statistics View, to load latest
      * CoffeeSites after reading statistics.
      */
-    private boolean calledUponUsersClick = false;
+    private boolean statisticsCalledUponUsersClick = false;
 
     /**
      * Needed to decide if the menu icon for starting MyCoffeeSitesListActivity
@@ -576,8 +581,6 @@ public class MainActivity extends ActivityWithLocationService
 
         // Setup menu icon with badge showing number of new CoffeeSites notification
         newSitesNotificationMenuItem = menu.findItem(R.id.new_sites_notification);
-        // Default do not show new CoffeeSite notification menu icon
-        //newSitesNotificationMenuItem.setVisible(false);
 
         View actionView = newSitesNotificationMenuItem.getActionView();
         textNotificationBellIconItemCount = (TextView) actionView.findViewById(R.id.notification_bell_badge);
@@ -588,6 +591,35 @@ public class MainActivity extends ActivityWithLocationService
             @Override
             public void onClick(View v) {
                 onOptionsItemSelected(newSitesNotificationMenuItem);
+            }
+        });
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search_main).getActionView();
+
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, StaticCoffeeSitesListActivity.class)));
+        searchView.setQueryHint(getString(R.string.search_by_city_hint));
+        searchView.setIconifiedByDefault(true); // iconify the widget; and expand after user's click
+
+        TownNamesArrayAdapter townNamesArrayAdapter = new TownNamesArrayAdapter(getApplicationContext(), R.layout.suggestion);
+        townNamesArrayAdapter.setNotifyOnChange(true);
+
+        SearchView.SearchAutoComplete searchAutoComplete = (SearchView.SearchAutoComplete) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchAutoComplete.setThreshold(2);
+        searchAutoComplete.setAdapter(townNamesArrayAdapter);
+
+        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // City name is selected from list
+                String townName =  parent.getItemAtPosition(position).toString();
+                if (townName.length() > 1) {
+                    searchView.setQuery(townName, true);
+                    // handleSearchIntent(); follows
+                }
+                Log.i(TAG, "Selected town: " + townName);
             }
         });
 
@@ -615,7 +647,7 @@ public class MainActivity extends ActivityWithLocationService
         switch (item.getItemId()) {
             case R.id.new_sites_notification: {
                 if (newNotificationCoffeeSiteURLs.size() > 1) {
-                    Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
+                    Intent intent = new Intent(this, StaticCoffeeSitesListActivity.class);
                     intent.putStringArrayListExtra("newCoffeeSitesURLs", newNotificationCoffeeSiteURLs);
                     startActivity(intent);
 
@@ -735,9 +767,10 @@ public class MainActivity extends ActivityWithLocationService
      */
     public synchronized void startReadStatistics() {
         if (Utils.isOnline(getApplicationContext())) {
-            if (calledUponUsersClick) {
+            if (statisticsCalledUponUsersClick) {
                 showProgressbar();
             }
+            //TODO refactor to read by Retrofit lib.
             new ReadStatsAsyncTask(this).execute();
         }
     }
@@ -751,6 +784,9 @@ public class MainActivity extends ActivityWithLocationService
         hideProgressbar();
         if (Integer.parseInt(statisticsPrefencesHelper.getNumOfSitesLastWeek()) < Integer.parseInt(stats.numOfSitesLastWeek)) {
             statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(true);
+        }
+        if (Integer.parseInt(stats.numOfSitesLastWeek) == 0) {
+            statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
         }
         statisticsPrefencesHelper.saveStatistics(stats);
 
@@ -768,10 +804,10 @@ public class MainActivity extends ActivityWithLocationService
         usersView.setText(stats.numOfUsers);
 
         // Where the statistics shown upon user's click on Statistics CardView ?
-        if (calledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0 ) {
-            calledUponUsersClick = false;
+        if (statisticsCalledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0 ) {
+            statisticsCalledUponUsersClick = false;
             if (Utils.isOnline(getApplicationContext())) {
-                Intent intent = new Intent(this, NotificationNewCoffeeSitesListActivity.class);
+                Intent intent = new Intent(this, StaticCoffeeSitesListActivity.class);
                 intent.putExtra("daysBack", DAYS_BACK_FOR_LOAD_STATISTICS);
                 startActivity(intent);
                 // user now checked the new CoffeeSites of the week, so background of the Statistics CardView can
@@ -823,7 +859,7 @@ public class MainActivity extends ActivityWithLocationService
      * @param view
      */
     public void onStatisticsClick(View view) {
-        calledUponUsersClick = true;
+        statisticsCalledUponUsersClick = true;
         statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.white_transparent));
         startReadStatistics();
     }

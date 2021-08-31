@@ -194,7 +194,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param oldSites
      */
     @Override
-    public void onSitesOutOfRange(List<CoffeeSiteMovable> oldSites) {
+    public void onSitesOutOfRange(List<CoffeeSiteMovable> oldSites, boolean searchInRange) {
         // Go through all current sites and remove sites being out of range
         for (CoffeeSiteMovable csmToRemove : oldSites) {
             csmToRemove.removePropertyChangeListener(this);
@@ -209,7 +209,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
 
         // If the list is empty now, insert standard 'Empty card'
-        if (mValues.size() == 0) {
+        if (mValues.size() == 0 && searchInRange) {
             mValues.add(0, dummyEmptyListCoffeeSite);
             this.notifyItemInserted(0);
         }
@@ -217,7 +217,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
     public int getCurrentNumberOfSitesShown() {
-        if (mValues != null && mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy"))) {
+        if (mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy") || mValues.get(0).getName().equals("InitialDummy"))) {
             return 0;
         } else {
             return mValues.size();
@@ -383,11 +383,18 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         return mValues.size();
     }
 
+    /**
+     * Clears list of current CoffeeSites. Used when new searching in town starts.
+     */
+    public void clearList() {
+        mValues.clear();
+    }
+
 
     /**
      * Start animation of text on Empty card, when new searching of CoffeeSites started again
      */
-    public void newSitesInRangeSearchingStarted() {
+    public void newSitesSearchingStarted() {
         searchingInProgress = true;
         if (emptyCardViewHolder != null &&
                 mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy"))) {
@@ -399,18 +406,20 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     /**
-     * Finish animations or replace Initial Empty card by standard Dummy card
+     * Finish animations or replace Initial Empty card by standard Dummy card.
+     * Applicable when searching in location/range, not in town
      */
-    public void newSitesInRangeSearchingFinished() {
+    public void newSitesSearchingFinished() {
         searchingInProgress = false;
         if (emptyCardViewHolder != null &&
-                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy")))  {
+                mValues.size() == 1 && (mValues.get(0).getName().equals("Dummy"))) {
             if (!animationRunning) {
                 emptyCardViewHolder.searchingInfoLabel.setText(R.string.searching_will_start_after_move_message);
             }
         }
 
         // If there is no newSites returned, after Initial Empty card was shown, show Standard Empty card
+        // if this was searching in location/range
         if (mValues.size() == 1 && mValues.get(0).getName().equals("InitialDummy")) {
             // Remove Initial Empty card
             mValues.remove(0);
@@ -562,20 +571,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         this.mValues.get(position).addPropertyChangeListener(viewHolder.distanceView);
         viewHolder.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
         Log.d(TAG, ". Distance Text View " + viewHolder.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
-
-//        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-//            if (!Utils.isOfflineModeOn(mParentActivity.getApplicationContext())) {
-//                Picasso.get().load(this.mValues.get(position).getMainImageURL())
-//                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-//                             .into(viewHolder.siteFoto);
-//            } else {
-//                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
-//                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-//                             .into(viewHolder.siteFoto);
-//            }
-//        } else {
-//            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
-//        }
 
         boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
         if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {

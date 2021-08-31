@@ -1,12 +1,10 @@
-package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
+package cz.fungisoft.coffeecompass2.asynctask.image;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.security.InvalidParameterException;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -17,51 +15,46 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final LoggedInUser currentUser;
 
-    private final File imageFile;
-
-    private final CoffeeSite coffeeSite;
+    /**
+     * Id of the CoffeeSite whose image is requested to be deleted
+     */
     private final long coffeeSiteId;
+    private final CoffeeSite coffeeSite;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
 
+    private String operationResult = "";
     private String operationError = "";
 
-    private static final String TAG = "ImageUploadAsyncTask";
+    private static final String TAG = "ImageDeleteAsyncTask";
 
 
-    public ImageUploadAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, File imageFile, CoffeeSite coffeeSite) {
+    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, CoffeeSite coffeeSite) {
         this.callingService = new WeakReference<>(imageService);
         this.currentUser = currentUser;
-        if (!imageFile.exists()) {
-            throw new IllegalArgumentException();
-        }
-        this.imageFile = imageFile;
         this.coffeeSite = coffeeSite;
         this.coffeeSiteId = coffeeSite.getId();
     }
 
-
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(TAG, "start");
+        operationResult = "";
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + (currentUser == null));
-        if (currentUser != null && imageFile != null) {
+        if (currentUser != null && coffeeSiteId != 0) {
 
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
@@ -85,37 +78,32 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
             Retrofit retrofit = new Retrofit.Builder()
                     .client(client)
-                    .baseUrl(ImageRESTInterface.UPLOAD_IMAGE_URL)
+                    .baseUrl(ImageRESTInterface.DELETE_IMAGE_URL)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build();
 
-            // Create a request body with file and image media type
-            RequestBody fileReqBody = RequestBody.create(imageFile, MediaType.parse("image/jpg"));
-
-            // Create MultipartBody.Part using file request-body, file name and part name
-            MultipartBody.Part part = MultipartBody.Part.createFormData("file", imageFile.getName(), fileReqBody);
-
             ImageRESTInterface api = retrofit.create(ImageRESTInterface .class);
 
-            Call<String> call = api.uploadImage(part, coffeeSiteId);
+            Call<Integer> call = api.deleteImageBySiteId(coffeeSiteId);
 
             Log.i(TAG, "start call");
 
-            call.enqueue(new Callback<String>() {
+            call.enqueue(new Callback<Integer>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
+                public void onResponse(Call<Integer> call, Response<Integer> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");
-                            String imageURL = response.body();
+                            operationResult = "OK";
+                            int coffeeSiteID = response.body();
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageSaveResult(coffeeSite, new Result.Success<>(imageURL.trim()));
+                                callingService.get().evaluateImageDeleteResult(coffeeSite, new Result.Success<>(coffeeSiteID));
                             }
                         } else {
-                            Log.i(TAG, "Returned empty response for uploading image request.");
-                            Result.Error error = new Result.Error(new IOException("Error uploading image. Response empty."));
+                            Log.i(TAG, "Returned empty response for deleting image request.");
+                            Result.Error error = new Result.Error(new IOException("Error deleting image. Response empty."));
                             if (callingService.get() != null) {
-                                callingService.get().evaluateImageSaveResult(coffeeSite, error);
+                                callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                             }
                         }
                     } else {
@@ -129,18 +117,18 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                         }
                         Result.Error error = new Result.Error(new IOException(operationError));
                         if (callingService.get() != null) {
-                            callingService.get().evaluateImageSaveResult(coffeeSite, error);
+                            callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Log.e(TAG, "Error uploading image REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error uploading image.", t));
-                    //operationError = error.toString();
+                public void onFailure(Call<Integer> call, Throwable t) {
+                    Log.e(TAG, "Error deleting image REST request." + t.getMessage());
+                    Result.Error error = new Result.Error(new IOException("Error deleting image.", t));
+                    operationError = error.toString();
                     if (callingService.get() != null) {
-                        callingService.get().evaluateImageSaveResult(coffeeSite, error);
+                        callingService.get().evaluateImageDeleteResult(coffeeSite, error);
                     }
                 }
             });
