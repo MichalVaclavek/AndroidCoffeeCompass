@@ -65,7 +65,6 @@
                 android:resource="@xml/main_app_widget_info" />
         </receiver> <!-- The content provider for Widget -->
 
-        <activity android:name=".activity.OfflineModeSelectionActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -167,7 +166,12 @@
             android:exported="true">
         </service>
 
-        <activity android:name=".activity.ui.register.SignupActivity" />
+        <activity
+            android:name=".activity.ui.register.SignupActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activity.OfflineModeSelectionActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.ui.login.LoginActivity"
             android:label="@string/title_activity_login"
@@ -202,6 +206,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
         </activity>
+
         <activity
             android:name=".activity.ui.login.UserDataViewActivity"
             android:parentActivityName=".activity.MainActivity"
@@ -210,6 +215,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.MainActivity" />
         </activity>
+
         <activity
             android:name=".activity.ui.coffeesite.CoffeeSiteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -219,6 +225,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity" />
         </activity>
+
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTop"

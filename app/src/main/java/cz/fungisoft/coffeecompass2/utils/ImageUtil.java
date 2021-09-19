@@ -216,7 +216,6 @@ public class ImageUtil {
                     final File myImageFile = new File(directory, imageFileName);
                     //File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
                     //dir.mkdirs();
-                    //final File myImageFile = new File(dir, imageFileName); // Create image file
                     myImageFileName = myImageFile.getAbsolutePath();
                     Bitmap bitmap = Picasso.get().load(myUrl).get();
                     try (FileOutputStream fos = new FileOutputStream(myImageFile)) {

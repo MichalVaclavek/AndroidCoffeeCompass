@@ -280,7 +280,7 @@
     <string name="found_coffeesite_activity_title">Nejbližší</string>
     <string name="coffeesite_not_found_in_town">Káva s sebou neevidována.</string>
 
-    <string name="all_data_to_download_size">(%1$d MB)</string>
+    <string name="all_data_to_download_size">(%1$s MB)</string>
     <string name="data_without_images_to_download_size">(%1$s MB)</string>
 
     <string name="moje_lokace">Moje lokace</string>

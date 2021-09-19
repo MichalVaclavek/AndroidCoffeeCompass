@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -570,6 +571,7 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
+    @SuppressLint("RestrictedApi") // due to searchAutoComplete.setThreshold(2);
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -598,7 +600,7 @@ public class MainActivity extends ActivityWithLocationService
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search_main).getActionView();
 
-        // Assumes current activity is the searchable activity
+        // StaticCoffeeSitesListActivity is the activity to show result of searchView input
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, StaticCoffeeSitesListActivity.class)));
         searchView.setQueryHint(getString(R.string.search_by_city_hint));
         searchView.setIconifiedByDefault(true); // iconify the widget; and expand after user's click
@@ -617,7 +619,7 @@ public class MainActivity extends ActivityWithLocationService
                 String townName =  parent.getItemAtPosition(position).toString();
                 if (townName.length() > 1) {
                     searchView.setQuery(townName, true);
-                    // handleSearchIntent(); follows
+                    // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
                 }
                 Log.i(TAG, "Selected town: " + townName);
             }

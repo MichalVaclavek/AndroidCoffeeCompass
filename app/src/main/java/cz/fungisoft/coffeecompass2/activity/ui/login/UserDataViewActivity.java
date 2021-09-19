@@ -60,7 +60,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
     @BindView(R.id.btn_logout) Button logoutButton;
     @BindView(R.id.btn_deleteUser) Button deleteUserButton;
-    @BindView(R.id.btn_notif_subscription) Button notificationSubscrActivityButton;
 
     @BindView(R.id.user_profile_toolbar) Toolbar toolbar;
 
@@ -112,14 +111,14 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
             doBindUserLogoutAndDeleteService();
         }
 
-        notificationSubscrActivityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(UserDataViewActivity.this, NewsSubscriptionActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-            }
-        });
+//        notificationSubscrActivityButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent i = new Intent(UserDataViewActivity.this, NewsSubscriptionActivity.class);
+//                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(i);
+//            }
+//        });
     }
 
     @Override

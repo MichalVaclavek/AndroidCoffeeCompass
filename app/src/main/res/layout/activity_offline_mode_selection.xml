@@ -11,6 +11,7 @@
         android:id="@+id/offlineActivityMainLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/activityBackround"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -22,7 +23,9 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/offline_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"></androidx.appcompat.widget.Toolbar>
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary2"
+                android:theme="@style/AppTheme.AppBarOverlay"></androidx.appcompat.widget.Toolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -72,6 +75,7 @@
                     android:layout_height="wrap_content"
                     android:text="Stažení dat o lokacích  "
                     android:textAlignment="center"
+                    android:textColor="@color/colorPrimaryDark"
                     android:textSize="18sp" />
 
                 <TextView
@@ -119,7 +123,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginTop="40dp"
             android:layout_marginRight="20dp"
-            android:background="@drawable/rounded_bezovy_button"
+            android:background="@drawable/rounded_green_button"
             android:text="Stáhnout" />
 
         <LinearLayout

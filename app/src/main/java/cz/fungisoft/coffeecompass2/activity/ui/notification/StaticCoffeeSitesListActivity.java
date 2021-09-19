@@ -139,6 +139,8 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             this.townName = query.trim();
+            this.townName = Character.toUpperCase(townName.charAt(0)) + townName.substring(1);
+
             toolbar.setTitle(this.townName + " (0)");
         }
     }

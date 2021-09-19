@@ -296,8 +296,11 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public void onSizeOfAllDataToDownload(Result<Integer> result) {
         if (result instanceof Result.Success) {
-            int sizeOfAllDataToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024;
-            sizeOfDataWithImageTextView.setText(getString(R.string.all_data_to_download_size, sizeOfAllDataToDownloadMB));
+            // Size of data returned from server are not precise
+            // according testing, the real size of data to be downloaded must be multiplicated by factor 1.5 (approximately)
+            float sizeOfAllDataToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024f  * 1.5f;
+            DecimalFormat df = new DecimalFormat("#");
+            sizeOfDataWithImageTextView.setText(getString(R.string.all_data_to_download_size, df.format(sizeOfAllDataToDownloadMB)));
         }
     }
 
@@ -320,7 +323,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public void onSizeOfDataToDownloadError(Result.Error error) {
         if (error != null) {
-            // TODO - show error Toast or not?
+            // TODO - to show error Toast or not?
         }
     }
 }

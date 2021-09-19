@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleService;
 
@@ -52,6 +53,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * A Service class to hold CoffeeSite entities classes.
  * Is able to load all available instancies of CoffeeSite entities
  * and save them into EntitiesRepository.
+ * <p>
+ * Also reads all CoffeeSites with Comments and Images from server and
+ * saves all to DB.
  * <p>
  * It has its own Service connector and is not part of other
  * CoffeeSiteServices with their common service connector.
@@ -270,7 +274,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     public static final int PAGE_SIZE = 20;
     private int sitesAlreadyDownloaded = 0;
 
-    private int numOfSitesWithImages = 0;
+    private int numOfSitesWithImage = 0;
 
     /**
      * Starts downloading of all CoffeeSites paginated. After AsyncTask downloading CoffeeSites
@@ -280,7 +284,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         if (Utils.isOnline(getApplicationContext())) {
             requestedPage = 1;
             sitesAlreadyDownloaded = 0;
-            numOfSitesWithImages = 0;
+            numOfSitesWithImage = 0;
             alreadyDownloadedComments = 0;
             downloadProgressBar.setProgress(0);
             downloadInProgress = true;
@@ -290,6 +294,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     /**
      * On all CoffeeSites returned from server.
+     * NOT used now as GetAllCoffeeSitesPaginatedAsyncTask and onCoffeeSitesPageReturned used.
      *
      * @param oper identifier of REST operation which lead to call this method
      * @param result - success or error result of the operation. If success, then List<CoffeeSite> is returned in result = new Result.Success<>(coffeeSites);
@@ -306,9 +311,9 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             if (this.includingImages) {
                 for (CoffeeSite cs : allCoffeeSites) {
                     if (!cs.getMainImageURL().isEmpty()) {
-                        numOfSitesWithImages++;
-                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
+                        numOfSitesWithImage++;
                         cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
+                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
                     }
                 }
             } else {
@@ -340,7 +345,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
                     for (CoffeeSite cs : coffeeSitesList) {
                         if (!cs.getMainImageURL().isEmpty() ) {
-                            numOfSitesWithImages++;
+                            numOfSitesWithImage++;
+                            cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
                         }
                     }
 
@@ -367,7 +373,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         } else {
             Result.Error error = (Result.Error) result;
             if (error != null) {
-                isLastPage = false;
                 informClientAboutAllCoffeeSitesLoadResult(false);
                 Log.e(TAG, "Error when obtaining coffee sites. " +  error.getDetail());
             }
@@ -382,17 +387,15 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void downloadImages() {
         this.downloadingStatusTextView.setText(R.string.offline_downloading_images_status);
         downloadProgressBar.setProgress(0);
-        downloadProgressBar.setMax(numOfSitesWithImages);
+        downloadProgressBar.setMax(numOfSitesWithImage);
 
         imageUtil.setProgressBar(downloadProgressBar);
         imageUtil.resetAlreadySavedImagesCounter();
-        imageUtil.setNumberOfImagesRequestedToDownload(numOfSitesWithImages);
+        imageUtil.setNumberOfImagesRequestedToDownload(numOfSitesWithImage);
         imageUtil.setNumberOfDownloadsListener(this);
 
         startDownloadImagesThread();
     }
-
-    private CommentRepository commentRepository;
 
     private final int COMMENTS_PAGE_SIZE = 10;
 
@@ -405,7 +408,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         alreadyDownloadedComments = 0;
 
         downloadInProgress = true;
-        commentRepository = CommentRepository.getInstance(db);
+        CommentRepository commentRepository = CommentRepository.getInstance(db);
         commentRepository.populateCommentsByPages(this, COMMENTS_PAGE_SIZE);
         Log.i(TAG, "Start of Comments download.");
     }
@@ -432,7 +435,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     }
 
     /**
-     * This should finish all downloads (if images download was also requested), we can indicate successful download and return to OfflineModeSelectionActivity
+     * This should finish all downloads (if images download was also requested),
+     * we can indicate successful download and return to OfflineModeSelectionActivity
      */
     @Override
     public void onRequestedNumberOfImagesToDownloadReached() {
@@ -455,7 +459,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         }
         for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
             if (result) {
-                DownloadDataOverview overview = new DownloadDataOverview(sitesAlreadyDownloaded, alreadyDownloadedComments, includingImages ? numOfSitesWithImages : 0);
+                DownloadDataOverview overview = new DownloadDataOverview(sitesAlreadyDownloaded, alreadyDownloadedComments, includingImages ? numOfSitesWithImage : 0);
                 listener.onAllDataForOfflineModeDownloaded(overview);
                 // Saves status of data download
                 dataDownloadPreferenceHelper.putDownloadOverview(overview);
@@ -492,7 +496,9 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private ScheduledFuture<?> imageDownloadHandleCheck;
 
     /**
-     * Method to create and start Thread for downloading CoffeeSite's images
+     * Method to create and start Thread for downloading CoffeeSite's images.
+     * Reads previously downloaded and saved CoffeeSites from DB and for every
+     * CoffeeSite with image available, it's image is downloaded.
      */
     private void startDownloadImagesThread() {
 
@@ -513,15 +519,16 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                             Log.i(TAG, "DB Single onSuccess()");
                             // Download images
                             downloadInProgress = true;
+                            assert coffeeSitesWithImage != null;
                             for (CoffeeSite cs : coffeeSitesWithImage) {
                                 if (cs != null && !cs.getMainImageFilePath().isEmpty()) {
-                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getMainImageFilePath());
+                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
                                 }
                             }
                         }
 
                         @Override
-                        public void onError(Throwable error) {
+                        public void onError(@NonNull Throwable error) {
                             Log.e(TAG, "Failed DB Single request for CoffeeSites with Image: " + error.getMessage());
                         }
                     });
@@ -531,7 +538,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         imageDownloadHandle = scheduler.schedule(downloadThread, 0, SECONDS);
 
         // Next thread to check, if the imageDownloadThread is still running after given amount of time
-        // i.e. After 10 minutes, the imageDownloadHandle Task wil be canceled if still running
+        // i.e. After 5 minutes, so the imageDownloadHandle Task wil be canceled if still running
         imageDownloadHandleCheck =  scheduler.schedule(new Runnable() {
             public void run() {
                 Log.d(TAG, "Thread to check and cancel image loading thread, started.");
@@ -539,8 +546,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     imageDownloadHandle.cancel(true);
                     Log.d(TAG, "Thread for loading images canceled due to timeout.");
                 }
+                // something bad happend if this thread was running, inform client
+                informClientAboutAllCoffeeSitesLoadResult(false);
             }
-        }, 60 * 10, SECONDS); // 10 minutes to wait before start and check
+        }, 30 * 10, SECONDS); // 5 minutes to wait before start and check
     }
 
 }

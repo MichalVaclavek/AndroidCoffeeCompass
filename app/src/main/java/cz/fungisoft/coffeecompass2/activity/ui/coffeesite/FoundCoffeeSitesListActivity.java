@@ -304,7 +304,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
         // StaticCoffeeSitesListActivity is the activity to show result of searchView input
-        //searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, StaticCoffeeSitesListActivity.class)));
         searchView.setQueryHint(getString(R.string.search_by_city_hint));
         searchView.setIconifiedByDefault(true); // iconify the widget; and expand after user's click
@@ -323,7 +322,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                 String townName =  parent.getItemAtPosition(position).toString();
                 if (townName.length() > 1) {
                     searchView.setQuery(townName, true);
-                    // handleSearchIntent(); follows
+                    // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
                 }
                 Log.i(TAG, "Selected town: " + townName);
             }
