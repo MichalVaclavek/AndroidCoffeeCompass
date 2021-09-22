@@ -25,7 +25,6 @@ import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
@@ -110,15 +109,6 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
             doBindUserLogoutAndDeleteService();
         }
-
-//        notificationSubscrActivityButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent i = new Intent(UserDataViewActivity.this, NewsSubscriptionActivity.class);
-//                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(i);
-//            }
-//        });
     }
 
     @Override

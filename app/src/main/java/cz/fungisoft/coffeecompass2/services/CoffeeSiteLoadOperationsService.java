@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -131,7 +130,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     @Override
     public void onCoffeeSiteReturned(CoffeeSiteRESTOper oper, Result<CoffeeSite> result) {
-        CoffeeSite coffeeSite = null;
+        CoffeeSite coffeeSite;
         if (result instanceof Result.Success) {
             coffeeSite = ((Result.Success<CoffeeSite>) result).getData();
             switch (oper) {

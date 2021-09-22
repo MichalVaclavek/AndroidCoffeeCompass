@@ -772,7 +772,6 @@ public class MainActivity extends ActivityWithLocationService
             if (statisticsCalledUponUsersClick) {
                 showProgressbar();
             }
-            //TODO refactor to read by Retrofit lib.
             new ReadStatsAsyncTask(this).execute();
         }
     }

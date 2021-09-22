@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/activityBackround"
     tools:context="activity.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/activityBackround"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
@@ -38,9 +38,9 @@
             android:id="@+id/statistics_news_main_card_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
+            android:layout_marginLeft="6dp"
             android:layout_marginTop="10dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginRight="6dp"
             android:checkable="true"
             android:clickable="true"
             android:focusable="true"
@@ -163,196 +163,212 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:gravity="bottom"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:weightSum="10">
 
-            <TextView
-                android:id="@+id/textView19"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="25dp"
-                android:text="Vyhledávání"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_gravity="center"
+                android:layout_weight="8"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TableRow
+                <TextView
+                    android:id="@+id/textView19"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_horizontal">
-
-                    <TextView
-                        android:id="@+id/textView17"
-                        android:layout_width="58dp"
-                        android:layout_height="wrap_content"
-                        android:text="max. vzdálenost [m]"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="12sp"
-                        android:textStyle="italic" />
-
-                    <TextView
-                        android:id="@+id/textView20"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/textView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center_horizontal"
-                    android:scrollbarThumbHorizontal="@drawable/cup_basic"
-                    android:textAlignment="center">
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="right"
-                        android:layout_marginRight="10dp"
-                        android:paddingRight="5dp"
-                        app:cardBackgroundColor="@color/activityBackround"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp">
-
-                        <LinearLayout
-                            android:id="@+id/searchDistancesScaleLinearLayout"
-                            android:layout_width="58dp"
-                            android:layout_height="match_parent"
-                            android:gravity="right"
-                            android:orientation="vertical"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp" />
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="#FFB23A"
-                        app:cardCornerRadius="6dp"
-                        app:cardElevation="4dp"
-                        app:contentPadding="8dp">
-
-                        <Button
-                            android:id="@+id/searchKafeButton"
-                            style="@style/AppTheme.RoundedCornerKafeButton"
-                            android:layout_width="149dp"
-                            android:layout_height="149dp"
-                            android:background="@drawable/button_espresso_unfocused"
-                            android:enabled="false"
-                            android:onClick="onSearchCoffeeClick"
-                            android:text="Button"
-                            android:textSize="22sp" />
-
-                    </androidx.cardview.widget.CardView>
-
-                    <com.lukelorusso.verticalseekbar.VerticalSeekBar
-                        android:id="@+id/searchDistanceSeekBar"
-                        android:layout_width="32dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        app:vsb_bar_background="@color/card_backround"
-                        app:vsb_bar_corner_radius="2dp"
-                        app:vsb_bar_progress_gradient_end="@color/colorPrimaryDark"
-                        app:vsb_bar_progress_gradient_start="@color/activityBackround"
-                        app:vsb_bar_width="10dp"
-                        app:vsb_click_to_set_progress="true"
-                        app:vsb_max_placeholder_position="inside"
-                        app:vsb_min_placeholder_position="inside"
-                        app:vsb_progress="3"
-                        app:vsb_show_thumb="true"
-                        app:vsb_thumb_container_tint="@color/activityBackround"
-                        app:vsb_thumb_placeholder_src="@drawable/cup_basic_25"
-                        app:vsb_use_thumb_to_set_progress="true" />
-
-                </TableRow>
-
-            </TableLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:text="Vyhledávání"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TableLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="10dp">
+                    android:layout_height="wrap_content">
 
                     <TableRow
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp">
+                        android:gravity="center_horizontal">
 
                         <TextView
-                            android:id="@+id/polohaLabel"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/textView17"
+                            android:layout_width="58dp"
                             android:layout_height="wrap_content"
-                            android:paddingLeft="10dp"
-                            android:text="Vaše poloha:"
+                            android:text="max. vzdálenost [m]"
+                            android:textAlignment="center"
                             android:textColor="@color/colorPrimaryDark"
-                            android:textSize="14sp"
-                            android:textStyle="normal|bold" />
-
-                        <ImageView
-                            android:id="@+id/locationImageView"
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:layout_marginLeft="10dp"
-                            android:adjustViewBounds="false"
-                            android:background="@drawable/location_bad" />
+                            android:textSize="12sp"
+                            android:textStyle="italic" />
 
                         <TextView
-                            android:id="@+id/accuracy"
+                            android:id="@+id/textView20"
                             android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center_horizontal"
+                        android:scrollbarThumbHorizontal="@drawable/cup_basic"
+                        android:textAlignment="center">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="right"
+                            android:layout_marginRight="10dp"
+                            android:paddingRight="5dp"
+                            app:cardBackgroundColor="@color/activityBackround"
+                            app:cardCornerRadius="4dp"
+                            app:cardElevation="1dp">
+
+                            <LinearLayout
+                                android:id="@+id/searchDistancesScaleLinearLayout"
+                                android:layout_width="58dp"
+                                android:layout_height="match_parent"
+                                android:gravity="right"
+                                android:orientation="vertical"
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5dp" />
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:paddingLeft="10dp"
-                            android:textAlignment="textStart"
-                            android:textColor="@android:color/holo_red_dark"
-                            android:textSize="12sp" />
+                            android:layout_margin="5dp"
+                            android:foreground="?attr/selectableItemBackground"
+                            app:cardBackgroundColor="#FFB23A"
+                            app:cardCornerRadius="6dp"
+                            app:cardElevation="4dp"
+                            app:contentPadding="8dp">
+
+                            <Button
+                                android:id="@+id/searchKafeButton"
+                                style="@style/AppTheme.RoundedCornerKafeButton"
+                                android:layout_width="149dp"
+                                android:layout_height="149dp"
+                                android:background="@drawable/button_espresso_unfocused"
+                                android:enabled="false"
+                                android:onClick="onSearchCoffeeClick"
+                                android:text="Button"
+                                android:textSize="22sp" />
+
+                        </androidx.cardview.widget.CardView>
+
+                        <com.lukelorusso.verticalseekbar.VerticalSeekBar
+                            android:id="@+id/searchDistanceSeekBar"
+                            android:layout_width="32dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            app:vsb_bar_background="@color/card_backround"
+                            app:vsb_bar_corner_radius="2dp"
+                            app:vsb_bar_progress_gradient_end="@color/colorPrimaryDark"
+                            app:vsb_bar_progress_gradient_start="@color/activityBackround"
+                            app:vsb_bar_width="10dp"
+                            app:vsb_click_to_set_progress="true"
+                            app:vsb_max_placeholder_position="inside"
+                            app:vsb_min_placeholder_position="inside"
+                            app:vsb_progress="3"
+                            app:vsb_show_thumb="true"
+                            app:vsb_thumb_container_tint="@color/activityBackround"
+                            app:vsb_thumb_placeholder_src="@drawable/cup_basic_25"
+                            app:vsb_use_thumb_to_set_progress="true" />
 
                     </TableRow>
 
                 </TableLayout>
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true">
+            </LinearLayout>
 
-                    <com.google.android.material.floatingactionbutton.FloatingActionButton
-                        android:id="@+id/add_site_floatingActionButton"
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="2">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp">
+
+                            <TextView
+                                android:id="@+id/polohaLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="10dp"
+                                android:text="Vaše poloha:"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="14sp"
+                                android:textStyle="normal|bold" />
+
+                            <ImageView
+                                android:id="@+id/locationImageView"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginLeft="10dp"
+                                android:adjustViewBounds="false"
+                                android:background="@drawable/location_bad" />
+
+                            <TextView
+                                android:id="@+id/accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:paddingLeft="10dp"
+                                android:textAlignment="textStart"
+                                android:textColor="@android:color/holo_red_dark"
+                                android:textSize="12sp" />
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                    <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:backgroundTint="@color/colorPrimary2"
-                        android:contentDescription="@string/new_coffee_site"
-                        android:src="@drawable/baseline_add_white_18dp"
-                        android:visibility="visible"
-                        app:backgroundTint="@color/colorAccent" />
-                </FrameLayout>
+                        android:layout_alignParentRight="true">
 
-            </RelativeLayout>
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:id="@+id/add_site_floatingActionButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:backgroundTint="@color/colorPrimary2"
+                            android:contentDescription="@string/new_coffee_site"
+                            android:src="@drawable/baseline_add_white_18dp"
+                            android:visibility="visible"
+                            app:backgroundTint="@color/colorAccent" />
+                    </FrameLayout>
+
+                </RelativeLayout>
+            </FrameLayout>
 
         </LinearLayout>
 

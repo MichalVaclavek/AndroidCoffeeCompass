@@ -60,9 +60,9 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
     private RecyclerView.LayoutManager layoutManager;
 
     private NotificationNewCoffeeSitesRecyclerViewAdapter recyclerViewAdapter;
-    private Parcelable mListState;
+//    private Parcelable mListState;
 
-    private static final String LIST_STATE_KEY = "CoffeeSiteList";
+//    private static final String LIST_STATE_KEY = "CoffeeSiteList";
 
     protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
@@ -85,8 +85,6 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
      * device. Not used, now.
      */
     private boolean mTwoPane;
-
-    private ProgressBar findingSitesInTownProgressBar;
 
     private Toolbar toolbar;
 
@@ -268,7 +266,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
             showCoffeeSiteLoadFailure(error);
             return;
         }
-        Log.i(TAG, "CoffeeSites in town load success?: " + error.isEmpty());
+        Log.i(TAG, "CoffeeSites in town load success.");
         if (loadedCoffeeSites != null) {
             content = loadedCoffeeSites;
             if (!content.isEmpty()) {
@@ -337,12 +335,10 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
     }
 
     private void prepareAndActivateRecyclerView(List<CoffeeSite> coffeeSites) {
-        //Bundle extras = getIntent().getExtras();
         recyclerView = findViewById(R.id.notification_new_coffeesites_list);
         assert recyclerView != null;
 
         recyclerView.setLayoutManager(layoutManager);
-        //boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         recyclerViewAdapter = new NotificationNewCoffeeSitesRecyclerViewAdapter(this, coffeeSites, mTwoPane);
         recyclerView.setAdapter(recyclerViewAdapter);
     }

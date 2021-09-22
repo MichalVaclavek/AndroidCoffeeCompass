@@ -208,14 +208,14 @@ public class ImageUtil {
             protected Void doInBackground(Void... arg0) {
 
                 try {
-                    //File sdCard = Environment.getExternalStorageDirectory();
-                    //@SuppressLint("DefaultLocale")
-                    //String fileName = String.format("%d.jpg", System.currentTimeMillis());
+                    // File sdCard = Environment.getExternalStorageDirectory();
+                    // @SuppressLint("DefaultLocale")
+                    // String fileName = String.format("%d.jpg", System.currentTimeMillis());
                     ContextWrapper cw = new ContextWrapper(context);
                     final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE);
                     final File myImageFile = new File(directory, imageFileName);
-                    //File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
-                    //dir.mkdirs();
+                    // File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
+                    // dir.mkdirs();
                     myImageFileName = myImageFile.getAbsolutePath();
                     Bitmap bitmap = Picasso.get().load(myUrl).get();
                     try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
@@ -244,5 +244,4 @@ public class ImageUtil {
         SaveThisImage saveThisImage = new SaveThisImage();
         saveThisImage.execute();
     }
-
 }
