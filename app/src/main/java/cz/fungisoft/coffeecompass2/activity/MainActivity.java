@@ -88,11 +88,11 @@ import static android.view.View.VISIBLE;
 /**
  * Main activity to show:
  *
- *  - search buttons to find either ESPRESSO CoffeeSites only or any CoffeeSite within specified distance range
+ *  - main search buttons to find CoffeeSites within selected distance range
  *  - info about location of the phone and accuracy of this location
  *  - basic statistics info about CoffeeSites and Users
  *  - show icon allowing to sign-in into application
- *  - show icon indicating, that logged-in user has created coffee sites and which leads to
+ *  - show icon indicating, that logged-in user has created coffee sites and which leads to MyCoffeeSitesListActivity
  *  - show icon to load Notifications settings or to show list of new CoffeeSites received upon notification from Firebase
  *
  *  {@link MyCoffeeSitesListActivity}
@@ -284,7 +284,7 @@ public class MainActivity extends ActivityWithLocationService
         }
         userPreferencesHelper = new UserPreferencesHelper(this);
 
-        // Get current serachDistance from Preferences
+        // Get current searchDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
         searchRange = searchRangePreferenceHelper.getSearchDistanc();
 
@@ -549,7 +549,6 @@ public class MainActivity extends ActivityWithLocationService
      * @param location
      */
     private void updateAccuracyIndicator(Location location) {
-
         Drawable  locIndic = getDrawable(R.drawable.location_bad);
         if (location != null) {
             locIndic = getDrawable(R.drawable.location_better);
@@ -596,7 +595,7 @@ public class MainActivity extends ActivityWithLocationService
             }
         });
 
-        // Get the SearchView and set the searchable configuration
+        // Get the SearchView (for searching sites in town) and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search_main).getActionView();
 

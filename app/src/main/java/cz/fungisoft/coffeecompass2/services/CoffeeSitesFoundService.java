@@ -298,14 +298,14 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
             if (!Utils.isOfflineModeOn(getApplicationContext())) {
                 startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
             }
-            else { // updates LiveData returned from DB
+            else { // invokes update of LiveData<List<CoffeeSite>> returned from DB
                 setDBInput(latitude, longitude, range);
             }
         }
     }
 
     /**
-     * Calls REST async. task.
+     * Calls REST call Async. task.
      *
      * @param coffeeSort
      */

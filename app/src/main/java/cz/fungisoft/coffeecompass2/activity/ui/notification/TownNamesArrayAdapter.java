@@ -33,7 +33,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.PlacesCandidatesCUZKRESTR
  * to show list of towns matching characters entered by user dynamically according
  * responses retrieved from CUZK Places API.
  * <p>
- * Based on stackoverflow.com advice
+ * Based on stackoverflow.com advice.
  */
 public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filterable,
                                                                            PlacesCandidatesCUZKRESTResultListener {
@@ -42,7 +42,8 @@ public class TownNamesArrayAdapter extends ArrayAdapter<String> implements Filte
 
     private final List<String> resultList = new ArrayList<>();
 
-    private final String allowedCheckChars = "áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ- "; // characters valid in czech town names (plus standrad a-z and A-Z)
+    // characters valid in czech town names (plus standard a-z and A-Z)
+    private final String allowedCheckChars = "áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ- ";
 
     public TownNamesArrayAdapter(android.content.Context context, int textViewResourceId) {
         super(context, textViewResourceId);

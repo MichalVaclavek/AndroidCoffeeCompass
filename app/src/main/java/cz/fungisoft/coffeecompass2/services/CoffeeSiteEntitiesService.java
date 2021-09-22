@@ -50,15 +50,16 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
- * A Service class to hold CoffeeSite entities classes.
+ * A Service class to hold CoffeeSite entities classes (for example CoffeeSiteStatus, CoffeeSort,
+ * PriceRange and so on. see cz.fungisoft.coffeecompass2.entity package)<br>
  * Is able to load all available instancies of CoffeeSite entities
  * and save them into EntitiesRepository.
  * <p>
  * Also reads all CoffeeSites with Comments and Images from server and
- * saves all to DB.
+ * saves all to DB (used for 'OFFLINE MODE').
  * <p>
- * It has its own Service connector and is not part of other
- * CoffeeSiteServices with their common service connector.
+ * It has its own Service connector and is not part of other CoffeeSiteServices with their
+ * common service connector.
  */
 public class CoffeeSiteEntitiesService extends LifecycleService
                                        implements CoffeeSiteEntitiesLoadRESTResultListener,
@@ -184,8 +185,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     /**
      * Usually called, when MainActivity is destroyed.
      * This leads to new load of CoffeeSite entities, when the app. runs again.
-     *
-     * @param dataRead
      */
     public void resetDataReadFromServer() {
         CoffeeSiteEntityRepositories.setDataSaved(false);
@@ -201,8 +200,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     @Override
     public void onCSEntitiesDeletedEnd() {
-        //CoffeeSiteEntityRepositories.setDataSaved(false);
-        entitiesRepository.setDataSaved(false);
+        CoffeeSiteEntityRepositories.setDataSaved(false);
         readAndSaveAllEntitiesFromServer();
     }
 
@@ -213,7 +211,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void readAndSaveAllEntitiesFromServer() {
         if (Utils.isOnline(getApplicationContext())) {
             downloadInProgress = true;
-            //entitiesRepository = CoffeeSiteEntityRepositories.getInstance(db, getApplicationContext());
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
         }
     }
@@ -222,9 +219,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     public void onCoffeeSiteEntitiesLoaded(Result<Boolean> result) {
         if (result instanceof Result.Success) {
             downloadInProgress = false;
-            if (entitiesRepository != null) {
-                entitiesRepository.setDataSaved(true); // all data saved
-            }
+            CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
             informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
         }
     }
@@ -258,7 +253,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         this.downloadProgressBar = downloadProgressBar;
         this.downloadingStatusTextView = downloadingStatusTextView;
         this.downloadingStatusTextView.setText(R.string.download_sites_inprogress_message);
-        //db.deleteCoffeeSitesAsync();
         db.deleteCoffeeSitesExceptOfflineAsyncT();
     }
 
@@ -294,7 +288,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
     /**
      * On all CoffeeSites returned from server.
-     * NOT used now as GetAllCoffeeSitesPaginatedAsyncTask and onCoffeeSitesPageReturned used.
+     * NOT used now as GetAllCoffeeSitesPaginatedAsyncTask and onCoffeeSitesPageReturned are used.
      *
      * @param oper identifier of REST operation which lead to call this method
      * @param result - success or error result of the operation. If success, then List<CoffeeSite> is returned in result = new Result.Success<>(coffeeSites);
@@ -361,11 +355,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     sitesAlreadyDownloaded += coffeeSitesPage.getNumberOfElements();
                     downloadProgressBar.setProgress(sitesAlreadyDownloaded);
 
-                    // We do not need to wait until insertAll() finishes as it is faster then downloading the first image
                     if (!isLastPage) {
                         requestedPage++;
                         new GetAllCoffeeSitesPaginatedAsyncTask(COFFEE_SITE_LOAD_ALL_NEXT_PAGE, requestedPage, PAGE_SIZE, this).execute();
-                    } else { // all pages downloaded
+                    } else { // all pages downloaded, continue downloading comments
                         downloadComments();
                     }
                 }
@@ -378,11 +371,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             }
         }
     }
-
-    /**
-     * Disposable of the Single DB request
-     */
-    private static Disposable d;
 
     private void downloadImages() {
         this.downloadingStatusTextView.setText(R.string.offline_downloading_images_status);
@@ -402,7 +390,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private int alreadyDownloadedComments = 0;
 
     private void downloadComments() {
-
         this.downloadingStatusTextView.setText(R.string.download_comments_progress_message);
         downloadProgressBar.setProgress(0);
         alreadyDownloadedComments = 0;
@@ -433,6 +420,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
             }
         }
     }
+
+    /**
+     * Disposable of the Single DB request
+     */
+    private static Disposable d;
 
     /**
      * This should finish all downloads (if images download was also requested),

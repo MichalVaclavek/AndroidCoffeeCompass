@@ -4,7 +4,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,13 +36,13 @@ import static android.view.View.GONE;
  * Or after user's click on Statistics View on MainActivity, which leads to load
  * CoffeeSites created in last week/7 days.<br>
  * Or after user searches CoffeeSites in town.<br>
- * Allows to select the new CoffeeSite and open detail activity for that new CoffeeSite.
+ * Allows to select the CoffeeSite from the list and open detail activity for that CoffeeSite.
  */
 public class StaticCoffeeSitesListActivity extends AppCompatActivity
                                            implements CoffeeSiteServicesConnectionListener,
                                                       CoffeeSiteLoadServiceOperationsListener  {
 
-    private static final String TAG = "LatestSitesListAct";
+    private static final String TAG = "StaticSitesListAct";
 
     /**
      * The main attribute of activity containing all new CoffeeSites to show
@@ -59,10 +58,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
-    private NotificationNewCoffeeSitesRecyclerViewAdapter recyclerViewAdapter;
-//    private Parcelable mListState;
-
-//    private static final String LIST_STATE_KEY = "CoffeeSiteList";
+    private StaticCoffeeSitesListRecyclerViewAdapter recyclerViewAdapter;
 
     protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
@@ -115,7 +111,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         newCoffeeSitesURLs = getIntent().getStringArrayListExtra("newCoffeeSitesURLs");
         numOfDaysToLoadLatestSites = getIntent().getIntExtra("daysBack", 0);
 
-        if (numOfDaysToLoadLatestSites == 0) {
+        if (newCoffeeSitesURLs == null || numOfDaysToLoadLatestSites == 0) { // this is request to show sites in town, not the latest sites
             handleSearchInTownIntent(getIntent());
         }
 
@@ -160,6 +156,9 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         finish();
     }
 
+    /**
+     * Loads either latest CoffeeSites or newly notified CoffeeSites
+     */
     private void loadAllNewCoffeeSites() {
         if (Utils.isOnline(getApplicationContext())) {
             if (this.numOfDaysToLoadLatestSites > 0) { // load latest CoffeeSites, user request for Statistics
@@ -315,6 +314,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
             // refresh CoffeeSites after start
             if (content.isEmpty() && numOfDaysToLoadLatestSites > 0) {
                 loadAllNewCoffeeSites();
+                return;
             }
             if (content.isEmpty() && !townName.isEmpty()) {
                 startCoffeeSitesInTownLoad(townName);
@@ -339,7 +339,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         assert recyclerView != null;
 
         recyclerView.setLayoutManager(layoutManager);
-        recyclerViewAdapter = new NotificationNewCoffeeSitesRecyclerViewAdapter(this, coffeeSites, mTwoPane);
+        recyclerViewAdapter = new StaticCoffeeSitesListRecyclerViewAdapter(this, coffeeSites, mTwoPane);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 

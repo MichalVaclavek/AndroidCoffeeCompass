@@ -46,12 +46,11 @@ import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
 
 
 /**
- * An activity representing a list of CoffeeSites currently in the search range.
+ * An activity representing a list of CoffeeSites found in the current search range.
  * <p>
  * This activity has different presentations for handset and tablet-size devices.
  * On handsets, the activity presents a list of items, which when touched,
- * lead to a {@link CoffeeSiteDetailActivity} representing
- * item details.
+ * lead to a {@link CoffeeSiteDetailActivity} representing item details.
  * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p><p/>
@@ -257,7 +256,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                         }
                     }
                     recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
-                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true); // update Widget
+                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true); // updates app's Widget
                 }
             });
 
@@ -273,7 +272,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                         }
                     }
                     recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
-                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true); // update Widget
+                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true); // updates app's Widget
                 }
             });
         }
@@ -299,7 +298,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_list, menu);
 
-        // Get the SearchView and set the searchable configuration
+        // Get the SearchView (for searching sites in town) and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
@@ -378,7 +377,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     public void onSearchingSitesFinished() {
         recyclerViewAdapter.newSitesSearchingFinished();
         if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
-            //toolbar.setTitle(originalToolbarTitle + ": " + Utils.convertSearchDistanceNoBrackets(this.searchRange) + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
             toolbar.setTitle(originalToolbarTitle + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
         } else {
             toolbar.setTitle(originalToolbarTitle);

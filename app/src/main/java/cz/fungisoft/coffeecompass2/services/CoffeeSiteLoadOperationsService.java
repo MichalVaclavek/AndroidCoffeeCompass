@@ -360,12 +360,12 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
        /*
         Needed to process results of DB search returned as Single in the Main thread
         DB request must run in separate thread, therefore AsyncTask is created,
-        but Picasso library (used by Widget) works in Main thread, therefore update of Widget cannot
-        be called from AsyncTask from onSuccess() of the DisposableSingleObserver
+        but Picasso library works in Main thread, therefore update of RecyclerView cannot
+        be called from AsyncTask from onSuccess() of the DisposableSingleObserver?
         */
         final CountDownLatch latch = new CountDownLatch(1);
         isSearching = true;
-        Log.i(TAG, "Start Async task for searching in DB.");
+        Log.i(TAG, "Start Async task for searching CoffeeSites in town in DB.");
         new GetSingleCoffeeSitesInTownAsyncTask(latch, townName)
                 .execute();
         try {
@@ -376,7 +376,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                 informClientAboutLoadedCoffeeSitesList(COFFEE_SITES_IN_TOWN, coffeeSitesInTownFromDB, readDBError);
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "Error waiting for CountDownLatch of DB search.");
+            Log.e(TAG, "Error waiting for CountDownLatch of CoffeeSites in town DB search.");
         }
     }
 
@@ -433,5 +433,4 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         }
         super.onDestroy();
     }
-
 }

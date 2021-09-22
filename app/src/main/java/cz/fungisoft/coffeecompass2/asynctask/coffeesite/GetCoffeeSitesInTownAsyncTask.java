@@ -123,7 +123,7 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
 
             @Override
             public void onFailure(Call<List<CoffeeSite>> call, Throwable t){
-                    Log.e(TAG, "Error loading CoffeeSites in town." + t.getMessage());
+                    Log.e(TAG, "Error loading CoffeeSites in town from server." + t.getMessage());
                     error = new Result.Error(new IOException("Error loading CoffeeSites in town REST calls.", t));
                     operationError = error.toString();
                     if (callingService != null) {

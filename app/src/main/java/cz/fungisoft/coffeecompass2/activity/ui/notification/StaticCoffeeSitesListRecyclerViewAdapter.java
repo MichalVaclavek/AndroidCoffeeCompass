@@ -28,11 +28,12 @@ import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * Adapter to show list of new CoffeeSites received upon Notification.
+ * Adapter to show list of CoffeeSites received upon Notification
+ * or list of CoffeeSites in town. Used by StaticCoffeeSitesListActivity.
  */
-public class NotificationNewCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = "NotifCoffeeSitesAdapter";
+    private static final String TAG = "StaticCoffeeSitesAdapter";
 
     private final boolean mTwoPane;
 
@@ -59,8 +60,8 @@ public class NotificationNewCoffeeSitesRecyclerViewAdapter extends RecyclerView.
      * @param mValues - list of CoffeeSites to be shown by the NotificationNewCoffeeSitesListActivity
      * @param parent - parent Activity for the Adapter, in this case this NotificationNewCoffeeSitesListActivity
      */
-    public NotificationNewCoffeeSitesRecyclerViewAdapter(StaticCoffeeSitesListActivity parent,
-                                                         List<CoffeeSite> mValues, boolean twoPane) {
+    public StaticCoffeeSitesListRecyclerViewAdapter(StaticCoffeeSitesListActivity parent,
+                                                    List<CoffeeSite> mValues, boolean twoPane) {
         mParentActivity = parent;
         this.mValues = mValues;
         mTwoPane = twoPane;
@@ -167,21 +168,6 @@ public class NotificationNewCoffeeSitesRecyclerViewAdapter extends RecyclerView.
         if (!this.mValues.get(position).getMesto().isEmpty()) {
             viewHolder.cityView.setText(this.mValues.get(position).getMesto());
         }
-
-        // Set CoffeeSite's image
-//        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-//            if (!Utils.isOfflineModeOn(viewHolder.siteFoto.getContext())) { // context can be taken from any View
-//                Picasso.get().load(this.mValues.get(position).getMainImageURL())
-//                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-//                             .into(viewHolder.siteFoto);
-//            } else {
-//                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
-//                        .fit().placeholder(R.drawable.kafe_backround_120x160)
-//                        .into(viewHolder.siteFoto);
-//            }
-//        } else {
-//            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
-//        }
 
         boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
         if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {
