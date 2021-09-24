@@ -389,6 +389,13 @@ public class MainActivity extends ActivityWithLocationService
         //showCurrentFirebaseToken();
         statisticsLayout = findViewById(R.id.statistics_layout);
 
+        statisticsLayout.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    onStatisticsClick(v);
+                                                }
+                                            });
+
         fab.setVisibility(VISIBLE);
     }
 

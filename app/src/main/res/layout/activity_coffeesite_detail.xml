@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
 
             <TextView
@@ -78,7 +78,7 @@
                 android:layout_gravity="center"
                 android:textAlignment="center"
                 android:textColor="@color/colorPrimaryDark"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -87,7 +87,7 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:baselineAligned="false">
 
             <TableRow

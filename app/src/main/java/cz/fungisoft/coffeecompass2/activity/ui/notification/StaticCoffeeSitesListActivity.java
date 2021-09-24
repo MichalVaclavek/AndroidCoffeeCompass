@@ -111,7 +111,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         newCoffeeSitesURLs = getIntent().getStringArrayListExtra("newCoffeeSitesURLs");
         numOfDaysToLoadLatestSites = getIntent().getIntExtra("daysBack", 0);
 
-        if (newCoffeeSitesURLs == null || numOfDaysToLoadLatestSites == 0) { // this is request to show sites in town, not the latest sites
+        if (newCoffeeSitesURLs == null && numOfDaysToLoadLatestSites == 0) { // this is request to show sites in town, not the latest sites
             handleSearchInTownIntent(getIntent());
         }
 

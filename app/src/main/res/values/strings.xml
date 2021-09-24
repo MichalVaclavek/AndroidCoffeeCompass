@@ -260,9 +260,9 @@
     <string name="no_notifications_subscribed">Žádné notifikace.</string>
     <string name="cancel_subscriptions_dialog_question">Zrušit všechna upozornění?</string>
     <string name="cancel_subscriptions_confirm">Zrušit</string>
-    <string name="main_statistics_news_label">Statistika</string>
+    <string name="main_statistics_news_label">Přehled</string>
     <string name="coffeesite_saved_to_db">Lokace uložena do databáze telefonu.</string>
-    <string name="data_for_offline_coffee_site_create_not_available">Data pro vytvoření lokace nejsou k dispocizi. Pro úvodní synchronizaci je potřebný přístup k internetu.</string>
+    <string name="data_for_offline_coffee_site_create_not_available">Data pro vytvoření lokace nejsou k dispozici. Pro úvodní synchronizaci je potřebný přístup k internetu.</string>
     <string name="action_upload_coffeesites">ulož na server</string>
     <string name="coffeesites_upload_failure">Uložení na serveru neúspěšné. Zkuste to prosím později.</string>
     <string name="coffeesites_upload_success">Uložení na server úspěšné.</string>
@@ -285,5 +285,7 @@
 
     <string name="moje_lokace">Moje lokace</string>
     <string name="novinky">Novinky</string>
+
+    <string name="searching_label_main_activity">VYHLEDAT</string>
 
 </resources>

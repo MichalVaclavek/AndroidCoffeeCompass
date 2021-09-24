@@ -60,7 +60,6 @@
                 android:layout_margin="5dp"
                 android:background="@color/card_backround"
                 android:baselineAligned="true"
-                android:onClick="onStatisticsClick"
                 android:orientation="horizontal"
                 android:padding="8dp">
 
@@ -174,16 +173,6 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textView19"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Vyhledávání"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -195,8 +184,8 @@
 
                         <TextView
                             android:id="@+id/textView17"
-                            android:layout_width="58dp"
-                            android:layout_height="wrap_content"
+                            android:layout_width="60dp"
+                            android:layout_height="match_parent"
                             android:text="max. vzdálenost [m]"
                             android:textAlignment="center"
                             android:textColor="@color/colorPrimaryDark"
@@ -204,14 +193,19 @@
                             android:textStyle="italic" />
 
                         <TextView
-                            android:id="@+id/textView20"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:id="@+id/textView19"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="@string/searching_label_main_activity"
+                            android:textAlignment="center"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/textView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="match_parent" />
                     </TableRow>
 
                     <TableRow
@@ -248,9 +242,9 @@
                             android:layout_margin="5dp"
                             android:foreground="?attr/selectableItemBackground"
                             app:cardBackgroundColor="#FFB23A"
-                            app:cardCornerRadius="6dp"
-                            app:cardElevation="4dp"
-                            app:contentPadding="8dp">
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="6dp"
+                            app:contentPadding="10dp">
 
                             <Button
                                 android:id="@+id/searchKafeButton"
