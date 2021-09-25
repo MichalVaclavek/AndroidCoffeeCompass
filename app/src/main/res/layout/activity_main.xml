@@ -173,6 +173,17 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/textView19"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/searching_label_main_activity"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -193,14 +204,9 @@
                             android:textStyle="italic" />
 
                         <TextView
-                            android:id="@+id/textView19"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="@string/searching_label_main_activity"
-                            android:textAlignment="center"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
+                            android:id="@+id/textView20"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" />
 
                         <TextView
                             android:id="@+id/textView"
@@ -211,7 +217,7 @@
                     <TableRow
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="2dp"
                         android:gravity="center_horizontal"
                         android:scrollbarThumbHorizontal="@drawable/cup_basic"
                         android:textAlignment="center">
