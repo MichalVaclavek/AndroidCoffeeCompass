@@ -281,9 +281,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     }
 
     /**
-     * Switch to switch between two modes of this list. Either standard list of my CoffeeSites
+     * Switch to swap between two modes of this list. Either standard list of my CoffeeSites
      * is shown (i.e. my CoffeeSites on server or in local DB)
-     * or lis yof CoffeeSites in local Db, which are not saved on server yet.
+     * or list of CoffeeSites in local DB, which are not saved on server yet.
      */
     private SwitchMaterial switchAB;
 

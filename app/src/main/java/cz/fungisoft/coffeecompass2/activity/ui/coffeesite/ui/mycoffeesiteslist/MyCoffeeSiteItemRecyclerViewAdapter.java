@@ -85,11 +85,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         notifyDataSetChanged();
     }
 
-    public void addCoffeeSites(List<CoffeeSite> newSites) {
-        this.mValues.addAll(removeCanceledElements(newSites));
-        notifyDataSetChanged();
-    }
-
     /**
      * Used for opening CoffeeSiteDetailActivity
      */
@@ -225,7 +220,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
 
     private void setupBasicViewHolder(int position, ViewHolder viewHolder) {
-
         CoffeeSite coffeeSite = this.mValues.get(position);
 
         viewHolder.csNameView.setText(coffeeSite.getName());
@@ -364,12 +358,18 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /* ********************************************************************* */
 
     void onCancelCoffeeSiteDialogPositiveClick() {
-        // Only newly created and not saved on server CoffeeSites can be deleted from DB
-        if (!selectedCoffeeSite.isSavedOnServer() && selectedCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
-            coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
+        // Only newly created and not saved on server CoffeeSite can be deleted from DB
+        if (!selectedCoffeeSite.isSavedOnServer()) {
+            if (selectedCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // newly created site
+                coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
+            } else { // modified site
+                // means modification was cancelled - keep previously modified site as unmodified id DB
+                coffeeSiteCUDOperationsService.cancelUpdateInDB(selectedCoffeeSite);
+            }
+            // applies to both newly created and/or modified
             showCoffeeSiteCancelSuccess();
-            // refresh list
-            modifiedCoffeeSite = selectedCoffeeSite; // to ensure correct refresh of the RecycleView list after CoffeeSite delete
+            // to ensure correct refresh of the RecycleView list after CoffeeSite delete
+            modifiedCoffeeSite = selectedCoffeeSite;
             updateRecyclerViewItemRemoved();
             return;
         }

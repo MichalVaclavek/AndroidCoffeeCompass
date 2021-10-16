@@ -242,6 +242,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         foundSitesService.addSitesFoundListener(coffeeSitesViewModel);
 
         if (coffeeSitesViewModel != null) {
+            // NEW sites in search range
             coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
                 @Override
                 public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
@@ -256,10 +257,12 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                         }
                     }
                     recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
-                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true); // updates app's Widget
+                    // updates app's Widget
+                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true);
                 }
             });
 
+            // Sites REMOVED from search range
             coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
                 @Override
                 public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
@@ -272,7 +275,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                         }
                     }
                     recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
-                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true); // updates app's Widget
+                    // updates app's Widget
+                    MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true);
                 }
             });
         }

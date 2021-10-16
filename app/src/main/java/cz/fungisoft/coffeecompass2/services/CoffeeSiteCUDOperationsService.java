@@ -179,9 +179,22 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
      */
     public void updateInDB(CoffeeSite coffeeSite) {
         currentUser = getCurrentUser();
-        if (currentUser != null) {
+        if (currentUser != null && coffeeSite != null) {
             coffeeSite.setLastEditUserName(currentUser.getUserName());
             coffeeSite.setSavedOnServer(false);
+            coffeeSiteRepository.update(coffeeSite);
+        }
+    }
+
+    /**
+     * Updates status of CoffeeSite saved in DB to be kept as not modified in Offline mode
+     *
+     * @param coffeeSite
+     */
+    public void cancelUpdateInDB(CoffeeSite coffeeSite) {
+        currentUser = getCurrentUser();
+        if (currentUser != null && coffeeSite != null) {
+            coffeeSite.setSavedOnServer(true);
             coffeeSiteRepository.update(coffeeSite);
         }
     }

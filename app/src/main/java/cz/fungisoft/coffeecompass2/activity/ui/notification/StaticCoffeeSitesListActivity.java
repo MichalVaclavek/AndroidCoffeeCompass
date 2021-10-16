@@ -126,7 +126,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
     }
 
     /**
-     * To handle search intent from SearchManager - searchViews in this Activity and in MainActivity
+     * To handle search intent from SearchManager - searchViews in FoundCoffeeSiteActivity and in MainActivity
      * @param intent
      */
     private void handleSearchInTownIntent(Intent intent) {
@@ -207,7 +207,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
     }
 
     /**
-     * CoffeeSites's data loaded from server, show the data.
+     * One CoffeeSites's data loaded from server, show the data.
      *
      * @param loadedCoffeeSite - CoffeeSite's data loaded from server
      * @param error - indication, if there was error during loading
@@ -221,7 +221,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
                 content.add(loadedCoffeeSite);
             }
             if (newCoffeeSitesURLs != null && !newCoffeeSitesURLs.isEmpty()) {
-                if (content.size() == newCoffeeSitesURLs.size()) {
+                if (content.size() == newCoffeeSitesURLs.size()) { // all CoffeeSites loaded
                     prepareAndActivateRecyclerView(content);
                 }
             }
@@ -314,7 +314,7 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
             // refresh CoffeeSites after start
             if (content.isEmpty() && numOfDaysToLoadLatestSites > 0) {
                 loadAllNewCoffeeSites();
-                return;
+                return; // return as only the new coffee sites or only sites in town are to be displayed in the Activity
             }
             if (content.isEmpty() && !townName.isEmpty()) {
                 startCoffeeSitesInTownLoad(townName);

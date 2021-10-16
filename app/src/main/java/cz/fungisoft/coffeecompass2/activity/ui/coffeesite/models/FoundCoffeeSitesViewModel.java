@@ -43,18 +43,6 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
     private LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
 
     /**
-     * Private constructor, class is singleton. Only instance is returned by getInstance() method.
-     *
-     * @param ownerActivity owner Activity
-     * @param sitesInRangeUpdateService service to return coffee sites in range
-     */
-    public FoundCoffeeSitesViewModel(@NonNull AppCompatActivity ownerActivity,
-                                     @NonNull CoffeeSitesFoundService sitesInRangeUpdateService) {
-        this(ownerActivity);
-        foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
-    }
-
-    /**
      * Constructor ....
      *
      * @param application

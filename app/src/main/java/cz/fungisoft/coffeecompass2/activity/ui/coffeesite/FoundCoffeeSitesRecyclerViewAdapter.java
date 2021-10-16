@@ -58,8 +58,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private final int currentSearchRange;
 
-    private static final CoffeeSiteMovable dummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "Dummy", 0);
-    private static final CoffeeSiteMovable initialDummyEmptyListCoffeeSite = new CoffeeSiteMovable(0, "InitialDummy", 0);
+    private static final CoffeeSiteMovable DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable(0, "Dummy", 0);
+    private static final CoffeeSiteMovable INITIAL_DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable(0, "InitialDummy", 0);
 
     // Animations for vyhledavam text
     private AlphaAnimation animation1;
@@ -208,9 +208,19 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
         }
 
+        // If there is no CoffeeSite, after Initial Empty card was shown, show Standard Empty card
+        if (mValues.size() == 1 && "InitialDummy".equals(mValues.get(0).getName())) {
+            // Remove Initial Empty card
+            mValues.remove(0);
+            this.notifyItemRemoved(0);
+            // Replace by Standard Empty card
+            mValues.add(0, DUMMY_EMPTY_LIST_COFFEE_SITE);
+            this.notifyItemInserted(0);
+        }
+
         // If the list is empty now, insert standard 'Empty card'
         if (mValues.size() == 0 && searchInRange) {
-            mValues.add(0, dummyEmptyListCoffeeSite);
+            mValues.add(0, DUMMY_EMPTY_LIST_COFFEE_SITE);
             this.notifyItemInserted(0);
         }
     }
@@ -241,7 +251,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         mOnClickListener = createOnClickListener();
         mOnImageClickListener = createOnClickListenerForShowImageActivityStart();
 
-        mValues.add(0, initialDummyEmptyListCoffeeSite);
+        mValues.add(0, INITIAL_DUMMY_EMPTY_LIST_COFFEE_SITE);
         this.notifyItemInserted(0);
     }
 
@@ -425,7 +435,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             mValues.remove(0);
             this.notifyItemRemoved(0);
             // Replace by Standard Empty card
-            mValues.add(0, dummyEmptyListCoffeeSite);
+            mValues.add(0, DUMMY_EMPTY_LIST_COFFEE_SITE);
             this.notifyItemInserted(0);
         }
     }
