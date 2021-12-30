@@ -35,13 +35,12 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSite
 import cz.fungisoft.coffeecompass2.activity.ui.notification.StaticCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.TownNamesArrayAdapter;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
 
 
@@ -80,7 +79,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
-    private final CoffeeSiteMovableListContent currentContent = new CoffeeSiteMovableListContent();
+    private final CoffeeSiteListContent currentContent = new CoffeeSiteListContent();
 
     /**
      * Adapter to show current CoffeeSites in range.
@@ -253,7 +252,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                         csm.setLocationService(locationService);
                         if (locationService != null) {
                             locationService.addPropertyChangeListener(csm);
-                            currentContent.getItems().add(csm);
+                            currentContent.add(csm);
                         }
                     }
                     recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
@@ -300,7 +299,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     @SuppressLint("RestrictedApi") // due to searchAutoComplete.setThreshold(2);
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_list, menu);
+        getMenuInflater().inflate(R.menu.menu_found_sites_list, menu);
 
         // Get the SearchView (for searching sites in town) and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);

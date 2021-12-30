@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -21,8 +22,10 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
@@ -49,6 +52,11 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
      * within this Activities
      */
     private List<CoffeeSite> content = new ArrayList<>();
+
+    /**
+     * List of CoffeeSites to be shown in MapsActivity
+     */
+    private final CoffeeSiteListContent mapContent = new CoffeeSiteListContent();
 
     /**
      * URLs of the new CoffeeSites
@@ -139,21 +147,46 @@ public class StaticCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            this.onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void goToMainActivity() {
         Intent i = new Intent(StaticCoffeeSitesListActivity.this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
         finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_static_sites_list, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.onBackPressed();
+                return true;
+            case R.id.action_map:
+                // Map can be opened even in Offline, if the user has downloaded a map ...?
+                openMap();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Starts MapsActivity to show found CoffeeSites. Available only Online.
+     */
+    private void openMap() {
+        Intent mapIntent = new Intent(this, MapsActivity.class);
+        for (CoffeeSite csm : content) {
+            mapContent.add(csm);
+        }
+        mapIntent.putExtra("listContent", mapContent);
+        startActivity(mapIntent);
     }
 
     /**

@@ -128,12 +128,6 @@ public class CoffeeSiteDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(coffeeSite.getTypPodniku().toString());
             ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(coffeeSite.getTypLokality().toString());
 
-            if (coffeeSite.getCupTypes().size() > 0) {
-                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(coffeeSite.getCupTypesOneString());
-            } else {
-                ((TextView) rootView.findViewById(R.id.cupTypeTextView)).setText(UNKNOWN_VALUE);
-            }
-
             if (coffeeSite.getCena() != null && !coffeeSite.getCena().toString().isEmpty()) {
                 ((TextView) rootView.findViewById(R.id.cenaTextView)).setText(coffeeSite.getCena().toString());
             } else {
