@@ -67,6 +67,15 @@ public interface CommentsAndStarsRESTInterface {
     Call<Comment> updateCommentAndStars(@Body Comment commentAndStarsToUpdate);
 
     /**
+     * Calls REST updating of Stars for CoffeeSiteID=siteID and user ID.
+     * Requires Authorization header.
+     *
+     * @return entered stars rating for the coffee site and user
+     */
+    @PUT("updateStarsForCoffeeSiteAndUser/coffeeSite/{coffeeSiteId}/user/{userId}/stars/{numOfStars}")
+    Call<Integer> updateStars(@Path("coffeeSiteId") long siteID, @Path("userId") long userId,  @Path("numOfStars") int numOfStars);
+
+    /**
      * REST call for obtaining number of Comments for the CoffeeSite with id=siteID
      * @param siteID
      * @return

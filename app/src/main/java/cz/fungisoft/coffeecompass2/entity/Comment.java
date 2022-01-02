@@ -34,7 +34,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("coffeeSiteID")
-    private int coffeeSiteID;
+    private long coffeeSiteID;
 
     @Expose
     @SerializedName("userName")
@@ -42,7 +42,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("userId")
-    private int userId;
+    private long userId;
 
     /**
      * The server sends also info about stars rating from the UserName for this
@@ -63,9 +63,9 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         id = in.readInt();
         text = in.readString();
         createdOnString = in.readString();
-        coffeeSiteID = in.readInt();
+        coffeeSiteID = in.readLong();
         userName = in.readString();
-        userId = in.readInt();
+        userId = in.readLong();
         starsFromUser = in.readInt();
         canBeDeleted = in.readByte() != 0;
     }
@@ -92,9 +92,9 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         dest.writeInt(id);
         dest.writeString(text);
         dest.writeString(createdOnString);
-        dest.writeInt(coffeeSiteID);
+        dest.writeLong(coffeeSiteID);
         dest.writeString(userName);
-        dest.writeInt(userId);
+        dest.writeLong(userId);
         dest.writeInt(starsFromUser);
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
     }
@@ -116,11 +116,11 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         return created;
     }
 
-    public Integer getCoffeeSiteID() {
+    public long getCoffeeSiteID() {
         return coffeeSiteID;
     }
 
-    public void setCoffeeSiteID(int coffeeSiteID) {
+    public void setCoffeeSiteID(long coffeeSiteID) {
         this.coffeeSiteID = coffeeSiteID;
     }
 
@@ -132,11 +132,11 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         this.userName = userName;
     }
 
-    public int getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
@@ -185,12 +185,11 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     public Comment() {}
 
-    public Comment(String emtpyText) {
-        this(0, emtpyText, 0, "", 0, false, 0);
+    public Comment(String emptyText) {
+        this(0, emptyText, 0, "", 0, false, 0);
     }
 
-
-    private Comment(Integer id, String commentText, Integer coffeeSiteId, String userName, int userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    private Comment(Integer id, String commentText, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this.id = id;
         this.text = commentText;
         this.coffeeSiteID = coffeeSiteId;
@@ -201,12 +200,12 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         setCreated(new Date());
     }
 
-    public Comment(Integer id, String commentText, Date createdOn, Integer coffeeSiteId, String userName, int userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    public Comment(Integer id, String commentText, Date createdOn, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this(id, commentText, coffeeSiteId, userName, userId, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreated(createdOn);
     }
 
-    public Comment(Integer id, String commentText, String createdOnString, Integer coffeeSiteId, String userName, int userId,boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    public Comment(Integer id, String commentText, String createdOnString, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this(id, commentText, coffeeSiteId, userName, userId, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreatedOnString(createdOnString);
     }

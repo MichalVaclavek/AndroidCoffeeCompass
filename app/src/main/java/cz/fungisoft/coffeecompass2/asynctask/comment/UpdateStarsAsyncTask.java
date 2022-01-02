@@ -25,10 +25,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
- * by loged-in user.
+ * AsyncTask to call REST methods/interface to modify Stars rating for the CoffeeSite
+ * by logged-in user.
  */
-public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
@@ -36,12 +36,15 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
 
     private final UsersCSRatingAndCommentUpdateOperationListener callingActivity;
 
-    private final Comment commentAndStarsToUpdate;
+    private final long coffeeSiteID;
 
-    public UpdateCommentAndStarsAsyncTask(LoggedInUser user, UsersCSRatingAndCommentUpdateOperationListener callingActivity, Comment commentAndStarsToUpdate) {
+    private final int numOfStars;
+
+    public UpdateStarsAsyncTask(LoggedInUser user, UsersCSRatingAndCommentUpdateOperationListener callingActivity, long siteId, int stars) {
         this.callingActivity = callingActivity;
-        this.commentAndStarsToUpdate = commentAndStarsToUpdate;
         this.user = user;
+        this.coffeeSiteID = siteId;
+        this.numOfStars = stars;
     }
 
     @Override
@@ -77,20 +80,20 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
 
             CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
-            Call<Comment> call = api.updateCommentAndStars(commentAndStarsToUpdate);
+            Call<Integer> call = api.updateStars(coffeeSiteID, user.getUserId(), numOfStars);
 
-            call.enqueue(new Callback<Comment>() {
+            call.enqueue(new Callback<Integer>() {
                 @Override
-                public void onResponse(Call<Comment> call, Response<Comment> response) {
+                public void onResponse(Call<Integer> call, Response<Integer> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_TAG, "onResponse() success");
                             if (callingActivity != null) {
-                                callingActivity.processUpdatedComment(response.body());
+                                callingActivity.processUpdatedStarsRating(response.body());
                             }
                         } else {
-                            Log.i(REQ_TAG, "Returned empty response for updating comment request.");
-                            Result.Error error = new Result.Error(new IOException("Error updating comment. Response empty."));
+                            Log.i(REQ_TAG, "Returned empty response for updating stars rating request.");
+                            Result.Error error = new Result.Error(new IOException("Error updating stars rating. Response empty."));
                             if (callingActivity != null) {
                                 callingActivity.processFailedCommentUpdate(error);
                             }
@@ -102,8 +105,8 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
                                 callingActivity.processFailedCommentUpdate(new Result.Error(Utils.getRestError(errorBody)));
                             }
                         } catch (IOException e) {
-                            Log.e(REQ_TAG, "Error updating comment." + e.getMessage());
-                            Result.Error error = new Result.Error(new IOException("Error updating comment.", e));
+                            Log.e(REQ_TAG, "Error updating stars rating." + e.getMessage());
+                            Result.Error error = new Result.Error(new IOException("Error updating stars rating.", e));
                             if (callingActivity != null) {
                                 callingActivity.processFailedCommentUpdate(error);
                             }
@@ -112,9 +115,9 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
                 }
 
                 @Override
-                public void onFailure(Call<Comment> call, Throwable t) {
-                    Log.e(REQ_TAG, "Error updating comment REST request." + t.getMessage());
-                    Result.Error error = new Result.Error(new IOException("Error updating comment.", t));
+                public void onFailure(Call<Integer> call, Throwable t) {
+                    Log.e(REQ_TAG, "Error updating stars rating REST request." + t.getMessage());
+                    Result.Error error = new Result.Error(new IOException("Error updating stars rating.", t));
                     if (callingActivity != null) {
                         callingActivity.processFailedCommentUpdate(error);
                     }

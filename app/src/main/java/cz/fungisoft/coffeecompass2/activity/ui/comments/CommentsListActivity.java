@@ -36,6 +36,8 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingLoadOperationListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.DeleteCommentAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.GetCommentsForCoffeeSiteAsyncTask;
@@ -63,7 +65,9 @@ import static android.view.View.VISIBLE;
 public class CommentsListActivity extends AppCompatActivity
                                   implements UserAccountServiceConnectionListener,
                                              EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
-                                             DeleteCommentDialogFragment.DeleteCommentDialogListener {
+                                             DeleteCommentDialogFragment.DeleteCommentDialogListener,
+                                             UsersCSRatingAndCommentUpdateOperationListener,
+                                             UsersCSRatingLoadOperationListener {
 
     private static final String TAG = "CommentsListActivity";
 
@@ -193,7 +197,7 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerViewAdapter = new CommentsListActivity.CommentItemRecyclerViewAdapter( this, offLineModeOn);
+        recyclerViewAdapter = new CommentsListActivity.CommentItemRecyclerViewAdapter( this);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
@@ -202,25 +206,32 @@ public class CommentsListActivity extends AppCompatActivity
      */
     private void showEnterCommentAndRatingDialog() {
         // Create an instance of the dialog fragment and show it
-        //Passes number of stars for CoffeeSite and User to EnterCommentAndRatingDialogFragment
+        // Passes number of stars for CoffeeSite and User to EnterCommentAndRatingDialogFragment
         EnterCommentAndRatingDialogFragment dialog;
         if (currentCommentOperation == CommentOperation.UPDATE) {
             this.selectedComment = recyclerViewAdapter.getCommentAfterCommentTextTap();
-            dialog = newInstance(this.starsFromCurrentUser, this.selectedComment != null ? this.selectedComment.getText() : "");
+            dialog = newDialogInstance(this.starsFromCurrentUser, this.selectedComment != null ? this.selectedComment.getText() : "");
         } else {
-            dialog = newInstance(this.starsFromCurrentUser, "");
+            dialog = newDialogInstance(this.starsFromCurrentUser, "");
         }
 
         dialog.show(getSupportFragmentManager(), "EnterCommentAndRatingDialogFragment");
     }
 
-    public static EnterCommentAndRatingDialogFragment newInstance(int numOfStars, String currentCommentText) {
+    /**
+     *
+     * @param numOfStars
+     * @param currentCommentText
+     * @return
+     */
+    public static EnterCommentAndRatingDialogFragment newDialogInstance(int numOfStars, String currentCommentText) {
         EnterCommentAndRatingDialogFragment f = new EnterCommentAndRatingDialogFragment();
 
-        // Supply num and text input as an argument.
+        // Supply num. of stars and text input as an argument
         Bundle args = new Bundle();
         args.putInt("numOfStars", numOfStars);
         args.putString("commentText", currentCommentText);
+        args.putBoolean("commentEditable", true);
         f.setArguments(args);
         return f;
     }
@@ -312,6 +323,7 @@ public class CommentsListActivity extends AppCompatActivity
      *
      * @param stars
      */
+    @Override
     public void processNumberOfStarsForSiteAndUser(int stars) {
         this.starsFromCurrentUser = stars;
         commentActionsProgressBar.setVisibility(View.GONE);
@@ -324,6 +336,7 @@ public class CommentsListActivity extends AppCompatActivity
      * This method can be called only before a current user wants to open<br>
      * EnterCommentAndRatingDialogFragment to enter Comment and Stars for the CoffeeSite.
      */
+    @Override
     public void processFailedNumberOfStarsForSiteAndUser(Result.Error error) {
         commentActionsProgressBar.setVisibility(View.GONE);
         showRESTCallError(error);
@@ -349,6 +362,7 @@ public class CommentsListActivity extends AppCompatActivity
      *
      * @param comments
      */
+    @Override
     public void processUpdatedComment(Comment updatedComment) {
         if (this.siteComments != null) {
             for (Comment comment : this.siteComments) {
@@ -360,6 +374,11 @@ public class CommentsListActivity extends AppCompatActivity
             showComments(this.siteComments);
         }
         commentActionsProgressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void processFailedCommentUpdate(Result.Error error) {
+        showRESTCallError(error);
     }
 
     private void showComments(List<Comment> comments) {
@@ -404,11 +423,10 @@ public class CommentsListActivity extends AppCompatActivity
         commentActionsProgressBar.setVisibility(View.GONE);
     }
 
-    /* *********** RecyclerViewAdapter ************* */
+        /* *********** RecyclerViewAdapter for Comments list ************* */
 
         public static class CommentItemRecyclerViewAdapter extends RecyclerView.Adapter<CommentItemRecyclerViewAdapter.ViewHolder> {
 
-            private final boolean offLineModeOn;
             private List<Comment> mValues;
             private final CommentsListActivity parenActivity;
 
@@ -421,8 +439,7 @@ public class CommentsListActivity extends AppCompatActivity
             private int commentIdToDelete;
             private Comment selectedComment;
 
-             CommentItemRecyclerViewAdapter(CommentsListActivity parenActivity, boolean offLineModeOn) {
-                 this.offLineModeOn = offLineModeOn;
+             CommentItemRecyclerViewAdapter(CommentsListActivity parenActivity) {
                  this.parenActivity = parenActivity;
             }
 

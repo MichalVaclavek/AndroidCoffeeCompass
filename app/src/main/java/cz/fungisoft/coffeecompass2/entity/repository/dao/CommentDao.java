@@ -38,5 +38,4 @@ public interface CommentDao {
     @Insert
     void insertComment(Comment comment);
 
-
 }

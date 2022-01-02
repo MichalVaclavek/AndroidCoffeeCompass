@@ -101,31 +101,38 @@
                 android:textStyle="italic" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView7"
+        <LinearLayout
+            android:id="@+id/users_comment_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/your_comment_dialog_label"
-            android:textAlignment="center"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/comment_inputlayout"
-            android:theme="@style/SiteInput.HintAppearance"
-            android:layout_width="match_parent"
-            app:counterEnabled="true"
-            app:counterMaxLength="320"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/commentTextInput"
+            <TextView
+                android:id="@+id/textView7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/dialog_comment_hint"
-                android:inputType="textMultiLine"
-                android:maxLength="320" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="20dp"
+                android:text="@string/your_comment_dialog_label"
+                android:textAlignment="center"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/comment_inputlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/SiteInput.HintAppearance"
+                app:counterEnabled="true"
+                app:counterMaxLength="320">
+
+                <EditText
+                    android:id="@+id/commentTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dialog_comment_hint"
+                    android:inputType="textMultiLine"
+                    android:maxLength="320" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
 
 
     </LinearLayout>

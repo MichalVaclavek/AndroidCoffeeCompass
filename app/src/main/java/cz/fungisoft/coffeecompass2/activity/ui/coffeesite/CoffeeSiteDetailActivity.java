@@ -22,8 +22,11 @@ import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
+import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -37,7 +40,6 @@ import cz.fungisoft.coffeecompass2.activity.ui.fragments.DetailsCollectionFragme
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
-import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity.CREATE_COFFEESITE_REQUEST;
 
 /**
  * An activity representing a single CoffeeSite detail screen. This
@@ -49,6 +51,8 @@ import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesite
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                                       implements CoffeeSiteServicesConnectionListener,
                                                  UserAccountServiceConnectionListener,
+                                                 EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
+                                                 UsersCSRatingAndCommentUpdateOperationListener,
                                                  CoffeeSiteLoadServiceOperationsListener {
 
     private static final String TAG = "CoffeeSiteDetailAct";
@@ -60,7 +64,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
 
-    private ProgressBar loadCoffeeSiteProgressBar;
+    private ProgressBar asyncRestCallTaskProgressBar;
     private LoggedInUser currentUser;
 
     /**
@@ -103,7 +107,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
 
-        loadCoffeeSiteProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
+        asyncRestCallTaskProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
 
         // Read coffee site data from calling activity
         Intent intent = this.getIntent();
@@ -269,14 +273,14 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void showProgressbar() {
-        loadCoffeeSiteProgressBar.setVisibility(View.VISIBLE);
+        asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
     }
 
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
     public void hideProgressbar() {
-        loadCoffeeSiteProgressBar.setVisibility(GONE);
+        asyncRestCallTaskProgressBar.setVisibility(GONE);
     }
 
 
@@ -384,12 +388,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     public void showRESTCallError(Result.Error error) {
         if (error != null) {
             Log.e(TAG, "REST call error: " + error.getDetail());
-            Toast.makeText(getApplicationContext(),
-                    error.getDetail(),
+            Toast.makeText(getApplicationContext(), error.getDetail(),
                     Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(),
-                    "Server connection error.",
+            Toast.makeText(getApplicationContext(), "Server connection error.",
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -505,5 +507,37 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 ft.commit();
             }
         }
+    }
+
+    /**
+     * Process positive response, i.e. try to save Comment and Star
+     * @param dialog
+     */
+    @Override
+    public void onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment dialog) {
+        if (Utils.isOnline(getApplicationContext())) {
+            asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
+            // Even if only Stars are updated, we need Comment object to be saved by UpdateCommentAndStarsAsyncTask
+            LoggedInUser user = userAccountService.getLoggedInUser();
+            new UpdateStarsAsyncTask(userAccountService.getLoggedInUser(), this, coffeeSite.getId(),dialog.getCommentAndStars().getStars().getNumOfStars() ).execute();
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    /**
+     * Stars rating has been updated, reload the coffee site to show current data.
+     * @param comment
+     */
+    @Override
+    public void processUpdatedStarsRating(Integer result) {
+        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        startCoffeeSiteLoad(coffeeSite.getId());
+    }
+
+    @Override
+    public void processFailedCommentUpdate(Result.Error error) {
+        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        showRESTCallError(error);
     }
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AlertDialog;
@@ -27,6 +28,11 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
     private int numOfStarsForSiteAndUser = 0;
 
     private String currentCommentText = "";
+
+    /**
+     * If comments is not to be editable, then hide the respective input field
+     */
+    private boolean commentEditable = true;
 
     public CommentAndStars getCommentAndStars() {
         return commentAndStars;
@@ -54,6 +60,8 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         this.numOfStarsForSiteAndUser = getArguments().getInt("numOfStars");
         this.currentCommentText = getArguments().getString("commentText");
+        // If comment is not to be editable, then show only star/cup rating
+        this.commentEditable = getArguments().getBoolean("commentEditable", true);
     }
 
     // Override the Fragment.onAttach() method to instantiate the CommentAndRatingDialogListener
@@ -106,26 +114,32 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
 
         setCurrentRatingCupsImageViews(ratingCupsViews, numOfStarsForSiteAndUser);
 
+        /**
+         * User's comment layout section - can be hide, if only stars rating is requested
+         */
+        LinearLayout usersCommentLayout = dialogView.findViewById(R.id.users_comment_layout);
+        usersCommentLayout.setVisibility(this.commentEditable ? View.VISIBLE : View.GONE);
+
         commentInput = dialogView.findViewById(R.id.commentTextInput);
 
         // If current Comment is to be modified
-        if (!currentCommentText.isEmpty()) {
+        if (currentCommentText != null && !currentCommentText.isEmpty()) {
             commentInput.setText(currentCommentText);
         }
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
-               .setTitle(R.string.comment_dialog_title)
-               .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.comment_dialog_title)
+                .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // Create new Comment and star object and call listener to pass it further as return value of this dia;log
+                        // Create new Comment and star object and call listener to pass it further as return value of this dialog
                         commentAndStars.setStars(new CommentAndStars.Stars(selectedRatingNumber));
                         commentAndStars.setComment(commentInput.getText().toString());
                         listener.onSaveUpdateCommentDialogPositiveClick(EnterCommentAndRatingDialogFragment.this);
                     }
                 })
-               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
                         listener.onSaveUpdateCommentDialogNegativeClick(EnterCommentAndRatingDialogFragment.this);

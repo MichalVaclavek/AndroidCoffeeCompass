@@ -3,20 +3,28 @@ package cz.fungisoft.coffeecompass2.activity.ui.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingLoadOperationListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -27,7 +35,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * (or should be in a {@link FoundCoffeeSitesListActivity} in two-pane mode (on tablets),
  * but currently only CoffeeSiteDetailActivity is used to show this fragment) )
  */
-public class CoffeeSiteDetailFragment extends Fragment {
+public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingLoadOperationListener {
 
     private static final String TAG = "CoffeeSiteDetailFrag";
 
@@ -64,6 +72,18 @@ public class CoffeeSiteDetailFragment extends Fragment {
     private View rootView;
 
     private static final String UNKNOWN_VALUE = "-";
+
+    /**
+     * to show EnterCommentAndRatingDialogFragment with current user's rating of the coffee site in this activity
+     */
+    private int starsFromCurrentUser = 0;
+
+    private ProgressBar asyncRestCallTaskProgressBar;
+
+    /**
+     * Layout with average rating of the coffee site as cup icons. Is clickable to se user's rating of the coffee site.
+     */
+    private LinearLayout averageStartRatingLayout;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -110,6 +130,15 @@ public class CoffeeSiteDetailFragment extends Fragment {
         rootView = inflater.inflate(R.layout.coffeesite_detail_fragment, container, false);
         editCoffeeSiteIcon = rootView.findViewById(R.id.edit_coffeesite_detail_imageView);
         editCoffeeSiteIcon.setOnClickListener(createOnClickListenerForEditCoffeeSiteImageView());
+        asyncRestCallTaskProgressBar = getActivity().findViewById(R.id.load_coffeeSite_progressBar);
+
+        averageStartRatingLayout = rootView.findViewById(R.id.rating_icons_detail_layout);
+        averageStartRatingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNumberOfStarsAsyncTask();
+            }
+        });
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -270,4 +299,86 @@ public class CoffeeSiteDetailFragment extends Fragment {
         startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }
 
+    /**
+     * Starts Async task to obtain number of stars assigned by current user to this coffee site
+     */
+    private void startNumberOfStarsAsyncTask() {
+        if (Utils.isOnline(rootView.getContext())) {
+            asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
+            // Async task for loading current user's rating for this CoffeeSite
+            // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes
+            new GetNumberOfStarsAsyncTask(currentUser.getUserId(), coffeeSite.getId(), this).execute();
+        } else { // Dialog can be opened as there might be only temporary connection problem
+            showEnterCommentAndRatingDialog();
+        }
+    }
+
+    /**
+     * Method to be called from async task after the number of stars for this CoffeeSite and User
+     * is returned from server.
+     * This method can be called only before a current user wants to open EnterCommentAndRatingDialogFragment
+     * to enter new Comment and Stars for the CoffeeSite or before updating current Comment and Stars for CoffeeSite.
+     *
+     * @param stars
+     */
+    @Override
+    public void processNumberOfStarsForSiteAndUser(int stars) {
+        this.starsFromCurrentUser = stars;
+        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        showEnterCommentAndRatingDialog();
+    }
+
+    /**
+     * Method to be called from Async task after failed request for the number<br>
+     * of stars for this CoffeeSite and User is returned from server.<br>
+     * This method can be called only before a current user wants to open<br>
+     * EnterCommentAndRatingDialogFragment to enter Comment and Stars for the CoffeeSite.
+     */
+    @Override
+    public void processFailedNumberOfStarsForSiteAndUser(Result.Error error) {
+        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        showRESTCallError(error);
+        // Open EnterCommentAndRatingDialogFragment
+        this.starsFromCurrentUser = 0;
+        showEnterCommentAndRatingDialog();
+    }
+
+    public void showRESTCallError(Result.Error error) {
+        if (error != null) {
+            Log.e(TAG, "REST call error: " + error.getDetail());
+            Toast.makeText(rootView.getContext(), error.getDetail(),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(rootView.getContext(), "Server connection error.",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Show the dialog for entering coffee site rating
+     */
+    private void showEnterCommentAndRatingDialog() {
+        // Create an instance of the dialog fragment and show it
+        // Passes number of stars for CoffeeSite and User to EnterCommentAndRatingDialogFragment
+        EnterCommentAndRatingDialogFragment dialog;
+        dialog = newDialogInstance(this.starsFromCurrentUser);
+        dialog.show(getParentFragmentManager(), "EnterCommentAndRatingDialogFragment");
+    }
+
+    /**
+     *
+     * @param numOfStars
+     * @param currentCommentText
+     * @return
+     */
+    public static EnterCommentAndRatingDialogFragment newDialogInstance(int numOfStars) {
+        EnterCommentAndRatingDialogFragment f = new EnterCommentAndRatingDialogFragment();
+
+        // Supply num. of stars as an argument
+        Bundle args = new Bundle();
+        args.putInt("numOfStars", numOfStars);
+        args.putBoolean("commentEditable", false);
+        f.setArguments(args);
+        return f;
+    }
 }
