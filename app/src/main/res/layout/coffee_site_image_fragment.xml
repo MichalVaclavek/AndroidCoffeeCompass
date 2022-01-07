@@ -27,7 +27,7 @@
             app:srcCompat="@drawable/kafe_backround_120x160" />
 
         <TextView
-            android:id="@+id/textView24"
+            android:id="@+id/site_detail_no_photo_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"

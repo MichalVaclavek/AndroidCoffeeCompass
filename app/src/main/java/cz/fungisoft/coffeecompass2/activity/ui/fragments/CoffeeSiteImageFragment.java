@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,6 +64,8 @@ public class CoffeeSiteImageFragment extends Fragment {
         ImageView pictureImageView = view.findViewById(R.id.coffeesitePictureImageView);
         mProgressBar =  view.findViewById(R.id.image_fragment_progressBar);
 
+        TextView noImageInfoLabel = view.findViewById(R.id.site_detail_no_photo_label);
+
         boolean isOnline = Utils.isOnline(mContext);
         if (isOnline && this.coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
             mProgressBar.setVisibility(View.VISIBLE);
@@ -73,11 +76,13 @@ public class CoffeeSiteImageFragment extends Fragment {
                         @Override
                         public void onSuccess() {
                             mProgressBar.setVisibility(View.GONE);
+                            noImageInfoLabel.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void onError(Exception e) {
                             mProgressBar.setVisibility(View.GONE);
+                            noImageInfoLabel.setVisibility(View.VISIBLE);
                         }
                     });
         } else {
@@ -88,11 +93,13 @@ public class CoffeeSiteImageFragment extends Fragment {
                         @Override
                         public void onSuccess() {
                             mProgressBar.setVisibility(View.GONE);
+                            noImageInfoLabel.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void onError(Exception e) {
                             mProgressBar.setVisibility(View.GONE);
+                            noImageInfoLabel.setVisibility(View.VISIBLE);
                         }
                     });
         }
