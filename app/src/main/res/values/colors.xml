@@ -5,7 +5,8 @@
     <color name="colorAccent">#D55C00</color>
     <color name="login_backround">#86BA4B</color>
     <color name="card_backround">#F0F4C3</color>
-    <color name="colorNiceYellow">#FCCA03</color>
+    <color name="colorNiceYellow">#FFFCCA03</color>
+    <color name="colorNiceYellow_alpha">#44FCCA03</color>
     <color name="colorPrimary2">#804314</color>
     <color name="colorPrimary2Widget">#BB804314</color>
     <color name="activityBackround">#FFE0B2</color>
@@ -23,6 +24,8 @@
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
     <color name="green_emptycard" >#B1C34A</color>
+    <color name="main_button_backround" >#FFB23A</color>
+    <color name="main_button_stroke_light" >#FBE1D8</color>
 
     <color name="black_alpha_40">#66000000</color>
 </resources>

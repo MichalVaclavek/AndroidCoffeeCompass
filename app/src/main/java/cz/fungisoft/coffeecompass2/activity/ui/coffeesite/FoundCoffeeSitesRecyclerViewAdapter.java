@@ -483,7 +483,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
         });
 
-        //animation2 AnimationListener
+        // animation2 AnimationListener
         animation2.setAnimationListener(new Animation.AnimationListener() {
 
             @Override

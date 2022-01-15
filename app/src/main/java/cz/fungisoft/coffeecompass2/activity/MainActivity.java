@@ -1,6 +1,13 @@
 package cz.fungisoft.coffeecompass2.activity;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.Manifest;
+import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -14,11 +21,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -39,6 +48,7 @@ import androidx.lifecycle.Observer;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -82,30 +92,27 @@ import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
 /**
  * Main activity to show:
- *
- *  - main search buttons to find CoffeeSites within selected distance range
- *  - info about location of the phone and accuracy of this location
- *  - basic statistics info about CoffeeSites and Users
- *  - show icon allowing to sign-in into application
- *  - show icon indicating, that logged-in user has created coffee sites and which leads to MyCoffeeSitesListActivity
- *  - show icon to load Notifications settings or to show list of new CoffeeSites received upon notification from Firebase
- *
- *  {@link MyCoffeeSitesListActivity}
- *
- *  Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
+ * <p>
+ * - main search buttons to find CoffeeSites within selected distance range
+ * - info about location of the phone and accuracy of this location
+ * - basic statistics info about CoffeeSites and Users
+ * - show icon allowing to sign-in into application
+ * - show icon indicating, that logged-in user has created coffee sites and which leads to MyCoffeeSitesListActivity
+ * - show icon to load Notifications settings or to show list of new CoffeeSites received upon notification from Firebase
+ * <p>
+ * {@link MyCoffeeSitesListActivity}
+ * <p>
+ * Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
 public class MainActivity extends ActivityWithLocationService
-                          implements PropertyChangeListener,
-                                     UserAccountServiceConnectionListener,
-                                     CoffeeSiteEntitiesServiceConnectionListener,
-                                     CoffeeSiteEntitiesServiceOperationsListener,
-                                     CoffeeSiteServicesConnectionListener,
-                                     CoffeeSiteLoadServiceOperationsListener {
+        implements PropertyChangeListener,
+        UserAccountServiceConnectionListener,
+        CoffeeSiteEntitiesServiceConnectionListener,
+        CoffeeSiteEntitiesServiceOperationsListener,
+        CoffeeSiteServicesConnectionListener,
+        CoffeeSiteLoadServiceOperationsListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -126,14 +133,20 @@ public class MainActivity extends ActivityWithLocationService
 
     private Button searchKafeButton;
 
+    private MaterialCardView buttonCardView;
+
+    private final AnimatorSet animatorSet = new AnimatorSet();
+    private ObjectAnimator reverseStrokeAnimator;
+    private ObjectAnimator strokeAnimator;
+
+    private boolean mainButtonClicked = false; // to indicate, that button text animation should stop
+
+    private ObjectAnimator mainButtonTextColorAnimation;
+
     private Toolbar mainToolbar;
 
-    private VerticalSeekBar searchDistanceSeekBar;
-
-    private LinearLayout  searchDistancesScaleLinearLayout;
-
     private static int searchRange = 500; // range in meters for searching from current position - 500 m default value
-    private static  String searchRangeString;
+    private static String searchRangeString;
 
     // Saves selected search distance range
     private SearchDistancePreferenceHelper searchRangePreferenceHelper;
@@ -188,6 +201,7 @@ public class MainActivity extends ActivityWithLocationService
 
     /**
      * Should be synchronized as called from more threads
+     *
      * @return
      */
     private synchronized int getNewSitesNotificationCount() {
@@ -230,7 +244,7 @@ public class MainActivity extends ActivityWithLocationService
          * If there are Extras, the Main activity was opened from notification tray
          * upon received firebase notification and user's click, i.e. when the
          * app. was in background
-        */
+         */
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             // bundle should contain all info sent in "data" field of the notification
@@ -290,17 +304,17 @@ public class MainActivity extends ActivityWithLocationService
 
         searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
 
-        searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
+        VerticalSeekBar searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
 
         String[] vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
         // Seek bar for selecting searching distance
         searchDistanceSeekBar.setMaxValue(vzdalenosti.length - 1);
 
-        searchDistancesScaleLinearLayout = findViewById(R.id.searchDistancesScaleLinearLayout);
+        LinearLayout searchDistancesScaleLinearLayout = findViewById(R.id.searchDistancesScaleLinearLayout);
         // Text view for searchDistances to be accessible for changing its property when selected by seekbar
         TextView[] searchDistanceTextViews = new TextView[vzdalenosti.length];
 
-        for (int i = vzdalenosti.length - 1; i >= 0 ; i--) {
+        for (int i = vzdalenosti.length - 1; i >= 0; i--) {
             TextView searchDistTextView = new TextView(this);
             searchDistTextView.setText(vzdalenosti[i]);
             searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -309,7 +323,7 @@ public class MainActivity extends ActivityWithLocationService
             searchDistancesScaleLinearLayout.addView(searchDistTextView);
         }
         // find selected searchRangeTextView to be highlited
-        for (int i = vzdalenosti.length - 1; i >= 0 ; i--) {
+        for (int i = vzdalenosti.length - 1; i >= 0; i--) {
             if (String.valueOf(searchRange).equals(vzdalenosti[i])) {
                 searchDistanceSeekBar.setProgress(i);
                 searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
@@ -321,7 +335,7 @@ public class MainActivity extends ActivityWithLocationService
 
         // SeekBar onChangeListener()
         searchDistanceSeekBar.setOnProgressChangeListener(FunctionalUtils.fromConsumer((progress) -> {
-            for (int i = searchDistanceTextViews.length-1; i >= 0 ; i--) {
+            for (int i = searchDistanceTextViews.length - 1; i >= 0; i--) {
                 if (i == progress) {
                     searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
                     searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
@@ -334,7 +348,7 @@ public class MainActivity extends ActivityWithLocationService
             }
             searchRange = Integer.parseInt(vzdalenosti[progress]);
             searchRangeString = Utils.convertSearchDistance(searchRange);
-            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
+            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>"));
             searchRangePreferenceHelper.putSearchDistance(searchRange);
         }));
 
@@ -348,9 +362,7 @@ public class MainActivity extends ActivityWithLocationService
 
         searchRangeString = Utils.convertSearchDistance(searchRange);
 
-        //TODO - text from R.string. ...
         searchKafeButton.setTransformationMethod(null);
-        searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>" ));
 
         locationImageView = (ImageView) findViewById(R.id.locationImageView);
 
@@ -390,13 +402,55 @@ public class MainActivity extends ActivityWithLocationService
         statisticsLayout = findViewById(R.id.statistics_layout);
 
         statisticsLayout.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    onStatisticsClick(v);
-                                                }
-                                            });
+            @Override
+            public void onClick(View v) {
+                onStatisticsClick(v);
+            }
+        });
 
         fab.setVisibility(VISIBLE);
+
+        mainButtonTextColorAnimation = ObjectAnimator.ofInt(searchKafeButton, "textColor", Color.WHITE, getResources().getColor(R.color.colorNiceYellow_alpha));
+    }
+
+    private void animateCardView(final MaterialCardView cardView) {
+        // Set CardView stroke Width to 'animation state' value 4dp
+        int dpSize = 4;
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        float strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, dm);
+        buttonCardView.setStrokeWidth((int) strokeWidth);
+
+        final int colorTo = getResources().getColor(R.color.main_button_stroke_light);
+        final int colorBasic = getResources().getColor(R.color.colorAccent);
+
+        reverseStrokeAnimator = ObjectAnimator.ofArgb(cardView, "strokeColor", colorTo, colorBasic);
+        reverseStrokeAnimator.setDuration(1000);
+        reverseStrokeAnimator.setStartDelay(300);
+        reverseStrokeAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        reverseStrokeAnimator.setRepeatMode(ObjectAnimator.RESTART);
+        reverseStrokeAnimator.setInterpolator(new AccelerateInterpolator());
+        reverseStrokeAnimator.addUpdateListener(valueAnimator -> cardView.invalidate());
+
+        strokeAnimator = ObjectAnimator.ofArgb(cardView, "strokeColor", colorBasic, colorTo);
+        strokeAnimator.setDuration(1500);
+        strokeAnimator.setStartDelay(400);
+        strokeAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        strokeAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        strokeAnimator.setInterpolator(new AccelerateInterpolator());
+        strokeAnimator.addUpdateListener(valueAnimator -> cardView.invalidate());
+
+        animatorSet.setStartDelay(1300);
+        animatorSet.play(reverseStrokeAnimator).after(strokeAnimator);
+        animatorSet.start();
+    }
+
+    private void startAnimateButtonText(ObjectAnimator colorAnim) {
+        colorAnim.setDuration(1300);
+        colorAnim.setStartDelay(1200);
+        colorAnim.setEvaluator(new ArgbEvaluator());
+        colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+        colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+        colorAnim.start();
     }
 
 
@@ -449,7 +503,7 @@ public class MainActivity extends ActivityWithLocationService
             }
             // Release information about the service's state.
             coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
-            unbindService( coffeeSiteEntitiesServiceConnector);
+            unbindService(coffeeSiteEntitiesServiceConnector);
             mShouldUnbindCoffeeSiteEntitiesService = false;
         }
     }
@@ -556,7 +610,7 @@ public class MainActivity extends ActivityWithLocationService
      * @param location
      */
     private void updateAccuracyIndicator(Location location) {
-        Drawable  locIndic = getDrawable(R.drawable.location_bad);
+        Drawable locIndic = getDrawable(R.drawable.location_bad);
         if (location != null) {
             locIndic = getDrawable(R.drawable.location_better);
 
@@ -570,7 +624,7 @@ public class MainActivity extends ActivityWithLocationService
     private void showLocationAccuracy(Location location) {
         if (location != null && location.hasAccuracy()) {
             setAccuracyTextColor(barvaBlack);
-            accuracy.setText("(\u00B1 "  + Math.round(location.getAccuracy()) + " m)");
+            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)");
         } else {
             setAccuracyTextColor(barvaRed);
             accuracy.setText("");
@@ -622,7 +676,7 @@ public class MainActivity extends ActivityWithLocationService
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // City name is selected from list
-                String townName =  parent.getItemAtPosition(position).toString();
+                String townName = parent.getItemAtPosition(position).toString();
                 if (townName.length() > 1) {
                     searchView.setQuery(townName, true);
                     // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
@@ -666,7 +720,7 @@ public class MainActivity extends ActivityWithLocationService
                     return true;
                 }
                 if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().isEmpty()
-                       && getNewSitesNotificationCount() == 1) {
+                        && getNewSitesNotificationCount() == 1) {
                     Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSiteUrl", newNotificationCoffeeSiteURL);
                     startActivity(intent);
@@ -811,7 +865,7 @@ public class MainActivity extends ActivityWithLocationService
         usersView.setText(stats.numOfUsers);
 
         // Where the statistics shown upon user's click on Statistics CardView ?
-        if (statisticsCalledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0 ) {
+        if (statisticsCalledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
             statisticsCalledUponUsersClick = false;
             if (Utils.isOnline(getApplicationContext())) {
                 Intent intent = new Intent(this, StaticCoffeeSitesListActivity.class);
@@ -845,6 +899,9 @@ public class MainActivity extends ActivityWithLocationService
         if (location == null) {
             return;
         }
+
+        mainButtonClicked = true;
+
         if (Utils.isOnline(getApplicationContext()) || Utils.offlineDataAvailable(getApplicationContext())) {
             Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
             csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -876,7 +933,7 @@ public class MainActivity extends ActivityWithLocationService
         int permission = ContextCompat.checkSelfPermission(this, permissionType);
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {permissionType}, requestCode);
+            ActivityCompat.requestPermissions(this, new String[]{permissionType}, requestCode);
         }
     }
 
@@ -909,9 +966,9 @@ public class MainActivity extends ActivityWithLocationService
 
         showLocationAccuracy(location);
         updateAccuracyIndicator(location);
-        if (location != null) {
-            searchKafeButton.setEnabled(true);
-        }
+//        if (location != null) {
+//            searchKafeButton.setEnabled(true);
+//        }
     }
 
     @Override
@@ -981,6 +1038,10 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onStop() {
         super.onStop();
+        // stop main button text animation
+        mainButtonTextColorAnimation.cancel();
+        searchKafeButton.setTextColor(Color.WHITE);
+
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
         doUnbindUserAccountService();
@@ -1011,7 +1072,13 @@ public class MainActivity extends ActivityWithLocationService
             location = locationService.getCurrentLocation();
             showLocationAccuracy(location);
             updateAccuracyIndicator(location);
+            // Setup searchKafeButton text and start to animate it, if it is not animating yet
+            // this highlights the button to user
             searchKafeButton.setEnabled(true);
+            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>"));
+            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
+                startAnimateButtonText(mainButtonTextColorAnimation);
+            }
         }
     }
 
