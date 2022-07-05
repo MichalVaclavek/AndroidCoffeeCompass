@@ -20,6 +20,7 @@ public class JwtUserToken implements Serializable {
      * token string
      */
     private String accessToken;
+
     /**
      * Expiry date of the token - should be validated before usage of token
      * and invalidated if expired. Then new token should be requested.

@@ -107,12 +107,12 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
 public class MainActivity extends ActivityWithLocationService
-        implements PropertyChangeListener,
-        UserAccountServiceConnectionListener,
-        CoffeeSiteEntitiesServiceConnectionListener,
-        CoffeeSiteEntitiesServiceOperationsListener,
-        CoffeeSiteServicesConnectionListener,
-        CoffeeSiteLoadServiceOperationsListener {
+                          implements PropertyChangeListener,
+                                     UserAccountServiceConnectionListener,
+                                     CoffeeSiteEntitiesServiceConnectionListener,
+                                     CoffeeSiteEntitiesServiceOperationsListener,
+                                     CoffeeSiteServicesConnectionListener,
+                                     CoffeeSiteLoadServiceOperationsListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -141,7 +141,7 @@ public class MainActivity extends ActivityWithLocationService
 
     private boolean mainButtonClicked = false; // to indicate, that button text animation should stop
 
-    private ObjectAnimator mainButtonTextColorAnimation;
+    //private ObjectAnimator mainButtonTextColorAnimation;
 
     private Toolbar mainToolbar;
 
@@ -410,7 +410,7 @@ public class MainActivity extends ActivityWithLocationService
 
         fab.setVisibility(VISIBLE);
 
-        mainButtonTextColorAnimation = ObjectAnimator.ofInt(searchKafeButton, "textColor", Color.WHITE, getResources().getColor(R.color.colorNiceYellow_alpha));
+        //mainButtonTextColorAnimation = ObjectAnimator.ofInt(searchKafeButton, "textColor", Color.WHITE, getResources().getColor(R.color.colorNiceYellow_alpha));
     }
 
     private void animateCardView(final MaterialCardView cardView) {
@@ -1039,7 +1039,7 @@ public class MainActivity extends ActivityWithLocationService
     protected void onStop() {
         super.onStop();
         // stop main button text animation
-        mainButtonTextColorAnimation.cancel();
+        //mainButtonTextColorAnimation.cancel();
         searchKafeButton.setTextColor(Color.WHITE);
 
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
@@ -1076,9 +1076,9 @@ public class MainActivity extends ActivityWithLocationService
             // this highlights the button to user
             searchKafeButton.setEnabled(true);
             searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>"));
-            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
-                startAnimateButtonText(mainButtonTextColorAnimation);
-            }
+//            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
+//                startAnimateButtonText(mainButtonTextColorAnimation);
+//            }
         }
     }
 

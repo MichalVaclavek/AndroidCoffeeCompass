@@ -14,6 +14,7 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -40,13 +41,13 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
     private final LoggedInUser user;
 
 
-    private final WeakReference<CommentsListActivity> commentsActivity;
+    private final UsersCSRatingAndCommentSaveOperationListener callingActivity;
 
     private final CommentAndStars commentAndStarsToSave;
 
-    public SaveCommentAndStarsAsyncTask(long coffeeSiteId, LoggedInUser user, CommentsListActivity commentsActivity, CommentAndStars commentAndStarsToSave) {
+    public SaveCommentAndStarsAsyncTask(long coffeeSiteId, LoggedInUser user, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;
-        this.commentsActivity = new WeakReference<>(commentsActivity);
+        this.callingActivity = callingActivity;
         this.commentAndStarsToSave = commentAndStarsToSave;
         this.user = user;
     }
@@ -91,27 +92,27 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_TAG, "onResponse() success");
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().processComments(response.body());
+                            if (callingActivity != null) {
+                                callingActivity.processSaveComments(response.body());
                             }
                         } else {
                             Log.i(REQ_TAG, "Returned empty response for saving comment request.");
                             Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(error);
                             }
                         }
                     } else {
                         try {
                             String errorBody = response.errorBody().string();
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(new Result.Error(Utils.getRestError(errorBody)));
                             }
                         } catch (IOException e) {
                             Log.e(REQ_TAG, "Error saving comment." + e.getMessage());
                             Result.Error error = new Result.Error(new IOException("Error saving comment.", e));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(error);
                             }
                         }
                     }
@@ -121,8 +122,8 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 public void onFailure(Call<List<Comment>> call, Throwable t) {
                     Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
-                    if (commentsActivity.get() != null) {
-                        commentsActivity.get().showRESTCallError(error);
+                    if (callingActivity != null) {
+                        callingActivity.processFailedCommentSave(error);
                     }
                 }
             });

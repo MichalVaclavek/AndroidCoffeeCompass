@@ -36,6 +36,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingLoadOperationListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfStarsAsyncTask;
@@ -66,6 +67,7 @@ public class CommentsListActivity extends AppCompatActivity
                                   implements UserAccountServiceConnectionListener,
                                              EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
                                              DeleteCommentDialogFragment.DeleteCommentDialogListener,
+                                             UsersCSRatingAndCommentSaveOperationListener,
                                              UsersCSRatingAndCommentUpdateOperationListener,
                                              UsersCSRatingLoadOperationListener {
 
@@ -349,7 +351,8 @@ public class CommentsListActivity extends AppCompatActivity
      * Method to be called from Async task after new comment is added to coffeeSite's list of comments
      * @param comments
      */
-    public void processComments(List<Comment> comments) {
+    @Override
+    public void processSaveComments(List<Comment> comments) {
         this.siteComments = comments;
         cs.setComments(this.siteComments);
         commentActionsProgressBar.setVisibility(View.GONE);
@@ -378,6 +381,11 @@ public class CommentsListActivity extends AppCompatActivity
 
     @Override
     public void processFailedCommentUpdate(Result.Error error) {
+        showRESTCallError(error);
+    }
+
+    @Override
+    public void processFailedCommentSave(Result.Error error) {
         showRESTCallError(error);
     }
 

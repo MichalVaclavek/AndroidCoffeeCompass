@@ -157,10 +157,9 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
      */
     @Override
     protected void onPostExecute(String result) {
-
         if (comments != null) {
             if (parentActivity.get() != null) {
-                parentActivity.get().processComments(comments);
+                parentActivity.get().processSaveComments(comments);
             }
         }
     }

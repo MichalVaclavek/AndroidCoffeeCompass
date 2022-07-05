@@ -21,14 +21,18 @@ import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
 import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
+import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -41,6 +45,8 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
 
+import java.util.List;
+
 /**
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
@@ -52,6 +58,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                                       implements CoffeeSiteServicesConnectionListener,
                                                  UserAccountServiceConnectionListener,
                                                  EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
+                                                 UsersCSRatingAndCommentSaveOperationListener,
                                                  UsersCSRatingAndCommentUpdateOperationListener,
                                                  CoffeeSiteLoadServiceOperationsListener {
 
@@ -98,6 +105,15 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     // Calling activity can request to show image fragment first
     private boolean showImageFirstRequest = false;
+
+    /**
+     * Enum to distinguish between saving the very first Stars rating or updating Stars rating
+     */
+//    private enum StarsOperation {SAVE, UPDATE}
+
+//    private StarsOperation starsOperation = StarsOperation.SAVE; // default is SAVE as the new CoffeeSite rating is expected
+
+    private int numOfStarsSelectedByUser = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -386,6 +402,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     public void showRESTCallError(Result.Error error) {
+        hideProgressbar();
         if (error != null) {
             Log.e(TAG, "REST call error: " + error.getDetail());
             Toast.makeText(getApplicationContext(), error.getDetail(),
@@ -510,7 +527,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     /**
-     * Process positive response, i.e. try to save Comment and Star
+     * Process positive response, i.e. try to save Star
      * @param dialog
      */
     @Override
@@ -518,8 +535,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         if (Utils.isOnline(getApplicationContext())) {
             asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
             // Even if only Stars are updated, we need Comment object to be saved by UpdateCommentAndStarsAsyncTask
-            LoggedInUser user = userAccountService.getLoggedInUser();
-            new UpdateStarsAsyncTask(userAccountService.getLoggedInUser(), this, coffeeSite.getId(),dialog.getCommentAndStars().getStars().getNumOfStars() ).execute();
+            numOfStarsSelectedByUser = dialog.getCommentAndStars().getStars().getNumOfStars();
+            new UpdateStarsAsyncTask(userAccountService.getLoggedInUser(), this, coffeeSite.getId(), numOfStarsSelectedByUser).execute();
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -531,13 +548,33 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
      */
     @Override
     public void processUpdatedStarsRating(Integer result) {
-        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        hideProgressbar();
+        startCoffeeSiteLoad(coffeeSite.getId());
+    }
+
+    /**
+     * Method to be called from Async task after new stars rating is saved to coffeeSite.
+     * Used as a trigger to reload coffeeSite to show current stars rating
+     * @param comments
+     */
+    @Override
+    public void processSaveComments(List<Comment> comments) {
+        hideProgressbar();
         startCoffeeSiteLoad(coffeeSite.getId());
     }
 
     @Override
     public void processFailedCommentUpdate(Result.Error error) {
-        asyncRestCallTaskProgressBar.setVisibility(View.GONE);
+        // if error, then this is probably the first rating for this user and coffeeSite, so, update not possible
+        // try to use SaveCommentAndStarsAsyncTask
+        CommentAndStars commentAndStars = new CommentAndStars();
+        commentAndStars.setStars(new CommentAndStars.Stars(numOfStarsSelectedByUser));
+        commentAndStars.setComment("");
+        new SaveCommentAndStarsAsyncTask(coffeeSite.getId(), userAccountService.getLoggedInUser(), this, commentAndStars).execute();
+    }
+
+    @Override
+    public void processFailedCommentSave(Result.Error error) {
         showRESTCallError(error);
     }
 }
