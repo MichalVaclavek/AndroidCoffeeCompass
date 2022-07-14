@@ -368,7 +368,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             }
             // applies to both newly created and/or modified
             showCoffeeSiteCancelSuccess();
-            // to ensure correct refresh of the RecycleView list after CoffeeSite delete
+            // to ensure correct refresh of the RecycleView list after CoffeeSite deleteUser
             modifiedCoffeeSite = selectedCoffeeSite;
             updateRecyclerViewItemRemoved();
             return;

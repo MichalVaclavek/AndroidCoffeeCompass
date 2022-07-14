@@ -15,7 +15,7 @@ import java.util.List;
 import cz.fungisoft.coffeecompass2.R;
 
 /**
- * Fragment to show name of town selected to be notified about, with delete button.
+ * Fragment to show name of town selected to be notified about, with deleteUser button.
  */
 public class SelectedTownFragment extends Fragment {
 

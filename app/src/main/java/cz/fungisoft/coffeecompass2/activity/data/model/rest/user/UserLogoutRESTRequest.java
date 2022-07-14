@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -28,7 +28,7 @@ public class UserLogoutRESTRequest {
 
     // Activity or Service implementing interface for evaluation of the
     // user logout REST call attempt response
-    private final UserAccountActionsEvaluator userAccountService;
+    private final UserAccountActionsProvider userAccountService;
 
     /**
      * User to be logged-out
@@ -60,14 +60,16 @@ public class UserLogoutRESTRequest {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 okhttp3.Request request = chain.request();
-                Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getToken().getTokenType() + " " + currentUser.getToken().getAccessToken()).build();
                 request = request.newBuilder().headers(headers).build();
                 return chain.proceed(request);
             }
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+        OkHttpClient client = new OkHttpClient.Builder()
+                                              .authenticator(new TokenAuthenticator(userAccountService))
+                                              .addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .client(client)

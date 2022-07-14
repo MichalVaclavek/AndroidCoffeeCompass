@@ -11,7 +11,7 @@ import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -43,14 +43,14 @@ public class CurrentUserRESTRequest {
      * Service or Class implementing interface for evaluation of user register
      * or login REST request.
      */
-    private final UserAccountActionsEvaluator userLoginAndRegisterService;
+    private final UserAccountActionsProvider userLoginAndRegisterService;
 
     /**
      *
      * @param userLoginRESTResponse
      * @param userLoginAndRegisterService
      */
-    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsEvaluator userLoginAndRegisterService) {
+    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsProvider userLoginAndRegisterService) {
         super();
         this.userJwtToken = userLoginRESTResponse;
         this.currentUser = new LoggedInUser(userJwtToken);

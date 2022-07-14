@@ -8,8 +8,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
@@ -38,12 +37,7 @@ public class UserLoginOrRegisterRESTRequest {
     /**
      * Evaluator of the user register or login REST response
      */
-    private final UserAccountActionsEvaluator userLoginAndRegisterService;
-
-    /**
-     * User data obtained from server as a result of login or register process
-     */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userLoginAndRegisterService;
 
     private static final int PERFORM_LOGIN = 1;
     private static final int PERFORM_REGISTER = 2;
@@ -55,11 +49,10 @@ public class UserLoginOrRegisterRESTRequest {
      * @param userName - username to be used for registration or login of the user
      * @param password - password entered by user, used to register or login
      */
-    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsEvaluator userLoginAndRegisterService) {
+    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsProvider userLoginAndRegisterService) {
         super();
         this.userLoginAndRegisterService = userLoginAndRegisterService;
         userLoginOrRegisterInputData = new UserLoginOrRegisterInputData(userName, deviceID, email, password);
-        currentUser = new LoggedInUser();
     }
 
 
@@ -116,7 +109,6 @@ public class UserLoginOrRegisterRESTRequest {
                         } else {
                             currentUserRESTRequest.performRequestAfterRegister();
                         }
-                        return;
                     } else {
                         Log.i(REQ_TAG, "Returned empty response");
                         if (requestType == PERFORM_LOGIN) {

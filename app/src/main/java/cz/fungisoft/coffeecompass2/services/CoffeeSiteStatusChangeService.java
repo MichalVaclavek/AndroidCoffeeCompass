@@ -85,17 +85,11 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         Log.d(TAG, "Service started.");
     }
 
-    /**
-     * Current CoffeeSite which is used for server operations save, update, activate and so on
-     */
-    //private CoffeeSite coffeeSite;
-
-
     public void activate(CoffeeSite coffeeSite) {
         requestedRESTOperation = COFFEE_SITE_ACTIVATE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -104,7 +98,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         requestedRESTOperation = COFFEE_SITE_DEACTIVATE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -113,7 +107,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         requestedRESTOperation = COFFEE_SITE_CANCEL;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }

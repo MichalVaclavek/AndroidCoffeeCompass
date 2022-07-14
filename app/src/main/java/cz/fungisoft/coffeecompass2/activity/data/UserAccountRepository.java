@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.data;
 
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 
 /**
  * Class that holds data about LoggedInUser. Also requests authentication attempts and user information
@@ -42,9 +43,8 @@ public class UserAccountRepository {
         return user;
     }
 
-
     /**
-     * Calls logou functionality of the dataSource,
+     * Calls logout functionality of the dataSource,
      * if the user is logged-in
      */
     public void logout() {
@@ -79,9 +79,17 @@ public class UserAccountRepository {
         dataSource.register(username, password, email, deviceID);
     }
 
+    public JwtUserToken refreshToken() {
+        LoggedInUser user = getLoggedInUser();
+        JwtUserToken retVal = dataSource.refreshToken(user.getRefreshToken(), user.getDeviceID());
+        user.setToken(retVal);
+        preferenceHelper.saveUserData(user);
+        return retVal;
+    }
+
     public void delete() {
         if (getLoggedInUser() != null) {
-            dataSource.delete(getLoggedInUser());
+            dataSource.deleteUser();
         }
     }
 

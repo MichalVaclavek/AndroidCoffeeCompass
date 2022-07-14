@@ -168,7 +168,7 @@ public interface CoffeeSiteRESTInterface {
      * @param siteId
      * @return
      */
-    @DELETE("delete/{siteId}")
+    @DELETE("deleteUser/{siteId}")
     Call<Integer> deleteCoffeeSite(@Path("siteId") long siteId);
 
 

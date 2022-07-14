@@ -93,7 +93,7 @@ public interface CommentsAndStarsRESTInterface {
     Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") long siteID);
 
     /**
-     * Deletes comment of commentID. Return commentID back or 0? if the delete request failed
+     * Deletes comment of commentID. Return commentID back or 0? if the deleteUser request failed
      * Requires Authorization header.
      *
      * @param commentID

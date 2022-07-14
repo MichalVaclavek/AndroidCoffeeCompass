@@ -265,13 +265,13 @@ public class CommentsListActivity extends AppCompatActivity
         if (Utils.isOnline(getApplicationContext())) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
             if (currentCommentOperation == CommentOperation.SAVE) {
-                new SaveCommentAndStarsAsyncTask(cs.getId(), userAccountService.getLoggedInUser(), this, dialog.getCommentAndStars()).execute();
+                new SaveCommentAndStarsAsyncTask(cs.getId(), userAccountService, this, dialog.getCommentAndStars()).execute();
             }
             if (currentCommentOperation == CommentOperation.UPDATE
                    && this.selectedComment != null) {
                 this.selectedComment.setText(dialog.getCommentAndStars().getComment());
                 this.selectedComment.setStarsFromUser(dialog.getCommentAndStars().getStars().getNumOfStars());
-                new UpdateCommentAndStarsAsyncTask(userAccountService.getLoggedInUser(), this, this.selectedComment).execute();
+                new UpdateCommentAndStarsAsyncTask(userAccountService, this, this.selectedComment).execute();
             }
         } else {
             Utils.showNoInternetToast(getApplicationContext());
@@ -279,14 +279,14 @@ public class CommentsListActivity extends AppCompatActivity
     }
 
     /**
-     * Process positive response, i.e. try to delete Comment
+     * Process positive response, i.e. try to deleteUser Comment
      * @param dialog
      */
     @Override
     public void onDeleteCommentDialogPositiveClick(DeleteCommentDialogFragment dialog) {
         if (Utils.isOnline(getApplicationContext())) {
             commentActionsProgressBar.setVisibility(View.VISIBLE);
-            new DeleteCommentAsyncTask(recyclerViewAdapter.getCommentIdAfterDeleteIconTap(), userAccountService.getLoggedInUser(), this).execute();
+            new DeleteCommentAsyncTask(recyclerViewAdapter.getCommentIdAfterDeleteIconTap(), userAccountService, this).execute();
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -507,7 +507,7 @@ public class CommentsListActivity extends AppCompatActivity
                         if (loggedInUser != null && item.getUserName().equals(loggedInUser.getUserName())) {
                             showButtons(holder);
                             // user name is not needed if this is user's comment as user can see buttons to edit, hide the user name
-                            // to save some space used by edit/delete comment icons
+                            // to save some space used by edit/deleteUser comment icons
                             holder.userText.setText("");
                             holder.dateText.setText(item.getCreatedOnString());
                             holder.dateText.setTypeface(holder.dateText.getTypeface(), Typeface.BOLD_ITALIC);

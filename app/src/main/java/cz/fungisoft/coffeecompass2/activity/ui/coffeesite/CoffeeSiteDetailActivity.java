@@ -536,7 +536,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
             // Even if only Stars are updated, we need Comment object to be saved by UpdateCommentAndStarsAsyncTask
             numOfStarsSelectedByUser = dialog.getCommentAndStars().getStars().getNumOfStars();
-            new UpdateStarsAsyncTask(userAccountService.getLoggedInUser(), this, coffeeSite.getId(), numOfStarsSelectedByUser).execute();
+            new UpdateStarsAsyncTask(userAccountService, this, coffeeSite.getId(), numOfStarsSelectedByUser).execute();
         } else {
             Utils.showNoInternetToast(getApplicationContext());
         }
@@ -570,7 +570,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         CommentAndStars commentAndStars = new CommentAndStars();
         commentAndStars.setStars(new CommentAndStars.Stars(numOfStarsSelectedByUser));
         commentAndStars.setComment("");
-        new SaveCommentAndStarsAsyncTask(coffeeSite.getId(), userAccountService.getLoggedInUser(), this, commentAndStars).execute();
+        new SaveCommentAndStarsAsyncTask(coffeeSite.getId(), userAccountService, this, commentAndStars).execute();
     }
 
     @Override

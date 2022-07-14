@@ -138,7 +138,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         currentUser = getCurrentUser();
         if (currentUser != null) {
             coffeeSite.setCreatedByUserName(currentUser.getUserName());
-            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -232,7 +232,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         currentUser = getCurrentUser();
         if (currentUser != null) {
             coffeeSite.setLastEditUserName(currentUser.getUserName());
-            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteCreateUpdateAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -242,7 +242,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_DELETE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new CoffeeSiteDeleteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new CoffeeSiteDeleteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -262,7 +262,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
     }
 
     /**
-     * Called for example from AsyncTask to delete CoffeeSite
+     * Called for example from AsyncTask to deleteUser CoffeeSite
      *
      * @param oper
      * @param result
@@ -307,7 +307,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
                     coffeeSite.setHodnoceni(null); // CREATED cannot have Rating yet
                 }
             }
-            new UploadCoffeeSitesAsyncTask(requestedRESTOperation, currentUser, coffeeSitesToUpload,this).execute();
+            new UploadCoffeeSitesAsyncTask(requestedRESTOperation, userAccountService, coffeeSitesToUpload,this).execute();
         } else {
             Log.w(TAG, "Current user is null. Cannot execute UploadCoffeeSitesAsyncTask.execute()");
         }

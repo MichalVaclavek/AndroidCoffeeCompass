@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 
 /**
- * Async task for delete user account
+ * Async task for deleteUser user account
  */
 public class DeleteUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
 

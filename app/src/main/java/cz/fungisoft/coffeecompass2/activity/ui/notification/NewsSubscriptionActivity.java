@@ -324,7 +324,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
             notificationSubscription.setTownNames(notificationSubscriptionViewModel.getAllValidatedTownNames());
         }
         subscriptionProgressBar.setVisibility(View.VISIBLE);
-        new NotificationSubscriptionAsyncTask(notificationSubscription, getCurrentUser(),this).execute();
+        new NotificationSubscriptionAsyncTask(notificationSubscription, userAccountService,this).execute();
     }
 
     /**
@@ -337,7 +337,7 @@ public class NewsSubscriptionActivity extends AppCompatActivity
         notificationSubscription.setTopic("");
         notificationSubscription.setTownNames(null);
         subscriptionProgressBar.setVisibility(View.VISIBLE);
-        new CancelNotificationSubscriptionAsyncTask(notificationSubscription, getCurrentUser(), this).execute();
+        new CancelNotificationSubscriptionAsyncTask(notificationSubscription, userAccountService, this).execute();
     }
 
 

@@ -7,15 +7,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
-import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -38,39 +37,39 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final long coffeeSiteId;
 
-    private final LoggedInUser user;
-
+    private final UserAccountActionsProvider userAccountService;
 
     private final UsersCSRatingAndCommentSaveOperationListener callingActivity;
 
     private final CommentAndStars commentAndStarsToSave;
 
-    public SaveCommentAndStarsAsyncTask(long coffeeSiteId, LoggedInUser user, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
+    public SaveCommentAndStarsAsyncTask(long coffeeSiteId, UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;
         this.callingActivity = callingActivity;
         this.commentAndStarsToSave = commentAndStarsToSave;
-        this.user = user;
+        this.userAccountService = userAccountService;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
         Log.d(REQ_TAG, "SaveCommentAndStarsAsyncTask REST request initiated");
 
-        if (user != null) {
-
+        if (userAccountService != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
-            //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+            // Add authenticator and the interceptor to the client builder
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .authenticator(new TokenAuthenticator(userAccountService))
+                    .addInterceptor(headerAuthorizationInterceptor).build();
 
             Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                          .create();

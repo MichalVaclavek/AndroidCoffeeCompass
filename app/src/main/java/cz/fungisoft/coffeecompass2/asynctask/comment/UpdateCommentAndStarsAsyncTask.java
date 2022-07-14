@@ -9,9 +9,10 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -32,37 +33,38 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
-    private final LoggedInUser user;
+    private final UserAccountActionsProvider userAccountService;
 
     private final UsersCSRatingAndCommentUpdateOperationListener callingActivity;
 
     private final Comment commentAndStarsToUpdate;
 
-    public UpdateCommentAndStarsAsyncTask(LoggedInUser user, UsersCSRatingAndCommentUpdateOperationListener callingActivity, Comment commentAndStarsToUpdate) {
+    public UpdateCommentAndStarsAsyncTask(UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentUpdateOperationListener callingActivity, Comment commentAndStarsToUpdate) {
         this.callingActivity = callingActivity;
         this.commentAndStarsToUpdate = commentAndStarsToUpdate;
-        this.user = user;
+        this.userAccountService = userAccountService;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
         Log.d(REQ_TAG, "UpdateCommentAndStarsAsyncTask REST request initiated");
 
-        if (user != null) {
-
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+            OkHttpClient client = new OkHttpClient.Builder()
+                                                  .authenticator(new TokenAuthenticator(userAccountService))
+                                                  .addInterceptor(headerAuthorizationInterceptor).build();
 
             Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                          .excludeFieldsWithoutExposeAnnotation()

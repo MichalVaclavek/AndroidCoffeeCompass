@@ -24,7 +24,7 @@ import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 
 /**
  * Service to handle requests for saving or deleting Image/Photo of the CoffeeSite.
- * Calls REST interface to save/delete the image from coffeecompass.cz server.
+ * Calls REST interface to save/deleteUser the image from coffeecompass.cz server.
  * Needs UserAccountService available to obtain logged-in user data as the
  * REST requests for saving/deleting image requires logged-in user.
  */
@@ -130,30 +130,16 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         }
     }
 
-    /**
-     * Helper method to get current logged-in user from userAccountService
-     * @return
-     */
-    private LoggedInUser getCurrentUser() {
-        if (userAccountService != null) {
-            LoggedInUser currentUser = userAccountService.getLoggedInUser();
-            return currentUser;
-        } else return null;
-    }
-
-
     /** Methods to be called by Activity **/
 
     public void uploadImage(File imageFile, CoffeeSite cs) {
-        currentUser = getCurrentUser();
         if (imageFile.exists() && currentUser != null) {
-            new ImageUploadAsyncTask(this, currentUser, imageFile, cs).execute();
+            new ImageUploadAsyncTask(this, userAccountService, imageFile, cs).execute();
         }
     }
 
     public void deleteImage(CoffeeSite cs) {
-        currentUser = getCurrentUser();
-        new ImageDeleteAsyncTask(this, currentUser, cs).execute();
+        new ImageDeleteAsyncTask(this, userAccountService, cs).execute();
     }
 
     /**

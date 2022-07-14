@@ -11,8 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.notification.NotificationSubscription;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.notification.NotificationSubscriptionRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.NotificationSubscriptionCallListener;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.NotificationSubscriptionRequestResult;
@@ -42,7 +43,7 @@ public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Voi
      */
     private final NotificationSubscription notificationSubscription;
 
-    private final LoggedInUser user;
+    private final UserAccountActionsProvider userAccountService;
 
     /**
      * Usually activity, which started this Async. task, capable to process result of API call
@@ -57,10 +58,10 @@ public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Voi
      * @param user
      * @param subscriptionActivity
      */
-    public CancelNotificationSubscriptionAsyncTask(NotificationSubscription notificationSubscription, LoggedInUser user, NotificationSubscriptionCallListener subscriptionActivity) {
+    public CancelNotificationSubscriptionAsyncTask(NotificationSubscription notificationSubscription, UserAccountActionsProvider userAccountService, NotificationSubscriptionCallListener subscriptionActivity) {
         this.notificationSubscription = notificationSubscription;
         this.subscriptionActivity = subscriptionActivity;
-        this.user = user;
+        this.userAccountService = userAccountService;
     }
 
     @Override
@@ -72,18 +73,19 @@ public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Voi
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        if (user != null) {
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
             client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor)
+                                               .authenticator(new TokenAuthenticator(userAccountService))
                                                .addInterceptor(logging)
                                                .build();
             baseUrl = NotificationSubscriptionRESTInterface.NOTIFICATION_SUBSCRIBE_URL;

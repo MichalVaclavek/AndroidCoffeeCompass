@@ -33,7 +33,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Activity to show logged-in user profile details.
- * Allows to log-out or delete user's account.
+ * Allows to log-out or deleteUser user's account.
  */
 public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener,
                                                                        UserAccountServiceConnectionListener,
@@ -241,7 +241,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
 
 
     /**
-     * Handling of the result of the Confirmation dialog for User account delete action
+     * Handling of the result of the Confirmation dialog for User account deleteUser action
      */
 
     /**
@@ -254,7 +254,7 @@ public class UserDataViewActivity extends AppCompatActivity implements UserLogou
     }
 
     /**
-     * Process positive response, i.e. try to delete account
+     * Process positive response, i.e. try to deleteUser account
      * @param dialog
      */
     @Override

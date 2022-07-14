@@ -9,8 +9,9 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
@@ -34,9 +35,9 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
     private final CoffeeSite coffeeSite;
 
     /**
-     * Current logged-in user
+     * Provides current logged-in user info
      */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
     private String operationError = "";
 
@@ -49,11 +50,11 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
 
     public CoffeeSiteCreateUpdateAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
                                            CoffeeSite coffeeSite,
-                                           LoggedInUser currentUser,
+                                           UserAccountActionsProvider userAccountService,
                                            CoffeeSiteRESTResultListener callingService) {
 
         this.coffeeSite = coffeeSite;
-        this.currentUser = currentUser;
+        this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
 
@@ -66,27 +67,27 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
         //operationResult = "";
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + (currentUser == null));
-        if (currentUser != null) {
-
+        Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+//            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(headerAuthorizationInterceptor)
-                    .addInterceptor(logging)
+                    .authenticator(new TokenAuthenticator(userAccountService))
+//                    .addInterceptor(logging)
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()

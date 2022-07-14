@@ -9,10 +9,10 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
-import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -32,7 +32,7 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
-    private final LoggedInUser user;
+    private final UserAccountActionsProvider userAccountService;
 
     private final UsersCSRatingAndCommentUpdateOperationListener callingActivity;
 
@@ -40,9 +40,9 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final int numOfStars;
 
-    public UpdateStarsAsyncTask(LoggedInUser user, UsersCSRatingAndCommentUpdateOperationListener callingActivity, long siteId, int stars) {
+    public UpdateStarsAsyncTask(UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentUpdateOperationListener callingActivity, long siteId, int stars) {
         this.callingActivity = callingActivity;
-        this.user = user;
+        this.userAccountService = userAccountService;
         this.coffeeSiteID = siteId;
         this.numOfStars = stars;
     }
@@ -51,21 +51,22 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         Log.d(REQ_TAG, "UpdateCommentAndStarsAsyncTask REST request initiated");
 
-        if (user != null) {
-
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+            OkHttpClient client = new OkHttpClient.Builder()
+                                                  .authenticator(new TokenAuthenticator(userAccountService))
+                                                  .addInterceptor(headerAuthorizationInterceptor).build();
 
             Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                          .excludeFieldsWithoutExposeAnnotation()
@@ -80,7 +81,7 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
             CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
-            Call<Integer> call = api.updateStars(coffeeSiteID, user.getUserId(), numOfStars);
+            Call<Integer> call = api.updateStars(coffeeSiteID, userAccountService.getLoggedInUser().getUserId(), numOfStars);
 
             call.enqueue(new Callback<Integer>() {
                 @Override

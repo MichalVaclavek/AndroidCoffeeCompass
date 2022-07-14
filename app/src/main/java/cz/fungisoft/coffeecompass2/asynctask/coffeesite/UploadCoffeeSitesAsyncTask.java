@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesUploadRESTResultListener;
@@ -32,10 +33,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "UploadCoffeeSitesAsyncT";
+
     /**
-     * Current logged-in user
+     * Provides current logged-in user info
      */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
     private String operationError = "";
 
@@ -44,7 +46,7 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private Result.Error error;
 
-    private List<CoffeeSite> coffeeSitesToUpload;
+    private final List<CoffeeSite> coffeeSitesToUpload;
 
     /**
      * Starts AsyncTask to load CoffeeSite either by coffeeSiteId or by CoffeeSiteURL
@@ -53,12 +55,12 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
      * @param callingService - service implementing CoffeeSiteRESTResultListener
      */
     public UploadCoffeeSitesAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                      LoggedInUser currentUser, List<CoffeeSite> coffeeSitesToUpload,
+                                      UserAccountActionsProvider userAccountService, List<CoffeeSite> coffeeSitesToUpload,
                                       CoffeeSitesUploadRESTResultListener callingService) {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         this.callingListenerService = callingService;
         this.coffeeSitesToUpload = coffeeSitesToUpload;
-        this.currentUser = currentUser;
+        this.userAccountService = userAccountService;
     }
 
     @Override
@@ -66,15 +68,16 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         Log.i(TAG, "start");
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
-        if (currentUser != null) {
+        Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null) {
 
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
+
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
@@ -85,6 +88,7 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
+                    .authenticator(new TokenAuthenticator(userAccountService))
                     .addInterceptor(headerAuthorizationInterceptor)
                     //.addInterceptor(logging)
                     .build();

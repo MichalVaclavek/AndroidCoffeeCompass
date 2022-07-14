@@ -17,16 +17,26 @@ import java.util.Date;
 public class JwtUserToken implements Serializable {
 
     /**
-     * token string
+     * Access token string
      */
     private String accessToken;
 
     /**
-     * Expiry date of the token - should be validated before usage of token
+     * Expiry date of the access token - should be validated before usage of token
      * and invalidated if expired. Then new token should be requested.
      */
     private Date expiryDate;
     private String tokenType; // usualy Bearer
+
+    private String refreshToken;
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
     public String getAccessToken() {
         return accessToken;
@@ -51,11 +61,9 @@ public class JwtUserToken implements Serializable {
     public void setExpiryDate(String expiryDate) {
 
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        try
-        {
+        try {
             this.expiryDate = format.parse(expiryDate);
-        } catch(ParseException e)
-        {
+        } catch(ParseException e) {
             this.expiryDate = new Date();
         }
     }
@@ -72,16 +80,17 @@ public class JwtUserToken implements Serializable {
         this.tokenType = tokenType;
     }
 
-    public JwtUserToken(String accessToken, Date expiryDate, String tokenType) {
+    public JwtUserToken(String accessToken, Date expiryDate, String tokenType, String refreshToken) {
         this.accessToken = accessToken;
         this.expiryDate = expiryDate;
         this.tokenType = tokenType;
+        this.refreshToken = refreshToken;
     }
 
-    public JwtUserToken(String accessToken, String expiryDate, String tokenType) {
+    public JwtUserToken(String accessToken, String expiryDate, String tokenType, String refreshToken) {
         this.accessToken = accessToken;
         setExpiryDate(expiryDate);
         this.tokenType = tokenType;
+        this.refreshToken = refreshToken;
     }
-
 }

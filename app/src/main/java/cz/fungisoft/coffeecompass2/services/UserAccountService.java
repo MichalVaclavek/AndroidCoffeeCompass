@@ -19,7 +19,8 @@ import cz.fungisoft.coffeecompass2.activity.data.UserAccountDataSource;
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LogoutOrDeleteResult;
@@ -32,14 +33,14 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserLogoutAndDeleteServic
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
 
 /**
- * Service to run user login and logout, and new user register and delete.
+ * Service to run user login and logout, and new user register and deleteUser. Also handles refresh token requests/respones.
  * Async tasks and to provide info about currently logged-in user to other Activities, if requested.
  */
-public class UserAccountService extends Service implements UserAccountActionsEvaluator {
+public class UserAccountService extends Service implements UserAccountActionsProvider {
 
     private final String TAG = "UserAccountService";
 
-    // Repository to check if a user is logen in
+    // Repository to check if a user is logged-in
     private static UserAccountRepository userLoginAndRegisterRepository;
 
     private static final MutableLiveData<LoginOrRegisterResult> loginResult = new MutableLiveData<>();
@@ -103,7 +104,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     }
 
     /**
-     * List of listeneres for logout and delete user account events.
+     * List of listeneres for logout and deleteUser user account events.
      */
     private static final List<UserLogoutAndDeleteServiceListener> userLogoutAndDeleteServiceListeners = new ArrayList<>();
 
@@ -111,16 +112,35 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         if (!userLogoutAndDeleteServiceListeners.contains(logoutAndDeleteServiceListener)) {
             userLogoutAndDeleteServiceListeners.add(logoutAndDeleteServiceListener);
         }
-        Log.i(TAG, "Počet posluchačů User logout and delete: " + userLogoutAndDeleteServiceListeners.size());
+        Log.i(TAG, "Počet posluchačů User logout and deleteUser: " + userLogoutAndDeleteServiceListeners.size());
         Log.i(TAG, logoutAndDeleteServiceListener.toString());
     }
 
     public void removeLogoutAndDeleteServiceListener(UserLogoutAndDeleteServiceListener logoutAndDeleteServiceListener) {
         userLogoutAndDeleteServiceListeners.remove(logoutAndDeleteServiceListener);
-        Log.i(TAG, "Počet posluchačů User logout and delete: " + userLogoutAndDeleteServiceListeners.size());
+        Log.i(TAG, "Počet posluchačů User logout and deleteUser: " + userLogoutAndDeleteServiceListeners.size());
         Log.i(TAG, logoutAndDeleteServiceListener.toString());
     }
 
+    @Override
+    public String getAccessToken() {
+        return userLoginAndRegisterRepository.getLoggedInUser().getAccessToken();
+    }
+
+    @Override
+    public String getAccessTokenType() {
+        return userLoginAndRegisterRepository.getLoggedInUser().getAccessTokenType();
+    }
+
+    @Override
+    public boolean isAccessTokenExpired() {
+        return userLoginAndRegisterRepository.getLoggedInUser().isAccessTokenExpired();
+    }
+
+    @Override
+    public String getRefreshToken() {
+        return userLoginAndRegisterRepository.getLoggedInUser().getRefreshToken();
+    }
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -162,22 +182,29 @@ public class UserAccountService extends Service implements UserAccountActionsEva
      * Starts user logout Async task.
      * The Async task invokes REST call to perform logout, then.
      * When the REST call is finished, it calls evaluation methods of
-     * {@link UserAccountActionsEvaluator} interface, which is implemented by
+     * {@link UserAccountActionsProvider} interface, which is implemented by
      * this service (UserAccountService) to process further actions
      * (update user account repository and UI of the calling Activity)
      * within this service.
      *
-     * Same flow happens during login, register and delete account actions.
+     * Same flow happens during login, register and deleteUser account actions.
      */
     public void logout() {
         new LogoutUserRESTAsyncTask(userLoginAndRegisterRepository).execute();
     }
 
     /**
-     * Starts user delete Async task
+     * Starts user deleteUser Async task
      */
     public void delete() {
         new DeleteUserRESTAsyncTask(userLoginAndRegisterRepository).execute();
+    }
+
+    /**
+     * Starts refresh token Async task
+     */
+    public JwtUserToken refreshTokenSync() {
+        return userLoginAndRegisterRepository.refreshToken();
     }
 
     /**
@@ -195,7 +222,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         } else {
             Result.Error error = (Result.Error) result;
             if (error != null) {
-                Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+                Log.e(TAG, "Error when returning user login data. " + error.getDetail());
                 loginResult.setValue(new LoginOrRegisterResult(error));
             }
             onUserLoggedInFailure();
@@ -217,7 +244,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
         } else {
             Result.Error error = (Result.Error) result;
             if (error != null) {
-                Log.e(TAG, "Error when returning coffee site id. " + error.getDetail());
+                Log.e(TAG, "Error when returning user register data. " + error.getDetail());
                 registerResult.setValue(new LoginOrRegisterResult(error));
             }
             onUserRegisterFailure();
@@ -244,7 +271,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     }
 
     /**
-     * Method called within delete user REST response evaluation
+     * Method called within deleteUser user REST response evaluation
      *
      * @param result
      */
@@ -265,6 +292,7 @@ public class UserAccountService extends Service implements UserAccountActionsEva
     /**
      * Returns currently loged in user or null, if user none is registered
      */
+    @Override
     public LoggedInUser getLoggedInUser() {
         return userLoginAndRegisterRepository.getLoggedInUser();
     }
@@ -337,12 +365,25 @@ public class UserAccountService extends Service implements UserAccountActionsEva
                                  : getString(R.string.delete_user_failure);
 
             if (errorDetail.contains(getString(R.string.user_no_value_present_error))) {
-                // Attempt to delete already deleted user
+                // Attempt to deleteUser already deleted user
                 userLoginAndRegisterRepository.setLoggedInUser(null);
                 listener.onUserDeleteSuccess();
             } else {
                 listener.onUserDeleteFailure(errorDetail);
             }
+        }
+    }
+
+    /* ---- Refresh access token  ----  */
+    private void onRefreshTokenSuccess() {
+        for (UserLoginServiceListener listener : userLoginServiceListeners) {
+            listener.onRefreshTokenSuccess(userLoginAndRegisterRepository.getLoggedInUser());
+        }
+    }
+
+    private void onRefreshTokenFailure() {
+        for (UserLoginServiceListener listener : userLoginServiceListeners) {
+            listener.onRefreshTokenFailure(userLoginAndRegisterRepository.getLoggedInUser());
         }
     }
 

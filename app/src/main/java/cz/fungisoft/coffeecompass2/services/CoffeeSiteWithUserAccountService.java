@@ -103,7 +103,7 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      */
     protected LoggedInUser currentUser;
 
-    private static UserAccountService userAccountService;
+    protected static UserAccountService userAccountService;
     private static UserAccountServiceConnector userAccountServiceConnector;
 
     /**

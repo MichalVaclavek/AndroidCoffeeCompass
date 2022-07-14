@@ -581,7 +581,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         saveMenuItem.setEnabled(true);
         saveMenuItem.setTitle(R.string.save_coffeesite_updated);
 
-        // setup delete image button
+        // setup deleteUser image button
         boolean enableImageDeleteButton = (!coffeeSite.getMainImageURL().isEmpty() && Utils.isOnline(getApplicationContext()))
                                           || !coffeeSite.getMainImageFilePath().isEmpty();
 
@@ -1116,7 +1116,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
                 // restore original, phone's DB, id of the edited CoffeeSite,
                 // which has to be changed to 0 before saving on server
-                // original ID is needed to delete it from local DB
+                // original ID is needed to deleteUser it from local DB
                 currentCoffeeSite.restoreId();
                 updateCoffeeSiteInDB(currentCoffeeSite);
                 coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
@@ -1180,13 +1180,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void onImageSaveSuccess(CoffeeSite coffeeSite, String imageSaveResult) {
         hideProgressbarAndEnableMenuItems();
-        // Image saved, button to delete can be enabled, but probably
+        // Image saved, button to deleteUser can be enabled, but probably
         // not needed as after Save we are going to MyCoffeeSiteActivity
         // after successful return from coffeeSiteCUDOperationsService.update(currentCoffeeSite);
         imageDeleteMenuItem.setEnabled(true);
         currentCoffeeSite.setMainImageURL(imageSaveResult);
 
-        // if newly created CoffeeSite has now image saved too, we can delete it from Db
+        // if newly created CoffeeSite has now image saved too, we can deleteUser it from Db
         if (!currentCoffeeSite.isSavedOnServer()  && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
                 && !currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
             currentCoffeeSite.restoreId();
@@ -1228,9 +1228,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     /**
-     * Called when REST Image delete request was successful.
+     * Called when REST Image deleteUser request was successful.
      * Show the inform Toast, then.
-     * Disable imageDeleteButton as there is no image to delete, now
+     * Disable imageDeleteButton as there is no image to deleteUser, now
      * Clear imageView and set the default icon to it.
      *
      * @param imageDeleteResult melo by byt Site id. kteremu se smazal Image
@@ -1247,7 +1247,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 text,
                 Toast.LENGTH_SHORT);
         toast.show();
-        // No image here, disable delete button
+        // No image here, disable deleteUser button
         imageDeleteMenuItem.setEnabled(false);
         siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
     }

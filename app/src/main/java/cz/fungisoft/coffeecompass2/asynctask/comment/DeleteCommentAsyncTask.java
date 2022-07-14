@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -27,14 +28,14 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "DeleteCommentAsyncTask";
 
-    private final LoggedInUser user;
-
     private final int commentID;
 
     private final WeakReference<CommentsListActivity> commentsActivity;
 
-    public DeleteCommentAsyncTask(int commentID, LoggedInUser user, CommentsListActivity parentActivity) {
-        this.user = user;
+    private final UserAccountActionsProvider userAccountService;
+
+    public DeleteCommentAsyncTask(int commentID, UserAccountActionsProvider userAccountService, CommentsListActivity parentActivity) {
+        this.userAccountService = userAccountService;
         this.commentID = commentID;
         this.commentsActivity = new WeakReference<>(parentActivity);
     }
@@ -48,14 +49,16 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 okhttp3.Request request = chain.request();
-                Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                 request = request.newBuilder().headers(headers).build();
                 return chain.proceed(request);
             }
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+        OkHttpClient client = new OkHttpClient.Builder()
+                                              .authenticator(new TokenAuthenticator(userAccountService))
+                                              .addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
@@ -77,7 +80,7 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
                             commentsActivity.get().processNumberOfComments(Integer.parseInt(response.body().toString()));
                         }
                     } else {
-                        Log.i(REQ_TAG, "Returned empty response for delete comment request.");
+                        Log.i(REQ_TAG, "Returned empty response for deleteUser comment request.");
                         Result.Error error = new Result.Error(new IOException("Error deleting comment. Response empty."));
                         if (commentsActivity.get() != null) {
                             commentsActivity.get().showRESTCallError(error);

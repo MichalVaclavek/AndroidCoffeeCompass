@@ -108,7 +108,7 @@ public class StatisticsPrefencesHelper {
     }
 
     /**
-     * To delete/remove saved user data, if user loged-out
+     * To deleteUser/remove saved user data, if user loged-out
      */
     public void removeUserData() {
         SharedPreferences.Editor edit = app_prefs.edit();

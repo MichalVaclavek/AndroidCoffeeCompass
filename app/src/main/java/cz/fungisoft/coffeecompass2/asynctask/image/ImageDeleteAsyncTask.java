@@ -8,8 +8,9 @@ import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImageRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -24,7 +25,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
     /**
      * Id of the CoffeeSite whose image is requested to be deleted
@@ -40,9 +41,9 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "ImageDeleteAsyncTask";
 
 
-    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, LoggedInUser currentUser, CoffeeSite coffeeSite) {
+    public ImageDeleteAsyncTask(CoffeeSiteImageService imageService, UserAccountActionsProvider userAccountService, CoffeeSite coffeeSite) {
         this.callingService = new WeakReference<>(imageService);
-        this.currentUser = currentUser;
+        this.userAccountService = userAccountService;
         this.coffeeSite = coffeeSite;
         this.coffeeSiteId = coffeeSite.getId();
     }
@@ -53,15 +54,14 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
         operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
-        if (currentUser != null && coffeeSiteId != 0) {
-
+        Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null && coffeeSiteId != 0) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
@@ -73,6 +73,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
             //Add the interceptor to the client builder.
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(headerAuthorizationInterceptor)
+                    .authenticator(new TokenAuthenticator(userAccountService))
                     //.addInterceptor(logging)
                     .build();
 

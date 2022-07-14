@@ -34,7 +34,7 @@ public interface ImageRESTInterface {
 
 
     /**
-     * Calls delete of CoffeeSite"s image. Input is an ID of the CoffeeSite
+     * Calls deleteUser of CoffeeSite"s image. Input is an ID of the CoffeeSite
      * to whom the image belongs to.
      *
      * Example: https://coffeecompass.cz/rest/secured/image/delete/site/320
@@ -42,11 +42,11 @@ public interface ImageRESTInterface {
      * @param siteId
      * @return
      */
-    @DELETE("delete/site/{siteId}")
+    @DELETE("deleteUser/site/{siteId}")
     Call<Integer> deleteImageBySiteId(@Path("siteId") long siteId);
 
     /**
-     * Calls delete of CoffeeSite|s image. Input is an ID of the CoffeeSite
+     * Calls deleteUser of CoffeeSite|s image. Input is an ID of the CoffeeSite
      * to whom the image belongs to.
      *
      * Example: https://coffeecompass.cz/rest/secured/image/delete/567
@@ -54,7 +54,7 @@ public interface ImageRESTInterface {
      * @param imageId
      * @return
      */
-    @DELETE("delete/{imageId}")
+    @DELETE("deleteUser/{imageId}")
     Call<Integer> deleteImageByImageId(@Path("imageId") int imageId);
 
 }

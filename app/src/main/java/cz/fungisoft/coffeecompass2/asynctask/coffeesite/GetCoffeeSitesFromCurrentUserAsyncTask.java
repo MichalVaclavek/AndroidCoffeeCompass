@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
@@ -35,7 +36,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
     private static final String TAG = "GetSitesFromUserAsnTsk";
 
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
     private String operationError = "";
 
@@ -46,9 +47,9 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
 
     public GetCoffeeSitesFromCurrentUserAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                                  LoggedInUser user,
+                                                  UserAccountActionsProvider userAccountService,
                                                   CoffeeSitesRESTResultListener callingService) {
-        this.currentUser = user;
+        this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
@@ -57,18 +58,17 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
     protected Void doInBackground(Void... voids) {
 
         Log.i(TAG, "start");
-        //operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + (currentUser == null));
-        if (currentUser != null) {
+        Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null) {
 
             // Inserts currentUser authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
@@ -83,6 +83,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(headerAuthorizationInterceptor)
+                    .authenticator(new TokenAuthenticator(userAccountService))
                     //.addInterceptor(logging)
                     .build();
 

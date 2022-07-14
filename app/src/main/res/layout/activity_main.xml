@@ -262,7 +262,7 @@
                                 android:background="@drawable/button_espresso_unfocused"
                                 android:enabled="false"
                                 android:onClick="onSearchCoffeeClick"
-                                android:text="Button"
+                                android:text="KÁVA"
                                 android:textSize="22sp" />
 
                         </com.google.android.material.card.MaterialCardView>
