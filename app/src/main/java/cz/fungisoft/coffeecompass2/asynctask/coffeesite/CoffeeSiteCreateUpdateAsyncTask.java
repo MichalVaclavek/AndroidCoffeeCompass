@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -158,8 +159,14 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

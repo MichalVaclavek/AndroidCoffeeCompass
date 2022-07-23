@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -119,6 +120,11 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
                     Result.Error error = new Result.Error(new IOException("Error updating comment.", t));
                     if (callingActivity != null) {
                         callingActivity.processFailedCommentUpdate(error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

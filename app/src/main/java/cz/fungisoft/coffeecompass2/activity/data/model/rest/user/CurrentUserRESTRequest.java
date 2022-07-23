@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -147,10 +148,16 @@ public class CurrentUserRESTRequest {
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.e(REQ_TAG, "Error waiting for CurrentUserRESTAsyncTask" + t.getMessage());
+
                 if (requestType == PERFORM_LOGIN) {
                     userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error reading current user.", t)));
                 } else {
                     userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error reading current user.", t)));
+                }
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userLoginAndRegisterService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userLoginAndRegisterService);
                 }
             }
         });

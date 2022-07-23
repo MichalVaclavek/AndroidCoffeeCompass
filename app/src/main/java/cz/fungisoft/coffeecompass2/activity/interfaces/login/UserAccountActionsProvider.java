@@ -19,6 +19,7 @@ public interface UserAccountActionsProvider {
     void evaluateLoginResult(Result result);
     void evaluateRegisterResult(Result result);
     void evaluateLogoutResult(Result result);
+    void clearLoggedInUser();
     void evaluateDeleteResult(Result result);
 
     String getAccessToken();

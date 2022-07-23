@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -99,7 +100,13 @@ public class UserDeleteRESTRequest {
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.e(REQ_TAG, "Error executing deleteUser user account REST request." + t.getMessage());
+
                 userAccountService.evaluateDeleteResult(new Result.Error(new IOException("Error deleting user.", t)));
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userAccountService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
+                }
             }
         });
     }

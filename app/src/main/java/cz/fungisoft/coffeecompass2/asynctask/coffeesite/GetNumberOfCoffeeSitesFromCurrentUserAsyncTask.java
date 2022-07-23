@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -132,8 +133,14 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
                     Log.e(TAG, "Error obtaining CoffeeSites number created by User REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User REST request.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

@@ -88,6 +88,7 @@
     <string name="user_profile_delete_button">Smazat</string>
     <string name="user_register_failure">Registrace neúspěšná.</string>
     <string name="toast_no_internet">Připojení k internetu není k dispozici</string>
+    <string name="toast_new_login_needed">Je nutné nové přihlášení.</string>
     <string name="toast_no_internet_map_not_available">Mapa je k dispozici pouze online</string>
     <string name="toast_no_internet_no_offline_data">Internet ani offline data nejsou k dispozici.</string>
     <string name="rest_public_user_url">https://coffeecompass.cz/rest/public/user/</string>

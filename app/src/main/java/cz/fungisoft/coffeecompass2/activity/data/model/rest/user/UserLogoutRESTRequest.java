@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -111,8 +112,13 @@ public class UserLogoutRESTRequest {
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e(REQ_TAG, "Error executing Logout user REST request." + t.getMessage());
+                Log.e(REQ_TAG, "Error executing Logout user REST request. " + t.getMessage());
                 userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user.", t)));
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userAccountService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
+                }
             }
         });
     }

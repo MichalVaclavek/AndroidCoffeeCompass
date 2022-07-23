@@ -5,7 +5,7 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
  */
 public class RefreshTokenRequestData {
 
-    private String deviceID;
+    private String deviceID = ""; // default value
 
     private String refreshToken;
 

@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -151,8 +152,14 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     Log.e(tag, "Error deleting CoffeeSite REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error deleting CoffeeSite.", t));
                     operationError = error.toString();
+
                     if (callingListenerDeleteService != null) {
                         callingListenerDeleteService.onCoffeeSitesIdReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

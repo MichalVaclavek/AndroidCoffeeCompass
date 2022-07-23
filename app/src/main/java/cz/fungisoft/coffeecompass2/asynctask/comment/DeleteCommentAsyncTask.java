@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -108,6 +109,11 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
                 Result.Error error = new Result.Error(new IOException("Error deleting comment.", t));
                 if (commentsActivity.get() != null) {
                     commentsActivity.get().showRESTCallError(error);
+                }
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userAccountService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                 }
             }
         });

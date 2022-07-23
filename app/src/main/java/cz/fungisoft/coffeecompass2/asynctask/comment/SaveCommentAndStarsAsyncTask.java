@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -121,8 +122,14 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 public void onFailure(Call<List<Comment>> call, Throwable t) {
                     Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
+
                     if (callingActivity != null) {
                         callingActivity.processFailedCommentSave(error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

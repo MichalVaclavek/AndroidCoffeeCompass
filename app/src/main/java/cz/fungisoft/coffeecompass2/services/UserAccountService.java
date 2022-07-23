@@ -124,22 +124,22 @@ public class UserAccountService extends Service implements UserAccountActionsPro
 
     @Override
     public String getAccessToken() {
-        return userLoginAndRegisterRepository.getLoggedInUser().getAccessToken();
+        return userLoginAndRegisterRepository.getLoggedInUser() != null ? userLoginAndRegisterRepository.getLoggedInUser().getAccessToken() : null;
     }
 
     @Override
     public String getAccessTokenType() {
-        return userLoginAndRegisterRepository.getLoggedInUser().getAccessTokenType();
+        return userLoginAndRegisterRepository.getLoggedInUser() != null ? userLoginAndRegisterRepository.getLoggedInUser().getAccessTokenType() : null;
     }
 
     @Override
     public boolean isAccessTokenExpired() {
-        return userLoginAndRegisterRepository.getLoggedInUser().isAccessTokenExpired();
+        return userLoginAndRegisterRepository.getLoggedInUser() != null ? userLoginAndRegisterRepository.getLoggedInUser().isAccessTokenExpired() : true;
     }
 
     @Override
     public String getRefreshToken() {
-        return userLoginAndRegisterRepository.getLoggedInUser().getRefreshToken();
+        return userLoginAndRegisterRepository.getLoggedInUser() != null ? userLoginAndRegisterRepository.getLoggedInUser().getRefreshToken() : null;
     }
 
     /**
@@ -261,13 +261,18 @@ public class UserAccountService extends Service implements UserAccountActionsPro
         if (result instanceof Result.Success) {
             String data = ((Result.Success<String>) result).getData();
             logoutResult.setValue(new LogoutOrDeleteResult(data, ""));
-            userLoginAndRegisterRepository.setLoggedInUser(null);
+            clearLoggedInUser();
             onUserLogoutSuccess();
         } else {
             String error = ((Result.Error) result).getDetail();
             logoutResult.setValue(new LogoutOrDeleteResult("", error));
             onUserLogoutFailure();
         }
+    }
+
+    @Override
+    public void clearLoggedInUser() {
+        userLoginAndRegisterRepository.setLoggedInUser(null);
     }
 
     /**

@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.image;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -130,6 +131,11 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     operationError = error.toString();
                     if (callingService.get() != null) {
                         callingService.get().evaluateImageDeleteResult(coffeeSite, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });

@@ -82,8 +82,10 @@ public class UserAccountRepository {
     public JwtUserToken refreshToken() {
         LoggedInUser user = getLoggedInUser();
         JwtUserToken retVal = dataSource.refreshToken(user.getRefreshToken(), user.getDeviceID());
-        user.setToken(retVal);
-        preferenceHelper.saveUserData(user);
+        if (retVal != null) {
+            user.setToken(retVal);
+            preferenceHelper.saveUserData(user);
+        }
         return retVal;
     }
 

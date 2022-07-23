@@ -51,6 +51,7 @@
 
         <activity
             android:name=".widgets.WidgetConfigurationActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_widget_configuration" /> <!-- Receiver for app. Widget -->
         <receiver
             android:name=".widgets.MainAppWidgetProvider"
@@ -176,6 +177,7 @@
             android:name=".activity.ui.login.LoginActivity"
             android:label="@string/title_activity_login"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:parentActivityName=".activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -183,6 +185,7 @@
         </activity>
         <activity
             android:name=".activity.ui.comments.CommentsListActivity"
+            android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.MapsActivity"

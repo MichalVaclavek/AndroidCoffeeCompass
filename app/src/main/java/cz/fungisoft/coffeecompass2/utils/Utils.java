@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -26,6 +27,7 @@ import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 
 /**
  * Utility class.
@@ -359,6 +361,24 @@ public class Utils {
         // i.e. something between 0 and 0.12 i.e. (fraction >= 0 && fraction <= 0.12)
         return RatingFractions.EMPTY;
 
+    }
+
+    /**
+     * Called when refreshing access token failed, mainly due to refresh token expiry.
+     * @param context
+     */
+    public static void openLoginActivityOnRefreshTokenFailed(Context context) {
+        if (isOnline(context)) {
+            Toast toast = Toast.makeText(context,
+                    R.string.toast_new_login_needed,
+                    Toast.LENGTH_SHORT);
+            toast.show();
+            Intent activityIntent = new Intent(context, LoginActivity.class);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(activityIntent);
+        } else {
+            showNoInternetToast(context);
+        }
     }
 
 }

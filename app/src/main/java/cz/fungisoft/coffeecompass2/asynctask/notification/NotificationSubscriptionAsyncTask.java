@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.notification;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -144,6 +145,11 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
                     Result.Error error = new Result.Error(new IOException("Error for notification subscription API request", t));
                     NotificationSubscriptionRequestResult result = new NotificationSubscriptionRequestResult(error);
                     subscriptionActivity.onNotificationSubscriptionFailure(result);
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
+                    }
                 }
             });
         }

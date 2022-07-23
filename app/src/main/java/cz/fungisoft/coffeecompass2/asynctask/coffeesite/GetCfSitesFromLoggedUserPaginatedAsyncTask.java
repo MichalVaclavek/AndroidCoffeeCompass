@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -153,8 +154,14 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
                     Log.e(TAG, "Error loading CoffeeSites from User REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error loading CoffeeSites from user REST request.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
