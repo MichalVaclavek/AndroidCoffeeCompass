@@ -44,7 +44,6 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
      */
     private final UserAccountActionsProvider userAccountService;
 
-    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -136,8 +135,8 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                             }
 
                         } else {
-                            Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            Log.i(tag, "Returned empty response for changing CoffeeSite state request.");
+                            error = new Result.Error(new IOException("Error changing CoffeeSite state. Response empty."));
                             operationError = error.toString();
                             if (callingListenerService != null) {
                                 callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
@@ -146,10 +145,9 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                            error = new Result.Error(operationError);
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
-
                             operationError = "Chyba komunikace se serverem.";
                         }
                         if (error == null) {
@@ -163,8 +161,8 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
                 @Override
                 public void onFailure(Call<CoffeeSite> call, Throwable t) {
-                    Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                    Log.e(tag, "Error changing CoffeeSite state REST request." + t.getMessage());
+                    error = new Result.Error(new IOException("Error changing CoffeeSite state.", t));
                     operationError = error.toString();
 
                     if (callingListenerService != null) {

@@ -133,7 +133,7 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                            error = new Result.Error(operationError);
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";

@@ -133,7 +133,7 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                            error = new Result.Error(operationError);
                         } catch (IOException e) {
                             Log.e(TAG, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";

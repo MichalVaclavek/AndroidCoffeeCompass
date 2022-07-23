@@ -32,6 +32,8 @@ import java.io.Serializable;
  */
 public class RestError implements Serializable {
 
+    private static final String NOT_AVAIL = "Not Available";
+
     private String type;
     private String title;
     private int status;
@@ -52,10 +54,10 @@ public class RestError implements Serializable {
 
     public RestError() {
         this.type = "Unknown";
-        this.title = "Not Available";
+        this.title = NOT_AVAIL;
         this.status = 0;
-        this.detail = "Not Available";
-        this.instance = "Not Available";
+        this.detail = NOT_AVAIL;
+        this.instance = NOT_AVAIL;
     }
 
     public String getType() {
@@ -83,7 +85,7 @@ public class RestError implements Serializable {
     }
 
     public String getDetail() {
-        return detail;
+        return detail.equals(NOT_AVAIL) ? this.title : detail;
     }
 
     public void setDetail(String detail) {
