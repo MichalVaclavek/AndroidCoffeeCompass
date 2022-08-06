@@ -170,7 +170,6 @@ public class Utils {
      * @return
      */
     public static synchronized RestError getRestError(String restErrorBody) {
-
         RestError retVal = new RestError();
         try {
             JSONObject jsonObject = new JSONObject(restErrorBody);
@@ -252,7 +251,6 @@ public class Utils {
      * @return
      */
     public static String getDistanceInBetterReadableForm(long distance) {
-
         if (distance == 0) {
             return "- m";
         }
@@ -350,7 +348,7 @@ public class Utils {
         if (fraction > 0.37 && fraction < 0.63) {
             return RatingFractions.HALF;
         }
-        if (fraction>= 0.6 && fraction < .88) {
+        if (fraction >= 0.63 && fraction < .88) {
             return RatingFractions.THREE_QUARTERS;
         }
 
@@ -376,9 +374,9 @@ public class Utils {
             Intent activityIntent = new Intent(context, LoginActivity.class);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(activityIntent);
-        } else {
-            showNoInternetToast(context);
+            return;
         }
+        showNoInternetToast(context);
     }
 
 }

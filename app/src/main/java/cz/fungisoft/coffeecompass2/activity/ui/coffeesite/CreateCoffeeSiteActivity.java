@@ -1084,7 +1084,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite) {
         showProgressbarAndDisableMenuItems();
-        if (coffeeSiteImageService != null && imageFile.exists()) {
+        if (coffeeSiteImageService != null) {
             coffeeSiteImageService.uploadImage(imageFile, coffeeSite);
         }
     }
@@ -1110,7 +1110,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 uploadCoffeeSiteImage(ImageUtil.getImageFile(getApplicationContext(), currentCoffeeSite.getMainImageFilePath()), savedCoffeeSite);
                 return;
             }
-
             if (!currentCoffeeSite.isSavedOnServer() && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
                     && currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
                 // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
@@ -1121,7 +1120,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 updateCoffeeSiteInDB(currentCoffeeSite);
                 coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
             }
-
             // Was also activation requested?
             if (saveAndActivateRequested) {
                 activateCoffeeSite(savedCoffeeSite);
@@ -1164,6 +1162,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         } else {
             showCoffeeSiteStatusChangeSuccess(COFFEE_SITE_ACTIVATE, "OK");
         }
+        saveAndActivateRequested = false;
         goToMyCoffeeSitesActivity();
     }
 
@@ -1186,7 +1185,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         imageDeleteMenuItem.setEnabled(true);
         currentCoffeeSite.setMainImageURL(imageSaveResult);
 
-        // if newly created CoffeeSite has now image saved too, we can deleteUser it from Db
+        // if newly created CoffeeSite has now image saved too, we can delete it from DB
         if (!currentCoffeeSite.isSavedOnServer()  && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
                 && !currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
             currentCoffeeSite.restoreId();

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -105,7 +107,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
 
             call.enqueue(new Callback<String>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");

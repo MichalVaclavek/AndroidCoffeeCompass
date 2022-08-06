@@ -94,7 +94,7 @@ public class GetPlacesCandidatesCUZKTask extends AsyncTask<Void, Void, Void> {
                         }
                     } else {
                         Log.i(TAG, "Returned empty response for loading places candidates.");
-                        error = new Result.Error(new IOException("Error saving places candidates. Response empty."));
+                        error = new Result.Error(new IOException("Error obtaining places candidates. Response empty."));
                         operationError = error.toString();
                         if (resultListener != null) {
                             resultListener.onCandidatesReturned(error);

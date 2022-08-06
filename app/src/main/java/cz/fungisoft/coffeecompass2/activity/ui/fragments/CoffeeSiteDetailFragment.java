@@ -30,7 +30,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
- * A fragment representing a single CoffeeSite detail informations list.
+ * A fragment representing a single CoffeeSite detail information list.
  * This fragment is either contained in a {@link CoffeeSiteDetailActivity} on handsets-mobile
  * (or should be in a {@link FoundCoffeeSitesListActivity} in two-pane mode (on tablets),
  * but currently only CoffeeSiteDetailActivity is used to show this fragment) )

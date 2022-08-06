@@ -50,11 +50,6 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         Log.i(TAG, "Počet posluchačů Image operations result: " + imageOperationsResultListeners.size());
     }
 
-    /**
-     * Current logged-in user
-     */
-    private LoggedInUser currentUser;
-
     private static UserAccountService userAccountService;
     private static UserAccountServiceConnector userAccountServiceConnector;
 
@@ -114,10 +109,6 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     public void onUserAccountServiceConnected() {
         Log.i(TAG, "onUserLoginServiceConnected()");
         userAccountService = userAccountServiceConnector.getUserLoginService();
-        if (userAccountService != null && userAccountService.isUserLoggedIn()) {
-            currentUser = userAccountService.getLoggedInUser();
-            Log.i(TAG, "currentUser available");
-        }
     }
 
     private void doUnbindUserLoginService() {
@@ -133,7 +124,8 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     /** Methods to be called by Activity **/
 
     public void uploadImage(File imageFile, CoffeeSite cs) {
-        if (imageFile.exists() && currentUser != null) {
+        Log.d(TAG, "ImageFile exists: " + imageFile.exists());
+        if (imageFile.exists()) {
             new ImageUploadAsyncTask(this, userAccountService, imageFile, cs).execute();
         }
     }

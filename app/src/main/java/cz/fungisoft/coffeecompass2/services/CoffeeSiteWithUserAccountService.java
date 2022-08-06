@@ -106,16 +106,6 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
     protected static UserAccountService userAccountService;
     private static UserAccountServiceConnector userAccountServiceConnector;
 
-    /**
-     * Current CoffeeSite which is used for server operations save, update, activate and so on
-     */
-    private CoffeeSite coffeeSite;
-
-    /**
-     * Operation name type requested by client Activity when registering the service
-     */
-    protected int requestedOperation = 0;
-
     protected String operationResult = "";
     protected String operationError = "";
 
@@ -124,9 +114,7 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      * @return
      */
     protected LoggedInUser getCurrentUser() {
-        if (userAccountService != null) {
-            return userAccountService.getLoggedInUser();
-        } else return null;
+        return (userAccountService != null) ? userAccountService.getLoggedInUser() : null;
     }
 
 

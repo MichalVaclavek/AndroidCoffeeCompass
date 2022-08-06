@@ -537,9 +537,9 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             // Even if only Stars are updated, we need Comment object to be saved by UpdateCommentAndStarsAsyncTask
             numOfStarsSelectedByUser = dialog.getCommentAndStars().getStars().getNumOfStars();
             new UpdateStarsAsyncTask(userAccountService, this, coffeeSite.getId(), numOfStarsSelectedByUser).execute();
-        } else {
-            Utils.showNoInternetToast(getApplicationContext());
+            return;
         }
+        Utils.showNoInternetToast(getApplicationContext());
     }
 
     /**

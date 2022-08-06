@@ -65,7 +65,6 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(tag, "start");
-        //operationResult = "";
         operationError = "";
 
         Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
