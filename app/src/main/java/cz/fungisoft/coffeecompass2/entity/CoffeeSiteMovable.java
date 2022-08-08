@@ -11,7 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 

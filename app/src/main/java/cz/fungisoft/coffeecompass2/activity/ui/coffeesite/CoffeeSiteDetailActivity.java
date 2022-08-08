@@ -25,7 +25,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndS
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
-import cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView;
+import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;

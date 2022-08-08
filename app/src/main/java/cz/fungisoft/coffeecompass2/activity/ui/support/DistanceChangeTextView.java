@@ -1,4 +1,4 @@
-package cz.fungisoft.coffeecompass2.activity.support;
+package cz.fungisoft.coffeecompass2.activity.ui.support;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
