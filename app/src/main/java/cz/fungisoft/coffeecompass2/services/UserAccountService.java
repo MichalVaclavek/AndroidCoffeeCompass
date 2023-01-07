@@ -134,7 +134,7 @@ public class UserAccountService extends Service implements UserAccountActionsPro
 
     @Override
     public boolean isAccessTokenExpired() {
-        return userLoginAndRegisterRepository.getLoggedInUser() != null ? userLoginAndRegisterRepository.getLoggedInUser().isAccessTokenExpired() : true;
+        return userLoginAndRegisterRepository.getLoggedInUser() == null || userLoginAndRegisterRepository.getLoggedInUser().isAccessTokenExpired();
     }
 
     @Override

@@ -13,10 +13,10 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
-* Retrofit interface for REST requests related to CoffeeSite's image object.<br>
-* Used by {@link ImageUploadAsyncTask}
+ * Retrofit interface for REST requests related to CoffeeSite's image object.<br>
+ * Used by {@link ImageUploadAsyncTask}
  * and {@link ImageDeleteAsyncTask}
-*/
+ */
 public interface ImageRESTInterface {
 
     String UPLOAD_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
@@ -42,7 +42,7 @@ public interface ImageRESTInterface {
      * @param siteId
      * @return
      */
-    @DELETE("deleteUser/site/{siteId}")
+    @DELETE("delete/site/{siteId}")
     Call<Integer> deleteImageBySiteId(@Path("siteId") long siteId);
 
     /**
@@ -54,7 +54,7 @@ public interface ImageRESTInterface {
      * @param imageId
      * @return
      */
-    @DELETE("deleteUser/{imageId}")
+    @DELETE("delete/{imageId}")
     Call<Integer> deleteImageByImageId(@Path("imageId") int imageId);
 
 }

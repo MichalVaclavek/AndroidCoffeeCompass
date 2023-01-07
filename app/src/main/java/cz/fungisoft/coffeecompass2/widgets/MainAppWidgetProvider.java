@@ -30,12 +30,14 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeWidgetService;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.squareup.picasso.Picasso;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
 /**
  * Implementation of App Widget functionality.
@@ -221,7 +223,9 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.main_app_widget);
 
         // add pending intents to handle widget click events
-        setWidgetClickPendingIntent(context, appWidgetIds, remoteViews);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setWidgetClickPendingIntent(context, appWidgetIds, remoteViews);
+        }
         setSettingsPendingIntent(context, appWidgetIds, remoteViews);
 
         // apply current settings
@@ -236,12 +240,13 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
     /**
      * Sets pending intent which gets fired on clicking widget body. Processed by onReceive() then.
      */
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private static void setWidgetClickPendingIntent(Context context, int[] appWidgetIds, RemoteViews rViews){
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
         intent.setAction(WIDGET_CLICK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         rViews.setOnClickPendingIntent(R.id.widget_container, pendingIntent);
     }
 
@@ -252,7 +257,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         Intent intent = new Intent(context, MainAppWidgetProvider.class);
         intent.setAction(SETTINGS_CLICK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         rViews.setOnClickPendingIntent(R.id.widget_settings_button, pendingIntent);
     }
@@ -271,7 +276,7 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
 
         // Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
         PendingIntent pendingUpdate = PendingIntent.getBroadcast(context, appWidgetId, intentUpdate,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // Send the pending intent in response to the user tapping the ‘Update’ button
         rViews.setOnClickPendingIntent(R.id.widget_refresh_button, pendingUpdate);

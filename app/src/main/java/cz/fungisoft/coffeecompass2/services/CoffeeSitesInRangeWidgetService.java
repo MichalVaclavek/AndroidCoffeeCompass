@@ -244,7 +244,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                 }
             }
         }
-
     }
 
 
@@ -406,8 +405,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         final CountDownLatch latch = new CountDownLatch(1);
         isSearchingSites = true;
         Log.i(TAG, "Start Async task for searching in DB.");
-        new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, range)
-                .execute();
+        new GetSingleCoffeeSitesAsyncTask(latch, searchLocation, range).execute();
         try {
             latch.await(); // wait to finish Async task assignment to coffeeSitesFromDB
             isSearchingSites = false;
