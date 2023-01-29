@@ -193,13 +193,14 @@
                             android:textStyle="italic" />
 
                         <TextView
-                            android:id="@+id/textView19"
+                            android:id="@+id/kava_search_button_label"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="@string/searching_label_main_activity"
+                            android:gravity="center"
+                            android:text="@string/main_act_search_button_kava_label"
                             android:textAlignment="center"
                             android:textColor="@color/colorPrimaryDark"
-                            android:textSize="20sp"
+                            android:textSize="24sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -262,8 +263,8 @@
                                 android:background="@drawable/button_espresso_unfocused"
                                 android:enabled="false"
                                 android:onClick="onSearchCoffeeClick"
-                                android:text="KÁVA"
-                                android:textSize="22sp" />
+                                android:text="@string/main_act_search_button_vyhledat_label"
+                                android:textSize="20sp" />
 
                         </com.google.android.material.card.MaterialCardView>
 

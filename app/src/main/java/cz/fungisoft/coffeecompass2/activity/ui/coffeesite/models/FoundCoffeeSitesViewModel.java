@@ -124,14 +124,14 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
         newSitesInRange.addAll(coffeeSites);
         newSitesInRange.removeAll(currentSitesInRange);
 
-        // Find oldSites, i.e. sites not included in the coffeeSites
+        // Find oldSites, i.e. sites not included in the current coffeeSites
         goneSitesOutOfRange.clear();
         goneSitesOutOfRange.addAll(currentSitesInRange);
         goneSitesOutOfRange.removeAll(coffeeSites);
 
         currentSitesInRange = coffeeSites;
 
-        //Gets newSites as MutableLiveData, sorted
+        // Gets newSites as MutableLiveData, sorted
         Collections.sort(newSitesInRange);
         newSitesInRangeMutable.setValue(newSitesInRange);
         goneSitesOutOfRangeMutable.setValue(goneSitesOutOfRange);

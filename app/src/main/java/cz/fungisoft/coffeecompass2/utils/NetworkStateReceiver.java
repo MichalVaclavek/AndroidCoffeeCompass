@@ -10,6 +10,7 @@ import android.util.Log;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
 
 /**
  * Receiver of events indicating change of network connectivity.
@@ -158,6 +159,21 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param isOnline status of internet connectivity
      * @param context calling context, usually Activity which registered this Receiver
      */
+    private void startLoadNumberOfSitesInRangesInMainActivity(boolean isOnline, Context context) {
+        if (isOnline) {
+            if (context instanceof MainActivity) {
+                MainActivity ma = (MainActivity) context;
+                ma.startReadingNumberOfSitesInRanges();
+            }
+        }
+    }
+
+    /**
+     * Calls MainActivity method to start loading number of CoffeeSite created by user.
+     *
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
+     */
     private void startMyCoffeeSitesListActivityUI(boolean isOnline, Context context) {
         if (context instanceof MyCoffeeSitesListActivity) {
             MyCoffeeSitesListActivity myCoffeeSitesListActivity = (MyCoffeeSitesListActivity) context;
@@ -176,6 +192,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             startReadStatisticsInMainActivity(online, this.context);
             startLoadCSEntities(online, this.context);
             startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
+            startLoadNumberOfSitesInRangesInMainActivity(online, this.context);
         }
         startMyCoffeeSitesListActivityUI(online, this.context);
     }

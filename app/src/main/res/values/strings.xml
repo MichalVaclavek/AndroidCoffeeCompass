@@ -290,4 +290,10 @@
 
     <string name="searching_label_main_activity">VYHLEDAT</string>
 
+    <string name="main_act_search_button_kava_label">KÁVA</string>
+    <string name="main_act_search_button_kava_label_placeholder">KÁVA (%1$d)</string>
+
+    <string name="main_act_search_button_vyhledat_label_placeholder">VYHLEDAT<small><br>(%1$s)</br></small></string>
+    <string name="main_act_search_button_vyhledat_label">VYHLEDAT</string>
+
 </resources>

@@ -14,9 +14,9 @@ public interface CoffeeSitesInRangeSearchOperationListener {
     void onStartSearchingSites();
 
     /**
-     * Called, when searching of sites in range is finished.
+     * Called, when searching of number of coffee sites in different range is finished.
      */
-    void onSearchingSitesFinished();
+    void onSearchingSitesFinished(int numOfSitesInRanges);
 
     /**
      *

@@ -20,7 +20,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -37,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -57,6 +57,7 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -70,6 +71,7 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoad
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.FoundCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundNumberOfCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
@@ -82,11 +84,14 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
 import cz.fungisoft.coffeecompass2.services.FirebaseMessageService;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.FunctionalUtils;
 import cz.fungisoft.coffeecompass2.utils.NetworkStateReceiver;
@@ -101,6 +106,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * - show icon allowing to sign-in into application
  * - show icon indicating, that logged-in user has created coffee sites and which leads to MyCoffeeSitesListActivity
  * - show icon to load Notifications settings or to show list of new CoffeeSites received upon notification from Firebase
+ * - show number of coffee sites in current search range if any
  * <p>
  * {@link MyCoffeeSitesListActivity}
  * <p>
@@ -112,7 +118,8 @@ public class MainActivity extends ActivityWithLocationService
                                      CoffeeSiteEntitiesServiceConnectionListener,
                                      CoffeeSiteEntitiesServiceOperationsListener,
                                      CoffeeSiteServicesConnectionListener,
-                                     CoffeeSiteLoadServiceOperationsListener {
+                                     CoffeeSiteLoadServiceOperationsListener,
+                                     CoffeeSitesInRangeServiceConnectionListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
@@ -126,6 +133,8 @@ public class MainActivity extends ActivityWithLocationService
     private final int barvaRed = Color.RED;
 
     private TextView accuracy;
+
+    private TextView kavaSearchButtonLabel;
 
     private ImageView locationImageView;
 
@@ -143,10 +152,16 @@ public class MainActivity extends ActivityWithLocationService
 
     //private ObjectAnimator mainButtonTextColorAnimation;
 
+    /**
+     * Model providing current number of CoffeeSites in the search range to the Activity.
+     */
+    private static FoundNumberOfCoffeeSitesViewModel numberOfCoffeeSitesInRangeModel;
+
+
     private Toolbar mainToolbar;
 
-    private static int searchRange = 500; // range in meters for searching from current position - 500 m default value
-    private static String searchRangeString;
+    private static int selectedSearchRange = 500; // range in meters for searching from current position - 500 m default value
+    private static List<Integer> searchRanges = new ArrayList<>(); // ranges of search distances to be selected by user
 
     // Saves selected search distance range
     private SearchDistancePreferenceHelper searchRangePreferenceHelper;
@@ -300,13 +315,15 @@ public class MainActivity extends ActivityWithLocationService
 
         // Get current searchDistance from Preferences
         searchRangePreferenceHelper = new SearchDistancePreferenceHelper(this);
-        searchRange = searchRangePreferenceHelper.getSearchDistanc();
+        selectedSearchRange = searchRangePreferenceHelper.getSearchDistanc();
 
         searchKafeButton = (Button) findViewById(R.id.searchKafeButton);
 
         VerticalSeekBar searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
 
         String[] vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
+        searchRanges = convertToIntList(vzdalenosti);
+
         // Seek bar for selecting searching distance
         searchDistanceSeekBar.setMaxValue(vzdalenosti.length - 1);
 
@@ -324,7 +341,7 @@ public class MainActivity extends ActivityWithLocationService
         }
         // find selected searchRangeTextView to be highlited
         for (int i = vzdalenosti.length - 1; i >= 0; i--) {
-            if (String.valueOf(searchRange).equals(vzdalenosti[i])) {
+            if (String.valueOf(selectedSearchRange).equals(vzdalenosti[i])) {
                 searchDistanceSeekBar.setProgress(i);
                 searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
                 searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
@@ -346,10 +363,13 @@ public class MainActivity extends ActivityWithLocationService
                     searchDistanceTextViews[i].setBackgroundResource(R.color.activityBackround);
                 }
             }
-            searchRange = Integer.parseInt(vzdalenosti[progress]);
-            searchRangeString = Utils.convertSearchDistance(searchRange);
-            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>"));
-            searchRangePreferenceHelper.putSearchDistance(searchRange);
+            selectedSearchRange = Integer.parseInt(vzdalenosti[progress]);
+            searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
+            kavaSearchButtonLabel.setText(R.string.main_act_search_button_kava_label);
+            searchRangePreferenceHelper.putSearchDistance(selectedSearchRange);
+            if (numberOfCoffeeSitesInRangeModel != null) {
+                numberOfCoffeeSitesInRangeModel.setSearchDistance(selectedSearchRange);
+            }
         }));
 
         mainToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -358,9 +378,9 @@ public class MainActivity extends ActivityWithLocationService
         // Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
-        accuracy = (TextView) findViewById(R.id.accuracy);
+        accuracy = findViewById(R.id.accuracy);
 
-        searchRangeString = Utils.convertSearchDistance(searchRange);
+        kavaSearchButtonLabel = findViewById(R.id.kava_search_button_label);
 
         searchKafeButton.setTransformationMethod(null);
 
@@ -410,6 +430,7 @@ public class MainActivity extends ActivityWithLocationService
 
         fab.setVisibility(VISIBLE);
 
+        doBindSitesInRangeService();
         //mainButtonTextColorAnimation = ObjectAnimator.ofInt(searchKafeButton, "textColor", Color.WHITE, getResources().getColor(R.color.colorNiceYellow_alpha));
     }
 
@@ -580,6 +601,68 @@ public class MainActivity extends ActivityWithLocationService
         }
     }
 
+    // ****** CoffeeSitesFoundService connection/disconnection ****** //
+
+    /**
+     * Service which provides number of CoffeeSites in the current search Range
+     */
+    private CoffeeSitesFoundService foundSitesService;
+    private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
+    private boolean mShouldUpdateSitesInRangeUnbind;
+
+    private void doBindSitesInRangeService() {
+        // Attempts to establish a connection with the service. We use an
+        // explicit class name because we want a specific service implementation,
+        // that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other applications).
+        sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
+        if (bindService(new Intent(this, CoffeeSitesFoundService.class),
+                sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUpdateSitesInRangeUnbind = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSitesInRangeUpdateService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    public void doUnBindSitesInRangeService() {
+        // Release information about the service's state.
+        if (mShouldUpdateSitesInRangeUnbind) {
+            unbindService(sitesInRangeUpdateServiceConnector);
+            mShouldUpdateSitesInRangeUnbind = false;
+        }
+    }
+
+    @Override
+    public void onCoffeeSitesInRangeUpdateServiceConnected() {
+        foundSitesService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
+
+        numberOfCoffeeSitesInRangeModel = new FoundNumberOfCoffeeSitesViewModel(this);
+        numberOfCoffeeSitesInRangeModel.setCoffeeSitesInRangeFoundService(foundSitesService);
+        foundSitesService.addSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+
+        if (foundSitesService != null) {
+            numberOfCoffeeSitesInRangeModel.getFoundNumberOfCoffeeSites().observe(this, new Observer<Integer>() {
+                @Override
+                public void onChanged(@Nullable final Integer numOfCoffeeSitesInRange) {
+                    // Process found number of CoffeeSites in range
+                    if (numOfCoffeeSitesInRange != null) {
+                        processNumbersOfSitesInRangesFound(numOfCoffeeSitesInRange);
+                    }
+                }
+            });
+        }
+    }
+
+    public void processNumbersOfSitesInRangesFound(Integer numOfCoffeeSites) {
+        hideProgressbar();
+        if (numOfCoffeeSites > 0) {
+            kavaSearchButtonLabel.setText(getString(R.string.main_act_search_button_kava_label_placeholder, numOfCoffeeSites));
+        } else {
+            kavaSearchButtonLabel.setText(R.string.main_act_search_button_kava_label);
+        }
+    }
+
     /**
      * Shows/hides MenuItem myCoffeeSitesMenuItem according data saved in Preferences helpers
      * to allow/disallow user to open MyCoffeeSitesListActivity with CoffeeSites created by the user.
@@ -624,10 +707,10 @@ public class MainActivity extends ActivityWithLocationService
     private void showLocationAccuracy(Location location) {
         if (location != null && location.hasAccuracy()) {
             setAccuracyTextColor(barvaBlack);
-            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)");
+//            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)"); // not needed to show to user
         } else {
             setAccuracyTextColor(barvaRed);
-            accuracy.setText("");
+//            accuracy.setText("");
         }
     }
 
@@ -837,6 +920,16 @@ public class MainActivity extends ActivityWithLocationService
     }
 
     /**
+     *
+     * Refreshes number of Coffee sites in different distances after internet becomes available, see {@link NetworkStateReceiver}
+     */
+    public synchronized void startReadingNumberOfSitesInRanges() {
+        if (locationService != null) {
+            numberOfCoffeeSitesInRangeModel.setCurrentLocationAndSearchDistance(locationService.getCurrentLatLng(), selectedSearchRange, searchRanges, "");
+        }
+    }
+
+    /**
      * To show statistics, can be called from AsyncTask
      *
      * @param stats
@@ -906,7 +999,7 @@ public class MainActivity extends ActivityWithLocationService
             Intent csListIntent = new Intent(this, FoundCoffeeSitesListActivity.class);
             csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
-            csListIntent.putExtra("searchRange", searchRange);
+            csListIntent.putExtra("searchRange", selectedSearchRange);
             csListIntent.putExtra("coffeeSort", "");
 
             startActivity(csListIntent);
@@ -1001,6 +1094,8 @@ public class MainActivity extends ActivityWithLocationService
             updateAccuracyIndicator(location);
 
             searchKafeButton.setEnabled(location != null);
+
+            startReadingNumberOfSitesInRanges();
         }
 
         doBindCoffeeSiteLoadOperationsService();
@@ -1051,6 +1146,8 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        foundSitesService.removeSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+        doUnBindSitesInRangeService();
         doUnbindCoffeeSiteEntitiesService();
     }
 
@@ -1075,10 +1172,13 @@ public class MainActivity extends ActivityWithLocationService
             // Setup searchKafeButton text and start to animate it, if it is not animating yet
             // this highlights the button to user
             searchKafeButton.setEnabled(true);
-            searchKafeButton.setText(Html.fromHtml("KÁVA<br><small>" + searchRangeString + "</small>"));
+//            searchKafeButton.setText(Html.fromHtml("VYHLEDAT<br><small>" + searchRangeString + "</small>"));
+            searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
+
 //            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
 //                startAnimateButtonText(mainButtonTextColorAnimation);
 //            }
+            startReadingNumberOfSitesInRanges();
         }
     }
 
@@ -1118,7 +1218,7 @@ public class MainActivity extends ActivityWithLocationService
 
     /**
      * Evaluates what login icon is shown according userAccountService
-     * If user is logged in, show green icon, othervise black.
+     * If user is logged in, show green icon, otherwise black.
      */
     private void evaluateLoginMenuIcon() {
         MenuItem userAccountMenuItem = mainToolbar.getMenu().size() > 0 ? mainToolbar.getMenu().findItem(R.id.action_login) : null;
@@ -1133,7 +1233,7 @@ public class MainActivity extends ActivityWithLocationService
 
 
     /**
-     * Helper method. Not used currently, but ready for the future, if thre would be a long running job
+     * Helper method. Not used currently, but ready for the future, if there would be a long running job
      */
     public void showProgressbar() {
         mainActivityProgressBar.setVisibility(VISIBLE);
@@ -1193,4 +1293,12 @@ public class MainActivity extends ActivityWithLocationService
 //        Log.i(TAG, "Current firebase token: " + preferencesHelper.getFirebaseToken());
 //    }
 
+
+    private static List<Integer> convertToIntList(String[] numbers) {
+        List<Integer> intList = new ArrayList<>();
+        for (String number : numbers) {
+            intList.add(Integer.parseInt(number));
+        }
+        return intList;
+    }
 }

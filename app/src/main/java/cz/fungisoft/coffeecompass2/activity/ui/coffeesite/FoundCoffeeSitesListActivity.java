@@ -41,6 +41,7 @@ import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConne
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
 
 
@@ -246,16 +247,17 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                 @Override
                 public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
                     // Update the cached copy of the newCoffeeSitesInRange in the adapter.
-                    assert newCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
-                        // Add new CoffeeSites as locationService listeners
-                        csm.setLocationService(locationService);
-                        if (locationService != null) {
-                            locationService.addPropertyChangeListener(csm);
-                            currentContent.add(csm);
+                    if (newCoffeeSitesInRange != null) {
+                        for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
+                            // Add new CoffeeSites as locationService listeners
+                            csm.setLocationService(locationService);
+                            if (locationService != null) {
+                                locationService.addPropertyChangeListener(csm);
+                                currentContent.add(csm);
+                            }
                         }
+                        recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
                     }
-                    recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
                     // updates app's Widget
                     MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true);
                 }
@@ -266,14 +268,15 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                 @Override
                 public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
                     // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
-                    assert goneCoffeeSitesInRange != null;
-                    for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
-                        if (locationService != null) {
-                            locationService.removePropertyChangeListener(csm);
-                            currentContent.getItems().remove(csm);
+                    if (goneCoffeeSitesInRange != null) {
+                        for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
+                            if (locationService != null) {
+                                locationService.removePropertyChangeListener(csm);
+                                currentContent.getItems().remove(csm);
+                            }
                         }
+                        recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
                     }
-                    recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
                     // updates app's Widget
                     MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true);
                 }
@@ -377,13 +380,16 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     }
 
     @Override
-    public void onSearchingSitesFinished() {
+    public void onSearchingSitesFinished(int numOfCoffeeSites) {
         recyclerViewAdapter.newSitesSearchingFinished();
-        if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
-            toolbar.setTitle(originalToolbarTitle + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
-        } else {
-            toolbar.setTitle(originalToolbarTitle);
+        String currentTitle = originalToolbarTitle;
+        if (numOfCoffeeSites > 0) {
+            currentTitle = originalToolbarTitle + " (" + numOfCoffeeSites + ")";
         }
+        if (!Utils.isOnline(getApplicationContext())) {
+            currentTitle = currentTitle + " - offline";
+        }
+        toolbar.setTitle(currentTitle);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite;
 
 import java.util.List;
+import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
@@ -60,6 +61,15 @@ public interface CoffeeSiteRESTInterface {
      */
     @GET("searchSites/")
     Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range, @Query("sort") String sort);
+
+    /**
+     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
+     * POST method needed if Body is used
+     *
+     * @return
+     */
+    @POST("getNumberOfSitesInGivenDistances/")
+    Call<Map<String, Integer>> getNumbersOfCoffeeSitesInRanges(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("sort") String sort, @Body Map<String, List<Integer>> distances);
 
     /**
      * URL example https://coffeecompass.cz/rest/site/getSitesInTown/?townName=Tišnov
