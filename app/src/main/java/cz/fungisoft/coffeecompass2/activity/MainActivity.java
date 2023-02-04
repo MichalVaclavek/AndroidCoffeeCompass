@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -134,8 +135,6 @@ public class MainActivity extends ActivityWithLocationService
 
     private TextView accuracy;
 
-    private TextView kavaSearchButtonLabel;
-
     private ImageView locationImageView;
 
     private Location location;
@@ -162,6 +161,8 @@ public class MainActivity extends ActivityWithLocationService
 
     private static int selectedSearchRange = 500; // range in meters for searching from current position - 500 m default value
     private static List<Integer> searchRanges = new ArrayList<>(); // ranges of search distances to be selected by user
+
+    private String[] searchDistances;
 
     // Saves selected search distance range
     private SearchDistancePreferenceHelper searchRangePreferenceHelper;
@@ -240,6 +241,9 @@ public class MainActivity extends ActivityWithLocationService
 
     private CardView statisticsAndNewsCardView; // needed to change backround color, when statistics shows new CoffeeSites last week
 
+    private TextView[] numberOfCoffeeSitesInDistanceTextViews;
+    private MaterialCardView[] numberOfCoffeeSitesInDistanceCardViews;
+
     /**
      * Save info about latest processed new notified CoffeeSite URL
      */
@@ -281,7 +285,7 @@ public class MainActivity extends ActivityWithLocationService
          * onChanged is called every time, the activity is created (for example goes from background
          * to foreground) and it was already called fro some previous new coffeeSite URL
          * notification. So, we need to check, if onChange() is called because of
-         * another ne URL or if it is already processed URL.
+         * another new URL or if it is already processed URL.
          */
         FirebaseMessageService
                 .Notification
@@ -321,33 +325,68 @@ public class MainActivity extends ActivityWithLocationService
 
         VerticalSeekBar searchDistanceSeekBar = (VerticalSeekBar) findViewById(R.id.searchDistanceSeekBar);
 
-        String[] vzdalenosti = getResources().getStringArray(R.array.vzdalenosti);
-        searchRanges = convertToIntList(vzdalenosti);
+        searchDistances = getResources().getStringArray(R.array.vzdalenosti);
+        searchRanges = convertToIntList(searchDistances);
 
         // Seek bar for selecting searching distance
-        searchDistanceSeekBar.setMaxValue(vzdalenosti.length - 1);
+        searchDistanceSeekBar.setMaxValue(searchDistances.length - 1);
 
         LinearLayout searchDistancesScaleLinearLayout = findViewById(R.id.searchDistancesScaleLinearLayout);
         // Text view for searchDistances to be accessible for changing its property when selected by seekbar
-        TextView[] searchDistanceTextViews = new TextView[vzdalenosti.length];
+        TextView[] searchDistanceTextViews = new TextView[searchDistances.length];
 
-        for (int i = vzdalenosti.length - 1; i >= 0; i--) {
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
             TextView searchDistTextView = new TextView(this);
-            searchDistTextView.setText(vzdalenosti[i]);
+            searchDistTextView.setText(searchDistances[i]);
             searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             searchDistTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
             searchDistanceTextViews[i] = searchDistTextView;
             searchDistancesScaleLinearLayout.addView(searchDistTextView);
         }
         // find selected searchRangeTextView to be highlited
-        for (int i = vzdalenosti.length - 1; i >= 0; i--) {
-            if (String.valueOf(selectedSearchRange).equals(vzdalenosti[i])) {
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
+            if (String.valueOf(selectedSearchRange).equals(searchDistances[i])) {
                 searchDistanceSeekBar.setProgress(i);
                 searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
                 searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
                 searchDistanceTextViews[i].setBackgroundResource(R.color.selectedSearchDistanceBackround);
                 break;
             }
+        }
+
+        LinearLayout numberOfCoffeeSitesInDistanceLinearLayout = findViewById(R.id.found_sites_in_distance_LinearLayout);
+        numberOfCoffeeSitesInDistanceTextViews = new TextView[searchDistances.length];
+        numberOfCoffeeSitesInDistanceCardViews = new MaterialCardView[searchDistances.length];
+
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
+            MaterialCardView numberOfSitesInDistanceCardView = new MaterialCardView(this);
+
+            LinearLayout.LayoutParams cardViewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+            int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics());
+            cardViewLayoutParams.setMargins(margin, margin, margin, margin);
+            numberOfSitesInDistanceCardView.setLayoutParams(cardViewLayoutParams);
+            numberOfSitesInDistanceCardView.setCardBackgroundColor(getColor(R.color.activityBackround));
+            numberOfSitesInDistanceCardView.setStrokeColor(getColor(R.color.white_transparent));
+            numberOfSitesInDistanceCardView.setStrokeWidth(3);
+            numberOfSitesInDistanceCardView.setRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
+            numberOfSitesInDistanceCardView.setElevation(0);
+
+            numberOfCoffeeSitesInDistanceCardViews[i] = numberOfSitesInDistanceCardView;
+
+            TextView numberOfSitesInDistanceTextView = new TextView(this);
+            LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            textViewLayoutParams.gravity = Gravity.CENTER;
+            numberOfSitesInDistanceTextView.setLayoutParams(textViewLayoutParams);
+
+            numberOfSitesInDistanceTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            numberOfSitesInDistanceTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            numberOfSitesInDistanceTextView.setTextColor(getColor(R.color.colorPrimary2));
+            numberOfSitesInDistanceTextView.setTypeface(null, Typeface.NORMAL);
+            numberOfSitesInDistanceTextView.setGravity(Gravity.CENTER);
+            numberOfCoffeeSitesInDistanceTextViews[i] = numberOfSitesInDistanceTextView;
+            numberOfSitesInDistanceCardView.addView(numberOfSitesInDistanceTextView);
+
+            numberOfCoffeeSitesInDistanceLinearLayout.addView(numberOfSitesInDistanceCardView);
         }
 
         // SeekBar onChangeListener()
@@ -363,9 +402,8 @@ public class MainActivity extends ActivityWithLocationService
                     searchDistanceTextViews[i].setBackgroundResource(R.color.activityBackround);
                 }
             }
-            selectedSearchRange = Integer.parseInt(vzdalenosti[progress]);
+            selectedSearchRange = Integer.parseInt(searchDistances[progress]);
             searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
-            kavaSearchButtonLabel.setText(R.string.main_act_search_button_kava_label);
             searchRangePreferenceHelper.putSearchDistance(selectedSearchRange);
             if (numberOfCoffeeSitesInRangeModel != null) {
                 numberOfCoffeeSitesInRangeModel.setSearchDistance(selectedSearchRange);
@@ -379,8 +417,6 @@ public class MainActivity extends ActivityWithLocationService
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
         accuracy = findViewById(R.id.accuracy);
-
-        kavaSearchButtonLabel = findViewById(R.id.kava_search_button_label);
 
         searchKafeButton.setTransformationMethod(null);
 
@@ -647,21 +683,57 @@ public class MainActivity extends ActivityWithLocationService
                 public void onChanged(@Nullable final Integer numOfCoffeeSitesInRange) {
                     // Process found number of CoffeeSites in range
                     if (numOfCoffeeSitesInRange != null) {
-                        processNumbersOfSitesInRangesFound(numOfCoffeeSitesInRange);
+                        processNumberOfSitesInRangeFound(numOfCoffeeSitesInRange);
+                    }
+                }
+            });
+
+            numberOfCoffeeSitesInRangeModel.getAllFoundNumbersOfCoffeeSites().observe(this, new Observer<Map<String, Integer>>() {
+                @Override
+                public void onChanged(@Nullable final Map<String, Integer> numOfAllCoffeeSitesInRanges) {
+                    // Process found number of CoffeeSites in range
+                    if (numOfAllCoffeeSitesInRanges != null) {
+                        updateNumberOfSitesInDistancesViews(numOfAllCoffeeSitesInRanges);
                     }
                 }
             });
         }
     }
 
-    public void processNumbersOfSitesInRangesFound(Integer numOfCoffeeSites) {
+
+    public void processNumberOfSitesInRangeFound(Integer numOfCoffeeSites) {
         hideProgressbar();
-        if (numOfCoffeeSites > 0) {
-            kavaSearchButtonLabel.setText(getString(R.string.main_act_search_button_kava_label_placeholder, numOfCoffeeSites));
-        } else {
-            kavaSearchButtonLabel.setText(R.string.main_act_search_button_kava_label);
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
+            if (searchDistances[i].equals(String.valueOf(selectedSearchRange))) {
+                numberOfCoffeeSitesInDistanceTextViews[i].setText((numOfCoffeeSites > 0) ? numOfCoffeeSites.toString() : "");
+                numberOfCoffeeSitesInDistanceTextViews[i].setTextColor(getColor(R.color.colorAccent));
+                numberOfCoffeeSitesInDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
+                numberOfCoffeeSitesInDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            } else {
+//                numberOfCoffeeSitesInDistanceTextViews[i].setText("");
+                numberOfCoffeeSitesInDistanceTextViews[i].setTextColor(getColor(R.color.colorPrimary2));
+                numberOfCoffeeSitesInDistanceTextViews[i].setTypeface(null, Typeface.NORMAL);
+                numberOfCoffeeSitesInDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            }
         }
     }
+    /**
+     * Updates Vies to show how many CoffeeSites are in selectable distances
+     */
+    private void updateNumberOfSitesInDistancesViews(final Map<String, Integer> numOfAllCoffeeSitesInRanges) {
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
+            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.white_transparent));
+            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(3);
+            numberOfCoffeeSitesInDistanceTextViews[i].setText("");
+            if (numOfAllCoffeeSitesInRanges.get(searchDistances[i]) != null
+                && numOfAllCoffeeSitesInRanges.get(searchDistances[i]) > 0) {
+                numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.colorPrimary2));
+                numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(6);
+                numberOfCoffeeSitesInDistanceTextViews[i].setText(numOfAllCoffeeSitesInRanges.get(searchDistances[i]).toString());
+            }
+        }
+    }
+
 
     /**
      * Shows/hides MenuItem myCoffeeSitesMenuItem according data saved in Preferences helpers

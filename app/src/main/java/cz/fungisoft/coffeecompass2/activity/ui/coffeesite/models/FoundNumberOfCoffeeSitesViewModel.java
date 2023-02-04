@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
 
     private WeakReference<CoffeeSitesFoundService> sitesInRangeUpdateService;
 
-    private Map<String, Integer> numOfCoffeeSites;
+    private Map<String, Integer> numOfCoffeeSites = new HashMap<>();
 
     private int searchDistance = 0;
 
@@ -55,6 +56,12 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
 
     public LiveData<Integer> getFoundNumberOfCoffeeSites() {
         return foundNumberOfCoffeeSites;
+    }
+
+    private MutableLiveData<Map<String, Integer>> numOfAllCoffeeSites = new MutableLiveData<>();
+
+    public LiveData<Map<String, Integer>> getAllFoundNumbersOfCoffeeSites() {
+        return numOfAllCoffeeSites;
     }
 
     /**
@@ -98,6 +105,7 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
     @Override
     public void onNumbersOfSitesInRangesFound(Map<String, Integer> numOfCoffeeSites) {
         this.numOfCoffeeSites = numOfCoffeeSites;
+        numOfAllCoffeeSites.setValue(numOfCoffeeSites);
         foundNumberOfCoffeeSites.setValue(this.numOfCoffeeSites.get(String.valueOf(this.searchDistance)));
     }
 }
