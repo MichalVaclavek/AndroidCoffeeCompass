@@ -1185,7 +1185,7 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
         if (locationService != null) {
-            locationService.removeAllLocationChangeListeners();
+            locationService.removePropertyChangeListener(this);
         }
         doUnbindCoffeeSiteLoadOperationsService();
     }
@@ -1204,7 +1204,6 @@ public class MainActivity extends ActivityWithLocationService
 
     @Override
     protected void onStop() {
-        super.onStop();
         // stop main button text animation
         //mainButtonTextColorAnimation.cancel();
         searchKafeButton.setTextColor(Color.WHITE);
@@ -1212,15 +1211,20 @@ public class MainActivity extends ActivityWithLocationService
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
         doUnbindUserAccountService();
+
+        super.onStop();
     }
 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        if (locationService != null) {
+            locationService.removeAllLocationChangeListeners();
+        }
         foundSitesService.removeSitesFoundListener(numberOfCoffeeSitesInRangeModel);
         doUnBindSitesInRangeService();
         doUnbindCoffeeSiteEntitiesService();
+        super.onDestroy();
     }
 
 

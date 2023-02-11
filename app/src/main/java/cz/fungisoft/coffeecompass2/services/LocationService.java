@@ -70,8 +70,8 @@ public class LocationService extends Service {
             }
             support.removePropertyChangeListener(pcl);
             Log.d(TAG,  "Odebran posluchac zmeny polohy: " + pcl);
+            Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
         }
-        Log.d(TAG,  "Pocet posluchacu zmeny polohy: " + support.getPropertyChangeListeners().length);
     }
 
     // Unique Identification Number for the Notification.

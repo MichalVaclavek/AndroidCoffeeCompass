@@ -80,6 +80,12 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     private boolean isSearching = false;
 
     /**
+     * To detect, that search request for number of sites in range to server is running
+     */
+    private boolean isSearchingNumOfSites = false;
+
+
+    /**
      * Main field provided by this service
      */
     private LiveData<List<CoffeeSiteMovable>> foundSites;
@@ -145,7 +151,9 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     private final List<CoffeeSitesFoundListener> sitesFoundListeners = new ArrayList<>();
 
     public void addSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
-        sitesFoundListeners.add(sitesInRangeUpdateListener);
+        if (!sitesFoundListeners.contains(sitesInRangeUpdateListener)) {
+            sitesFoundListeners.add(sitesInRangeUpdateListener);
+        }
     }
 
     public void removeSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
@@ -323,10 +331,10 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * @param range
      */
     private synchronized void startSearchingNumbersOfSitesInRanges(String coffeeSort, double latitude, double longitude, List<Integer> allRanges, int selectedRange) {
-        if (!isSearching && !Utils.isOfflineModeOn(getApplicationContext())) {
+        if (!isSearchingNumOfSites && !Utils.isOfflineModeOn(getApplicationContext())) {
             startSearchNumberOfSitesInRangeFromServer(coffeeSort, latitude, longitude, allRanges);
         }
-        if (!isSearching && Utils.isOfflineModeOn(getApplicationContext())) {
+        if (!isSearchingNumOfSites && Utils.isOfflineModeOn(getApplicationContext())) {
             setDBInput(latitude, longitude, selectedRange);
         }
     }
@@ -388,7 +396,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * @param coffeeSort
      */
     private void startSearchNumberOfSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, List<Integer> ranges) {
-        isSearching = true;
+        isSearchingNumOfSites = true;
         Log.i(TAG, "Start Async task for searching number of sites on server.");
         new GetNumberOfCoffeeSitesInRangeAsyncTask(this,
                 latitude,
@@ -403,7 +411,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      */
     @Override
     public void onNumberOfSitesInRangesReturnedFromServer(Map<String, Integer> numOfCoffeeSitesInDistances) {
-        isSearching = false;
+        isSearchingNumOfSites = false;
         for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
             listener.onNumbersOfSitesInRangesFound(numOfCoffeeSitesInDistances);
         }
