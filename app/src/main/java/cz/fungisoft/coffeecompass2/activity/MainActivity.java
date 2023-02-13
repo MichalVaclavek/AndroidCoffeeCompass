@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -334,14 +335,20 @@ public class MainActivity extends ActivityWithLocationService
         LinearLayout searchDistancesScaleLinearLayout = findViewById(R.id.searchDistancesScaleLinearLayout);
         // Text view for searchDistances to be accessible for changing its property when selected by seekbar
         TextView[] searchDistanceTextViews = new TextView[searchDistances.length];
-
+        searchDistancesScaleLinearLayout.setWeightSum(searchDistances.length);
         for (int i = searchDistances.length - 1; i >= 0; i--) {
             TextView searchDistTextView = new TextView(this);
+
+            FrameLayout textFrameLayout = new FrameLayout(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+            textFrameLayout.setLayoutParams(params);
+            textFrameLayout.addView(searchDistTextView);
+
             searchDistTextView.setText(searchDistances[i]);
             searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            searchDistTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            searchDistTextView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
             searchDistanceTextViews[i] = searchDistTextView;
-            searchDistancesScaleLinearLayout.addView(searchDistTextView);
+            searchDistancesScaleLinearLayout.addView(textFrameLayout);
         }
         // find selected searchRangeTextView to be highlited
         for (int i = searchDistances.length - 1; i >= 0; i--) {
