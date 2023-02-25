@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -16,8 +17,12 @@ import com.google.android.gms.maps.model.LatLng;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesInRangeAsyncTask;
@@ -55,9 +60,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
     public void setCurrentSearchRange(int currentSearchRange) {
         this.currentSearchRange = currentSearchRange;
-        if (!isSearching && Utils.isOfflineModeOn(getApplicationContext())) {
-            setDBInput(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-        }
     }
 
     private List<Integer> allSearchRanges;
@@ -94,10 +96,14 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         return foundSites;
     }
 
-    private LiveData<Integer> numberOfFoundSites;
-
-    public LiveData<Integer> getNumberOfFoundSites() {
-        return numberOfFoundSites;
+    /**
+     * Main field provided by this service. Pairs of search range and number of coffee sites in this ranges
+     */
+    private LiveData<Map<String, LiveData<Integer>>> allNumberOfFoundSitesInRangesLive;
+    private final Map<String, LiveData<Integer>> allNumberOfFoundSitesInRanges = new HashMap<>();
+    
+    public LiveData<Map<String, LiveData<Integer>>> getAllNumberOfFoundSitesInRanges() {
+        return allNumberOfFoundSitesInRangesLive;
     }
 
 
@@ -174,24 +180,38 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         super.onCreate();
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
 
-        // Transform CoffeeSites returned from DB (sites within Rectangle) to CoffeeSiteMovable (sites within search circle) expected by FoundCoffeeSiteListActivity
-        foundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), coffeeSites -> {
+        allNumberOfFoundSitesInRangesLive = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRangeWithRange(), i -> {
+           for (Map.Entry<String, LiveData<List<CoffeeSite>>> e : i.entrySet()) {
+               allNumberOfFoundSitesInRanges.put(e.getKey(), Transformations.map(e.getValue(), List::size));
+           }
+           return allNumberOfFoundSitesInRanges;
+        });
+
+        foundSites = Transformations.switchMap(coffeeSiteRepository.getCoffeeSitesInRangeWithRange(), i -> {
+            for (Map.Entry<String, LiveData<List<CoffeeSite>>> e : i.entrySet()) {
+                if (e.getKey().equals(String.valueOf(this.currentSearchRange))) {
+                    if (e.getValue() != null) {
+                        return transformToMovableCoffeeSiteList(e.getValue());
+                    }
+                }
+            }
+            return new MutableLiveData<>();
+        });
+
+        doBindLocationService();
+    }
+
+    private LiveData<List<CoffeeSiteMovable>> transformToMovableCoffeeSiteList(LiveData<List<CoffeeSite>> input) {
+        return Transformations.map(input, coffeeSites -> {
             List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
             for (CoffeeSite cs : coffeeSites) { // filters only CoffeeSites in circle range and maps to CoffeeSiteMovable
                 if ((searchLocationOfCurrentSites != null)
-                    && (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange)) {
-                        coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocationOfCurrentSites));
+                        && (Utils.countDistanceMetersFromSearchPoint(cs.getLatitude(), cs.getLongitude(), searchLocationOfCurrentSites.latitude, searchLocationOfCurrentSites.longitude) <= currentSearchRange)) {
+                    coffeeSiteMovables.add(new CoffeeSiteMovable(cs, searchLocationOfCurrentSites));
                 }
             }
-//            for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-//                listener.onSearchingSitesFinished(coffeeSiteMovables.size());
-//            }
             return coffeeSiteMovables;
         });
-
-        numberOfFoundSites = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRange(), List::size);
-
-        doBindLocationService();
     }
 
     private void doBindLocationService() {
@@ -231,17 +251,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     }
 
     /**
-     * Set new input search data (lat, long, range) to repository to initiate new DB search.
-     *
-     * @param latitudeFrom
-     * @param longitudeFrom
-     * @param searchRange
-     */
-    private void setDBInput(double latitudeFrom, double longitudeFrom, int searchRange) {
-        coffeeSiteRepository.setNewLatLongRangeSearchCriteria(latitudeFrom, longitudeFrom, searchRange);
-    }
-
-    /**
      * Listen to location changes invoked by LocationService.
      * If the move distance overlaps given threshold, search of new CoffeeSites starts.
      *
@@ -265,8 +274,9 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
                     this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
                     if (this.searchLocationOfCurrentSites != null
                             && this.coffeeSort != null) {
-                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                        startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges, this.currentSearchRange);
+                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange, this.allSearchRanges);
+                        startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
+                        updateDBLiveDataInput( this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
                         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
                             listener.onStartSearchingSites();
                         }
@@ -280,14 +290,16 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * Validates prerequisites for CoffeeSites search and starts searching for CoffeeSites in range.<br>
      * Also calls onStartSearchingSitesInRange of the listeners to perform action required at search begin.
      */
-    public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, String coffeeSort) {
+    public void requestUpdatesOfCurrentSitesInRange(LatLng searchLocationOfCurrentSites, int range, List<Integer> allRanges, String coffeeSort) {
         getSearchLocation(searchLocationOfCurrentSites);
 
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
+        this.allSearchRanges = allRanges;
 
         if (this.searchLocationOfCurrentSites != null) {
-            startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+            startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange, this.allSearchRanges);
+            updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges);
             for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
                 listener.onStartSearchingSites();
             }
@@ -305,7 +317,8 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         this.allSearchRanges = allRanges;
 
         if (this.searchLocationOfCurrentSites != null) {
-            startSearchingNumbersOfSitesInRanges(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges, this.currentSearchRange);
+            startSearchingNumbersOfSitesInRanges(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges);
+            updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges);
         }
     }
 
@@ -330,12 +343,9 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * @param longitude
      * @param range
      */
-    private synchronized void startSearchingNumbersOfSitesInRanges(String coffeeSort, double latitude, double longitude, List<Integer> allRanges, int selectedRange) {
+    private synchronized void startSearchingNumbersOfSitesInRanges(String coffeeSort, double latitude, double longitude, List<Integer> allRanges) {
         if (!isSearchingNumOfSites && !Utils.isOfflineModeOn(getApplicationContext())) {
             startSearchNumberOfSitesInRangeFromServer(coffeeSort, latitude, longitude, allRanges);
-        }
-        if (!isSearchingNumOfSites && Utils.isOfflineModeOn(getApplicationContext())) {
-            setDBInput(latitude, longitude, selectedRange);
         }
     }
 
@@ -348,14 +358,15 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * @param longitude
      * @param range
      */
-    private synchronized void startSearchingSitesInRange(String coffeeSort, double latitude, double longitude, int range) {
-        if (!isSearching) {
-            if (!Utils.isOfflineModeOn(getApplicationContext())) {
-                startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
-            }
-            else { // invokes update of LiveData<List<CoffeeSite>> returned from DB
-                setDBInput(latitude, longitude, range);
-            }
+    private synchronized void startSearchingSitesInRange(String coffeeSort, double latitude, double longitude, int range, List<Integer> allRanges) {
+        if (!isSearching && !Utils.isOfflineModeOn(getApplicationContext())) {
+            startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
+        }
+    }
+
+    private synchronized void updateDBLiveDataInput(double latitude, double longitude, List<Integer> allRanges) {
+        if (!(isSearchingNumOfSites || isSearching) && Utils.isOfflineModeOn(getApplicationContext())) {
+            coffeeSiteRepository.setNewLatLongRangeSearchCriteriaForAllRanges(latitude, longitude, allRanges);
         }
     }
 

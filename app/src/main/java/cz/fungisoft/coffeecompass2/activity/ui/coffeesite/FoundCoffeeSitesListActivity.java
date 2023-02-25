@@ -25,6 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -89,6 +91,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     private Parcelable mListState;
 
     private int searchRange;
+    private List<Integer> searchRanges; // possible ranges of search distances to be selected by user
     private LatLng searchLocation;
     private String searchCoffeeSort;
 
@@ -128,6 +131,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
         if (getIntent().getExtras().get("searchRange") != null) {
             this.searchRange = (int) getIntent().getExtras().get("searchRange");
+        }
+        if (getIntent().getExtras().get("searchRanges") != null) {
+            this.searchRanges = getIntent().getIntegerArrayListExtra("searchRanges");
         }
 
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
@@ -201,7 +207,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     @Override
     public void onDestroy() {
         super.onDestroy();
-        foundSitesService.removeSitesFoundListener(coffeeSitesViewModel);
         doUnBindSitesInRangeService();
     }
 
@@ -226,6 +231,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         if (mShouldUpdateSitesInRangeUnbind) {
             if (foundSitesService != null) {
                 foundSitesService.removeFoundSitesSearchOperationListener(this);
+                foundSitesService.removeSitesFoundListener(coffeeSitesViewModel);
             }
             unbindService(sitesInRangeUpdateServiceConnector);
             mShouldUpdateSitesInRangeUnbind = false;
@@ -294,8 +300,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         final int currentSearchRange = this.searchRange;
         final LatLng currentSearchFromLocation = this.searchLocation;
 
-        if (foundSitesService != null) {
-            foundSitesService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort);
+        if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.setCurrentLocationAndSearchDistance(currentSearchFromLocation, currentSearchRange, this.searchRanges, this.searchCoffeeSort);
         }
     }
 

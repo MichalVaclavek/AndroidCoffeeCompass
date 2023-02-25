@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -339,16 +338,11 @@ public class MainActivity extends ActivityWithLocationService
         for (int i = searchDistances.length - 1; i >= 0; i--) {
             TextView searchDistTextView = new TextView(this);
 
-            FrameLayout textFrameLayout = new FrameLayout(this);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-            textFrameLayout.setLayoutParams(params);
-            textFrameLayout.addView(searchDistTextView);
-
             searchDistTextView.setText(searchDistances[i]);
             searchDistTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            searchDistTextView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+            searchDistTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
             searchDistanceTextViews[i] = searchDistTextView;
-            searchDistancesScaleLinearLayout.addView(textFrameLayout);
+            searchDistancesScaleLinearLayout.addView(searchDistTextView);
         }
         // find selected searchRangeTextView to be highlited
         for (int i = searchDistances.length - 1; i >= 0; i--) {
@@ -413,7 +407,7 @@ public class MainActivity extends ActivityWithLocationService
             searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
             searchRangePreferenceHelper.putSearchDistance(selectedSearchRange);
             if (numberOfCoffeeSitesInRangeModel != null) {
-                numberOfCoffeeSitesInRangeModel.setSearchDistance(selectedSearchRange);
+                numberOfCoffeeSitesInRangeModel.setCurrentSearchDistance(selectedSearchRange);
             }
         }));
 
@@ -1079,6 +1073,7 @@ public class MainActivity extends ActivityWithLocationService
             csListIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             csListIntent.putExtra("latLongFrom", new LatLng(location.getLatitude(), location.getLongitude()));
             csListIntent.putExtra("searchRange", selectedSearchRange);
+            csListIntent.putIntegerArrayListExtra("searchRanges", (ArrayList<Integer>) searchRanges);
             csListIntent.putExtra("coffeeSort", "");
 
             startActivity(csListIntent);

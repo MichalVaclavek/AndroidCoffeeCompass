@@ -188,19 +188,9 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/textView"
-                                android:layout_width="65dp"
-                                android:layout_height="match_parent"
-                                android:text="max. vzdálenost [m]"
-                                android:textAlignment="center"
-                                android:textColor="@color/colorPrimaryDark"
-                                android:textSize="12sp"
-                                android:textStyle="italic" />
-
-                            <TextView
                                 android:id="@+id/textView19"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_marginTop="10dp"
                                 android:layout_marginBottom="10dp"
                                 android:layout_weight="1"
@@ -210,6 +200,16 @@
                                 android:textColor="@color/colorPrimary2"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/textView"
+                                android:layout_width="65dp"
+                                android:layout_height="match_parent"
+                                android:text="max. vzdálenost [m]"
+                                android:textAlignment="center"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="12sp"
+                                android:textStyle="italic" />
 
                         </LinearLayout>
 
@@ -237,15 +237,15 @@
                                 app:cardCornerRadius="4dp"
                                 app:cardElevation="0dp">
 
-                                <LinearLayout
-                                    android:id="@+id/searchDistancesScaleLinearLayout"
-                                    android:layout_width="58dp"
-                                    android:layout_height="match_parent"
-                                    android:gravity="right"
-                                    android:orientation="vertical"
-                                    android:paddingLeft="5dp"
-                                    android:paddingRight="5dp" />
                             </androidx.cardview.widget.CardView>
+
+                            <LinearLayout
+                                android:id="@+id/found_sites_in_distance_LinearLayout"
+                                android:layout_width="28dp"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical">
+
+                            </LinearLayout>
 
                             <androidx.cardview.widget.CardView
                                 android:layout_width="wrap_content"
@@ -255,158 +255,6 @@
                                 app:cardCornerRadius="0dp"
                                 app:cardElevation="0dp">
 
-                                <LinearLayout
-                                    android:id="@+id/found_sites_in_distance_LinearLayout"
-                                    android:layout_width="28dp"
-                                    android:layout_height="match_parent"
-                                    android:orientation="vertical">
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView20"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:text="7"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView21"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView22"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView23"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView2222"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                    <!--                                    <com.google.android.material.card.MaterialCardView-->
-                                    <!--                                        android:layout_width="match_parent"-->
-                                    <!--                                        android:layout_height="wrap_content"-->
-                                    <!--                                        android:layout_marginLeft="2dp"-->
-                                    <!--                                        android:layout_marginTop="2dp"-->
-                                    <!--                                        android:layout_marginRight="2dp"-->
-                                    <!--                                        android:layout_marginBottom="2dp"-->
-                                    <!--                                        android:layout_weight="1"-->
-                                    <!--                                        app:cardBackgroundColor="@color/activityBackround"-->
-                                    <!--                                        app:strokeColor="@color/colorAccent"-->
-                                    <!--                                        app:strokeWidth="1dp">-->
-
-                                    <!--                                        <TextView-->
-                                    <!--                                            android:id="@+id/textView25"-->
-                                    <!--                                            android:layout_width="wrap_content"-->
-                                    <!--                                            android:layout_height="wrap_content"-->
-                                    <!--                                            android:layout_gravity="center"-->
-                                    <!--                                            android:gravity="bottom"-->
-                                    <!--                                            android:textColor="@color/chip_gray"-->
-                                    <!--                                            android:textSize="16sp"-->
-                                    <!--                                            android:textStyle="bold"-->
-                                    <!--                                            tools:ignore="TouchTargetSizeCheck" />-->
-                                    <!--                                    </com.google.android.material.card.MaterialCardView>-->
-
-                                </LinearLayout>
                             </androidx.cardview.widget.CardView>
 
                             <com.google.android.material.card.MaterialCardView
@@ -437,6 +285,15 @@
 
                             </com.google.android.material.card.MaterialCardView>
 
+                            <LinearLayout
+                                android:id="@+id/searchDistancesScaleLinearLayout"
+                                android:layout_width="58dp"
+                                android:layout_height="match_parent"
+                                android:gravity="right"
+                                android:orientation="vertical"
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5dp" />
+
                             <com.lukelorusso.verticalseekbar.VerticalSeekBar
                                 android:id="@+id/searchDistanceSeekBar"
                                 android:layout_width="32dp"
@@ -462,52 +319,51 @@
 
                 </TableLayout>
 
-                <TableLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="10dp">
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp">
-
-                        <TextView
-                            android:id="@+id/polohaLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingLeft="10dp"
-                            android:text="poloha:"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="14sp"
-                            android:textStyle="normal|bold" />
-
-                        <ImageView
-                            android:id="@+id/locationImageView"
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:layout_marginLeft="10dp"
-                            android:adjustViewBounds="false"
-                            android:background="@drawable/location_bad" />
-
-                        <TextView
-                            android:id="@+id/accuracy"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:paddingLeft="10dp"
-                            android:textAlignment="textStart"
-                            android:textColor="@android:color/holo_red_dark"
-                            android:textSize="12sp" />
-
-                    </TableRow>
-
-                </TableLayout>
-
             </LinearLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
+
+                    <TextView
+                        android:id="@+id/polohaLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="poloha:"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="normal|bold" />
+
+                    <ImageView
+                        android:id="@+id/locationImageView"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginLeft="10dp"
+                        android:adjustViewBounds="false"
+                        android:background="@drawable/location_bad" />
+
+                    <TextView
+                        android:id="@+id/accuracy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:paddingLeft="10dp"
+                        android:textAlignment="textStart"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="12sp" />
+
+                </TableRow>
+            </TableLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"

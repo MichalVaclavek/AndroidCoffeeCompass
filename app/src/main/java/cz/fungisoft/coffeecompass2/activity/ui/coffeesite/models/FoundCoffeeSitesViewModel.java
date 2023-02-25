@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,11 +38,22 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
 
     private final WeakReference<AppCompatActivity> ownerActivity;
 
+    private int currentSearchDistance = 0;
+
+    public void setCurrentSearchDistance(int currentSearchDistance) {
+        this.currentSearchDistance = currentSearchDistance;
+        if (this.sitesInRangeUpdateService.get() != null) {
+            this.sitesInRangeUpdateService.get().setCurrentSearchRange(this.currentSearchDistance);
+        }
+    }
+
     /**
      * Actual list of CoffeeSites in the search range from current position of the equipment as
      * found in DB.
      */
     private LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
+
+    private WeakReference<CoffeeSitesFoundService> sitesInRangeUpdateService;
 
     /**
      * Constructor ....
@@ -54,14 +67,24 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
     }
 
     public void setCoffeeSitesInRangeFoundService(CoffeeSitesFoundService sitesInRangeUpdateService) {
-        foundCoffeeSites = sitesInRangeUpdateService.getFoundSites();
+        this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
+        foundCoffeeSites = this.sitesInRangeUpdateService.get().getFoundSites();
         foundCoffeeSites.observe(ownerActivity.get(), new Observer<List<CoffeeSiteMovable>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
                 // Process found CoffeeSites - leads to update list of new and gone CoffeeSites, see below
-                processFoundCoffeeSites(coffeeSitesInRange);
+                if (coffeeSitesInRange != null) {
+                    processFoundCoffeeSites(coffeeSitesInRange);
+                }
             }
         });
+    }
+
+    public void setCurrentLocationAndSearchDistance(LatLng currentLocation, int searchDistance, List<Integer> allRanges, String coffeeSort) {
+        this.currentSearchDistance = searchDistance;
+        if (this.sitesInRangeUpdateService != null) {
+            this.sitesInRangeUpdateService.get().requestUpdatesOfCurrentSitesInRange(currentLocation, searchDistance, allRanges, coffeeSort);
+        }
     }
 
 

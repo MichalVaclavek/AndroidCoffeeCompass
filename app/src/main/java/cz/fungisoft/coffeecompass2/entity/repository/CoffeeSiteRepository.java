@@ -7,10 +7,16 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -96,18 +102,18 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             return longitudeFrom;
         }
 
-        public double getSearchRangeAsDegreePart() {
-            return searchRangeAsDegreePart;
+        public List<Integer> getAllSearchRangeMeters() {
+            return allRanges;
         }
 
         private final double latitudeFrom;
         private final double longitudeFrom;
-        private final double searchRangeAsDegreePart;
+        private final List<Integer> allRanges;
 
-        public SearchParamsDataInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
+        public SearchParamsDataInput(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
             this.latitudeFrom = latitudeFrom;
             this.longitudeFrom = longitudeFrom;
-            this.searchRangeAsDegreePart = searchRangeAsDegreePart;
+            this.allRanges = allRanges;
         }
     }
 
@@ -116,23 +122,27 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
      */
     private final MutableLiveData<SearchParamsDataInput> searchLatLongRangeInput = new MutableLiveData<>();
 
-    private void setLatLongRangeInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
-        searchLatLongRangeInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart));
+    private void setLatLongRangeInput(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
+        searchLatLongRangeInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, allRanges));
     }
 
-    private final LiveData<List<CoffeeSite>> coffeeSitesInRange =
-            Transformations.switchMap(searchLatLongRangeInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
-
-
-    public void setNewLatLongRangeSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
-        double searchRangeAsDegreePart = searchRangeInMeters * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
-        setLatLongRangeInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+    public void setNewLatLongRangeSearchCriteriaForAllRanges(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
+        setLatLongRangeInput(latitudeFrom, longitudeFrom, allRanges);
     }
 
-    public LiveData<List<CoffeeSite>> getCoffeeSitesInRange() {
-        return coffeeSitesInRange;
-    }
+    private final Map<String, LiveData<List<CoffeeSite>>> coffeeSitesInRangeWithRange = new HashMap<>();
 
+    private final LiveData<Map<String, LiveData<List<CoffeeSite>>>> coffeeSitesInRangeWithRangeLive = Transformations.map(searchLatLongRangeInput, input -> {
+        for (Integer range : input.getAllSearchRangeMeters()) {
+            double searchRangeAsDegreePart = range * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
+            coffeeSitesInRangeWithRange.put(range.toString(), coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), searchRangeAsDegreePart));
+        }
+        return coffeeSitesInRangeWithRange;
+    });
+
+    public LiveData<Map<String, LiveData<List<CoffeeSite>>>> getCoffeeSitesInRangeWithRange() {
+        return coffeeSitesInRangeWithRangeLive;
+    }
 
     public Single<List<CoffeeSite>> getCoffeeSitesInTownSingle(String townName) {
         return coffeeSiteDao.getCoffeeSitesInTownSingle(townName);

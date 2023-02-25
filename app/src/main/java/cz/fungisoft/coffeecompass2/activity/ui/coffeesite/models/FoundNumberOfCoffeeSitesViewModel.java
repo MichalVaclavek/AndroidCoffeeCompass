@@ -33,23 +33,27 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
 
     private WeakReference<CoffeeSitesFoundService> sitesInRangeUpdateService;
 
-    private Map<String, Integer> numOfCoffeeSites = new HashMap<>();
+    private int currentSearchDistance = 0;
 
-    private int searchDistance = 0;
-
-    public void setSearchDistance(int searchDistance) {
-        this.searchDistance = searchDistance;
-        this.sitesInRangeUpdateService.get().setCurrentSearchRange(this.searchDistance);
+    public void setCurrentSearchDistance(int currentSearchDistance) {
+        this.currentSearchDistance = currentSearchDistance;
+        this.sitesInRangeUpdateService.get().setCurrentSearchRange(this.currentSearchDistance);
         if (this.numOfCoffeeSites != null) {
-            Integer numberOfSites = this.numOfCoffeeSites.get(String.valueOf(this.searchDistance));
+            Integer numberOfSites = this.numOfCoffeeSites.get(String.valueOf(this.currentSearchDistance));
             if (numberOfSites != null) {
-                foundNumberOfCoffeeSites.setValue(this.numOfCoffeeSites.get(String.valueOf(this.searchDistance)));
+                foundNumberOfCoffeeSites.setValue(this.numOfCoffeeSites.get(String.valueOf(this.currentSearchDistance)));
             }
         }
     }
 
     /**
-     * Main attribute returned by this Model.
+     * Main internal data structure to hold info about search distance (String)
+     * and number of coffee sites in that distances.
+     */
+    private Map<String, Integer> numOfCoffeeSites = new HashMap<>();
+
+    /**
+     * Main "LiveData" attribute returned by this Model.
      * Actual number of CoffeeSites in the current search range from current position.
      */
     private final MutableLiveData<Integer> foundNumberOfCoffeeSites = new MutableLiveData<>();
@@ -78,20 +82,29 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
     public void setCoffeeSitesInRangeFoundService(CoffeeSitesFoundService sitesInRangeUpdateService) {
         this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
         if (this.sitesInRangeUpdateService.get() != null) {
-            LiveData<Integer> foundNumberCoffeeSitesFromDB = this.sitesInRangeUpdateService.get().getNumberOfFoundSites();
-            foundNumberCoffeeSitesFromDB.observe(ownerActivity.get(), new Observer<Integer>() {
+            this.sitesInRangeUpdateService.get().getAllNumberOfFoundSitesInRanges().observe(ownerActivity.get(), new Observer<Map<String, LiveData<Integer>>>() {
                 @Override
-                public void onChanged(@Nullable final Integer numOfCoffeeSitesInRange) {
-                    // Process found number of CoffeeSites
-                    numOfCoffeeSites.put(String.valueOf(searchDistance), numOfCoffeeSitesInRange);
-                    foundNumberOfCoffeeSites.setValue(numOfCoffeeSitesInRange);
+                public void onChanged(@Nullable final Map<String, LiveData<Integer>> numOfCoffeeSitesInRange) {
+                    // Process found number of CoffeeSites in all search ranges
+                    if (numOfCoffeeSitesInRange != null) {
+                        for (Map.Entry<String, LiveData<Integer>> e : numOfCoffeeSitesInRange.entrySet()) {
+                            e.getValue().observe(ownerActivity.get(), new Observer<Integer>() {
+                                @Override
+                                public void onChanged(@Nullable final Integer numOfCoffeeSitesInRange) {
+                                    // Process found number of CoffeeSites
+                                    numOfCoffeeSites.put(e.getKey(), numOfCoffeeSitesInRange);
+                                }
+                            });
+                        }
+                        numOfAllCoffeeSites.setValue(numOfCoffeeSites);
+                    }
                 }
             });
         }
     }
 
     public void setCurrentLocationAndSearchDistance(LatLng currentLocation, int searchDistance, List<Integer> allRanges, String coffeeSort) {
-        this.searchDistance = searchDistance;
+        this.currentSearchDistance = searchDistance;
         if (this.sitesInRangeUpdateService != null) {
             this.sitesInRangeUpdateService.get().requestUpdateOfCoffeeSitesNumberInRanges(currentLocation, searchDistance, allRanges, coffeeSort);
         }
@@ -106,6 +119,6 @@ public class FoundNumberOfCoffeeSitesViewModel extends AndroidViewModel
     public void onNumbersOfSitesInRangesFound(Map<String, Integer> numOfCoffeeSites) {
         this.numOfCoffeeSites = numOfCoffeeSites;
         numOfAllCoffeeSites.setValue(numOfCoffeeSites);
-        foundNumberOfCoffeeSites.setValue(this.numOfCoffeeSites.get(String.valueOf(this.searchDistance)));
+        foundNumberOfCoffeeSites.setValue(this.numOfCoffeeSites.get(String.valueOf(this.currentSearchDistance)));
     }
 }
