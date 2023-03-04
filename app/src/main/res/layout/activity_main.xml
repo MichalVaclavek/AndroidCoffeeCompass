@@ -23,142 +23,6 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:titleTextColor="@android:color/background_light" />
 
-        <TextView
-            android:id="@+id/textView15"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="@string/main_statistics_news_label"
-            android:textAlignment="center"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/statistics_news_main_card_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="6dp"
-            android:checkable="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
-            app:cardCornerRadius="6dp"
-            app:cardElevation="4dp"
-            app:cardPreventCornerOverlap="true"
-            app:contentPadding="2dp"
-            app:strokeColor="@color/colorPrimary2"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:id="@+id/statistics_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@color/card_backround"
-                android:baselineAligned="true"
-                android:orientation="horizontal"
-                android:padding="8dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_sites_label"
-                        android:textAlignment="viewStart"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/textView8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/coffee_sites_today"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_sites7_label"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/textView6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_users_label"
-
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="5dp"
-                    android:gravity="right"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/all_sites_TextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        android:textAlignment="viewEnd"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:layout_editor_absoluteX="37dp"
-                        tools:layout_editor_absoluteY="239dp" />
-
-                    <TextView
-                        android:id="@+id/TodaySitesTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        android:textAlignment="viewEnd"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:layout_editor_absoluteX="37dp"
-                        tools:layout_editor_absoluteY="175dp" />
-
-                    <TextView
-                        android:id="@+id/AllSites7TextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        android:textAlignment="viewEnd"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:layout_editor_absoluteX="37dp"
-                        tools:layout_editor_absoluteY="175dp" />
-
-                    <TextView
-                        android:id="@+id/AllUsersTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        android:textAlignment="viewEnd"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -169,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_weight="8"
+                android:layout_weight="6"
                 android:gravity="bottom"
                 android:orientation="vertical">
 
@@ -369,7 +233,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_weight="2">
+                android:layout_weight="4">
 
                 <RelativeLayout
                     android:layout_width="match_parent"

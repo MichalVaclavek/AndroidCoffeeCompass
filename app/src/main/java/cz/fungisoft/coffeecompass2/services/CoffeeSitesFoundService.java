@@ -17,12 +17,9 @@ import com.google.android.gms.maps.model.LatLng;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesInRangeAsyncTask;
@@ -274,7 +271,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
                     this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
                     if (this.searchLocationOfCurrentSites != null
                             && this.coffeeSort != null) {
-                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange, this.allSearchRanges);
+                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
                         startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
                         updateDBLiveDataInput( this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
                         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
@@ -298,7 +295,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         this.allSearchRanges = allRanges;
 
         if (this.searchLocationOfCurrentSites != null) {
-            startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange, this.allSearchRanges);
+            startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
             updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges);
             for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
                 listener.onStartSearchingSites();
@@ -350,15 +347,14 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     }
 
     /**
-     * Starts request for CoffeeSites in range either from server (REST API) or sets the input to LiveData
-     * to be returned from DB.
+     * Starts request for CoffeeSites in range either from server (REST API)
      *
      * @param coffeeSort
      * @param latitude
      * @param longitude
      * @param range
      */
-    private synchronized void startSearchingSitesInRange(String coffeeSort, double latitude, double longitude, int range, List<Integer> allRanges) {
+    private synchronized void startSearchingSitesInRange(String coffeeSort, double latitude, double longitude, int range) {
         if (!isSearching && !Utils.isOfflineModeOn(getApplicationContext())) {
             startSearchSitesInRangeFromServer(coffeeSort, latitude, longitude, range);
         }

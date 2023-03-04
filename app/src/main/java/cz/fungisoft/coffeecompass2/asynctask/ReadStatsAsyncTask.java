@@ -19,7 +19,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
-import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.AboutActivity;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 
 /**
@@ -33,11 +33,11 @@ public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
 
     private static final String bURL = BuildConfig.HOME_API_URL;
 
-    private final WeakReference<MainActivity> parentActivity;
+    private final WeakReference<AboutActivity> parentActivity;
 
     private Statistics stats;
 
-    public ReadStatsAsyncTask(MainActivity parentActivity) {
+    public ReadStatsAsyncTask(AboutActivity parentActivity) {
         this.parentActivity = new WeakReference<>(parentActivity);
     }
 

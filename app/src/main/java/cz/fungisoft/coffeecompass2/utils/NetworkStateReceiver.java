@@ -7,10 +7,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import cz.fungisoft.coffeecompass2.activity.AboutActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
 
 /**
  * Receiver of events indicating change of network connectivity.
@@ -112,8 +112,8 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      */
     private void startReadStatisticsInMainActivity(boolean isOnline, Context context) {
         if (isOnline) {
-            if (context instanceof MainActivity) {
-                MainActivity ma = (MainActivity) context;
+            if (context instanceof AboutActivity) {
+                AboutActivity ma = (AboutActivity) context;
                 ma.startReadStatistics();
             }
         }

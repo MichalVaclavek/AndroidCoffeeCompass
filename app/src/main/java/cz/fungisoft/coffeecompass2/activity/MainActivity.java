@@ -40,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -65,7 +64,6 @@ import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.SearchDistancePreferenceHelper;
-import cz.fungisoft.coffeecompass2.activity.data.StatisticsPrefencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.UserPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
@@ -79,8 +77,6 @@ import cz.fungisoft.coffeecompass2.activity.ui.login.UserDataViewActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.NewsSubscriptionActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.StaticCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.TownNamesArrayAdapter;
-import cz.fungisoft.coffeecompass2.asynctask.ReadStatsAsyncTask;
-import cz.fungisoft.coffeecompass2.entity.Statistics;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -167,23 +163,10 @@ public class MainActivity extends ActivityWithLocationService
     // Saves selected search distance range
     private SearchDistancePreferenceHelper searchRangePreferenceHelper;
 
-    // Saves Statistics
-    private StatisticsPrefencesHelper statisticsPrefencesHelper;
-
     // Saves number of Not canceled sites created by user
     private UserPreferencesHelper userPreferencesHelper;
 
     private ProgressBar mainActivityProgressBar;
-
-    private LinearLayout statisticsLayout;
-
-    private final int DAYS_BACK_FOR_LOAD_STATISTICS = 7;
-
-    /**
-     * To indicate if a user clicked on statistics View, to load latest
-     * CoffeeSites after reading statistics.
-     */
-    private boolean statisticsCalledUponUsersClick = false;
 
     /**
      * Needed to decide if the menu icon for starting MyCoffeeSitesListActivity
@@ -232,14 +215,11 @@ public class MainActivity extends ActivityWithLocationService
         this.newSitesNotificationCount++;
     }
 
-
     private String newNotificationCoffeeSiteURL = "";
 
     private ArrayList<String> newNotificationCoffeeSiteURLs = new ArrayList<>();
 
     private MenuItem newSitesNotificationMenuItem;
-
-    private CardView statisticsAndNewsCardView; // needed to change backround color, when statistics shows new CoffeeSites last week
 
     private TextView[] numberOfCoffeeSitesInDistanceTextViews;
     private MaterialCardView[] numberOfCoffeeSitesInDistanceCardViews;
@@ -254,8 +234,6 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        statisticsPrefencesHelper = new StatisticsPrefencesHelper(this);
 
         setContentView(R.layout.activity_main);
 
@@ -273,8 +251,8 @@ public class MainActivity extends ActivityWithLocationService
                 Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSiteUrl", data);
                 startActivity(intent);
-                // User now see the new CoffeeSites, trigger to show statistics view in original coloe
-                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
+                // User now see the new CoffeeSites, trigger to show statistics view in original colour
+//                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
             }
         }
 
@@ -298,7 +276,7 @@ public class MainActivity extends ActivityWithLocationService
                             newNotificationCoffeeSiteURL = data.get("coffeeSiteURL");
                             // is this a new URL to be processed?
                             if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().equals(newNotificationCoffeeSiteURL)) {
-                                startReadStatistics();
+//                                startReadStatistics();
                                 notificationSubscriptionPreferencesHelper.putLatestReceivedUrl(newNotificationCoffeeSiteURL);
                                 newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
                                 increaseNewSitesNotificationCount();
@@ -310,11 +288,6 @@ public class MainActivity extends ActivityWithLocationService
 
         mainActivityProgressBar = findViewById(R.id.progress_main_activity);
 
-        statisticsAndNewsCardView = findViewById(R.id.statistics_news_main_card_view);
-
-        if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
-            statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        }
         userPreferencesHelper = new UserPreferencesHelper(this);
 
         // Get current searchDistance from Preferences
@@ -456,15 +429,6 @@ public class MainActivity extends ActivityWithLocationService
         getFirebaseToken();
 
         //showCurrentFirebaseToken();
-        statisticsLayout = findViewById(R.id.statistics_layout);
-
-        statisticsLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onStatisticsClick(v);
-            }
-        });
-
         fab.setVisibility(VISIBLE);
 
         doBindSitesInRangeService();
@@ -619,12 +583,11 @@ public class MainActivity extends ActivityWithLocationService
     public void startNumberOfCoffeeSitesFromUserCall() {
         if (Utils.isOnline(getApplicationContext())) {
             if (coffeeSiteLoadOperationsService != null && !numberOfCoffeeSitesCreatedByLoggedInUserChecked) {
-                //showProgressbar(); // we don't want to show progressbar on MainActivity for short time REST requests
+//                showProgressbar();
                 coffeeSiteLoadOperationsService.findNumberOfCoffeeSitesFromCurrentUser();
             }
         }
     }
-
 
     @Override
     public void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {
@@ -979,74 +942,16 @@ public class MainActivity extends ActivityWithLocationService
     }
 
     /**
-     * Starts AsyncTask to read app. statistics to be shown in MainActivity
-     * if internet is available.<br>
-     * Can also be read later, after internet becomes available, see {@link NetworkStateReceiver}
-     */
-    public synchronized void startReadStatistics() {
-        if (Utils.isOnline(getApplicationContext())) {
-            if (statisticsCalledUponUsersClick) {
-                showProgressbar();
-            }
-            new ReadStatsAsyncTask(this).execute();
-        }
-    }
-
-    /**
      *
      * Refreshes number of Coffee sites in different distances after internet becomes available, see {@link NetworkStateReceiver}
      */
     public synchronized void startReadingNumberOfSitesInRanges() {
         if (locationService != null) {
+//            showProgressbar();
             numberOfCoffeeSitesInRangeModel.setCurrentLocationAndSearchDistance(locationService.getCurrentLatLng(), selectedSearchRange, searchRanges, "");
         }
     }
 
-    /**
-     * To show statistics, can be called from AsyncTask
-     *
-     * @param stats
-     */
-    public void showAndSaveStatistics(Statistics stats) {
-        hideProgressbar();
-        if (Integer.parseInt(statisticsPrefencesHelper.getNumOfSitesLastWeek()) < Integer.parseInt(stats.numOfSitesLastWeek)) {
-            statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(true);
-        }
-        if (Integer.parseInt(stats.numOfSitesLastWeek) == 0) {
-            statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
-        }
-        statisticsPrefencesHelper.saveStatistics(stats);
-
-        TextView sitesView = findViewById(R.id.all_sites_TextView);
-        TextView sites7View = findViewById(R.id.AllSites7TextView);
-        TextView sitesToday = findViewById(R.id.TodaySitesTextView);
-        TextView usersView = findViewById(R.id.AllUsersTextView);
-
-        sitesView.setText(stats.numOfSites);
-        sitesToday.setText(stats.numOfSitesToday);
-        sites7View.setText(stats.numOfSitesLastWeek);
-        if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
-            statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        }
-        usersView.setText(stats.numOfUsers);
-
-        // Where the statistics shown upon user's click on Statistics CardView ?
-        if (statisticsCalledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
-            statisticsCalledUponUsersClick = false;
-            if (Utils.isOnline(getApplicationContext())) {
-                Intent intent = new Intent(this, StaticCoffeeSitesListActivity.class);
-                intent.putExtra("daysBack", DAYS_BACK_FOR_LOAD_STATISTICS);
-                startActivity(intent);
-                // user now checked the new CoffeeSites of the week, so background of the Statistics CardView can
-                // changed back to it's original color
-                statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.white_transparent));
-                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
-            } else {
-                Snackbar mySnackbar = Snackbar.make(statisticsLayout, R.string.toast_no_internet_no_offline_data, Snackbar.LENGTH_LONG);
-                mySnackbar.show();
-            }
-        }
-    }
 
     /**
      * Start MapsActivity
@@ -1082,19 +987,6 @@ public class MainActivity extends ActivityWithLocationService
             mySnackbar.show();
         }
     }
-
-    /**
-     * After click on Statistics View, load the latest statistics and if there are some new
-     * CoffeeSites, load and show them.
-     *
-     * @param view
-     */
-    public void onStatisticsClick(View view) {
-        statisticsCalledUponUsersClick = true;
-        statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.white_transparent));
-        startReadStatistics();
-    }
-
 
     protected void requestPermission(String permissionType, int requestCode) {
         int permission = ContextCompat.checkSelfPermission(this, permissionType);
@@ -1142,14 +1034,8 @@ public class MainActivity extends ActivityWithLocationService
     protected void onResume() {
         super.onResume();
 
-        // Read statistics
-        startReadStatistics();
         // Read number of CoffeeSites created by current user to show/hide menu icon to open list of MyCoffeeSitesActivity
         startNumberOfCoffeeSitesFromUserCall();
-
-        if (!Utils.isOnline(getApplicationContext()) && Utils.offlineDataAvailable(getApplicationContext())) {
-            showAndSaveStatistics(statisticsPrefencesHelper.getSavedStatistics());
-        }
 
         updateMyCoffeeSitesMenuItem();
 
@@ -1207,7 +1093,7 @@ public class MainActivity extends ActivityWithLocationService
     @Override
     protected void onStop() {
         // stop main button text animation
-        //mainButtonTextColorAnimation.cancel();
+        // mainButtonTextColorAnimation.cancel();
         searchKafeButton.setTextColor(Color.WHITE);
 
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
@@ -1313,6 +1199,7 @@ public class MainActivity extends ActivityWithLocationService
     /**
      * Helper method. Not used currently, but ready for the future, if there would be a long running job
      */
+
     public void showProgressbar() {
         mainActivityProgressBar.setVisibility(VISIBLE);
     }

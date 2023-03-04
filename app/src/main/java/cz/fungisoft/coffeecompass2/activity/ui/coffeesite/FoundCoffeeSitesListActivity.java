@@ -25,8 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
