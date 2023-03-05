@@ -317,13 +317,11 @@ public class MainActivity extends ActivityWithLocationService
             searchDistanceTextViews[i] = searchDistTextView;
             searchDistancesScaleLinearLayout.addView(searchDistTextView);
         }
-        // find selected searchRangeTextView to be highlited
+        // find selected searchRangeTextView to be highlighted
         for (int i = searchDistances.length - 1; i >= 0; i--) {
             if (String.valueOf(selectedSearchRange).equals(searchDistances[i])) {
                 searchDistanceSeekBar.setProgress(i);
-                searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
-                searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-                searchDistanceTextViews[i].setBackgroundResource(R.color.selectedSearchDistanceBackround);
+                setSelectedSearchDistanceView(searchDistanceTextViews, i);
                 break;
             }
         }
@@ -367,13 +365,8 @@ public class MainActivity extends ActivityWithLocationService
         searchDistanceSeekBar.setOnProgressChangeListener(FunctionalUtils.fromConsumer((progress) -> {
             for (int i = searchDistanceTextViews.length - 1; i >= 0; i--) {
                 if (i == progress) {
-                    searchDistanceTextViews[i].setTypeface(null, Typeface.BOLD);
-                    searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-                    searchDistanceTextViews[i].setBackgroundResource(R.color.selectedSearchDistanceBackround);
-                } else {
-                    searchDistanceTextViews[i].setTypeface(null, Typeface.NORMAL);
-                    searchDistanceTextViews[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                    searchDistanceTextViews[i].setBackgroundResource(R.color.activityBackround);
+                    setSelectedSearchDistanceView(searchDistanceTextViews, i);
+                    setNotSelectedSearchDistanceView(searchDistanceTextViews, i);
                 }
             }
             selectedSearchRange = Integer.parseInt(searchDistances[progress]);
@@ -433,6 +426,22 @@ public class MainActivity extends ActivityWithLocationService
 
         doBindSitesInRangeService();
         //mainButtonTextColorAnimation = ObjectAnimator.ofInt(searchKafeButton, "textColor", Color.WHITE, getResources().getColor(R.color.colorNiceYellow_alpha));
+    }
+
+    private void setNotSelectedSearchDistanceView(TextView[] searchDistanceTextViews, int i) {
+        for (int j = i + 1; j < searchDistanceTextViews.length; j++) {
+            searchDistanceTextViews[j].setTypeface(null, Typeface.NORMAL);
+            searchDistanceTextViews[j].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            searchDistanceTextViews[j].setBackgroundResource(R.color.activityBackround);
+        }
+    }
+
+    private void setSelectedSearchDistanceView(TextView[] searchDistanceTextViews, int i) {
+        for (int j = i; j >= 0; j--) {
+            searchDistanceTextViews[j].setTypeface(null, Typeface.BOLD);
+            searchDistanceTextViews[j].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            searchDistanceTextViews[j].setBackgroundResource(R.color.selectedSearchDistanceBackround);
+        }
     }
 
     private void animateCardView(final MaterialCardView cardView) {
