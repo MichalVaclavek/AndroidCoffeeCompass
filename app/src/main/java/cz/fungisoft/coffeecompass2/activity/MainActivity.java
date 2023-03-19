@@ -129,7 +129,7 @@ public class MainActivity extends ActivityWithLocationService
     private final int barvaBlack = Color.BLACK;
     private final int barvaRed = Color.RED;
 
-    private TextView accuracy;
+//    private TextView accuracy;
 
     private ImageView locationImageView;
 
@@ -370,7 +370,7 @@ public class MainActivity extends ActivityWithLocationService
                 }
             }
             selectedSearchRange = Integer.parseInt(searchDistances[progress]);
-            searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
+//            searchKafeButton.setText(R.string.main_act_search_button_kava_label);
             searchRangePreferenceHelper.putSearchDistance(selectedSearchRange);
             if (numberOfCoffeeSitesInRangeModel != null) {
                 numberOfCoffeeSitesInRangeModel.setCurrentSearchDistance(selectedSearchRange);
@@ -383,7 +383,7 @@ public class MainActivity extends ActivityWithLocationService
         // Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
 
-        accuracy = findViewById(R.id.accuracy);
+//        accuracy = findViewById(R.id.accuracy);
 
         searchKafeButton.setTransformationMethod(null);
 
@@ -749,15 +749,15 @@ public class MainActivity extends ActivityWithLocationService
         locationImageView.setBackground(locIndic);
     }
 
-    private void showLocationAccuracy(Location location) {
-        if (location != null && location.hasAccuracy()) {
-            setAccuracyTextColor(barvaBlack);
-//            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)"); // not needed to show to user
-        } else {
-            setAccuracyTextColor(barvaRed);
-//            accuracy.setText("");
-        }
-    }
+//    private void showLocationAccuracy(Location location) {
+//        if (location != null && location.hasAccuracy()) {
+//            setAccuracyTextColor(barvaBlack);
+////            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)"); // not needed to show to user
+//        } else {
+//            setAccuracyTextColor(barvaRed);
+////            accuracy.setText("");
+//        }
+//    }
 
     @SuppressLint("RestrictedApi") // due to searchAutoComplete.setThreshold(2);
     @Override
@@ -946,9 +946,9 @@ public class MainActivity extends ActivityWithLocationService
         this.startActivity(i);
     }
 
-    private void setAccuracyTextColor(int barva) {
-        accuracy.setTextColor(barva);
-    }
+//    private void setAccuracyTextColor(int barva) {
+//        accuracy.setTextColor(barva);
+//    }
 
     /**
      *
@@ -1032,7 +1032,7 @@ public class MainActivity extends ActivityWithLocationService
             locationService.addPropertyChangeListener(this);
         }
 
-        showLocationAccuracy(location);
+//        showLocationAccuracy(location);
         updateAccuracyIndicator(location);
 //        if (location != null) {
 //            searchKafeButton.setEnabled(true);
@@ -1059,7 +1059,7 @@ public class MainActivity extends ActivityWithLocationService
             locationService.addPropertyChangeListener(this);
             location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
-            showLocationAccuracy(location);
+//            showLocationAccuracy(location);
             updateAccuracyIndicator(location);
 
             searchKafeButton.setEnabled(location != null);
@@ -1103,7 +1103,7 @@ public class MainActivity extends ActivityWithLocationService
     protected void onStop() {
         // stop main button text animation
         // mainButtonTextColorAnimation.cancel();
-        searchKafeButton.setTextColor(Color.WHITE);
+//        searchKafeButton.setTextColor(Color.WHITE);
 
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
@@ -1135,18 +1135,18 @@ public class MainActivity extends ActivityWithLocationService
     public void propertyChange(PropertyChangeEvent evt) {
         if (firstLocationDetection) { // prvni platna detekce polohy
             firstLocationDetection = false;
-            setAccuracyTextColor(barvaBlack);
+//            setAccuracyTextColor(barvaBlack);
         }
 
         if (locationService != null) {
             location = locationService.getCurrentLocation();
-            showLocationAccuracy(location);
+//            showLocationAccuracy(location);
             updateAccuracyIndicator(location);
             // Setup searchKafeButton text and start to animate it, if it is not animating yet
             // this highlights the button to user
             searchKafeButton.setEnabled(true);
 //            searchKafeButton.setText(Html.fromHtml("VYHLEDAT<br><small>" + searchRangeString + "</small>"));
-            searchKafeButton.setText(R.string.main_act_search_button_vyhledat_label);
+            searchKafeButton.setText(R.string.main_act_search_button_kava_label);
 
 //            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
 //                startAnimateButtonText(mainButtonTextColorAnimation);

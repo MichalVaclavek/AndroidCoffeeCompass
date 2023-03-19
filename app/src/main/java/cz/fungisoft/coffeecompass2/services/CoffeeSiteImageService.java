@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -130,17 +129,23 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         }
     }
 
+    /**
+     * Deletes image of the CoffeeSite on server and on COFFEESITE_IMAGE_DIR
+     * @param cs
+     */
     public void deleteImage(CoffeeSite cs) {
+        ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), cs);
         new ImageDeleteAsyncTask(this, userAccountService, cs).execute();
     }
 
     /**
-     * Deletes image of the CoffeeSite saved in phone
+     * Deletes image of the CoffeeSite saved in phone, but not saved in COFFEESITE_IMAGE_DIR
+     * i.e. image saved only during CoffeeSite creation in CreateCoffeeSiteActivity
      *
      * @param cs
      */
     public void deleteLocalImageFile(CoffeeSite cs) {
-        ImageUtil.deleteImageFile(cs.getMainImageFilePath());
+        ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), cs);
     }
 
     /** Methods to be called from AsyncTask REST calls */

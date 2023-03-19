@@ -19,9 +19,12 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Request;
+import com.squareup.picasso.RequestHandler;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -587,8 +590,9 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             Picasso.get().load(this.mValues.get(position).getMainImageURL())
                     .fit().placeholder(R.drawable.kafe_backround_120x160)
                     .into(viewHolder.siteFoto);
-        } else {
-            Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
+        }
+        if (!isOnline) {
+            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position)))
                     .fit().placeholder(R.drawable.kafe_backround_120x160)
                     .into(viewHolder.siteFoto);
         }

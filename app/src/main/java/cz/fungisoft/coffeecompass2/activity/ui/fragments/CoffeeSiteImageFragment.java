@@ -85,8 +85,9 @@ public class CoffeeSiteImageFragment extends Fragment {
                             noImageInfoLabel.setVisibility(View.VISIBLE);
                         }
                     });
-        } else {
-            Picasso.get().load(ImageUtil.getImageFile(mContext, this.coffeeSite.getMainImageFilePath()))
+        }
+        if (!isOnline && this.coffeeSite != null) {
+            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mContext, this.coffeeSite))
                     .resize(0, pictureImageView.getMaxHeight())
                     .placeholder(R.drawable.kafe_backround_120x160)
                     .into(pictureImageView, new Callback() {

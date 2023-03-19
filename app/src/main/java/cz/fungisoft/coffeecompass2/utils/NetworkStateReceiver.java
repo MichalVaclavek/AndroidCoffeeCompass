@@ -169,7 +169,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
     }
 
     /**
-     * Calls MainActivity method to start loading number of CoffeeSite created by user.
+     * Calls MyCoffeeSitesListActivity method to start loading of current user's created CoffeeSites.
      *
      * @param isOnline status of internet connectivity
      * @param context calling context, usually Activity which registered this Receiver

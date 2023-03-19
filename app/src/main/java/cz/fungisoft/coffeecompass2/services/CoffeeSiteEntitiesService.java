@@ -306,8 +306,10 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 for (CoffeeSite cs : allCoffeeSites) {
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImage++;
-                        cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
-                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
+//                        cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
+//                        cs.setMainImageFilePath(cs.getDefaultImageFileName());
+                        cs.setImageFileName(cs.getDefaultImageFileName());
+                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                     }
                 }
             } else {
@@ -340,7 +342,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     for (CoffeeSite cs : coffeeSitesList) {
                         if (!cs.getMainImageURL().isEmpty() ) {
                             numOfSitesWithImage++;
-                            cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
+//                            cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
+//                            cs.setImageFileName(cs.getDefaultImageFileName());
                         }
                     }
 
@@ -495,6 +498,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private void startDownloadImagesThread() {
 
         final Runnable downloadThread = new Runnable() {
+
             public void run() {
                 Log.d(TAG, "Thread to load images started.");
                 d = coffeeSiteRepository.getAllCoffeeSitesWithImageSingle()
@@ -511,10 +515,13 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                             Log.i(TAG, "DB Single onSuccess()");
                             // Download images
                             downloadInProgress = true;
-                            assert coffeeSitesWithImage != null;
-                            for (CoffeeSite cs : coffeeSitesWithImage) {
-                                if (cs != null && !cs.getMainImageFilePath().isEmpty()) {
-                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getDefaultImageFileName());
+                            if (coffeeSitesWithImage != null) {
+                                for (CoffeeSite cs : coffeeSitesWithImage) {
+//                                if (cs != null && !cs.getMainImageFilePath().isEmpty()) {
+                                    if (cs != null) {
+                                        cs.setImageFileName(cs.getDefaultImageFileName());
+                                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
+                                    }
                                 }
                             }
                         }

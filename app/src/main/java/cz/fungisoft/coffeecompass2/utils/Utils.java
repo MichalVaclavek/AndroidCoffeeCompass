@@ -50,48 +50,6 @@ public class Utils {
     }
 
     /**
-     * Checks if the connection to INTERNET is available.
-     * Basic method, can be used in UI thread.
-     *
-     * @return true if internet connection is available
-     */
-    @Deprecated
-    public static boolean isOnline() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
-            boolean exited;
-            int exitValue = -1;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                exited = ipProcess.waitFor(2, TimeUnit.SECONDS);
-                if (exited) {
-                    exitValue = ipProcess.exitValue();
-                }
-            } else {
-                exitValue = ipProcess.waitFor();
-            }
-            return (exitValue == 0);
-        }
-        catch (IOException | InterruptedException e) {
-            Log.e(TAG," Problem during internet connection check.");
-        }
-        return false;
-    }
-
-    /**
-     * Checks if data network is available. INTERNET still can be unavailable if true.
-     *
-     * @param context
-     * @return
-     */
-    private static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null;
-    }
-
-    /**
      * Check internet connection availability.
      * Must run in AsyncTask, i.e. not in UI thread.
      * Here we use {@link InternetCheckAsyncTask} to call this method.
@@ -100,7 +58,7 @@ public class Utils {
      * @return
      */
     public static boolean hasInternetAccess(Context context) {
-        if (isNetworkAvailable(context)) {
+        if (isOnline(context)) {
             try {
                 HttpURLConnection urlc = (HttpURLConnection)
                                          (new URL("https://clients3.google.com/generate_204")

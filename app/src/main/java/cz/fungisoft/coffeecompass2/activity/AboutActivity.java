@@ -146,7 +146,6 @@ public class AboutActivity extends AppCompatActivity {
         TextView sitesView = findViewById(R.id.all_sites_TextView);
         TextView sites7View = findViewById(R.id.AllSites7TextView);
         TextView sitesToday = findViewById(R.id.TodaySitesTextView);
-        TextView usersView = findViewById(R.id.AllUsersTextView);
 
         sitesView.setText(stats.numOfSites);
         sitesToday.setText(stats.numOfSitesToday);
@@ -154,7 +153,6 @@ public class AboutActivity extends AppCompatActivity {
         if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
             statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
-        usersView.setText(stats.numOfUsers);
 
         // Where the statistics shown upon user's click on Statistics CardView ?
         if (statisticsCalledUponUsersClick && Integer.parseInt(stats.numOfSitesLastWeek) > 0) {

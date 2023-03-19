@@ -105,10 +105,21 @@ public class CoffeeSite implements Serializable,
     protected String mainImageURL = ""; // default empty, means image not available
 
     /**
-     * File name and path of the CoffeeSite image saved
+     * File name and path of the CoffeeSite image not saved on server, but selected locally only
      */
     @ColumnInfo(name = "mainImageFileName")
     protected String mainImageFilePath = ""; // default empty, means image not available
+
+    @Expose(serialize = false)
+    @ColumnInfo(name = "imageFileName")
+    private String imageFileName = ""; // name of image downloaded from server and saved in all sites image directory, see ImageUtils.COFFEESITE_IMAGE_DIR
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
 
     @Expose
     @SerializedName("uliceCP")
@@ -306,6 +317,7 @@ public class CoffeeSite implements Serializable,
 
         mainImageURL = in.readString();
         mainImageFilePath = in.readString();
+        imageFileName = in.readString();
 
         mesto = in.readString();
         uliceCP = in.readString();
@@ -356,6 +368,7 @@ public class CoffeeSite implements Serializable,
 
         dest.writeString(getMainImageURL());
         dest.writeString(getMainImageFilePath());
+        dest.writeString(getImageFileName());
 
         dest.writeString(mesto);
         dest.writeString(uliceCP);

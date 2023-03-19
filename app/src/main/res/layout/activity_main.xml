@@ -43,27 +43,13 @@
 
                     <TableRow
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:gravity="center_horizontal">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/textView19"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="10dp"
-                                android:layout_marginBottom="10dp"
-                                android:layout_weight="1"
-                                android:fontFamily="serif"
-                                android:gravity="center_horizontal"
-                                android:text="KÁVA"
-                                android:textColor="@color/colorPrimary2"
-                                android:textSize="24sp"
-                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/textView"
@@ -74,6 +60,19 @@
                                 android:textColor="@color/colorPrimaryDark"
                                 android:textSize="12sp"
                                 android:textStyle="italic" />
+
+                            <TextView
+                                android:id="@+id/textView19"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_weight="1"
+                                android:fontFamily="serif"
+                                android:gravity="center_horizontal"
+                                android:textColor="@color/colorPrimary2"
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
 
                         </LinearLayout>
 
@@ -102,6 +101,15 @@
                                 app:cardElevation="0dp">
 
                             </androidx.cardview.widget.CardView>
+
+                            <LinearLayout
+                                android:id="@+id/searchDistancesScaleLinearLayout"
+                                android:layout_width="58dp"
+                                android:layout_height="match_parent"
+                                android:gravity="right"
+                                android:orientation="vertical"
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5dp" />
 
                             <LinearLayout
                                 android:id="@+id/found_sites_in_distance_LinearLayout"
@@ -142,21 +150,13 @@
                                     android:layout_height="149dp"
                                     android:background="@drawable/button_espresso_unfocused"
                                     android:enabled="false"
-                                    android:fontFamily="sans-serif-medium"
+                                    android:fontFamily="serif"
                                     android:onClick="onSearchCoffeeClick"
-                                    android:text="@string/main_act_search_button_vyhledat_label"
-                                    android:textSize="20sp" />
+                                    android:text="@string/main_act_search_button_kava_label"
+                                    android:textColor="@color/card_backround"
+                                    android:textSize="22sp" />
 
                             </com.google.android.material.card.MaterialCardView>
-
-                            <LinearLayout
-                                android:id="@+id/searchDistancesScaleLinearLayout"
-                                android:layout_width="58dp"
-                                android:layout_height="match_parent"
-                                android:gravity="right"
-                                android:orientation="vertical"
-                                android:paddingLeft="5dp"
-                                android:paddingRight="5dp" />
 
                             <com.lukelorusso.verticalseekbar.VerticalSeekBar
                                 android:id="@+id/searchDistanceSeekBar"
@@ -181,53 +181,44 @@
 
                     </TableRow>
 
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/polohaLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="10dp"
+                                android:text="poloha:"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="14sp"
+                                android:textStyle="normal|bold" />
+
+                            <ImageView
+                                android:id="@+id/locationImageView"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginLeft="10dp"
+                                android:adjustViewBounds="true"
+                                android:background="@drawable/location_bad" />
+
+                        </LinearLayout>
+
+                    </TableRow>
+
                 </TableLayout>
 
             </LinearLayout>
-
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp">
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp">
-
-                    <TextView
-                        android:id="@+id/polohaLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="10dp"
-                        android:text="poloha:"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="14sp"
-                        android:textStyle="normal|bold" />
-
-                    <ImageView
-                        android:id="@+id/locationImageView"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:layout_marginLeft="10dp"
-                        android:adjustViewBounds="false"
-                        android:background="@drawable/location_bad" />
-
-                    <TextView
-                        android:id="@+id/accuracy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:paddingLeft="10dp"
-                        android:textAlignment="textStart"
-                        android:textColor="@android:color/holo_red_dark"
-                        android:textSize="12sp" />
-
-                </TableRow>
-            </TableLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"

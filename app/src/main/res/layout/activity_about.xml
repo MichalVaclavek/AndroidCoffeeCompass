@@ -128,14 +128,6 @@
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/textView6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/num_all_users_label"
-
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout

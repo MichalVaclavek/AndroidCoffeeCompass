@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+
 /**
  * Copy from https://androidwave.com/capture-image-from-camera-gallery/
  */
@@ -119,17 +121,34 @@ public class ImageUtil {
         return new File(directory, imageFileName);
     }
 
-    public static File getImageFile(Context appContext, String imageFilePath) {
-        ContextWrapper cw = new ContextWrapper(appContext);
+    public static File getImageFile(String imageFilePath) {
         return new File(imageFilePath);
     }
 
-    public static void deleteImageFile(String imageFilePath) {
-        File target = new File(imageFilePath);
-        Log.d(" target_path", "" + imageFilePath);
-        if (target.exists() && target.isFile() && target.canWrite()) {
-            target.delete();
-            Log.d("d_file", "" + target.getName());
+    public static File getCoffeeSiteImageFile(Context appContext, CoffeeSite coffeeSite) {
+        ContextWrapper cw = new ContextWrapper(appContext);
+        if (!coffeeSite.getImageFileName().isEmpty()) {
+            return new File(cw.getDir(COFFEESITE_IMAGE_DIR, Context.MODE_PRIVATE), coffeeSite.getImageFileName());
+        }
+        return getImageFile(coffeeSite.getMainImageFilePath());
+    }
+
+    public static void deleteCoffeeSiteImage(Context appContext, CoffeeSite coffeeSite) {
+        ContextWrapper cw = new ContextWrapper(appContext);
+        if (!coffeeSite.getImageFileName().isEmpty()) {
+            File target = new File(cw.getDir(COFFEESITE_IMAGE_DIR, Context.MODE_PRIVATE), coffeeSite.getImageFileName());
+            deleteImageFile(target);
+        }
+        if (!coffeeSite.getMainImageFilePath().isEmpty()) {
+            File target = new File(coffeeSite.getMainImageFilePath());
+            deleteImageFile(target);
+        }
+    }
+
+    private static void deleteImageFile(File imageFile) {
+        if (imageFile.exists() && imageFile.isFile() && imageFile.canWrite()) {
+            imageFile.delete();
+            Log.d("delete_file: ", imageFile.getName());
         }
     }
 

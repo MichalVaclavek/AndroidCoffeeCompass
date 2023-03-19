@@ -4,12 +4,12 @@
     <color name="colorPrimaryDark">#3A1A00</color>
     <color name="colorAccent">#D55C00</color>
     <color name="login_backround">#86BA4B</color>
-    <color name="card_backround">#F0F4C3</color>
+    <color name="card_backround">#F4F2C3</color>
     <color name="colorNiceYellow">#FFFCCA03</color>
     <color name="colorNiceYellow_alpha">#44FCCA03</color>
     <color name="colorPrimary2">#804314</color>
     <color name="colorPrimary2Widget">#BB804314</color>
-    <color name="activityBackround">#FFE0B2</color>
+    <color name="activityBackround">#EFDABA</color>
     <color name="activityBackroundWidget">#BBFFE0B2</color>
     <color name="selectedSearchDistanceBackround">#C1F1CC8A</color>
     <color name="listOfDistancesBackround">#FCD8A6</color>

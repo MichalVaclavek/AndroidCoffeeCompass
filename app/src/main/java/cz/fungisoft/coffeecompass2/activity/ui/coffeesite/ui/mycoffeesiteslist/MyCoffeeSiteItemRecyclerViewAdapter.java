@@ -310,10 +310,11 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             Picasso.get().load(coffeeSite.getMainImageURL())
                          .fit().placeholder(R.drawable.kafe_backround_120x160)
                          .into(viewHolder.siteFoto);
-        } else {
-            Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), coffeeSite.getMainImageFilePath()))
-                    .fit().placeholder(R.drawable.kafe_backround_120x160)
-                    .into(viewHolder.siteFoto);
+        }
+        if (!isOnline) {
+            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite))
+                         .fit().placeholder(R.drawable.kafe_backround_120x160)
+                         .into(viewHolder.siteFoto);
         }
     }
 
@@ -679,6 +680,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
+    public void invalidateImageUrl(CoffeeSite coffeeSite) {
+        Picasso.get().invalidate(coffeeSite.getMainImageURL());
+    }
 
     /**
      * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter

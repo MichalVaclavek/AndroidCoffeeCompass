@@ -1107,7 +1107,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_SAVE, "OK");
 
             if (!currentCoffeeSite.getMainImageFilePath().isEmpty()) {
-                uploadCoffeeSiteImage(ImageUtil.getImageFile(getApplicationContext(), currentCoffeeSite.getMainImageFilePath()), savedCoffeeSite);
+                uploadCoffeeSiteImage(ImageUtil.getImageFile(currentCoffeeSite.getMainImageFilePath()), savedCoffeeSite);
                 return;
             }
             if (!currentCoffeeSite.isSavedOnServer() && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
@@ -1410,14 +1410,15 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         // Show photo if available
         boolean isOnline = Utils.isOnline(getApplicationContext());
-        if (!coffeeSite.getMainImageURL().isEmpty() && isOnline) {
+        if (isOnline && !coffeeSite.getMainImageURL().isEmpty()) {
             Picasso.get().load(coffeeSite.getMainImageURL())
                     .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
                     .into(siteFotoView);
-        } else {
-            Picasso.get().load(ImageUtil.getImageFile(getApplicationContext(), coffeeSite.getMainImageFilePath()))
-                    .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
-                    .into(siteFotoView);
+        }
+        if (!isOnline) {
+            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(getApplicationContext(), coffeeSite))
+                         .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                         .into(siteFotoView);
         }
         Log.i("CreateCoffeeSiteAct", "CoffeeSite created");
     }

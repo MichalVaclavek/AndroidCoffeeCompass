@@ -645,9 +645,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 this.returnedCoffeeSitesAfterUpload = returnedCoffeeSites;
                 coffeeSitesWithImageToBeUploaded = 0;
                 for (CoffeeSite cs : getNotSavedCoffeeSites()) {
-                    if (!cs.getMainImageFilePath().isEmpty()) {
-                        coffeeSitesWithImageToBeUploaded++;
-                    }
+//                    if (!cs.getDefaultImageFileName().isEmpty()) {
+                    coffeeSitesWithImageToBeUploaded++;
+//                    }
                 }
                 if (coffeeSitesWithImageToBeUploaded > 0) {
                     // Start upload of the CoffeeSite's images
@@ -660,7 +660,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                         // The time of creation is used to assign correct MainImageFilePath to correct CoffeeSite
                         String imageFilePath = getMainImageFilePath(cs);
                         if (!imageFilePath.isEmpty()) {
-                            uploadCoffeeSiteImage(ImageUtil.getImageFile(getApplicationContext(), imageFilePath), cs);
+                            uploadCoffeeSiteImage(ImageUtil.getImageFile(imageFilePath), cs);
                         }
                     }
                 } else {
@@ -714,6 +714,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         coffeeSitesWithImageUploaded++;
         coffeeSite.setMainImageURL(imageSaveResult);
 
+        // Invalidate Picasso image
+        recyclerViewAdapter.invalidateImageUrl(coffeeSite);
         updateCoffeeSiteInDB(coffeeSite);
 
         if (coffeeSitesWithImageToBeUploaded == coffeeSitesWithImageUploaded) {
@@ -1287,10 +1289,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * @param isOnline
      */
     public void updateActivityUI(boolean isOnline) {
+        reloadAllUsersCoffeeSites();
         if (switchAB != null && switchAB.isChecked()) {
             uploadCoffeeSitesMenuItem.setVisible(isOnline);
-        } else {
-            reloadAllUsersCoffeeSites();
         }
     }
 }

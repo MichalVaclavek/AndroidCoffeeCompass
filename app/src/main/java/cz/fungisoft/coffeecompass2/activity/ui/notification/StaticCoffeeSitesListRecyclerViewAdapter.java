@@ -172,12 +172,13 @@ public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapt
         boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
         if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {
             Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                    .fit().placeholder(R.drawable.kafe_backround_120x160)
-                    .into(viewHolder.siteFoto);
-        } else {
-            Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position).getMainImageFilePath()))
-                    .fit().placeholder(R.drawable.kafe_backround_120x160)
-                    .into(viewHolder.siteFoto);
+                   .fit().placeholder(R.drawable.kafe_backround_120x160)
+                   .into(viewHolder.siteFoto);
+        }
+        if (!isOnline) {
+            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position)))
+                         .fit().placeholder(R.drawable.kafe_backround_120x160)
+                         .into(viewHolder.siteFoto);
         }
 
         // Foto and main Label with CoffeeSite name are clickable

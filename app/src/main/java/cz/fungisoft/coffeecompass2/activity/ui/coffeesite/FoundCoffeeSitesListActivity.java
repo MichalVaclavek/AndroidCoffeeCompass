@@ -260,7 +260,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                                 currentContent.add(csm);
                             }
                         }
+                        recyclerViewAdapter.newSitesSearchingFinished();
                         recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
+                        updateTitle(recyclerViewAdapter.getCurrentNumberOfSitesShown());
                     }
                     // updates app's Widget
                     MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true);
@@ -279,7 +281,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
                                 currentContent.getItems().remove(csm);
                             }
                         }
+                        recyclerViewAdapter.newSitesSearchingFinished();
                         recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
+                        updateTitle(recyclerViewAdapter.getCurrentNumberOfSitesShown());
                     }
                     // updates app's Widget
                     MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true);
@@ -383,9 +387,7 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
         recyclerViewAdapter.newSitesSearchingStarted();
     }
 
-    @Override
-    public void onSearchingSitesFinished(int numOfCoffeeSites) {
-        recyclerViewAdapter.newSitesSearchingFinished();
+    public void updateTitle(int numOfCoffeeSites) {
         String currentTitle = originalToolbarTitle;
         if (numOfCoffeeSites > 0) {
             currentTitle = originalToolbarTitle + " (" + numOfCoffeeSites + ")";
