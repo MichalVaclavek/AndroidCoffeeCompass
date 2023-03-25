@@ -570,12 +570,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     /* */
 
     private void prepareAndActivateRecyclerView() {
-        //Bundle extras = getIntent().getExtras();
         recyclerView = findViewById(R.id.my_coffeesite_list);
-        assert recyclerView != null;
 
-        recyclerView.setLayoutManager(layoutManager);
-        setupRecyclerView((RecyclerView) recyclerView);
+        if (recyclerView != null) {
+            recyclerView.setLayoutManager(layoutManager);
+            setupRecyclerView((RecyclerView) recyclerView);
+        }
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -841,7 +841,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
                 /*
                  * Get CoffeeSites saved in local DB, which are not uploaded to server, first.
-                 * If none is available, reload CoffeeSites from server or DB.
                  */
                 myCoffeeSitesViewModel.getCoffeeSitesNotSavedOnServer().observe(this, new Observer<List<CoffeeSite>>() {
                     @Override

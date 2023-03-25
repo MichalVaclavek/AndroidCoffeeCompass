@@ -591,7 +591,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                     .fit().placeholder(R.drawable.kafe_backround_120x160)
                     .into(viewHolder.siteFoto);
         }
-        if (!isOnline) {
+        if (!isOnline || this.mValues.get(position).getMainImageURL().isEmpty()) {
             Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position)))
                     .fit().placeholder(R.drawable.kafe_backround_120x160)
                     .into(viewHolder.siteFoto);

@@ -1415,7 +1415,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
                     .into(siteFotoView);
         }
-        if (!isOnline) {
+        if (!isOnline || coffeeSite.getMainImageURL().isEmpty()) {
             Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(getApplicationContext(), coffeeSite))
                          .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
                          .into(siteFotoView);
