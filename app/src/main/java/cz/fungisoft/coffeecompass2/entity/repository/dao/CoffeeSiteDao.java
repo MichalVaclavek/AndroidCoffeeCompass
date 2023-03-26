@@ -54,7 +54,7 @@ public interface CoffeeSiteDao {
             "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart) " +
             "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart) " +
             "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart) " +
-            "AND statusZaznamu NOT NULL")
+            "AND statusZaznamu IS NOT NULL")
     LiveData<List<CoffeeSite>> getCoffeeSitesInRectangleLiveData(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
     /**
@@ -66,7 +66,7 @@ public interface CoffeeSiteDao {
             "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart) " +
             "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart) " +
             "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart) " +
-            "AND statusZaznamu NOT NULL")
+            "AND statusZaznamu IS NOT NULL")
     Single<List<CoffeeSite>> getCoffeeSitesInRectangleSingle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
     /**

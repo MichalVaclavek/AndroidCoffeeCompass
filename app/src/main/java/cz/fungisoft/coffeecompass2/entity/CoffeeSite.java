@@ -176,7 +176,7 @@ public class CoffeeSite implements Serializable,
     @Expose
     @SerializedName("recordStatus")
     @TypeConverters(DbDataConverters.class)
-    protected CoffeeSiteRecordStatus statusZaznamu = null; // better for checking for SELECT requests from DB
+    protected CoffeeSiteRecordStatus statusZaznamu; // better for checking in SELECT requests for NULL value
 
     @Expose
     @SerializedName("cena")

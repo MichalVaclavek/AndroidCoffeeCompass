@@ -306,8 +306,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 for (CoffeeSite cs : allCoffeeSites) {
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImage++;
-//                        cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
-//                        cs.setMainImageFilePath(cs.getDefaultImageFileName());
                         cs.setImageFileName(cs.getDefaultImageFileName());
                         imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                     }
@@ -342,8 +340,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     for (CoffeeSite cs : coffeeSitesList) {
                         if (!cs.getMainImageURL().isEmpty() ) {
                             numOfSitesWithImage++;
-//                            cs.setMainImageFilePath(ImageUtil.COFFEESITE_IMAGE_DIR + "/" + cs.getDefaultImageFileName());
-//                            cs.setImageFileName(cs.getDefaultImageFileName());
+                            cs.setImageFileName(cs.getDefaultImageFileName());
                         }
                     }
 
@@ -517,7 +514,6 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                             downloadInProgress = true;
                             if (coffeeSitesWithImage != null) {
                                 for (CoffeeSite cs : coffeeSitesWithImage) {
-//                                if (cs != null && !cs.getMainImageFilePath().isEmpty()) {
                                     if (cs != null) {
                                         cs.setImageFileName(cs.getDefaultImageFileName());
                                         imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());

@@ -27,7 +27,7 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
 
     @Expose
     @SerializedName("status")
-    private String status = ""; // default value when CoffeeSite created Offline
+    private String status; // default value when CoffeeSite created Offline
 
     @Ignore // for Room processing
     protected CoffeeSiteRecordStatus(Parcel in) {

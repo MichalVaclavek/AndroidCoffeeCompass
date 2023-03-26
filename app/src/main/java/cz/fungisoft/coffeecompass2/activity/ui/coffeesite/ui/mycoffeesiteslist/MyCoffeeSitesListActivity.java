@@ -251,14 +251,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        /*
-         Must be called here, in onCreate(), as after successful connection to UserAccountService
-         loading of users CoffeeSites starts. We need this loading only if this Activity
-         is created, not in case we returned to it from another Activity */
-        doBindUserAccountService();
-
         // Starts loading of all CoffeeSites related services, see onCoffeeSiteServiceConnected() to see next steps
-        // If services are connected correctly, initiates loading of CoffeeSites
+        // If services are connected correctly, initiates loading of user's CoffeeSites
         doBindCoffeeSiteStatusChangeService();
 
         // To save images of the CoffeeSites created/updated in Offline
@@ -306,6 +300,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         MenuItem item = menu.findItem(R.id.switchId);
         item.setActionView(R.layout.switch_layout);
         switchAB = item.getActionView().findViewById(R.id.switchAB);
+        switchAB.setChecked(false); // default. show user's sites already on server or downloaded ones if offline
 
         myCoffeeSitesViewModel.getNumOfCoffeeSitesNotSavedOnServer().observe(this, new Observer<Integer>() {
             @Override
@@ -326,10 +321,11 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    setShowNotModifiedCoffeeSites(false);
                     showNotUploadedCoffeeSites();
                 } else {
+                    setShowNotModifiedCoffeeSites(true);
                     reloadAllUsersCoffeeSites();
-                    /* see also method onUserAccountServiceConnected() for more info (reloading list of CoffeeSites if in OfflineMode ) */
                 }
             }
         });
@@ -340,7 +336,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private void showNotUploadedCoffeeSites() {
         List<CoffeeSite> notSavedOnServerCoffeeSites = getNotUploadedCoffeeSites();
         if (notSavedOnServerCoffeeSites != null) {
-            setShowNotModifiedCoffeeSites(false);
             uploadCoffeeSitesMenuItem.setVisible(notSavedOnServerCoffeeSites.size() > 0 && Utils.isOnline(getApplicationContext()));
             if (recyclerViewAdapter != null) {
                 recyclerViewAdapter.clearList();
@@ -400,17 +395,22 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private void reloadAllUsersCoffeeSites() {
         boolean offLineModeOn = Utils.isOfflineModeOn(getApplicationContext());
         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.my_sites_activity_toolbar_mainlabel);
-        uploadCoffeeSitesMenuItem.setVisible(false);
-        setShowNotModifiedCoffeeSites(true);
+        if (uploadCoffeeSitesMenuItem != null) {
+            uploadCoffeeSitesMenuItem.setVisible(false);
+        }
         if (recyclerViewAdapter != null) {
             recyclerViewAdapter.clearList();
         }
-        if (currentUser != null && !offLineModeOn) {
-            // Load list again, only if not in OFFLINE mode
+        if (!offLineModeOn) {
             startMyCoffeeSitesLoadOperation();
-            return;
         }
-        if (coffeeSitesInDBDownloaded != null && offLineModeOn) {
+        if (offLineModeOn) {
+            showCoffeeSitesDownloaded();
+        }
+    }
+
+    private void showCoffeeSitesDownloaded() {
+        if (coffeeSitesInDBDownloaded != null) {
             showProgressbar();
             if (coffeeSitesInDBDownloaded.size() > 0) {
                 String title = getResources().getString(R.string.my_sites_activity_toolbar_mainlabel) + " (offline)";
@@ -467,7 +467,16 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
          * when Offline.
          */
         myCoffeeSitesViewModel.getUsersCoffeeSitesInDBNotModified(currentUser)
-                              .observe(this, myCoffeeSites -> coffeeSitesInDBDownloaded = myCoffeeSites);
+                              .observe(this, myCoffeeSites -> {
+                                  coffeeSitesInDBDownloaded = myCoffeeSites;
+                                  if (Utils.isOfflineModeOn(getApplicationContext())
+                                    && isShowNotModifiedCoffeeSites()) {
+                                      showCoffeeSitesDownloaded();
+                                  }
+                              });
+
+        // All needed services connected here, download user's Coffee sites
+        reloadAllUsersCoffeeSites();
     }
 
     /** UnBind UserAccountService ****/
@@ -590,9 +599,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         }
     }
 
-
     private void startMyCoffeeSitesLoadOperation() {
         if (coffeeSiteLoadOperationsService != null
+                && currentUser != null
                 && !isLoadingPage()
                 && Utils.isOnline(getApplicationContext())
                 && isShowNotModifiedCoffeeSites()) {
@@ -637,40 +646,43 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         if (!error.isEmpty()) {
             showCoffeeSitesUploadFailure(error);
             Log.w(TAG, "CoffeeSites upload failure. Error: " + error);
+            return;
         }
-        else {
-            Log.i(TAG, "CoffeeSites uploaded. Result: " + ((returnedCoffeeSites != null) ? "OK" : "FAILED"));
 
-            showCoffeeSitesUploadSuccess();
+        Log.i(TAG, "CoffeeSites uploaded. Result: " + ((returnedCoffeeSites != null) ? "OK" : "FAILED"));
 
-            if (returnedCoffeeSites != null) {
-                /**
-                 * List of CoffeeSites returned from server after their create/update
-                 */
-                coffeeSitesWithImageToBeUploaded = 0;
-                for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
-                    if (!cs.getMainImageFilePath().isEmpty()) {
-                        coffeeSitesWithImageToBeUploaded++;
-                    }
+        showCoffeeSitesUploadSuccess();
+
+        if (returnedCoffeeSites != null) {
+            switchAB.setChecked(false);
+            /**
+             * List of CoffeeSites returned from server after their create/update
+             */
+            coffeeSitesWithImageToBeUploaded = 0;
+            for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
+                if (!cs.getMainImageFilePath().isEmpty()) {
+                    coffeeSitesWithImageToBeUploaded++;
+                    cs.setImageFileName(cs.getDefaultImageFileName());
                 }
-                if (coffeeSitesWithImageToBeUploaded > 0) {
-                    // Start upload of the CoffeeSite's images
-                    coffeeSitesWithImageUploaded = 0;
-                    //showProgressbarAndDisableMenuItems();
-                    showProgressbar();
-                    for (CoffeeSite cs : returnedCoffeeSites) {
-                        // As the returned, saved CoffeeSites have right ID, they do not have getMainImageFilePath correct
-                        // Therefore, we need to find correct getMainImageFilePath from notSavedCoffeeSites
-                        // The time of creation is used to assign correct MainImageFilePath to correct CoffeeSite
-                        String imageFilePath = getMainImageFilePath(cs);
-                        if (!imageFilePath.isEmpty()) {
-                            uploadCoffeeSiteImage(ImageUtil.getImageFile(imageFilePath), cs);
-                        }
+            }
+            if (coffeeSitesWithImageToBeUploaded <= 0) {
+                // delete already uploaded coffee sites from local DB, if without images
+                // if with images, then will be deleted after images upload
+                coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
+            }
+            if (coffeeSitesWithImageToBeUploaded > 0) {
+                // Start upload of the CoffeeSite's images
+                coffeeSitesWithImageUploaded = 0;
+                //showProgressbarAndDisableMenuItems();
+                showProgressbar();
+                for (CoffeeSite cs : returnedCoffeeSites) {
+                    // As the returned, saved CoffeeSites have right ID, they do not have getMainImageFilePath correct
+                    // Therefore, we need to find correct getMainImageFilePath from notSavedCoffeeSites
+                    // The time of creation is used to assign correct MainImageFilePath to correct CoffeeSite
+                    String imageFilePath = getMainImageFilePath(cs);
+                    if (!imageFilePath.isEmpty()) {
+                        uploadCoffeeSiteImage(ImageUtil.getImageFile(imageFilePath), cs);
                     }
-                } else {
-                    coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
-                    setShowNotModifiedCoffeeSites(true);
-                    reloadAllUsersCoffeeSites();
                 }
             }
         }
@@ -726,8 +738,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         if (coffeeSitesWithImageToBeUploaded == coffeeSitesWithImageUploaded) {
             coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
-            // Now uploade CoffeeSites are to be shown
-            setShowNotModifiedCoffeeSites(true);
+            // Now uploaded CoffeeSites are to be shown
             showCoffeeSitesImagesUploadSuccess();
             hideProgressbar();
             reloadAllUsersCoffeeSites();
@@ -744,7 +755,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
 
             // Now uploaded CoffeeSites are to be shown
-            setShowNotModifiedCoffeeSites(true);
             hideProgressbar();
             reloadAllUsersCoffeeSites();
         }
@@ -814,6 +824,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * 1) CoffeeSiteStatusChangeService - start loading in onCreate()
      * 2) CoffeeSiteCUDOperationsService
      * 3) CoffeeSiteLoadOperationsService
+     * 4) UserAccountService
      */
     @Override
     public void onCoffeeSiteServiceConnected() {
@@ -842,16 +853,18 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                 coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
 
                 /*
-                 * Get CoffeeSites saved in local DB, which are not uploaded to server, first.
+                 * All other services connected, connect UserService and then user's CoffeeSites (in onUserAccountServiceConnected)
+                 */
+                doBindUserAccountService();
+
+                /*
+                 * Get CoffeeSites saved in local DB, which are not uploaded to server
                  */
                 myCoffeeSitesViewModel.getCoffeeSitesNotSavedOnServer().observe(this, new Observer<List<CoffeeSite>>() {
                     @Override
                     public void onChanged(@Nullable final List<CoffeeSite> notSavedCoffeeSites) {
                         setNotUploadedCoffeeSites(notSavedCoffeeSites);
-                        if (notSavedCoffeeSites == null || notSavedCoffeeSites.size() <= 0) {
-                            switchAB.setChecked(false);
-                        } else { // or show CoffeeSites not uploaded yet
-                            switchAB.setChecked(true);
+                        if (!isShowNotModifiedCoffeeSites()) {
                             showNotUploadedCoffeeSites();
                         }
                     }
@@ -1164,10 +1177,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     void onUploadCoffeeSitesDialogPositiveClick(UploadCoffeeSitesDialogFragment dialog) {
         // upload CoffeeSites after user's confirmation
         if (Utils.isOnline(getApplicationContext())) {
-//            DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
-//            if (currentUser != null && dataForOfflineModePreferenceHelper.getDataSavedOfflineAvailable()
-//                    && getNotSavedCoffeeSites() != null) {
-            //DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(getApplicationContext());
             if (currentUser != null && getNotUploadedCoffeeSites() != null) {
                 startUploadCoffeeSitesOperation(getNotUploadedCoffeeSites());
             }
