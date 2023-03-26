@@ -77,7 +77,6 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
         if (o == null || getClass() != o.getClass()) return false;
         CoffeeSiteRecordStatus that = (CoffeeSiteRecordStatus) o;
         return status.equalsIgnoreCase(that.status);
-//        return Objects.equals(status, that.status);
     }
 
     @Override

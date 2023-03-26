@@ -393,7 +393,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                         }
                                         // if it is update (and save) of the CoffeeSite, which is not saved on server yet,
                                         // then it is CREATE operation from server point of view.
-                                        if (!currentCoffeeSite.isSavedOnServer() && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+                                        if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()) {
                                             mode = MODE_CREATE_FROM_MYCOFFEESITESACTIVITY;
                                             currentCoffeeSite.saveId(); // save current DB id to be restored later, if save would fail
                                             currentCoffeeSite.setLastEditUserName(null);
@@ -1110,7 +1110,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 uploadCoffeeSiteImage(ImageUtil.getImageFile(currentCoffeeSite.getMainImageFilePath()), savedCoffeeSite);
                 return;
             }
-            if (!currentCoffeeSite.isSavedOnServer() && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
+            if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()
                     && currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
                 // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
                 // restore original, phone's DB, id of the edited CoffeeSite,
@@ -1131,7 +1131,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             // restore original, phone's DB, id of the edited CoffeeSite,
             // which has to be changed to 0 before saving on server
             // original ID is needed to edit further if saving failed
-            if (!currentCoffeeSite.isSavedOnServer() && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+            if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()) {
                 currentCoffeeSite.restoreId();
             }
             showCoffeeSiteCreateFailure(error);
@@ -1186,7 +1186,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         currentCoffeeSite.setMainImageURL(imageSaveResult);
 
         // if newly created CoffeeSite has now image saved too, we can delete it from DB
-        if (!currentCoffeeSite.isSavedOnServer()  && currentCoffeeSite.getStatusZaznamu().getStatus().isEmpty()
+        if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()
                 && !currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
             currentCoffeeSite.restoreId();
             updateCoffeeSiteInDB(currentCoffeeSite);

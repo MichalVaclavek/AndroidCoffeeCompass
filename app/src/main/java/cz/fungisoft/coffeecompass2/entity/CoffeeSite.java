@@ -176,7 +176,7 @@ public class CoffeeSite implements Serializable,
     @Expose
     @SerializedName("recordStatus")
     @TypeConverters(DbDataConverters.class)
-    protected CoffeeSiteRecordStatus statusZaznamu = new CoffeeSiteRecordStatus();
+    protected CoffeeSiteRecordStatus statusZaznamu = null; // better for checking for SELECT requests from DB
 
     @Expose
     @SerializedName("cena")
@@ -632,6 +632,10 @@ public class CoffeeSite implements Serializable,
 
     public CoffeeSiteRecordStatus getStatusZaznamu() {
         return statusZaznamu;
+    }
+
+    public boolean isStatusZaznamuAvailable() {
+        return statusZaznamu != null && !statusZaznamu.getStatus().isEmpty();
     }
 
     public void setStatusZaznamu(CoffeeSiteRecordStatus statusZaznamu) {

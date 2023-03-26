@@ -234,7 +234,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         // Set default color for CoffeeSite Status view
         viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
         // Prelozeni jmen statusu CoffeeSitu a nastaveni active/inactive na obrazky tlacitek
-        String status = coffeeSite.getStatusZaznamu().toString();
+        String status = coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "";
         switch (status) {
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
@@ -274,7 +274,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             default: // CANCELED too, all buttons disabled.
-                viewHolder.statusView.setText(coffeeSite.getStatusZaznamu().toString());
+                viewHolder.statusView.setText(coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "");
                 enableDisableAllButtons(viewHolder, false);
         }
 
@@ -361,7 +361,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     void onCancelCoffeeSiteDialogPositiveClick() {
         // Only newly created and not saved on server CoffeeSite can be deleted from DB
         if (!selectedCoffeeSite.isSavedOnServer()) {
-            if (selectedCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // newly created site
+            if (!selectedCoffeeSite.isStatusZaznamuAvailable()) { // newly created site
                 coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
             } else { // modified site
                 // means modification was cancelled - keep previously modified site as unmodified id DB
@@ -394,7 +394,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 mParentActivity.showProgressbar();
                 updatingCommentOnly = true;
                 selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
-                if (!selectedCoffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+                if (selectedCoffeeSite.isStatusZaznamuAvailable()) {
                     coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
                 } else {
                     coffeeSiteCUDOperationsService.updateInDB(selectedCoffeeSite);
@@ -460,7 +460,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         Iterator<CoffeeSite> iter = inputCoffeeSiteList.iterator();
         while (iter.hasNext()) {
             CoffeeSite p = iter.next();
-            if (p != null && "CANCELED".equalsIgnoreCase(p.getStatusZaznamu().toString())) {
+            if (p != null && "CANCELED".equalsIgnoreCase(p.getStatusZaznamu() != null ? p.getStatusZaznamu().toString() : "")) {
                 iter.remove();
             }
         }

@@ -351,7 +351,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             if (requestCode == EDIT_COFFEESITE_REQUEST) {
                 // Make sure the request was successful
                 if (resultCode == RESULT_OK) {
-                    if (Utils.isOnline(getApplicationContext()) && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) { // do no load if this is CoffeeSIte creteted offline, not saved yet
+                    if (Utils.isOnline(getApplicationContext()) && coffeeSite.isStatusZaznamuAvailable()) { // do no load if this is CoffeeSIte created offline, not saved yet
                         // Reloads CoffeeSite to show current saved data after edit
                         startCoffeeSiteLoad(coffeeSite.getId());
                     } else { // or gets as return value from Edit activity
@@ -444,7 +444,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             // refresh CoffeeSite after start if possible
             if (Utils.isOnline(getApplicationContext())) {
-               if (coffeeSite != null && !coffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+                if (coffeeSite != null && coffeeSite.isStatusZaznamuAvailable()) {
                    startCoffeeSiteLoad(coffeeSite.getId());
                    return;
                }

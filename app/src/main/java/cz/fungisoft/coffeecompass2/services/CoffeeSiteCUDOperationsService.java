@@ -300,7 +300,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
         if (currentUser != null) {
             // Modify CoffeeSites saved only in phone DB to be saved as new CoffeeSites on server
             for (CoffeeSite coffeeSite : this.coffeeSitesToUpload) {
-                if (!coffeeSite.isSavedOnServer() && coffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+                if (!coffeeSite.isSavedOnServer() && !coffeeSite.isStatusZaznamuAvailable()) {
                     coffeeSite.saveId(); // if the saving fails, we can then restore original local DB id
                     coffeeSite.setId(0); // new CoffeeSite must be with ID=0 to be saved on server
                     coffeeSite.setLastEditUserName(null);
@@ -325,7 +325,6 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             this.onCoffeeSitesUploaded(oper, result);
         }
     }
-
 
     /**
      * **** CoffeeSites upload SUCCESSFUL ****
@@ -355,7 +354,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             // Restore IDs of the input CoffeeSites - it can be then used to further processing by calling activity.
             // (for example allowed new editing of the CoffeeSite, if upload would fail)
             for (CoffeeSite coffeeSite : this.coffeeSitesToUpload) {
-                if (!coffeeSite.isSavedOnServer() && coffeeSite.getStatusZaznamu().getStatus().isEmpty()) {
+                if (!coffeeSite.isSavedOnServer() && !coffeeSite.isStatusZaznamuAvailable()) {
                     coffeeSite.restoreId();
                 }
             }

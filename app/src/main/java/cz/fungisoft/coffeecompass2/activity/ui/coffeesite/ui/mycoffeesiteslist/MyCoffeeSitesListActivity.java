@@ -686,10 +686,12 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      * @return
      */
     private String getMainImageFilePath(CoffeeSite returnedCS) {
-        for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
-            if (!cs.getMainImageFilePath().isEmpty()) {
-                if (cs.getCreatedOn().equals(returnedCS.getCreatedOn())) {
-                    return cs.getMainImageFilePath();
+        if (returnedCS != null) {
+            for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
+                if (!cs.getMainImageFilePath().isEmpty()) {
+                    if (cs.getCreatedOn().equals(returnedCS.getCreatedOn())) {
+                        return cs.getMainImageFilePath();
+                    }
                 }
             }
         }

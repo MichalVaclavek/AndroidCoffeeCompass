@@ -50,10 +50,11 @@ public interface CoffeeSiteDao {
      * @param searchRangeAsDegreePart to be calculated as searchRange in meters * {@link ONE_METER_IN_DEGREE}
      * @return
      */
-    @Query("SELECT * FROM coffee_site_table WHERE zemSirka > (:latitudeFrom - :searchRangeAsDegreePart)" +
-            "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart)" +
-            "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart)" +
-            "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart)")
+    @Query("SELECT * FROM coffee_site_table WHERE zemSirka > (:latitudeFrom - :searchRangeAsDegreePart) " +
+            "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart) " +
+            "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart) " +
+            "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart) " +
+            "AND statusZaznamu NOT NULL")
     LiveData<List<CoffeeSite>> getCoffeeSitesInRectangleLiveData(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
     /**
@@ -61,10 +62,11 @@ public interface CoffeeSiteDao {
      * @param searchRangeAsDegreePart to be calculated as searchRange in meters * {@link ONE_METER_IN_DEGREE}
      * @return
      */
-    @Query("SELECT * FROM coffee_site_table WHERE zemSirka > (:latitudeFrom - :searchRangeAsDegreePart)" +
-            "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart)" +
-            "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart)" +
-            "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart)")
+    @Query("SELECT * FROM coffee_site_table WHERE zemSirka > (:latitudeFrom - :searchRangeAsDegreePart) " +
+            "AND zemSirka < (:latitudeFrom + :searchRangeAsDegreePart) " +
+            "AND zemDelka > (:longitudeFrom - :searchRangeAsDegreePart) " +
+            "AND zemDelka < (:longitudeFrom + :searchRangeAsDegreePart) " +
+            "AND statusZaznamu NOT NULL")
     Single<List<CoffeeSite>> getCoffeeSitesInRectangleSingle(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart);
 
     /**
