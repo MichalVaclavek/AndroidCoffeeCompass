@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -105,13 +106,6 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     // Calling activity can request to show image fragment first
     private boolean showImageFirstRequest = false;
-
-    /**
-     * Enum to distinguish between saving the very first Stars rating or updating Stars rating
-     */
-//    private enum StarsOperation {SAVE, UPDATE}
-
-//    private StarsOperation starsOperation = StarsOperation.SAVE; // default is SAVE as the new CoffeeSite rating is expected
 
     private int numOfStarsSelectedByUser = 0;
 
@@ -375,6 +369,16 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         Intent commentsIntent = new Intent(this, CommentsListActivity.class);
         commentsIntent.putExtra("site", (Parcelable) coffeeSite);
         startActivity(commentsIntent);
+    }
+
+    public void onNavigationButtonClick(View v) {
+        String startPosition = locationService.getCurrentLatLng().latitude + "," + locationService.getCurrentLatLng().longitude;
+        String destPosition = coffeeSite.getLatitude() + "," + coffeeSite.getLongitude();
+        String uriGoogleMaps = "http://maps.google.com/maps?saddr=" + startPosition + " &daddr=" + destPosition + "&dirflg=w"; // dirflg=w means walking
+        Uri uri = Uri.parse(uriGoogleMaps);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     public void onMapButtonClick(View v) {
