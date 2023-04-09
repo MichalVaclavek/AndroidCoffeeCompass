@@ -218,7 +218,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
-
     private void setupBasicViewHolder(int position, ViewHolder viewHolder) {
         CoffeeSite coffeeSite = this.mValues.get(position);
 
@@ -239,39 +238,28 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
                 viewHolder.statusView.setText(R.string.status_active);
-
-                viewHolder.activateCoffeeSiteButton.setEnabled(false);
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_grey_36);
-
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
                 if (!coffeeSite.isSavedOnServer()) {
-                    viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
+                    viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(false);
                 }
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
+
                 break;
             case "INACTIVE":
                 viewHolder.statusView.setText(R.string.status_inactive);
-
-                viewHolder.activateCoffeeSiteButton.setEnabled(true);
                 if (!coffeeSite.isSavedOnServer()) {
-                    viewHolder.activateCoffeeSiteButton.setEnabled(false);
+                    viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(false);
                 }
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
 
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
-
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             case "" : // for new CoffeeSite created when offline, not saved on server yet
             case "CREATED":
                 viewHolder.statusView.setText(R.string.status_created);
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_dark_gray));
 
-                viewHolder.activateCoffeeSiteButton.setEnabled(true);
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+                viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(true);
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
 
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
             default: // CANCELED too, all buttons disabled.
                 viewHolder.statusView.setText(coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "");
@@ -285,8 +273,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         // Set CoffeeSite instance of this RecyclerView item as a tag to all buttons
         // to be available later in button's onClick methods
         viewHolder.editCoffeeSiteButton.setTag(coffeeSite);
-        viewHolder.activateCoffeeSiteButton.setTag(coffeeSite);
-        viewHolder.deactivateCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.activateDeactivateCoffeeSiteButton.setTag(coffeeSite);
         viewHolder.cancelCoffeeSiteButton.setTag(coffeeSite);
         viewHolder.insertCommentButton.setTag(coffeeSite);
 
@@ -320,8 +307,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
         viewHolder.editCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
-        viewHolder.activateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
-        viewHolder.deactivateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.activateDeactivateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
         viewHolder.cancelCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
         viewHolder.insertCommentButton.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
@@ -542,34 +528,23 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
 
-    private void onActivateButtonClick(View v) {
+    private void onActivateDeactivateButtonClick(View v) {
         if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
 
             if (selectedCoffeeSite.isSavedOnServer()) {
                 if (coffeeSiteStatusChangeService != null) {
-                    mParentActivity.showProgressbar();
-                    coffeeSiteStatusChangeService.activate(selectedCoffeeSite);
+                    if (selectedCoffeeSite.canBeActivated()) {
+                        mParentActivity.showProgressbar();
+                        coffeeSiteStatusChangeService.activate(selectedCoffeeSite);
+                    }
+                    if (selectedCoffeeSite.canBeDeactivated()) {
+                        mParentActivity.showProgressbar();
+                        coffeeSiteStatusChangeService.deactivate(selectedCoffeeSite);
+                    }
                 }
             } else {
-                Utils.showSiteNotSavedOnServerToast(mParentActivity.getApplicationContext());
-            }
-        } else {
-            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
-        }
-    }
-
-    private void onDeactivateButtonClick(View v) {
-        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
-            selectedCoffeeSite = (CoffeeSite) v.getTag();
-            selectedPosition = mValues.indexOf(selectedCoffeeSite);
-            if (selectedCoffeeSite.isSavedOnServer()) {
-                if (coffeeSiteStatusChangeService != null) {
-                    mParentActivity.showProgressbar();
-                    coffeeSiteStatusChangeService.deactivate(selectedCoffeeSite);
-                }
-            }else {
                 Utils.showSiteNotSavedOnServerToast(mParentActivity.getApplicationContext());
             }
         } else {
@@ -707,8 +682,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         /* Buttons */
         final AppCompatImageButton editCoffeeSiteButton;
-        final AppCompatImageButton activateCoffeeSiteButton;
-        final AppCompatImageButton deactivateCoffeeSiteButton;
+        final AppCompatImageButton activateDeactivateCoffeeSiteButton;
         final AppCompatImageButton cancelCoffeeSiteButton;
         final AppCompatImageButton insertCommentButton;
 
@@ -731,14 +705,10 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             editCoffeeSiteButton = view.findViewById(R.id.button_edit_coffeesite);
             editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
 
-            activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
+            activateDeactivateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
             // set original icon
-            activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
-            activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
-
-            deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
-            deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
-            deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
+            activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+            activateDeactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateDeactivateButtonClick);
 
             cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
             cancelCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onCancelButtonClick);

@@ -251,8 +251,6 @@ public class MainActivity extends ActivityWithLocationService
                 Intent intent = new Intent(this, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSiteUrl", data);
                 startActivity(intent);
-                // User now see the new CoffeeSites, trigger to show statistics view in original colour
-//                statisticsPrefencesHelper.putNumOfSitesLastWeekChanged(false);
             }
         }
 
@@ -276,7 +274,6 @@ public class MainActivity extends ActivityWithLocationService
                             newNotificationCoffeeSiteURL = data.get("coffeeSiteURL");
                             // is this a new URL to be processed?
                             if (!notificationSubscriptionPreferencesHelper.getLatestReceivedUrl().equals(newNotificationCoffeeSiteURL)) {
-//                                startReadStatistics();
                                 notificationSubscriptionPreferencesHelper.putLatestReceivedUrl(newNotificationCoffeeSiteURL);
                                 newNotificationCoffeeSiteURLs.add(newNotificationCoffeeSiteURL);
                                 increaseNewSitesNotificationCount();
@@ -355,6 +352,7 @@ public class MainActivity extends ActivityWithLocationService
             numberOfSitesInDistanceTextView.setTextColor(getColor(R.color.colorPrimary2));
             numberOfSitesInDistanceTextView.setTypeface(null, Typeface.NORMAL);
             numberOfSitesInDistanceTextView.setGravity(Gravity.CENTER);
+            numberOfSitesInDistanceTextView.setText(""); // reset
             numberOfCoffeeSitesInDistanceTextViews[i] = numberOfSitesInDistanceTextView;
             numberOfSitesInDistanceCardView.addView(numberOfSitesInDistanceTextView);
 
@@ -382,8 +380,6 @@ public class MainActivity extends ActivityWithLocationService
 
         // Location info
         requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
-
-//        accuracy = findViewById(R.id.accuracy);
 
         searchKafeButton.setTransformationMethod(null);
 
@@ -666,6 +662,7 @@ public class MainActivity extends ActivityWithLocationService
                 public void onChanged(@Nullable final Map<String, Integer> numOfAllCoffeeSitesInRanges) {
                     // Process found number of CoffeeSites in range
                     if (numOfAllCoffeeSitesInRanges != null) {
+                        resetNumberOfSitesInDistancesViews();
                         updateNumberOfSitesInDistancesViews(numOfAllCoffeeSitesInRanges);
                     }
                 }
@@ -690,20 +687,29 @@ public class MainActivity extends ActivityWithLocationService
             }
         }
     }
+
     /**
      * Updates Vies to show how many CoffeeSites are in selectable distances
      */
     private void updateNumberOfSitesInDistancesViews(final Map<String, Integer> numOfAllCoffeeSitesInRanges) {
         for (int i = searchDistances.length - 1; i >= 0; i--) {
-            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.white_transparent));
-            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(3);
-            numberOfCoffeeSitesInDistanceTextViews[i].setText("");
             if (numOfAllCoffeeSitesInRanges.get(searchDistances[i]) != null
                 && numOfAllCoffeeSitesInRanges.get(searchDistances[i]) > 0) {
                 numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.colorPrimary2));
                 numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(6);
                 numberOfCoffeeSitesInDistanceTextViews[i].setText(numOfAllCoffeeSitesInRanges.get(searchDistances[i]).toString());
             }
+        }
+    }
+
+    /**
+     * Reset Vies to show how many CoffeeSites are in selectable distances
+     */
+    private void resetNumberOfSitesInDistancesViews() {
+        for (int i = searchDistances.length - 1; i >= 0; i--) {
+            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.white_transparent));
+            numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(3);
+            numberOfCoffeeSitesInDistanceTextViews[i].setText("");
         }
     }
 
@@ -1084,6 +1090,8 @@ public class MainActivity extends ActivityWithLocationService
         if (locationService != null) {
             locationService.removePropertyChangeListener(this);
         }
+
+        resetNumberOfSitesInDistancesViews();
         doUnbindCoffeeSiteLoadOperationsService();
     }
 

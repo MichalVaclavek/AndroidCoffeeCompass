@@ -97,20 +97,6 @@
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/mapButton"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/rounded_orange_button"
-                    android:onClick="onMapButtonClick"
-                    android:paddingLeft="2dp"
-                    android:paddingRight="2dp"
-                    android:text="Mapa"
-                    android:textColor="@android:color/white"
-                    android:visibility="visible" />
-
-                <Button
                     android:id="@+id/commentsButton"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
@@ -124,6 +110,20 @@
                     android:text="komentáře"
                     android:textColor="@android:color/white"
                     android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
+                    android:visibility="visible" />
+
+                <Button
+                    android:id="@+id/mapButton"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/rounded_orange_button"
+                    android:onClick="onMapButtonClick"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text="Mapa"
+                    android:textColor="@android:color/white"
                     android:visibility="visible" />
 
                 <Button

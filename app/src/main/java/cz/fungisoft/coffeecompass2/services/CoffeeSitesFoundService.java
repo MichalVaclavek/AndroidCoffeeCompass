@@ -177,13 +177,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         super.onCreate();
         coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
 
-        allNumberOfFoundSitesInRangesLive = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRangeWithRange(), i -> {
-           for (Map.Entry<String, LiveData<List<CoffeeSite>>> e : i.entrySet()) {
-               allNumberOfFoundSitesInRanges.put(e.getKey(), Transformations.map(e.getValue(), List::size));
-           }
-           return allNumberOfFoundSitesInRanges;
-        });
-
         foundSites = Transformations.switchMap(coffeeSiteRepository.getCoffeeSitesInRangeWithRange(), i -> {
             for (Map.Entry<String, LiveData<List<CoffeeSite>>> e : i.entrySet()) {
                 if (e.getKey().equals(String.valueOf(this.currentSearchRange))) {
@@ -193,6 +186,13 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
                 }
             }
             return new MutableLiveData<>();
+        });
+
+        allNumberOfFoundSitesInRangesLive = Transformations.map(coffeeSiteRepository.getCoffeeSitesInRangeWithRange(), i -> {
+            for (Map.Entry<String, LiveData<List<CoffeeSite>>> e : i.entrySet()) {
+                allNumberOfFoundSitesInRanges.put(e.getKey(), Transformations.map(e.getValue(), List::size));
+            }
+            return allNumberOfFoundSitesInRanges;
         });
 
         doBindLocationService();
@@ -265,7 +265,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
                 movedDistance = locationService.getDistanceFromCurrentLocation(this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude);
 
                 if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange
-                    || firstLocationDetection) {
+                        || firstLocationDetection) {
                     firstLocationDetection = false;
                     // get current location for searching
                     this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();

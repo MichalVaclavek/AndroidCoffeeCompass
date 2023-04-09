@@ -106,7 +106,7 @@
                         android:insetBottom="0dp"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
                         app:backgroundTint="@color/green_emptycard"
-                        app:icon="@drawable/ic_baseline_edit_36"
+                        app:icon="@drawable/ic_baseline_edit_32"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconTint="?attr/actionMenuTextColor" />

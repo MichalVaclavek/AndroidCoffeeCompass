@@ -138,7 +138,7 @@
                             android:layout_gravity="top"
                             android:baselineAlignBottom="false"
                             android:visibility="gone"
-                            app:srcCompat="@drawable/ic_baseline_edit_36" />
+                            app:srcCompat="@drawable/ic_baseline_edit_32" />
 
                         <ImageView
                             android:id="@+id/deleteIconImageView"
