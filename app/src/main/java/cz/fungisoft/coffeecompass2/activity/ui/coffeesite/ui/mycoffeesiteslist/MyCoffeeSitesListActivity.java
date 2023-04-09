@@ -302,21 +302,6 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         switchAB = item.getActionView().findViewById(R.id.switchAB);
         switchAB.setChecked(false); // default. show user's sites already on server or downloaded ones if offline
 
-        myCoffeeSitesViewModel.getNumOfCoffeeSitesNotSavedOnServer().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(@Nullable Integer numOfSitesNotSavedOnServer) {
-                if (numOfSitesNotSavedOnServer != null) {
-                    switchAB.setVisibility(numOfSitesNotSavedOnServer > 0 ? View.VISIBLE : View.GONE);
-                    uploadCoffeeSitesMenuItem.setVisible(!isShowNotModifiedCoffeeSites() && numOfSitesNotSavedOnServer > 0 && Utils.isOnline(getApplicationContext()));
-                    if (numOfSitesNotSavedOnServer == 0) {
-                        Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.my_sites_activity_toolbar_mainlabel);
-                        setShowNotModifiedCoffeeSites(true);
-                        reloadAllUsersCoffeeSites();
-                    }
-                }
-            }
-        });
-
         // Switch button to switch between list of CoffeeSites not saved on server yet  (i.e. new and modified CoffeeSites)
         // and list of all CoffeeSites created by user either loaded from server or from DB
         switchAB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -472,7 +457,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                               .observe(this, myCoffeeSites -> {
                                   coffeeSitesInDBDownloaded = myCoffeeSites;
                                   if (Utils.isOfflineModeOn(getApplicationContext())
-                                    && isShowNotModifiedCoffeeSites()) {
+                                        && isShowNotModifiedCoffeeSites()) {
                                       showCoffeeSitesDownloaded();
                                   }
                               });
@@ -869,6 +854,20 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                                 && !notSavedCoffeeSites.isEmpty()
                                 && !isShowNotModifiedCoffeeSites()) {
                             showNotUploadedCoffeeSites();
+                        }
+                    }
+                });
+                myCoffeeSitesViewModel.getNumOfCoffeeSitesNotSavedOnServer().observe(this, new Observer<Integer>() {
+                    @Override
+                    public void onChanged(@Nullable Integer numOfSitesNotSavedOnServer) {
+                        if (numOfSitesNotSavedOnServer != null) {
+                            switchAB.setVisibility(numOfSitesNotSavedOnServer > 0 ? View.VISIBLE : View.GONE);
+                            uploadCoffeeSitesMenuItem.setVisible(!isShowNotModifiedCoffeeSites() && numOfSitesNotSavedOnServer > 0 && Utils.isOnline(getApplicationContext()));
+                            if (numOfSitesNotSavedOnServer == 0) {
+                                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.my_sites_activity_toolbar_mainlabel);
+                                setShowNotModifiedCoffeeSites(true);
+                                reloadAllUsersCoffeeSites();
+                            }
                         }
                     }
                 });
