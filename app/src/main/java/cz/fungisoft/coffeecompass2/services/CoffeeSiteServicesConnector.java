@@ -36,7 +36,7 @@ public class CoffeeSiteServicesConnector<T extends CoffeeSiteWithUserAccountServ
 
         // This is called when the connection with the service has been
         // established, giving us the service object we can use to
-        // interact with the service.  Because we have bound to a explicit
+        // interact with the service. Because we have bound to a explicit
         // service that we know is running in our own process, we can
         // cast its IBinder to a concrete class and directly access it.
         mBoundService = (T) ((T.LocalBinder)service).getService();

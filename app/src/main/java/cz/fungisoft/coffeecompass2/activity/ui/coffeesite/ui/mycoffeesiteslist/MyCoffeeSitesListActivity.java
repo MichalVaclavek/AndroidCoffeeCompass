@@ -310,6 +310,8 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                     uploadCoffeeSitesMenuItem.setVisible(!isShowNotModifiedCoffeeSites() && numOfSitesNotSavedOnServer > 0 && Utils.isOnline(getApplicationContext()));
                     if (numOfSitesNotSavedOnServer == 0) {
                         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.my_sites_activity_toolbar_mainlabel);
+                        setShowNotModifiedCoffeeSites(true);
+                        reloadAllUsersCoffeeSites();
                     }
                 }
             }
@@ -700,10 +702,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     private String getMainImageFilePath(CoffeeSite returnedCS) {
         if (returnedCS != null) {
             for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
-                if (!cs.getMainImageFilePath().isEmpty()) {
-                    if (cs.getCreatedOn().equals(returnedCS.getCreatedOn())) {
+                if (!cs.getMainImageFilePath().isEmpty()
+                    && cs.getCreatedOn().equals(returnedCS.getCreatedOn())) {
                         return cs.getMainImageFilePath();
-                    }
                 }
             }
         }
@@ -864,7 +865,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                     @Override
                     public void onChanged(@Nullable final List<CoffeeSite> notSavedCoffeeSites) {
                         setNotUploadedCoffeeSites(notSavedCoffeeSites);
-                        if (!isShowNotModifiedCoffeeSites()) {
+                        if (notSavedCoffeeSites != null
+                                && !notSavedCoffeeSites.isEmpty()
+                                && !isShowNotModifiedCoffeeSites()) {
                             showNotUploadedCoffeeSites();
                         }
                     }
@@ -1175,13 +1178,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
 
     void onUploadCoffeeSitesDialogPositiveClick(UploadCoffeeSitesDialogFragment dialog) {
-        // upload CoffeeSites after user's confirmation
-        if (Utils.isOnline(getApplicationContext())) {
-            if (currentUser != null && getNotUploadedCoffeeSites() != null) {
-                startUploadCoffeeSitesOperation(getNotUploadedCoffeeSites());
-            }
-        } else {
+        if (!Utils.isOnline(getApplicationContext())) {
             Utils.showNoInternetToast(getApplicationContext());
+            return;
+        }
+        // upload CoffeeSites after user's confirmation
+        if (currentUser != null && getNotUploadedCoffeeSites() != null) {
+            startUploadCoffeeSitesOperation(getNotUploadedCoffeeSites());
         }
     }
 
