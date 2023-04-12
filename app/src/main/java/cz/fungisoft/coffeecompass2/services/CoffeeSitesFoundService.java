@@ -382,22 +382,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     }
 
     /**
-     * A callback method to be called, when there are CoffeeSites in range returned by
-     * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
-     */
-    @Override
-    public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
-        isSearching = false;
-        for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
-            listener.onSitesInRangeFound(coffeeSites);
-        }
-        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesFinished(coffeeSites.size());
-        }
-        Log.i(TAG, "Returned search of Coffee Sites from server. Number of coffee sites found: " + coffeeSites.size());
-    }
-
-    /**
      * Calls REST call Async. task
      *
      * @param coffeeSort
@@ -417,6 +401,31 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
      */
     @Override
+    public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
+        isSearching = false;
+        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+            listener.onSearchingSitesFinished(coffeeSites.size());
+        }
+        for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
+            listener.onSitesInRangeFound(coffeeSites);
+        }
+        Log.i(TAG, "Returned search of Coffee Sites from server. Number of coffee sites found: " + coffeeSites.size());
+    }
+
+    @Override
+    public void onSitesInRangeReturnedFromServerError(String error) {
+        isSearching = false;
+        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+            listener.onSearchingSitesError(error);
+            listener.onSearchingSitesFinished(0);
+        }
+    }
+
+    /**
+     * A callback method to be called, when there are CoffeeSites in range returned by
+     * async. task called by GetSitesInRangeAsyncTask.onPostExecute(result).
+     */
+    @Override
     public void onNumberOfSitesInRangesReturnedFromServer(Map<String, Integer> numOfCoffeeSitesInDistances) {
         isSearchingNumOfSites = false;
         for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
@@ -428,14 +437,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         Log.i(TAG, "Returned search from server.");
     }
 
-    @Override
-    public void onSitesInRangeReturnedFromServerError(String error) {
-        isSearching = false;
-        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onSearchingSitesError(error);
-            listener.onSearchingSitesFinished(0);
-        }
-    }
 
     @Override
     public void onDestroy() {
