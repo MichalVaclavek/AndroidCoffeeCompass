@@ -25,7 +25,7 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
  * Service uses usually AsyncTasks to perform REST calls to coffeecompass.cz server.
  * Respective status change methods are called by Activities.<br>
  * Service must implement {@link CoffeeSiteRESTResultListener} which informs about result
- * of the respectve Async tasks. The results are then passed to Activities, which
+ * of the respective Async tasks. The results are then passed to Activities, which
  * implement {@link CoffeeSiteServiceStatusOperationsListener}
  */
 public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountService

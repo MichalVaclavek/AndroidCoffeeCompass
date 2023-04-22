@@ -642,11 +642,11 @@ public class MainActivity extends ActivityWithLocationService
     public void onCoffeeSitesInRangeUpdateServiceConnected() {
         foundSitesService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
 
-        numberOfCoffeeSitesInRangeModel = new FoundNumberOfCoffeeSitesViewModel(this);
-        numberOfCoffeeSitesInRangeModel.setCoffeeSitesInRangeFoundService(foundSitesService);
-        foundSitesService.addSitesFoundListener(numberOfCoffeeSitesInRangeModel);
-
         if (foundSitesService != null) {
+            numberOfCoffeeSitesInRangeModel = new FoundNumberOfCoffeeSitesViewModel(this);
+            numberOfCoffeeSitesInRangeModel.setCoffeeSitesInRangeFoundService(foundSitesService);
+            foundSitesService.addSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+
             numberOfCoffeeSitesInRangeModel.getFoundNumberOfCoffeeSites().observe(this, new Observer<Integer>() {
                 @Override
                 public void onChanged(@Nullable final Integer numOfCoffeeSitesInRange) {
@@ -1036,10 +1036,12 @@ public class MainActivity extends ActivityWithLocationService
         if (locationService != null) {
             location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationService.addPropertyChangeListener(this);
+            updateAccuracyIndicator(location);
+            startReadingNumberOfSitesInRanges();
         }
 
 //        showLocationAccuracy(location);
-        updateAccuracyIndicator(location);
+
 //        if (location != null) {
 //            searchKafeButton.setEnabled(true);
 //        }
@@ -1106,6 +1108,9 @@ public class MainActivity extends ActivityWithLocationService
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(networkChangeStateReceiver, filter);
+        if (foundSitesService != null) {
+            foundSitesService.addSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+        }
     }
 
     @Override
@@ -1117,7 +1122,9 @@ public class MainActivity extends ActivityWithLocationService
         numberOfCoffeeSitesCreatedByLoggedInUserChecked = false;
         unregisterReceiver(networkChangeStateReceiver);
         doUnbindUserAccountService();
-
+        if (foundSitesService != null) {
+            foundSitesService.removeSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+        }
         super.onStop();
     }
 
@@ -1127,7 +1134,7 @@ public class MainActivity extends ActivityWithLocationService
         if (locationService != null) {
             locationService.removeAllLocationChangeListeners();
         }
-        foundSitesService.removeSitesFoundListener(numberOfCoffeeSitesInRangeModel);
+//        foundSitesService.removeSitesFoundListener(numberOfCoffeeSitesInRangeModel);
         doUnBindSitesInRangeService();
         doUnbindCoffeeSiteEntitiesService();
         super.onDestroy();
@@ -1160,7 +1167,6 @@ public class MainActivity extends ActivityWithLocationService
 //            if (!mainButtonTextColorAnimation.isRunning() && !mainButtonClicked) {
 //                startAnimateButtonText(mainButtonTextColorAnimation);
 //            }
-            startReadingNumberOfSitesInRanges();
         }
     }
 

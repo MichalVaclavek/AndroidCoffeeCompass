@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,8 +28,8 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
  * Collects following information:
  *
  * - all currently found Coffee sites on current location within given range
- * - new CoffeeSites
- * - old CoffeeSites to be displayed by the activity's RecyclerViewAdapter
+ * - new CoffeeSites to be displayed by the activity's RecyclerViewAdapter
+ * - old CoffeeSites to be removed from the activity's RecyclerViewAdapter
  * <p>
  * Class is a singleton.
  */
@@ -47,12 +49,6 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
         }
     }
 
-    /**
-     * Actual list of CoffeeSites in the search range from current position of the equipment as
-     * found in DB.
-     */
-    private LiveData<List<CoffeeSiteMovable>> foundCoffeeSites;
-
     private WeakReference<CoffeeSitesFoundService> sitesInRangeUpdateService;
 
     /**
@@ -68,7 +64,11 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
 
     public void setCoffeeSitesInRangeFoundService(CoffeeSitesFoundService sitesInRangeUpdateService) {
         this.sitesInRangeUpdateService = new WeakReference<>(sitesInRangeUpdateService);
-        foundCoffeeSites = this.sitesInRangeUpdateService.get().getFoundSites();
+        /**
+         * Actual list of CoffeeSites in the search range from current position of the equipment as
+         * found in DB.
+         */
+        LiveData<List<CoffeeSiteMovable>> foundCoffeeSites = this.sitesInRangeUpdateService.get().getFoundSites();
         foundCoffeeSites.observe(ownerActivity.get(), new Observer<List<CoffeeSiteMovable>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
@@ -81,6 +81,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
     }
 
     public void setCurrentLocationAndSearchDistance(LatLng currentLocation, int searchDistance, List<Integer> allRanges, String coffeeSort) {
+        Log.i(TAG, "Starting Coffee sites search ...");
         this.currentSearchDistance = searchDistance;
         if (this.sitesInRangeUpdateService != null) {
             this.sitesInRangeUpdateService.get().requestUpdatesOfCurrentSitesInRange(currentLocation, searchDistance, allRanges, coffeeSort);
@@ -169,6 +170,7 @@ public class FoundCoffeeSitesViewModel extends AndroidViewModel
      */
     @Override
     public void onSitesInRangeFound(List<CoffeeSiteMovable> coffeeSites) {
+        Log.i(TAG, "Processing of Coffee Sites from server. Number of Coffee Sites: " + coffeeSites.size());
         processFoundCoffeeSites(coffeeSites);
     }
 }

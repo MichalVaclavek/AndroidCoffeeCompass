@@ -47,7 +47,7 @@ import io.reactivex.schedulers.Schedulers;
  * <p></>
  * This is variant used by {@link MainAppWidgetProvider} only.<br>
  * Extends JobIntentService to call its functionality using enqueueWork() method.
- * Uses either REST API requests from server or DB repository in case of OFFLiNE mode to get
+ * Uses either REST API requests from server or DB repository in case of OFFLine mode to get
  * requested data about CoffeeSites.<br>
  * <p>
  * Requires using Location service.
@@ -113,7 +113,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     }
 
     /**
-     * Method to prepare this servie to as a Foreground service. Needed for Android API >= 26
+     * Method to prepare this service to as a Foreground service. Needed for Android API >= 26
      * For lower API the enqueue() method is used to invoke this service action.
      */
     private void prepareAndStartForeground() {

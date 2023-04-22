@@ -201,7 +201,7 @@ public class LocationService extends Service {
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION);
         locManager.removeUpdates(locListener);
-        Log.i(TAG, "Service destroyed");
+        Log.i(TAG, "Service destroyed.");
     }
 
     // This is the object that receives interactions from clients.

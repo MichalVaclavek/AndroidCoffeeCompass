@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundNumberOfCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -140,12 +142,12 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
     public void addFoundSitesSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
         sitesInRangeSearchOperationListeners.add(sitesInRangeUpdateListener);
-        Log.d(TAG,  ". Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
+        Log.d(TAG,  "Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
     }
 
     public void removeFoundSitesSearchOperationListener(CoffeeSitesInRangeSearchOperationListener sitesInRangeUpdateListener) {
         sitesInRangeSearchOperationListeners.remove(sitesInRangeUpdateListener);
-        Log.d(TAG,  ". Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
+        Log.d(TAG,  "Pocet posluchacu zacatku/konce vyhledavani CoffeeSites: " + sitesInRangeSearchOperationListeners.size());
     }
 
     /**
@@ -156,11 +158,24 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     public void addSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
         if (!sitesFoundListeners.contains(sitesInRangeUpdateListener)) {
             sitesFoundListeners.add(sitesInRangeUpdateListener);
+            Log.d(TAG,  "Pridan posluchac nalezenych CofeeSites. Listener: " + sitesInRangeUpdateListener);
+            Log.d(TAG,  "Pocet posluchacu vyhledavani CoffeeSites: " + sitesFoundListeners.size());
         }
     }
 
     public void removeSitesFoundListener(CoffeeSitesFoundListener sitesInRangeUpdateListener) {
         sitesFoundListeners.remove(sitesInRangeUpdateListener);
+        Log.d(TAG,  "Odebran posluchac nalezenych CofeeSites. Listener: " + sitesInRangeUpdateListener);
+        Log.d(TAG,  "Pocet posluchacu vyhledavani CoffeeSites: " + sitesFoundListeners.size());
+    }
+
+    private boolean sitesFoundListenersContainsListenerClass(Class<?> clazz) {
+        for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
+            if (listener.getClass().equals(clazz)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Don't attempt to unbind from the service unless the client has received some
@@ -271,8 +286,13 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
                     this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
                     if (this.searchLocationOfCurrentSites != null
                             && this.coffeeSort != null) {
-                        startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                        startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
+                        Log.d(TAG, "Location property changed. Start searching ...");
+                        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
+                            startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
+                        }
+                        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
+                            startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
+                        }
                         updateDBLiveDataInput( this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
                         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
                             listener.onStartSearchingSites();
@@ -403,18 +423,19 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     @Override
     public void onSitesInRangeReturnedFromServer(List<CoffeeSiteMovable> coffeeSites) {
         isSearching = false;
+        Log.d(TAG, "Returned search of Coffee Sites from server. Number of coffee sites found: " + coffeeSites.size());
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesFinished(coffeeSites.size());
         }
         for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
             listener.onSitesInRangeFound(coffeeSites);
         }
-        Log.i(TAG, "Returned search of Coffee Sites from server. Number of coffee sites found: " + coffeeSites.size());
     }
 
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
         isSearching = false;
+        Log.e(TAG, "Error searching Coffee Sites from server. Error: " + error);
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesError(error);
             listener.onSearchingSitesFinished(0);
@@ -434,7 +455,6 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesFinished(0);
         }
-        Log.i(TAG, "Returned search from server.");
     }
 
 

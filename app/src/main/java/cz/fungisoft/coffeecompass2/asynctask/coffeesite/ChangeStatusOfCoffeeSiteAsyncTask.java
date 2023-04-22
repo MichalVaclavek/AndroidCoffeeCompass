@@ -70,7 +70,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
         //operationResult = "";
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        Log.i(tag, "currentUser is null? " + (userAccountService.getLoggedInUser() == null));
         if (userAccountService.getLoggedInUser() != null && coffeeSiteToModify != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
