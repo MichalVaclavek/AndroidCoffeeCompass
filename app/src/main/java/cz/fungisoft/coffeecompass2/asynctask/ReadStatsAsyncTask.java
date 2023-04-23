@@ -24,7 +24,7 @@ import cz.fungisoft.coffeecompass2.entity.Statistics;
 
 /**
  * AsyncTask to read basic statistics from coffeecompass.cz about saved CoffeeSites.
- * The task runs at the start of the MainActivity.
+ * The task runs at the start of the AboutActivity.
  */
 // TODO refactor to read by Retrofit lib.
 public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {

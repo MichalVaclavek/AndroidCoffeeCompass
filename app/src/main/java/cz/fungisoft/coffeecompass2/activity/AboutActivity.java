@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -45,7 +47,7 @@ public class AboutActivity extends AppCompatActivity {
      * To indicate if a user clicked on statistics View, to load latest
      * CoffeeSites after reading statistics.
      */
-    private boolean statisticsCalledUponUsersClick = true;
+    private boolean statisticsCalledUponUsersClick = false;
 
 
     @Override
@@ -150,6 +152,19 @@ public class AboutActivity extends AppCompatActivity {
         sitesView.setText(stats.numOfSites);
         sitesToday.setText(stats.numOfSitesToday);
         sites7View.setText(stats.numOfSitesLastWeek);
+
+        // if number of sites in last week is greater then 0, color the label text to Blue and make it Bol
+        // to indicate, that it is clicable showing list of new sites
+        TextView sites7ViewLabel = findViewById(R.id.last7DaysLabelTextView);
+        if (Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
+//            sites7ViewLabel.setTypeface(null, Typeface.BOLD);
+            sites7ViewLabel.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.quantum_googblue));
+        }
+        if (Integer.parseInt(stats.numOfSitesLastWeek) == 0) {
+            sites7ViewLabel.setTypeface(null, Typeface.NORMAL);
+            sites7ViewLabel.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimaryDark));
+        }
+
         if (statisticsPrefencesHelper.getNumOfSitesLastWeekChanged()) {
             statisticsAndNewsCardView.setCardBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }

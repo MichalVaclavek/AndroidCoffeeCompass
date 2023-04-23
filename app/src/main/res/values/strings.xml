@@ -23,14 +23,15 @@
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
     <string name="about_version">v. 2.2.0</string>
-    <string name="about_datum">29. 03. 2023</string>
+    <string name="about_datum">23. 04. 2023</string>
 
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
     <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokaci,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. Lokaci lze vytvořit i bez aktuálního připojení k internetu a nahrát na server později.</string>
     <string name="about_sentence5">Lze si také objednat odběr novinek, tj. upozornění, že byla zaevidována nová kávová lokace.</string>
     <string name="about_sentence4">Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="https://www.coffeecompass.cz">coffeecompass.cz</a></b>, a pomozte evidovat další kávové lokace.</string>
-    <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>
+<!--    <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>-->
+    <string name="about_sentence_widget"></string>
     <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
     <string name="about_coffeecompass_link">"<a href="https://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
