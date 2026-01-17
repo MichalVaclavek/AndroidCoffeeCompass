@@ -2,21 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="cz.fungisoft.coffeecompass2">
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality.
-    -->
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
-
-    <!-- For photo saving ? -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- For picture reading -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- needed for Widget handling for Pre-Oreo devices -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -34,17 +29,9 @@
         android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <!--
-         Set custom default icon. This is used when no icon is set for incoming notification messages.
-        See README(https://goo.gl/l4GJaQ) for more.
-        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/cup_rating_full_3" />
-        <!--
-          Set color used with incoming notification messages. This is used when no color is set for the incoming
-          notification message. See README(https://goo.gl/6BKBk7) for more.
-        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
@@ -52,7 +39,8 @@
         <activity
             android:name=".widgets.WidgetConfigurationActivity"
             android:screenOrientation="portrait"
-            android:label="@string/title_activity_widget_configuration" /> <!-- Receiver for app. Widget -->
+            android:label="@string/title_activity_widget_configuration" />
+        
         <receiver
             android:name=".widgets.MainAppWidgetProvider"
             android:icon="@drawable/cup_48"
@@ -61,20 +49,11 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/main_app_widget_info" />
-        </receiver> <!-- The content provider for Widget -->
+        </receiver>
 
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -95,7 +74,7 @@
 
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false" /> <!-- Needed to read Google maps over http in API 28 -->
+            android:required="false" />
 
         <activity
             android:name=".activity.ui.notification.NewsSubscriptionActivity"
@@ -119,7 +98,9 @@
         <service
             android:name=".services.LocationService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:foregroundServiceType="location" />
+        
         <service
             android:name=".services.CoffeeSitesFoundService"
             android:enabled="true"
@@ -202,8 +183,6 @@
             android:screenOrientation="portrait"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
-
-            <!-- enable the search dialog to send searches to StaticCoffeeSitesListActivity -->
             <meta-data android:name="android.app.default_searchable"
                        android:value=".activity.ui.coffeesite.StaticCoffeeSitesListActivity" />
             <meta-data
@@ -239,7 +218,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- enable the search dialog to send searches to StaticCoffeeSitesListActivity -->
             <meta-data android:name="android.app.default_searchable"
                        android:value=".activity.ui.coffeesite.StaticCoffeeSitesListActivity" />
         </activity>
@@ -250,7 +228,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
-            <!--            Performing search of CoffeeSites by city name-->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>

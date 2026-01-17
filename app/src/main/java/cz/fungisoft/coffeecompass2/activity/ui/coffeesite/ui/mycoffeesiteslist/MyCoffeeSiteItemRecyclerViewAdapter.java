@@ -376,7 +376,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     void onInsertAuthorCommentDialogPositiveClick(InsertAuthorCommentDialogFragment dialog) {
         if (dialog != null && !dialog.getAuthorComment().equals(selectedCoffeeSite.getUvodniKoment())) {
-            if (coffeeSiteStatusChangeService != null) {
+            if (coffeeSiteCUDOperationsService != null) {
                 mParentActivity.showProgressbar();
                 updatingCommentOnly = true;
                 selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());

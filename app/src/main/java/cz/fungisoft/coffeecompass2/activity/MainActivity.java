@@ -802,7 +802,7 @@ public class MainActivity extends ActivityWithLocationService
         TownNamesArrayAdapter townNamesArrayAdapter = new TownNamesArrayAdapter(getApplicationContext(), R.layout.suggestion);
         townNamesArrayAdapter.setNotifyOnChange(true);
 
-        SearchView.SearchAutoComplete searchAutoComplete = (SearchView.SearchAutoComplete) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         searchAutoComplete.setThreshold(2);
         searchAutoComplete.setAdapter(townNamesArrayAdapter);
 
@@ -979,7 +979,6 @@ public class MainActivity extends ActivityWithLocationService
             startActivity(mapIntent);
         }
     }
-
 
     public void onSearchCoffeeClick(View view) {
         if (location == null) {
