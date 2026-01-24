@@ -518,13 +518,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     private void refreshDetailFragment(CoffeeSite coffeeSite) {
         if (coffeeSite != null) {
             if (detailsCollectionFragment == null) {
-                createAndShowDetailsFragments(this.coffeeSite);
+                createAndShowDetailsFragments(coffeeSite);
             }
             else {
                 detailsCollectionFragment.setCoffeeSite(coffeeSite);
                 final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.detach(detailsCollectionFragment);
-                ft.attach(detailsCollectionFragment);
+//                ft.detach(detailsCollectionFragment);
+//                ft.attach(detailsCollectionFragment);
                 ft.commit();
             }
         }
@@ -548,7 +548,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     /**
      * Stars rating has been updated, reload the coffee site to show current data.
-     * @param comment
+     * @param result
      */
     @Override
     public void processUpdatedStarsRating(Integer result) {

@@ -366,7 +366,7 @@ public class CommentsListActivity extends AppCompatActivity
      * @param comments
      */
     @Override
-    public void processUpdatedComment(Comment updatedComment) {
+    public void  processUpdatedComment(Comment updatedComment) {
         if (this.siteComments != null) {
             for (Comment comment : this.siteComments) {
                 if (comment != null && comment.getId() == updatedComment.getId()) {

@@ -110,19 +110,19 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Is capable to detect it's current location to allow searching of CoffeeSites based on current location.
  */
 public class MainActivity extends ActivityWithLocationService
-                          implements PropertyChangeListener,
-                                     UserAccountServiceConnectionListener,
-                                     CoffeeSiteEntitiesServiceConnectionListener,
-                                     CoffeeSiteEntitiesServiceOperationsListener,
-                                     CoffeeSiteServicesConnectionListener,
-                                     CoffeeSiteLoadServiceOperationsListener,
-                                     CoffeeSitesInRangeServiceConnectionListener {
+        implements PropertyChangeListener,
+        UserAccountServiceConnectionListener,
+        CoffeeSiteEntitiesServiceConnectionListener,
+        CoffeeSiteEntitiesServiceOperationsListener,
+        CoffeeSiteServicesConnectionListener,
+        CoffeeSiteLoadServiceOperationsListener,
+        CoffeeSitesInRangeServiceConnectionListener {
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private static final String TAG = "MainActivity";
 
-    private static final long MAX_STARI_DAT = 1000 * 60; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
-    private static final float GOOD_PRESNOST = 10.0f;
+    private static final long MAX_STARI_DAT = 1000 * 60 * 15; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
+    private static final float GOOD_PRESNOST = 20.0f;
     private static final float LAST_PRESNOST = 500.0f;
 
     private boolean firstLocationDetection = true;
@@ -694,7 +694,7 @@ public class MainActivity extends ActivityWithLocationService
     private void updateNumberOfSitesInDistancesViews(final Map<String, Integer> numOfAllCoffeeSitesInRanges) {
         for (int i = searchDistances.length - 1; i >= 0; i--) {
             if (numOfAllCoffeeSitesInRanges.get(searchDistances[i]) != null
-                && numOfAllCoffeeSitesInRanges.get(searchDistances[i]) > 0) {
+                    && numOfAllCoffeeSitesInRanges.get(searchDistances[i]) > 0) {
                 numberOfCoffeeSitesInDistanceCardViews[i].setStrokeColor(getColor(R.color.colorPrimary2));
                 numberOfCoffeeSitesInDistanceCardViews[i].setStrokeWidth(6);
                 numberOfCoffeeSitesInDistanceTextViews[i].setText(numOfAllCoffeeSitesInRanges.get(searchDistances[i]).toString());
@@ -761,10 +761,10 @@ public class MainActivity extends ActivityWithLocationService
 ////            accuracy.setText("(\u00B1 " + Math.round(location.getAccuracy()) + " m)"); // not needed to show to user
 //        } else {
 //            setAccuracyTextColor(barvaRed);
-////            accuracy.setText("");
+
+    /// /            accuracy.setText("");
 //        }
 //    }
-
     @SuppressLint("RestrictedApi") // due to searchAutoComplete.setThreshold(2);
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -1037,13 +1037,8 @@ public class MainActivity extends ActivityWithLocationService
             locationService.addPropertyChangeListener(this);
             updateAccuracyIndicator(location);
             startReadingNumberOfSitesInRanges();
+            searchKafeButton.setEnabled(location != null);
         }
-
-//        showLocationAccuracy(location);
-
-//        if (location != null) {
-//            searchKafeButton.setEnabled(true);
-//        }
     }
 
     @Override
@@ -1068,7 +1063,6 @@ public class MainActivity extends ActivityWithLocationService
             locationService.addPropertyChangeListener(this);
             location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
 
-//            showLocationAccuracy(location);
             updateAccuracyIndicator(location);
 
             searchKafeButton.setEnabled(location != null);
@@ -1280,8 +1274,6 @@ public class MainActivity extends ActivityWithLocationService
 //        NotificationSubscriptionPreferencesHelper preferencesHelper = new NotificationSubscriptionPreferencesHelper(this);
 //        Log.i(TAG, "Current firebase token: " + preferencesHelper.getFirebaseToken());
 //    }
-
-
     private static List<Integer> convertToIntList(String[] numbers) {
         List<Integer> intList = new ArrayList<>();
         for (String number : numbers) {

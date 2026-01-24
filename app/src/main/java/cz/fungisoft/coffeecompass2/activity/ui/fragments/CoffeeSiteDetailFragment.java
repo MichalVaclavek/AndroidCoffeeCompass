@@ -94,6 +94,10 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
 
     public void setCoffeeSite(CoffeeSite csm) {
        this.coffeeSite = csm;
+        // Pokud je fragment již zobrazen, aktualizuj UI hned
+        if (rootView != null && coffeeSite != null) {
+            showAllCoffeeSiteInfo(rootView, coffeeSite);
+        }
     }
 
     public void setCurrentUser(LoggedInUser mCurrentUser) {

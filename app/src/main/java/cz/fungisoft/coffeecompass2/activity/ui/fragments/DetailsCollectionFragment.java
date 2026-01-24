@@ -94,6 +94,7 @@ public class DetailsCollectionFragment extends Fragment {
     }
 
     public void setCoffeeSite(CoffeeSite csm) {
+        this.coffeeSite = csm;
         if (coffeeSiteDetailsTabsAdapter != null) {
             coffeeSiteDetailsTabsAdapter.setCoffeeSite(csm);
         }
