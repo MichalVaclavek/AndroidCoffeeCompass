@@ -1,15 +1,10 @@
 package cz.fungisoft.coffeecompass2.services;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -58,10 +53,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     public static final int JOB_ID = 1010;
 
-    public static final int NOTIFICATION_ID = 121234;
-
-    private static final long MAX_STARI_DAT = 1000 * 300; // pokud jsou posledni zname udaje o poloze starsi jako 5 minuty, zjistit nove
-    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pockat na lepsi
+    private static final long MAX_STARI_DAT = 1000 * 60 * 30; // 30 minutes for widget is fine
+    private static final float LAST_PRESNOST = 2000.0f; // 2km accuracy is enough for widget initial search
 
     private static final String TAG = "SitesInRangeWidgetSrv";
 
@@ -101,45 +94,15 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      */
     private Boolean serviceInvokedByUser = false;
 
+    private CountDownLatch workDoneLatch;
+
     /**
-     * Called for Android API >= 26 using context.startForegroundService(sitesInRangeServiceIntent);
-     * from MainAppWidgetProvider
+     * JobIntentService handles its own lifecycle. onStartCommand is not used for Foreground mode anymore.
      */
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
-        prepareAndStartForeground();
-        starWorkOnWidgetRequest(intent);
-        return START_STICKY;
+        return super.onStartCommand(intent, flags, startId);
     }
-
-    /**
-     * Method to prepare this service to as a Foreground service. Needed for Android API >= 26
-     * For lower API the enqueue() method is used to invoke this service action.
-     */
-    private void prepareAndStartForeground() {
-        if (Build.VERSION.SDK_INT >= 26) {
-            String CHANNEL_ID = "my_channel_01";
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Start Widget update", NotificationManager.IMPORTANCE_LOW);
-
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-
-            //Intent notificationIntent = new Intent(this, FoundCoffeeSitesListActivity.class); 
-            Intent notificationIntent = new Intent(this, CoffeeSitesInRangeWidgetService.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-            Notification notification = new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle(getText(R.string.widget_notification_title))
-                .setContentText(getText(R.string.widget_notification_message))
-                .setSmallIcon(R.drawable.cup_rating_full_3)
-                .setContentIntent(pendingIntent)
-                .setTicker(getText(R.string.widget_ticker_text))
-                .build();
-
-            startForeground(NOTIFICATION_ID, notification);
-        }
-    }
-
 
     /**
      * Start method of this service to be called from Widget
@@ -166,18 +129,20 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      */
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.i(TAG, "Service invoked from MainAppWidgetProvider: onHandleWork()");
-        if (theOnlyJobIhave == null) {
-            theOnlyJobIhave = intent;
-            try {
-                starWorkOnWidgetRequest(intent);
-            } catch (Exception ex) {
-                Log.e(TAG, "onHandleWork() exception during starWorkOnWidgetRequest(). Ex.: " + ex.getMessage());
+        Log.i(TAG, "onHandleWork() started");
+        workDoneLatch = new CountDownLatch(1); // Inicializace latch
+        try {
+            starWorkOnWidgetRequest(intent);
+
+            // ZABLOKOVAT vlákno a čekat, dokud se nevolá updateWidget (max 50s)
+            boolean finished = workDoneLatch.await(50, TimeUnit.SECONDS);
+            if (!finished) {
+                Log.w(TAG, "onHandleWork() timed out.");
             }
-        } else {
-            Log.d(TAG, "onHandleWork I'm already busy, refuse to work >:(");
+        } catch (InterruptedException e) {
+            Log.e(TAG, "onHandleWork() interrupted", e);
         }
-        Log.d(TAG, "onHandleWork end");
+        Log.i(TAG, "onHandleWork() finished");
     }
 
     /**
@@ -205,10 +170,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
 
     private void doBindLocationService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other applications).
         Log.i(TAG, "Binding location service ...");
         locationServiceConnector = new LocationServiceConnector(this);
         if (bindService(new Intent(this, LocationService.class),
@@ -224,24 +185,26 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         locationService = locationServiceConnector.getLocationService();
 
         if (locationService != null) {
-            startLocationFoundTimerTask();
             locationService.addPropertyChangeListener(this);
             Log.d(TAG, "Location service binded.");
+            
+            // For widget, we can use older and less accurate location to start with
             Location lastLocation =  locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationSearchFinished = false;
+            
             if (lastLocation != null) {
                 if (serviceInvokedByUser) {
                     Toast.makeText(this, R.string.widget_toast_searching_coffee, Toast.LENGTH_SHORT).show();
                 }
-                Log.d(TAG, "Last location found.");
+                Log.d(TAG, "Last location found for widget.");
                 searchLocationOfCurrentSites = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                Log.d(TAG, "Last location accuracy: " + lastLocation.getAccuracy());
-                if (lastLocation.getAccuracy() < LAST_PRESNOST) {
-                    locationSearchFinished = true;
-                }
+                locationSearchFinished = true; // For widget, we consider this enough to start searching
+                
                 if (!isSearchingSites) {
                     startSearchCurrentSitesForWidget();
                 }
+            } else {
+                startLocationFoundTimerTask();
             }
         }
     }
@@ -249,8 +212,9 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     private void doUnbindLocationService() {
         if (mShouldUnbind) {
-            locationService.removePropertyChangeListener(this);
-            // Release information about the service's state.
+            if (locationService != null) {
+                locationService.removePropertyChangeListener(this);
+            }
             unbindService(locationServiceConnector);
             Log.i(TAG, "Location service unbinded.");
             mShouldUnbind = false;
@@ -303,6 +267,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     @Override
     public void onSitesInRangeReturnedFromServerError(String error) {
         isSearchingSites = false;
+        updateWidget(null, null);
     }
 
     /**
@@ -317,7 +282,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             d.dispose();
         }
 
-        if ((locationFoundTimer != null) && locationSearchFinished) {
+        if (locationFoundTimer != null) {
             locationFoundTimer.cancel();
             Log.d(TAG, "Timer cancelled.");
         }
@@ -325,8 +290,10 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
         Log.d(TAG, "Updating widget with found coffeeSites.");
         MainAppWidgetProvider.updateCoffeeSiteWidget(this, coffeeSites, locationSearchFinished);
 
-        if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.O) && locationSearchFinished ) { // was started using enqueue()
-            stopSelf();
+        doUnbindLocationService();
+
+        if (workDoneLatch != null) {
+            workDoneLatch.countDown(); // UVOLNIT onHandleWork, práce je hotová
         }
     }
 
@@ -358,7 +325,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     private void startLocationFoundTimerTask() {
         TimerTask task = new TimerTask() {
             public void run() {
-                Log.d(TAG, "Timer task performed on: " + new Date() + ". Thread's name: " + Thread.currentThread().getName());
+                Log.d(TAG, "Timer task performed on: " + new Date());
                 locationSearchFinished = true;
                 updateWidget(null, null);
             }
@@ -372,8 +339,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "Unbinding Location service.");
-        locationService.removePropertyChangeListener(this);
         doUnbindLocationService();
         super.onDestroy();
     }
@@ -396,12 +361,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      * @param searchLocation current search location
      */
     private void startSearchCoffeeSitesInDB(LatLng searchLocation, int range) {
-       /*
-        Needed to process results of DB search returned as Single in the Main thread
-        DB request must run in separate thread, therefore AsyncTask is created,
-        but Picasso library (used by Widget) works in Main thread, therefore update of Widget cannot
-        be called from AsyncTask from onSuccess() of the DisposableSingleObserver
-        */
         final CountDownLatch latch = new CountDownLatch(1);
         isSearchingSites = true;
         Log.i(TAG, "Start Async task for searching in DB.");

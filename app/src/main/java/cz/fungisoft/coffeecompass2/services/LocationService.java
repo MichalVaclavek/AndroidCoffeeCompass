@@ -134,7 +134,7 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startAsForeground();
         requestLocationUpdates();
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void startAsForeground() {
@@ -182,6 +182,16 @@ public class LocationService extends Service {
         return mBinder;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        if (locManager != null && locListener != null) {
+            locManager.removeUpdates(locListener);
+        }
+        stopSelf();
+        return super.onUnbind(intent);
+    }
+
+
     public Location getPosledniPozice(float minAccuracy, long cas) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return null;
@@ -197,10 +207,15 @@ public class LocationService extends Service {
             }
         }
 
+        if (bestLocation == null) {
+            Log.d(TAG, "Žádná poslední známá poloha nebyla nalezena.");
+            return null;
+        }
+
         long vekPolohySekundy = (System.currentTimeMillis() - bestLocation.getTime()) / 1000;
         Log.d(TAG, "Nalezena poloha je stará: " + vekPolohySekundy + " s. Limit je: " + (cas / 1000) + " s.");
 
-        if (bestLocation != null && (System.currentTimeMillis() - bestLocation.getTime() < cas)) {
+        if (System.currentTimeMillis() - bestLocation.getTime() < cas) {
             return bestLocation;
         }
         return null;

@@ -101,20 +101,12 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
         sitesInRangeServiceIntent.putExtra("serviceInvokedByUser", invokedByUser);
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
-                if (!serviceStarted) {
-                    context.startForegroundService(sitesInRangeServiceIntent);
-                    serviceStarted = true;
-                    Log.i(TAG, "CoffeeSitesInRangeWidgetService started.");
-                }
-            } else {
-                CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent);
-                Log.i(TAG, "CoffeeSitesInRangeWidgetService started - enqueueWork()");
-            }
-
+            // Vždy používat enqueueWork, nikdy startForegroundService
+            CoffeeSitesInRangeWidgetService.enqueueWork(context, sitesInRangeServiceIntent);
+            Log.i(TAG, "CoffeeSitesInRangeWidgetService enqueued via enqueueWork().");
         }
         catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+            Log.e(TAG, "Error starting service: " + ex.getMessage());
         }
     }
 
