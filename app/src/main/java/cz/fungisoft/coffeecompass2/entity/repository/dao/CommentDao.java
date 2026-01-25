@@ -26,7 +26,7 @@ public interface CommentDao {
 
     @Transaction
     @Query("SELECT * FROM coffee_site_table WHERE id = :coffeeSiteId LIMIT 1")
-    LiveData<List<CoffeeSiteWithComments>> getCoffeeSiteWithComments(long coffeeSiteId);
+    LiveData<List<CoffeeSiteWithComments>> getCoffeeSiteWithComments(String coffeeSiteId);
 
     @Query("DELETE FROM comment_table")
     void deleteAll();
@@ -37,5 +37,4 @@ public interface CommentDao {
     @Transaction
     @Insert
     void insertComment(Comment comment);
-
 }

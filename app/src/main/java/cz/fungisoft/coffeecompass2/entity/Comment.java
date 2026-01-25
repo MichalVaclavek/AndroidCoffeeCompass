@@ -34,7 +34,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("coffeeSiteID")
-    private long coffeeSiteID;
+    private String coffeeSiteID;
 
     @Expose
     @SerializedName("userName")
@@ -42,7 +42,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Expose
     @SerializedName("userId")
-    private long userId;
+    private String userId;
 
     /**
      * The server sends also info about stars rating from the UserName for this
@@ -60,12 +60,12 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
     private final SimpleDateFormat dateFormater = new SimpleDateFormat("dd.MM. yyyy HH:mm");
 
     protected Comment(Parcel in) {
-        id = in.readInt();
+        id = in.readString();
         text = in.readString();
         createdOnString = in.readString();
-        coffeeSiteID = in.readLong();
+        coffeeSiteID = in.readString();
         userName = in.readString();
-        userId = in.readLong();
+        userId = in.readString();
         starsFromUser = in.readInt();
         canBeDeleted = in.readByte() != 0;
     }
@@ -89,19 +89,14 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(text);
         dest.writeString(createdOnString);
-        dest.writeLong(coffeeSiteID);
+        dest.writeString(coffeeSiteID);
         dest.writeString(userName);
-        dest.writeLong(userId);
+        dest.writeString(userId);
         dest.writeInt(starsFromUser);
         dest.writeByte((byte) (canBeDeleted ? 1 : 0));
-    }
-
-
-    public int getId() {
-        return id;
     }
 
     public String getText() {
@@ -116,11 +111,11 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         return created;
     }
 
-    public long getCoffeeSiteID() {
+    public String getCoffeeSiteID() {
         return coffeeSiteID;
     }
 
-    public void setCoffeeSiteID(long coffeeSiteID) {
+    public void setCoffeeSiteID(String coffeeSiteID) {
         this.coffeeSiteID = coffeeSiteID;
     }
 
@@ -132,11 +127,11 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         this.userName = userName;
     }
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -150,11 +145,13 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
 
     public void setCreated(Date created) {
         this.created = created;
-        this.createdOnString = dateFormater.format(this.created);
+        if (this.created != null) {
+            this.createdOnString = dateFormater.format(this.created);
+        }
     }
 
     public String getCreatedOnString() {
-        if (createdOnString == null) {
+        if (createdOnString == null && created != null) {
             setCreated(created);
         }
         return createdOnString;
@@ -165,7 +162,6 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         this.createdOnString = createdOnString;
 
         Date created;
-        //SimpleDateFormat format = new SimpleDateFormat("dd.MM. yyyy HH:mm");
         try {
             created = dateFormater.parse( this.createdOnString);
         } catch (ParseException e) {
@@ -186,10 +182,10 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
     public Comment() {}
 
     public Comment(String emptyText) {
-        this(0, emptyText, 0, "", 0, false, 0);
+        this("", emptyText, "", "", "", false, 0);
     }
 
-    private Comment(Integer id, String commentText, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    private Comment(String id, String commentText, String coffeeSiteId, String userName, String userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this.id = id;
         this.text = commentText;
         this.coffeeSiteID = coffeeSiteId;
@@ -200,18 +196,19 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
         setCreated(new Date());
     }
 
-    public Comment(Integer id, String commentText, Date createdOn, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    public Comment(String id, String commentText, Date createdOn, String coffeeSiteId, String userName, String userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this(id, commentText, coffeeSiteId, userName, userId, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreated(createdOn);
     }
 
-    public Comment(Integer id, String commentText, String createdOnString, long coffeeSiteId, String userName, long userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
+    public Comment(String id, String commentText, String createdOnString, String coffeeSiteId, String userName, String userId, boolean canBeDeleted, int starsFromUserForTheCoffeeSite) {
         this(id, commentText, coffeeSiteId, userName, userId, canBeDeleted, starsFromUserForTheCoffeeSite);
         setCreatedOnString(createdOnString);
     }
 
     @Override
     public int compareTo(Comment o) {
+        if (getCreated() == null || o.getCreated() == null) return 0;
         return getCreated().compareTo(o.getCreated());
     }
 }

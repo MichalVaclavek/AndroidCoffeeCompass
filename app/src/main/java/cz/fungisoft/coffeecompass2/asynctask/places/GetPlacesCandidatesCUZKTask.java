@@ -76,57 +76,60 @@ public class GetPlacesCandidatesCUZKTask extends AsyncTask<Void, Void, Void> {
         call = api.getPlacesCandidates(this.nameOfPlace, this.maxPlaces);
 
         Log.i(TAG, "start call");
-        if (call != null)
-        call.enqueue(new Callback<CuzkCandidates>() {
-            @Override
-            public void onResponse(Call<CuzkCandidates> call, Response<CuzkCandidates> response) {
-                if (response.isSuccessful()) {
-                    int responseCode = response.code();
-                    if (responseCode == 504) {return;}
+        if (call != null) {
+            call.enqueue(new Callback<CuzkCandidates>() {
+                @Override
+                public void onResponse(Call<CuzkCandidates> call, Response<CuzkCandidates> response) {
+                    if (response.isSuccessful()) {
+                        int responseCode = response.code();
+                        if (responseCode == 504) {
+                            return;
+                        }
 
-                    if (response.body() != null) {
-                        Log.i(TAG, "onSuccess()");
-                        CuzkCandidates candidates = response.body();
-                        //operationResult = "OK";
-                        Result.Success<CuzkCandidates> result = new Result.Success<>(candidates);
-                        if (resultListener != null) {
-                            resultListener.onCandidatesReturned(result);
+                        if (response.body() != null) {
+                            Log.i(TAG, "onSuccess()");
+                            CuzkCandidates candidates = response.body();
+                            //operationResult = "OK";
+                            Result.Success<CuzkCandidates> result = new Result.Success<>(candidates);
+                            if (resultListener != null) {
+                                resultListener.onCandidatesReturned(result);
+                            }
+                        } else {
+                            Log.i(TAG, "Returned empty response for loading places candidates.");
+                            error = new Result.Error(new IOException("Error obtaining places candidates. Response empty."));
+                            operationError = error.toString();
+                            if (resultListener != null) {
+                                resultListener.onCandidatesReturned(error);
+                            }
                         }
                     } else {
-                        Log.i(TAG, "Returned empty response for loading places candidates.");
-                        error = new Result.Error(new IOException("Error obtaining places candidates. Response empty."));
-                        operationError = error.toString();
+                        try {
+                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                        } catch (IOException e) {
+                            Log.e(TAG, e.getMessage());
+                            operationError = "Chyba komunikace se serverem.";
+                        }
+                        Log.e(TAG, "response Not successful");
+                        if (error == null) {
+                            error = new Result.Error(operationError);
+                        }
                         if (resultListener != null) {
                             resultListener.onCandidatesReturned(error);
                         }
                     }
-                } else {
-                    try {
-                        error = new Result.Error(Utils.getRestError(response.errorBody().string()));
-                    } catch (IOException e) {
-                        Log.e(TAG, e.getMessage());
-                        operationError = "Chyba komunikace se serverem.";
-                    }
-                    Log.e(TAG, "response Not successful");
-                    if (error == null) {
-                        error = new Result.Error(operationError);
-                    }
+                }
+
+                @Override
+                public void onFailure(Call<CuzkCandidates> call, Throwable t) {
+                    Log.e(TAG, "Error loading places candidates." + t.getMessage());
+                    error = new Result.Error(new IOException("Error loading places candidates.", t));
+                    operationError = error.toString();
                     if (resultListener != null) {
                         resultListener.onCandidatesReturned(error);
                     }
                 }
-            }
-
-            @Override
-            public void onFailure(Call<CuzkCandidates> call, Throwable t) {
-                Log.e(TAG, "Error loading places candidates." + t.getMessage());
-                error = new Result.Error(new IOException("Error loading places candidates.", t));
-                operationError = error.toString();
-                if (resultListener != null) {
-                    resultListener.onCandidatesReturned(error);
-                }
-            }
-        });
+            });
+        }
 
         return null;
     }

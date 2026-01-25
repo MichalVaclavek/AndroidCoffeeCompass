@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -35,23 +36,25 @@ public class CoffeeSite implements Serializable,
 
     @Expose
     @SerializedName("id")
-    @PrimaryKey(autoGenerate = true)
-    protected long id;
+    @PrimaryKey
+    @NonNull
+    protected String id = "";
 
-    public long getId() {
+    @NonNull
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 
     /**
      * Pomocny atribute to save local DB id. Used in case the CoffeeSite upload fails and we
-     * need to restore original id as it has to be changed to 0 before uploading brand new CoffeeSite
+     * need to restore original id as it has to be changed to 0/empty before uploading brand new CoffeeSite
      */
     @Ignore
-    private long localDBid;
+    private String localDBid = "";
 
     public void saveId() {
         this.localDBid = id;
@@ -274,7 +277,7 @@ public class CoffeeSite implements Serializable,
     public CoffeeSite() {
     }
 
-    public CoffeeSite(int id, String name, long dist) {
+    public CoffeeSite(String id, String name, long dist) {
         this();
         setId(id);
         setName(name);
@@ -306,7 +309,7 @@ public class CoffeeSite implements Serializable,
             comments = in.readArrayList(Comment.class.getClassLoader());
         }
 
-        id = in.readLong();
+        id = in.readString();
         name = in.readString();
         distance = in.readLong();
 
@@ -357,11 +360,11 @@ public class CoffeeSite implements Serializable,
 
         dest.writeList(comments);
 
-        dest.writeLong(id);
+        dest.writeString(id);
         dest.writeString(name);
         dest.writeLong(distance);
 
-        dest.writeLong(createdOn.getTime());
+        dest.writeLong(createdOn != null ? createdOn.getTime() : 0);
         dest.writeString(getCreatedOnString());
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
@@ -749,7 +752,7 @@ public class CoffeeSite implements Serializable,
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CoffeeSite that = (CoffeeSite) o;
-        return id == that.id;
+        return Objects.equals(id, that.id);
     }
 
     @Override
@@ -781,7 +784,7 @@ public class CoffeeSite implements Serializable,
     public String toString() {
         return "CoffeeSite{" +
                 "name='" + name + '\'' +
-                ", id=" + id +
+                ", id='" + id + '\'' +
                 '}';
     }
 }

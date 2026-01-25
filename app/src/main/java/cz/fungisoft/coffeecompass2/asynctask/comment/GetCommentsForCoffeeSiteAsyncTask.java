@@ -39,9 +39,9 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
 
     private List<Comment> comments;
 
-    private final long coffeeSiteID;
+    private final String coffeeSiteID;
 
-    public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, long coffeeSiteID) {
+    public GetCommentsForCoffeeSiteAsyncTask(CommentsListActivity parentActivity, String coffeeSiteID) {
         this.parentActivity = new WeakReference<>(parentActivity);
         this.coffeeSiteID = coffeeSiteID;
 
@@ -67,18 +67,16 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
 
                 inpStream = new BufferedInputStream(conn.getInputStream());
 
-                if (inpStream != null) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, StandardCharsets.UTF_8));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, StandardCharsets.UTF_8));
 
-                    StringBuilder sb = new StringBuilder();
-                    String radek = null;
+                StringBuilder sb = new StringBuilder();
+                String radek = null;
 
-                    while ((radek = reader.readLine()) != null) {
-                        sb.append(radek + "\n");
-                    }
-
-                    sJSON = sb.toString();
+                while ((radek = reader.readLine()) != null) {
+                    sb.append(radek + "\n");
                 }
+
+                sJSON = sb.toString();
             } else {
                 if (statusCode >= 400) { // resource not found, napr. 404, kdy nebyl nalezen prislusny Controller na serveru
                     Log.e(TAG, "Server error, status code 40X.");
@@ -127,13 +125,13 @@ public class GetCommentsForCoffeeSiteAsyncTask extends AsyncTask<String, String,
 
                         JSONObject commentObject = jsonCommentsArray.getJSONObject(i);
 
-                        Integer id = commentObject.getInt("id");
+                        String id = commentObject.getString("id");
                         String commentText = commentObject.getString("text");
                         String createdOn = commentObject.getString("created");
 
-                        Integer coffeeSiteId = commentObject.getInt("coffeeSiteID");
+                        String coffeeSiteId = commentObject.getString("coffeeSiteID");
                         String userName = commentObject.getString("userName");
-                        int userId = commentObject.getInt("userId");
+                        String userId = commentObject.getString("userId");
                         int starsFromUserForCS = commentObject.getInt("starsFromUser");
                         boolean canBeDeleted = commentObject.getBoolean("canBeDeleted");
 

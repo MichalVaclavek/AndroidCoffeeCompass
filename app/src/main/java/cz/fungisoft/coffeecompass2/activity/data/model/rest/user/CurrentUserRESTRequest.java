@@ -10,6 +10,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
@@ -93,7 +94,9 @@ public class CurrentUserRESTRequest {
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .client(client)
@@ -108,7 +111,7 @@ public class CurrentUserRESTRequest {
         // We need further parsing of the JSON upon receiving response
         Call<String> call = api.getCurrentUser();
 
-        call.enqueue(new Callback<String>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
 
@@ -131,7 +134,6 @@ public class CurrentUserRESTRequest {
                                 userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error JSON parsing current user data.", e)));
                             }
                         }
-                        return;
                     } else {
                         Log.i(REQ_TAG, "Returned empty response");
                     }

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
@@ -29,6 +30,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositorie
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -82,12 +84,13 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
 
         Gson gson = new GsonBuilder().setLenient().create();
 
-        //Add the interceptor to the client builder.
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .baseUrl(CoffeeSiteEntitiesRESTInterface.GET_ENTITY_BASE)
                 .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+                .addConverterFactory(GsonConverterFactory.create(gson));
+
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+        Retrofit retrofit = retrofitBuilder.client(clientBuilder.build()).build();
 
         CoffeeSiteEntitiesRESTInterface api = retrofit.create(CoffeeSiteEntitiesRESTInterface.class);
 

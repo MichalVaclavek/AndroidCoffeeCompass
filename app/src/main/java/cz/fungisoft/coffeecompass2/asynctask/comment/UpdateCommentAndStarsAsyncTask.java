@@ -63,7 +63,7 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                                                   .authenticator(new TokenAuthenticator(userAccountService))
                                                   .addInterceptor(headerAuthorizationInterceptor).build();
 

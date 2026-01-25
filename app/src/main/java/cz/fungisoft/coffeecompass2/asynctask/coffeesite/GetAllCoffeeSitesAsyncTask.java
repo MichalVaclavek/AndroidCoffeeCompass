@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -53,18 +54,20 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         operationError = "";
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        clientBuilder.connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(180, TimeUnit.SECONDS) // 5 minutes
-                .build();
+                .readTimeout(180, TimeUnit.SECONDS); // 5 minutes
+
+//        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
                 .setDateFormat("dd. MM. yyyy HH:mm")
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
+                .client(clientBuilder.build())
                 .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
@@ -76,7 +79,7 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<List<CoffeeSite>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 if (response.isSuccessful()) {

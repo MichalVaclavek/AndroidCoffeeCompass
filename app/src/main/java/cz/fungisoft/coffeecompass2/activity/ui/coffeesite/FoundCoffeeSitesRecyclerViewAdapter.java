@@ -61,8 +61,8 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     private final int currentSearchRange;
 
-    private static final CoffeeSiteMovable DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable(0, "Dummy", 0);
-    private static final CoffeeSiteMovable INITIAL_DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable(0, "InitialDummy", 0);
+    private static final CoffeeSiteMovable DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable("", "Dummy", 0);
+    private static final CoffeeSiteMovable INITIAL_DUMMY_EMPTY_LIST_COFFEE_SITE = new CoffeeSiteMovable("", "InitialDummy", 0);
 
     // Animations for vyhledavam text
     private AlphaAnimation animation1;
@@ -275,7 +275,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                     // Open CoffeeSiteDetailFragment, if the siteMovable is clicked and there is
                     // landscape orientation to show details of the CoffeeSiteMovable holding this siteMovable
                     Bundle arguments = new Bundle();
-                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(siteMovable.getId()));
+                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, siteMovable.getId());
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
                     fragment.setArguments(arguments);
                 } else {

@@ -60,7 +60,7 @@ public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, V
         //operationResult = "";
         operationError = "";
 
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)

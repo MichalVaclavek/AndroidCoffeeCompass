@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
@@ -88,7 +89,7 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 //            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .authenticator(new TokenAuthenticator(userAccountService))
                     .addInterceptor(headerAuthorizationInterceptor)
                     //.addInterceptor(logging)

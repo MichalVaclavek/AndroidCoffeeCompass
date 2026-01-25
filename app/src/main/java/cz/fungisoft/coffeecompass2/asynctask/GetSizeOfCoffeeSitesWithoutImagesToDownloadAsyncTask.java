@@ -35,6 +35,7 @@ public class GetSizeOfCoffeeSitesWithoutImagesToDownloadAsyncTask extends AsyncT
 
         //Add the interceptor to the client builder.
         Retrofit retrofit = new Retrofit.Builder()
+                .client(Utils.getOkHttpClientBuilder().build())
                 .baseUrl(DataDownloadSizesRESTInterface.GET_DATA_DOWNLOAD_SIZE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();

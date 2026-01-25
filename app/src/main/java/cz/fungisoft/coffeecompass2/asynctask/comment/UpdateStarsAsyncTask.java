@@ -8,7 +8,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.UUID;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
@@ -37,11 +39,11 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final UsersCSRatingAndCommentUpdateOperationListener callingActivity;
 
-    private final long coffeeSiteID;
+    private final String coffeeSiteID;
 
     private final int numOfStars;
 
-    public UpdateStarsAsyncTask(UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentUpdateOperationListener callingActivity, long siteId, int stars) {
+    public UpdateStarsAsyncTask(UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentUpdateOperationListener callingActivity, String siteId, int stars) {
         this.callingActivity = callingActivity;
         this.userAccountService = userAccountService;
         this.coffeeSiteID = siteId;
@@ -65,7 +67,7 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                                                   .authenticator(new TokenAuthenticator(userAccountService))
                                                   .addInterceptor(headerAuthorizationInterceptor).build();
 
@@ -82,7 +84,7 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
             CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
-            Call<Integer> call = api.updateStars(coffeeSiteID, userAccountService.getLoggedInUser().getUserId(), numOfStars);
+            Call<Integer> call = api.updateStars(coffeeSiteID.toString(), userAccountService.getLoggedInUser().getUserId(), numOfStars);
 
             call.enqueue(new Callback<Integer>() {
                 @Override

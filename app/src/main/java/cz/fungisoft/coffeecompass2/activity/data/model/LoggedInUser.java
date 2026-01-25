@@ -19,30 +19,10 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 /**
  * Data class that collects user information for logged in users retrieved from UserAccountRepository.
  * Based on server REST API available items for current logged-in user.
- *
- * authProvider": "string",
- *   "createdOn": {
- *     "date": 0,
- *   },
- *   "createdSites": 0,
- *   "deletedSites": 0,
- *   "email": "string",
- *   "firstName": "string",
- *   "id": 0,
- *   "lastName": "string",
- *   "toManageItself": true,
- *   "updatedSites": 0,
- *   "userName": "string",
- *   "userProfiles": [
- *     {
- *       "id": 0,
- *       "type": "string"
- *     }
- *   ]
  */
 public class LoggedInUser implements Serializable {
 
-    private long userId;
+    private String userId;
     private String displayName;
 
     private String userName;
@@ -153,11 +133,11 @@ public class LoggedInUser implements Serializable {
     }
 
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -281,7 +261,7 @@ public class LoggedInUser implements Serializable {
 
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            this.setUserId(jsonObject.getInt("id"));
+            this.setUserId(jsonObject.getString("id"));
             this.setUserName(jsonObject.getString("userName"));
             this.setFirstName(jsonObject.getString("firstName"));
             this.setLastName(jsonObject.getString("lastName"));

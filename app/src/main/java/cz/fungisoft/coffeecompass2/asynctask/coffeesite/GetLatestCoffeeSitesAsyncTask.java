@@ -55,7 +55,7 @@ public class GetLatestCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         operationError = "";
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS) // 1 minute

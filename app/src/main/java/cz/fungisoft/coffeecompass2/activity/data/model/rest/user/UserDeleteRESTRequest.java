@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
@@ -31,7 +32,6 @@ public class UserDeleteRESTRequest {
     /**
      * Standard Constructor
      *
-     * @param user user account to be deleted
      * @param userDeleteService userAccount service to handle results of the deleteUser REST call
      */
     public UserDeleteRESTRequest(UserAccountActionsProvider userDeleteService) {
@@ -55,9 +55,10 @@ public class UserDeleteRESTRequest {
             }
         };
 
-        //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                                              .authenticator(new TokenAuthenticator(userAccountService))
+        // Add the interceptor to the client builder.
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.authenticator(new TokenAuthenticator(userAccountService))
                                               .addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()

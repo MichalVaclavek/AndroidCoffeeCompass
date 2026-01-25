@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -52,7 +53,7 @@ public class RefreshTokenRESTRequest {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        OkHttpClient client = Utils.getOkHttpClientBuilder().addInterceptor(interceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .baseUrl(UserAccountRESTInterface.REFRESH_TOKEN_URL)

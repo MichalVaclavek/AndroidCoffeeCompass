@@ -314,7 +314,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
             // We are editing site here - insert input values to View from currentCoffeeSite
             // "Edit mode"
-            if (currentCoffeeSite != null && currentCoffeeSite.getId() != 0) {
+            if (currentCoffeeSite != null && !currentCoffeeSite.getId().isEmpty()) {
                 mode = MODE_MODIFY;
                 if (coffeeSitePositionInRecyclerView == -1) { // called from CoffeeSiteDetailActivity
                     mode = MODE_MODIFY_FROM_DETAILACTIVITY; // this is to go back to CoffeeSiteDetailActivity if called from there
@@ -1025,7 +1025,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         saveAndActivateRequested = false;
         if (coffeeSiteCUDOperationsService != null) {
             // Set new CoffeeSite ID to 0 before saving on server
-            coffeeSite.setId(0);
+            coffeeSite.setId("");
             coffeeSiteCUDOperationsService.save(coffeeSite);
         }
     }
@@ -1238,7 +1238,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     public void onImageDeleteSuccess(CoffeeSite cs, String imageDeleteResult) {
         hideProgressbarAndEnableMenuItems();
         String text = getString(R.string.image_delete_ok);
-        if (Long.parseLong(imageDeleteResult) == currentCoffeeSite.getId()) {
+        if (imageDeleteResult.equals(currentCoffeeSite.getId())) {
             text = getString(R.string.image_delete_success);
         }
 
@@ -1448,7 +1448,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         CoffeeSite coffeeSite;
         if (coffeeSiteToUpdate == null) {
             coffeeSite = new CoffeeSite();
-            coffeeSite.setId(0);
+            coffeeSite.setId("");
             coffeeSite.setCreatedOn(new Date());
         } else {
             coffeeSite = coffeeSiteToUpdate;
@@ -1532,7 +1532,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     getString(R.string.coffeesite_saved_to_db),
                     Toast.LENGTH_SHORT);
             toast.show();
-            if (result.getId() == 0) {
+            if (result.getId().isEmpty()) {
                 goToMyCoffeeSitesActivity();
             } else {
                 goBackAfterUpdate(result);

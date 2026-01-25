@@ -269,7 +269,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         doUnbindUserAccountService();
     }
 
-    public void startCoffeeSiteLoad(long coffeeSiteId) {
+    public void startCoffeeSiteLoadById(String coffeeSiteId) {
         showProgressbar();
         coffeeSiteLoadOperationsService.findCoffeeSiteById(coffeeSiteId);
     }
@@ -347,7 +347,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                 if (resultCode == RESULT_OK) {
                     if (Utils.isOnline(getApplicationContext()) && coffeeSite.isStatusZaznamuAvailable()) { // do no load if this is CoffeeSIte created offline, not saved yet
                         // Reloads CoffeeSite to show current saved data after edit
-                        startCoffeeSiteLoad(coffeeSite.getId());
+                        startCoffeeSiteLoadById(coffeeSite.getId());
                     } else { // or gets as return value from Edit activity
                         // add property change listener for new coffeesite
                         coffeeSite = new CoffeeSiteMovable(data.getExtras().getParcelable("coffeeSite"));
@@ -449,7 +449,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             // refresh CoffeeSite after start if possible
             if (Utils.isOnline(getApplicationContext())) {
                 if (coffeeSite != null && coffeeSite.isStatusZaznamuAvailable()) {
-                   startCoffeeSiteLoad(coffeeSite.getId());
+                   startCoffeeSiteLoadById(coffeeSite.getId());
                    return;
                }
                if (coffeeSiteURL != null && !coffeeSiteURL.isEmpty()) {
@@ -553,7 +553,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     @Override
     public void processUpdatedStarsRating(Integer result) {
         hideProgressbar();
-        startCoffeeSiteLoad(coffeeSite.getId());
+        startCoffeeSiteLoadById(coffeeSite.getId());
     }
 
     /**
@@ -564,7 +564,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     @Override
     public void processSaveComments(List<Comment> comments) {
         hideProgressbar();
-        startCoffeeSiteLoad(coffeeSite.getId());
+        startCoffeeSiteLoadById(coffeeSite.getId());
     }
 
     @Override

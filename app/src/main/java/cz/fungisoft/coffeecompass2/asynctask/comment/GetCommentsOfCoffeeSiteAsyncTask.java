@@ -45,7 +45,7 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
     protected Void doInBackground(Void... voids) {
         Log.d(REQ_TAG, "GetAllCommentsAsyncTask REST request initiated");
 
-        OkHttpClient client = new OkHttpClient.Builder().build();
+        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
 
         Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                      .create();

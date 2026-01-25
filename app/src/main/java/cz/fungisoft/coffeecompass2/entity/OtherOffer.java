@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "other_offer_table")
 public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
 
-    public OtherOffer(int id, String entityValue) {
+    public OtherOffer(String id, String entityValue) {
         super(id);
         this.offer = entityValue;
     }
@@ -33,7 +33,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
     }
 
     protected OtherOffer(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         offer = in.readString();
     }
 
@@ -61,7 +61,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(offer);
     }
 }

@@ -37,7 +37,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
     private final File imageFile;
 
     private final CoffeeSite coffeeSite;
-    private final long coffeeSiteId;
+    private final String coffeeSiteId;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
 
@@ -81,7 +81,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
             //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .addInterceptor(headerAuthorizationInterceptor)
                     .authenticator(new TokenAuthenticator(userAccountService))
                     //.addInterceptor(logging)

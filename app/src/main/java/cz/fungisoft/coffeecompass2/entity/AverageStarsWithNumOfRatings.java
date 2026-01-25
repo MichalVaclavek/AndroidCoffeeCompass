@@ -28,10 +28,13 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     @SerializedName("common")
     private String common;
 
-    public AverageStarsWithNumOfRatings() {}
+    public AverageStarsWithNumOfRatings() {
+        super();
+    }
 
     @Ignore // for Room processing
-    public AverageStarsWithNumOfRatings(float avgStars, int numOfHodnoceni, String common) {
+    public AverageStarsWithNumOfRatings(String id, float avgStars, int numOfHodnoceni, String common) {
+        super(id);
         this.avgStars = avgStars;
         this.numOfHodnoceni = numOfHodnoceni;
         this.common = common;
@@ -39,6 +42,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
 
     @Ignore // for Room processing
     protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
+        this.id = in.readString();
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
         common = in.readString();
@@ -47,7 +51,6 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     public static final Creator<AverageStarsWithNumOfRatings> CREATOR = new Creator<AverageStarsWithNumOfRatings>() {
 
         @NotNull
-        //@Contract("_ -> new")
         @Override
         public AverageStarsWithNumOfRatings createFromParcel(Parcel in) {
             return new AverageStarsWithNumOfRatings(in);
@@ -100,6 +103,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
 
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeFloat(avgStars);
         dest.writeInt(numOfHodnoceni);
         dest.writeString(common);

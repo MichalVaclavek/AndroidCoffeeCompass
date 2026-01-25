@@ -11,8 +11,8 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "stars_quality_description_table")
 public class StarsQualityDescription extends CoffeeSiteEntity implements Parcelable {
 
-    public StarsQualityDescription(int id, String entityValue, int numOfStars) {
-        super(numOfStars);
+    public StarsQualityDescription(String id, String entityValue, int numOfStars) {
+        super(id);
         this.quality = entityValue;
         this.setNumOfStars(numOfStars);
     }
@@ -30,14 +30,14 @@ public class StarsQualityDescription extends CoffeeSiteEntity implements Parcela
     private int numOfStars;
 
     protected StarsQualityDescription(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         quality = in.readString();
         numOfStars = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(quality);
         dest.writeInt(numOfStars);
     }

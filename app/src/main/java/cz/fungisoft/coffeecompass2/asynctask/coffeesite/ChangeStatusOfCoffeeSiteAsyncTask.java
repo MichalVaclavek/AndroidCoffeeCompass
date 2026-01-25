@@ -84,7 +84,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .addInterceptor(headerAuthorizationInterceptor)
                     .authenticator(new TokenAuthenticator(userAccountService))
                     //.addInterceptor(logging)

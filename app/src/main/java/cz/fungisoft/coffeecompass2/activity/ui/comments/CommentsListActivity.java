@@ -444,7 +444,7 @@ public class CommentsListActivity extends AppCompatActivity
 
             private LoggedInUser loggedInUser;
 
-            private int commentIdToDelete;
+            private String commentIdToDelete;
             private Comment selectedComment;
 
              CommentItemRecyclerViewAdapter(CommentsListActivity parenActivity) {
@@ -466,7 +466,7 @@ public class CommentsListActivity extends AppCompatActivity
 
                     final Comment item = mValues.get(position);
 
-                    if (getItemCount() == 1 && item.getId() == 0
+                    if (getItemCount() == 1 && item.getId().isEmpty()
                        && item.getText().equals(holder.commentTextView.getContext().getString(R.string.no_comments_available))) {
                         hideRatingSigns(holder);
                         hideNameAndDate(holder);
@@ -569,7 +569,7 @@ public class CommentsListActivity extends AppCompatActivity
                 holder.editButtonIcon.setVisibility(VISIBLE);
             }
 
-            public int getCommentIdAfterDeleteIconTap() {
+            public String getCommentIdAfterDeleteIconTap() {
                 return commentIdToDelete;
             }
 

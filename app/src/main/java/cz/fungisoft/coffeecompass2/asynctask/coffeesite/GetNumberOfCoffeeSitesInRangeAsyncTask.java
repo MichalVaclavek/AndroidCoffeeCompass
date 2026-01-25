@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,7 +69,9 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
         Log.i(TAG, "start");
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -84,11 +88,11 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
 
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-        Call<Map<String, Integer>> call = api.getNumbersOfCoffeeSitesInRanges(this.latFrom, this.longFrom, this.coffeeSort, this.ranges);
+        Call<Map<String, Integer>> call = api.getNumbersOfCoffeeSitesInRanges(this.latFrom, this.longFrom, this.ranges);
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<Map<String, Integer>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<Map<String, Integer>> call, Response<Map<String, Integer>> response) {
                 Map<String, Integer> numOfCoffeeSites;
@@ -98,7 +102,7 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
                         numOfCoffeeSites = response.body();
                         if (callingService != null) {
                             callingService.onNumberOfSitesInRangesReturnedFromServer(numOfCoffeeSites);
-                         }
+                        }
                     }
                 } else {
                     try {
@@ -107,7 +111,7 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
                             callingService.onSitesInRangeReturnedFromServerError(error);
                         }
                     } catch (IOException e) {
-                        error =  e.getMessage();
+                        error = e.getMessage();
                         Log.e(TAG, error);
                         callingService.onSitesInRangeReturnedFromServerError(error);
                     }
@@ -123,5 +127,4 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
         });
         return null;
     }
-
 }

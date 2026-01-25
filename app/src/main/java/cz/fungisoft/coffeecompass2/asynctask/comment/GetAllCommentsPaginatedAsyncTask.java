@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
@@ -48,7 +49,9 @@ public class GetAllCommentsPaginatedAsyncTask extends AsyncTask<Void, Void, Void
     protected Void doInBackground(Void... voids) {
         Log.d(REQ_TAG, "GetAllCommentsAsyncTask REST request initiated");
 
-        OkHttpClient client = new OkHttpClient.Builder().build();
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.build();
 
         Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                      .create();

@@ -30,7 +30,7 @@ public interface ImageRESTInterface {
      */
     @Multipart
     @POST("upload")
-    Call<String> uploadImage(@Part MultipartBody.Part file, @Query("coffeeSiteId") long coffeeSiteId);
+    Call<String> uploadImage(@Part MultipartBody.Part file, @Query("coffeeSiteId") String coffeeSiteId);
 
 
     /**
@@ -43,7 +43,7 @@ public interface ImageRESTInterface {
      * @return
      */
     @DELETE("delete/site/{siteId}")
-    Call<Integer> deleteImageBySiteId(@Path("siteId") long siteId);
+    Call<Integer> deleteImageBySiteId(@Path("siteId") String siteId);
 
     /**
      * Calls deleteUser of CoffeeSite|s image. Input is an ID of the CoffeeSite

@@ -20,7 +20,7 @@ public class CoffeeSiteEntitiesFactory {
 
     private static final String TAG = "CoffeeSiteEntitiesFact";
 
-    public static CoffeeSiteEntity getEntity(String entityType, int id, String value) {
+    public static CoffeeSiteEntity getEntity(String entityType, String id, String value) {
         if (entityType == null) {
             return null;
         }
@@ -103,7 +103,7 @@ public class CoffeeSiteEntitiesFactory {
             }
 
             if (retVal != null) {
-                retVal.setId(jsonObject.getInt("id"));
+                retVal.setId(jsonObject.getString("id"));
             }
         } catch (JSONException e) {
             Log.e(TAG, "Exception during parsing JSON : " + e.getMessage());

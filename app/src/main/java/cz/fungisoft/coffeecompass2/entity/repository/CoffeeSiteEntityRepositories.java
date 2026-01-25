@@ -172,9 +172,9 @@ public class CoffeeSiteEntityRepositories {
     }
 
     public void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
-        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
-            stars.setId(stars.getNumOfStars());
-        }
+//        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
+//            stars.setId(stars.getNumOfStars());
+//        }
         starsQualityDescriptionRepository.insertAll(allStarsQualityDescriptions);
     }
 

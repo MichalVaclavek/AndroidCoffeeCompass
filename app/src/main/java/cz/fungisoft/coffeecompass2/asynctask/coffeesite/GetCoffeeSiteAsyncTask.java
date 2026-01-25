@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -30,7 +31,7 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "GetCoffeeSiteAsyncTask";
 
-    private final long coffeeSiteId;
+    private final String coffeeSiteId;
 
     private String operationResult = "";
     private String operationError = "";
@@ -51,7 +52,7 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
      * @param coffeeSiteURL - REST endpoint URL to load CoffeeSite. Can be empty, then coffeeSiteId is used.
      */
     public GetCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                  CoffeeSiteRESTResultListener callingService, long coffeeSiteId, String coffeeSiteURL) {
+                                  CoffeeSiteRESTResultListener callingService, String coffeeSiteId, String coffeeSiteURL) {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         this.callingListenerService = callingService;
         this.coffeeSiteId = coffeeSiteId;
@@ -65,8 +66,9 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
         operationError = "";
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                .build();
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
                 .setDateFormat("dd. MM. yyyy HH:mm")

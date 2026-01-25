@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,7 +43,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
     private double latFrom;
     private double longFrom;
     private int range;
-    private String coffeeSort;
+//    private String coffeeSort;
 
 
     public GetCoffeeSitesInRangeAsyncTask(CoffeeSitesFoundFromServerResultListener parentService,
@@ -58,7 +60,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
         this.latFrom = latFrom;
         this.longFrom = longFrom;
         this.range = range;
-        this.coffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
+//        this.coffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
     }
 
 
@@ -68,7 +70,9 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
         Log.i(TAG, "start");
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -87,11 +91,11 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
 
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(this.latFrom, this.longFrom, this.range, this.coffeeSort);
+        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(this.latFrom, this.longFrom, this.range);
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<List<CoffeeSite>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();

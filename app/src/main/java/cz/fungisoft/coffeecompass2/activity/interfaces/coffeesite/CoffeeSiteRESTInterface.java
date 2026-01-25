@@ -30,10 +30,11 @@ public interface CoffeeSiteRESTInterface {
      * REST call for obtaining number of Stars, which were given by the User to the CoffeeSite.
      * URL example https://coffeecompass.cz/rest/site/stars/?siteID=2&userID=5
      * @param siteID
+     * @param userID
      * @return
      */
     @GET("number/")
-    Call<Integer> getNumberOfStars(@Query("siteID") long siteID, @Query("userID") long userID);
+    Call<Integer> getNumberOfStars(@Query("siteID") String siteID, @Query("userID") String userID);
 
     /**
      * REST call for obtaining one CoffeeSite by it's ID
@@ -42,7 +43,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("{siteId}")
-    Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") long siteId);
+    Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") String siteId);
 
     /**
      * REST call for obtaining one CoffeeSite by it's URL returned from server
@@ -55,21 +56,18 @@ public interface CoffeeSiteRESTInterface {
     Call<CoffeeSite> getCoffeeSiteByURL(@Url String CoffeeSiteUrl);
 
     /**
-     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
+     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange
      *
      * @return
      */
-    @GET("searchSites/")
-    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range, @Query("sort") String sort);
+    @GET("getSitesInRange/")
+    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range);
 
     /**
-     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
-     * POST method needed if Body is used
-     *
      * @return
      */
     @POST("getNumberOfSitesInGivenDistances/")
-    Call<Map<String, Integer>> getNumbersOfCoffeeSitesInRanges(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("sort") String sort, @Body Map<String, List<Integer>> distances);
+    Call<Map<String, Integer>> getNumbersOfCoffeeSitesInRanges(@Query("lat1") double lat1, @Query("lon1") double lon1, @Body Map<String, List<Integer>> distances);
 
     /**
      * URL example https://coffeecompass.cz/rest/site/getSitesInTown/?townName=Tišnov
@@ -87,7 +85,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("site/byUser/{userId}")
-    Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") long userId);
+    Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") String userId);
 
     /**
      * REST call for obtaining all CoffeeSites created by current user
@@ -170,7 +168,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @PUT("update/{siteId}")
-    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") long siteId, @Body CoffeeSite coffeeSite);
+    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") String siteId, @Body CoffeeSite coffeeSite);
 
     /**
      * Calls update of CoffeeSite instance. Expects same siteId returned as positive response.
@@ -179,19 +177,19 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @DELETE("deleteUser/{siteId}")
-    Call<Integer> deleteCoffeeSite(@Path("siteId") long siteId);
+    Call<Integer> deleteCoffeeSite(@Path("siteId") String siteId);
 
 
     /** STATUS change operations **/
 
     @PUT("{siteId}/activate")
-    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") long siteId);
+    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") String siteId);
 
     @PUT("{siteId}/deactivate")
-    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") long siteId);
+    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") String siteId);
 
     @PUT("{siteId}/cancel")
-    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") long siteId);
+    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") String siteId);
 
 
     /**

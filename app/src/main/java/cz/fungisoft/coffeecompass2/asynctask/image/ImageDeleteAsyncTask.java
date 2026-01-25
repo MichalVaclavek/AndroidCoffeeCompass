@@ -31,7 +31,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
     /**
      * Id of the CoffeeSite whose image is requested to be deleted
      */
-    private final long coffeeSiteId;
+    private final String coffeeSiteId;
     private final CoffeeSite coffeeSite;
 
     private final WeakReference<CoffeeSiteImageService> callingService;
@@ -56,7 +56,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
-        if (userAccountService.getLoggedInUser() != null && coffeeSiteId != 0) {
+        if (userAccountService.getLoggedInUser() != null && !coffeeSiteId.isEmpty()) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
@@ -72,7 +72,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
             //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .addInterceptor(headerAuthorizationInterceptor)
                     .authenticator(new TokenAuthenticator(userAccountService))
                     //.addInterceptor(logging)

@@ -29,13 +29,13 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "DeleteCommentAsyncTask";
 
-    private final int commentID;
+    private final String commentID;
 
     private final WeakReference<CommentsListActivity> commentsActivity;
 
     private final UserAccountActionsProvider userAccountService;
 
-    public DeleteCommentAsyncTask(int commentID, UserAccountActionsProvider userAccountService, CommentsListActivity parentActivity) {
+    public DeleteCommentAsyncTask(String commentID, UserAccountActionsProvider userAccountService, CommentsListActivity parentActivity) {
         this.userAccountService = userAccountService;
         this.commentID = commentID;
         this.commentsActivity = new WeakReference<>(parentActivity);
@@ -57,7 +57,7 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
                                               .authenticator(new TokenAuthenticator(userAccountService))
                                               .addInterceptor(headerAuthorizationInterceptor).build();
 

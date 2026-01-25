@@ -87,7 +87,7 @@ public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapt
                     // Open CoffeeSiteDetailFragment, if the coffeeSite is clicked and there is
                     // landscape orientation to show details of the CoffeeSiteMovable holding this coffeeSite
                     Bundle arguments = new Bundle();
-                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, Long.toString(coffeeSite.getId()));
+                    arguments.putString(CoffeeSiteDetailFragment.ARG_ITEM_ID, coffeeSite.getId());
                     CoffeeSiteDetailFragment fragment = new CoffeeSiteDetailFragment();
                     fragment.setArguments(arguments);
                 } else {

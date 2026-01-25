@@ -302,7 +302,7 @@ public class CoffeeSiteCUDOperationsService extends CoffeeSiteWithUserAccountSer
             for (CoffeeSite coffeeSite : this.coffeeSitesToUpload) {
                 if (!coffeeSite.isSavedOnServer() && !coffeeSite.isStatusZaznamuAvailable()) {
                     coffeeSite.saveId(); // if the saving fails, we can then restore original local DB id
-                    coffeeSite.setId(0); // new CoffeeSite must be with ID=0 to be saved on server
+                    coffeeSite.setId(""); // new CoffeeSite must be with ID=0 to be saved on server
                     coffeeSite.setLastEditUserName(null);
                     coffeeSite.setHodnoceni(null); // CREATED cannot have Rating yet
                 }

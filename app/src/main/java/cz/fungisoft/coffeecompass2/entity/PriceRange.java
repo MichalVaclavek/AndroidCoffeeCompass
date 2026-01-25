@@ -12,8 +12,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "price_range_table")
 public class PriceRange extends CoffeeSiteEntity implements Parcelable {
 
-    public PriceRange(int id, String entityValue) {
-
+    public PriceRange(String id, String entityValue) {
         super(id);
         this.priceRange = entityValue;
     }
@@ -24,13 +23,13 @@ public class PriceRange extends CoffeeSiteEntity implements Parcelable {
 
     @Ignore // for Room processing
     protected PriceRange(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         priceRange = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(priceRange);
     }
 

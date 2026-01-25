@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "next_to_machine_type_table")
 public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
 
-    public NextToMachineType(int id, String entityValue) {
+    public NextToMachineType(String id, String entityValue) {
         super(id);
         this.type = entityValue;
     }
@@ -25,13 +25,13 @@ public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
     }
 
     protected NextToMachineType(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         type = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(type);
     }
 

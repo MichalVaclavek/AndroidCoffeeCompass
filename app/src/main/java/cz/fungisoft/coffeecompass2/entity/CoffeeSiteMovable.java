@@ -140,7 +140,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setDistance(Utils.countDistanceMetersFromSearchPoint(coffeeSite.getLatitude(), coffeeSite.getLongitude(), searchLocationFrom.latitude, searchLocationFrom.longitude));
     }
 
-    public CoffeeSiteMovable(int id, String name, long dist) {
+    public CoffeeSiteMovable(String id, String name, long dist) {
         super(id, name, dist);
     }
 

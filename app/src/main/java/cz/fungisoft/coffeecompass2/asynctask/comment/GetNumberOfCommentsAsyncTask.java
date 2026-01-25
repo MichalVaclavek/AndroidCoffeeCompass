@@ -23,12 +23,12 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "GetNumberOfCommentsAsyn";
 
-    private final int coffeeSiteId;
+    private final String coffeeSiteId;
 
     private final WeakReference<CoffeeSiteDetailActivity> coffeeSiteDetailActivity;
 
 
-    public GetNumberOfCommentsAsyncTask(int coffeeSiteId, CoffeeSiteDetailActivity coffeeSiteDetailActivity) {
+    public GetNumberOfCommentsAsyncTask(String coffeeSiteId, CoffeeSiteDetailActivity coffeeSiteDetailActivity) {
         this.coffeeSiteId = coffeeSiteId;
         this.coffeeSiteDetailActivity = new WeakReference<>(coffeeSiteDetailActivity);
     }
@@ -40,6 +40,7 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
 
         //Add the interceptor to the client builder.
         Retrofit retrofit = new Retrofit.Builder()
+                .client(Utils.getOkHttpClientBuilder().build())
                 .baseUrl(CommentsAndStarsRESTInterface.GET_COMMENT_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();

@@ -85,13 +85,13 @@ public class CancelNotificationSubscriptionAsyncTask extends AsyncTask<Void, Voi
                     return chain.proceed(request);
                 }
             };
-            client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor)
+            client = Utils.getOkHttpClientBuilder().addInterceptor(headerAuthorizationInterceptor)
                                                .authenticator(new TokenAuthenticator(userAccountService))
                                                .addInterceptor(logging)
                                                .build();
             baseUrl = NotificationSubscriptionRESTInterface.NOTIFICATION_SUBSCRIBE_URL;
         } else {
-            client = new OkHttpClient.Builder().build();
+            client = Utils.getOkHttpClientBuilder().build();
             baseUrl = NotificationSubscriptionRESTInterface.NOTIFICATION_SUBSCRIBE_PUBLIC_URL;
         }
 

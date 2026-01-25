@@ -54,7 +54,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @POST("saveStarsAndComment/{siteID}")
-    Call<List<Comment>> saveCommentAndStars(@Path("siteID") long siteID, @Body CommentAndStars commentAndStarsToSave);
+    Call<List<Comment>> saveCommentAndStars(@Path("siteID") String siteID, @Body CommentAndStars commentAndStarsToSave);
 
     /**
      * Calls REST updating of Comment and Stars for CoffeeSiteID=siteID. Returns updated Comment.
@@ -73,7 +73,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return entered stars rating for the coffee site and user
      */
     @PUT("updateStarsForCoffeeSiteAndUser/coffeeSite/{coffeeSiteId}/user/{userId}/stars/{numOfStars}")
-    Call<Integer> updateStars(@Path("coffeeSiteId") long siteID, @Path("userId") long userId,  @Path("numOfStars") int numOfStars);
+    Call<Integer> updateStars(@Path("coffeeSiteId") String siteID, @Path("userId") String userId,  @Path("numOfStars") int numOfStars);
 
     /**
      * REST call for obtaining number of Comments for the CoffeeSite with id=siteID
@@ -81,7 +81,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @GET("comments/number/{siteID}")
-    Call<Integer> getNumberOfComments(@Path("siteID") int siteID);
+    Call<Integer> getNumberOfComments(@Path("siteID") String siteID);
 
     /**
      * REST call for obtaining Comments for the CoffeeSite with id=siteID
@@ -90,7 +90,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @GET("comments/{siteID}")
-    Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") long siteID);
+    Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") String siteID);
 
     /**
      * Deletes comment of commentID. Return commentID back or 0? if the deleteUser request failed
@@ -100,5 +100,5 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @DELETE("deleteComment/{commentID}")
-    Call<Integer> deleteComment(@Path("commentID") int commentID);
+    Call<Integer> deleteComment(@Path("commentID") String commentID);
 }

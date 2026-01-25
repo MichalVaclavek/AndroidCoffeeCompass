@@ -62,7 +62,7 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
         Log.i(TAG, "start");
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -85,7 +85,7 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<List<CoffeeSite>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
@@ -122,13 +122,13 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
             }
 
             @Override
-            public void onFailure(Call<List<CoffeeSite>> call, Throwable t){
-                    Log.e(TAG, "Error loading CoffeeSites in town from server." + t.getMessage());
-                    error = new Result.Error(new IOException("Error loading CoffeeSites in town REST calls.", t));
-                    operationError = error.toString();
-                    if (callingService != null) {
-                        callingService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
-                    }
+            public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
+                Log.e(TAG, "Error loading CoffeeSites in town from server." + t.getMessage());
+                error = new Result.Error(new IOException("Error loading CoffeeSites in town REST calls.", t));
+                operationError = error.toString();
+                if (callingService != null) {
+                    callingService.onCoffeeSitesReturned(requestedRESTOperationCode, error);
+                }
             }
         });
 

@@ -71,7 +71,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .writeTimeout(5, TimeUnit.SECONDS)
                     .readTimeout(5, TimeUnit.SECONDS)

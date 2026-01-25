@@ -22,12 +22,12 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
 
     static final String REQ_TAG = "GetNumberOfStarsAsyncT";
 
-    private final long userID;
-    private final long coffeeSiteId;
+    private final String userID;
+    private final String coffeeSiteId;
 
     UsersCSRatingLoadOperationListener parentActivity;
 
-    public GetNumberOfStarsAsyncTask(long userID, long coffeeSiteId, UsersCSRatingLoadOperationListener parentActivity) {
+    public GetNumberOfStarsAsyncTask(String userID, String coffeeSiteId, UsersCSRatingLoadOperationListener parentActivity) {
         this.userID = userID;
         this.coffeeSiteId = coffeeSiteId;
         this.parentActivity = parentActivity;
@@ -39,6 +39,7 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
 
         //Add the interceptor to the client builder.
         Retrofit retrofit = new Retrofit.Builder()
+                .client(Utils.getOkHttpClientBuilder().build())
                 .baseUrl(CoffeeSiteRESTInterface.GET_NUMBER_OF_STARS_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();

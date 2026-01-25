@@ -38,13 +38,13 @@ public class NotificationSubscriptionPreferencesHelper {
     }
 
     // If 0, means no user for the subscription, only Firebase token is the identity
-    public void putUserId(long userId) {
+    public void putUserId(String userId) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putLong(USER_ID, userId);
+        edit.putString(USER_ID, userId);
         edit.apply();
     }
-    public long getUserId() {
-        return app_prefs.getLong(USER_ID, 0);
+    public String getUserId() {
+        return app_prefs.getString(USER_ID, "");
     }
 
 

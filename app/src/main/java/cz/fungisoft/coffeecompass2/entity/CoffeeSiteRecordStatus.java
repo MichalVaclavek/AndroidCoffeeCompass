@@ -20,7 +20,7 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
         super();
     }
 
-    public CoffeeSiteRecordStatus(int id, String entityValue) {
+    public CoffeeSiteRecordStatus(String id, String entityValue) {
         super(id);
         this.status = entityValue;
     }
@@ -31,13 +31,13 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
 
     @Ignore // for Room processing
     protected CoffeeSiteRecordStatus(Parcel in) {
-        id = in.readInt();
+        id = in.readString();
         status = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(status);
     }
 
@@ -76,7 +76,7 @@ public class CoffeeSiteRecordStatus extends CoffeeSiteEntity implements Parcelab
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CoffeeSiteRecordStatus that = (CoffeeSiteRecordStatus) o;
-        return status.equalsIgnoreCase(that.status);
+        return status != null && status.equalsIgnoreCase(that.status);
     }
 
     @Override

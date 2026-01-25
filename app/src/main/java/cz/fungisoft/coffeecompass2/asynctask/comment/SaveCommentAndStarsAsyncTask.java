@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
@@ -38,7 +39,7 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     static final String REQ_TAG = "SaveCommentAsyncREST";
 
-    private final long coffeeSiteId;
+    private final String coffeeSiteId;
 
     private final UserAccountActionsProvider userAccountService;
 
@@ -46,7 +47,7 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private final CommentAndStars commentAndStarsToSave;
 
-    public SaveCommentAndStarsAsyncTask(long coffeeSiteId, UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
+    public SaveCommentAndStarsAsyncTask(String coffeeSiteId, UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;
         this.callingActivity = callingActivity;
         this.commentAndStarsToSave = commentAndStarsToSave;
@@ -71,7 +72,7 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
             };
 
             // Add authenticator and the interceptor to the client builder
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .authenticator(new TokenAuthenticator(userAccountService))
                     .addInterceptor(headerAuthorizationInterceptor).build();
 

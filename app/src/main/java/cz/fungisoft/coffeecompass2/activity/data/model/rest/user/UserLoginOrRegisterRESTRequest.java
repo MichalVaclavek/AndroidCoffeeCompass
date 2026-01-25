@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
@@ -79,12 +80,14 @@ public class UserLoginOrRegisterRESTRequest {
         Gson gson = new GsonBuilder().setDateFormat("dd.MM.yyyy HH:mm")
                                      .create();
 
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
+                                        .client(Utils.getOkHttpClientBuilder().build())
                                         .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL
                                                                                 : UserAccountRESTInterface.REGISTER_USER_URL)
                                         .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
+                                        .addConverterFactory(GsonConverterFactory.create(gson));
+
+        Retrofit retrofit = retrofitBuilder.build();
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
@@ -95,7 +98,7 @@ public class UserLoginOrRegisterRESTRequest {
             call = api.registerNewUser(userLoginOrRegisterInputData);
         }
 
-        call.enqueue(new Callback<JwtUserToken>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<JwtUserToken> call, Response<JwtUserToken> response) {
                 if (response.isSuccessful()) {
@@ -129,8 +132,7 @@ public class UserLoginOrRegisterRESTRequest {
                         Log.e(REQ_TAG, "Error reading error body." + e.getMessage());
                         if (requestType == PERFORM_LOGIN) {
                             userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user.", e)));
-                        }
-                        else {
+                        } else {
                             userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error register user.", e)));
                         }
                     }
