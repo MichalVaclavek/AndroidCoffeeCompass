@@ -21,6 +21,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -66,22 +67,22 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
     protected Void doInBackground(Void... voids) {
 
         Log.i(TAG, "start");
-        //operationResult = "";
         operationError = "";
 
         Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
         if (userAccountService.getLoggedInUser() != null) {
 
             // Inserts currentUser authorization token to Authorization header
-            Interceptor headerAuthorizationInterceptor = new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
-                    request = request.newBuilder().headers(headers).build();
-                    return chain.proceed(request);
-                }
+            Interceptor headerAuthorizationInterceptor = chain -> {
+                okhttp3.Request request = chain.request();
+                Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
+                request = request.newBuilder().headers(headers).build();
+                return chain.proceed(request);
             };
+
+//            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
 
             //Add the interceptor to the client builder.
             OkHttpClient client = Utils.getOkHttpClientBuilder()
@@ -90,6 +91,7 @@ public class GetCfSitesFromLoggedUserPaginatedAsyncTask extends AsyncTask<Void, 
                     .readTimeout(20, TimeUnit.SECONDS)
                     .authenticator(new TokenAuthenticator(userAccountService))
                     .addInterceptor(headerAuthorizationInterceptor)
+//                    .addInterceptor(logging)
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()

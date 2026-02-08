@@ -25,7 +25,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
     private String offer;
 
     public String getOffer() {
-        return offer;
+        return offer == null ? "" : offer;
     }
 
     public void setOffer(String offer) {
@@ -51,7 +51,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public String toString() {
-        return offer;
+        return getOffer();
     }
 
     @Override

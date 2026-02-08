@@ -13,39 +13,75 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Sort {
 
-    @SerializedName("empty")
+    @SerializedName("direction")
     @Expose
-    private Boolean empty;
+    private String direction;
 
-    @SerializedName("sorted")
+    @SerializedName("property")
     @Expose
-    private Boolean sorted;
+    private String property;
 
-    @SerializedName("unsorted")
+    @SerializedName("ignoreCase")
     @Expose
-    private Boolean unsorted;
+    private Boolean ignoreCase;
 
-    public Boolean getEmpty() {
-        return empty;
+    @SerializedName("nullHandling")
+    @Expose
+    private String nullHandling;
+
+    @SerializedName("ascending")
+    @Expose
+    private Boolean ascending;
+
+    @SerializedName("descending")
+    @Expose
+    private Boolean descending;
+
+    public String getDirection() {
+        return direction;
     }
 
-    public void setEmpty(Boolean empty) {
-        this.empty = empty;
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 
-    public Boolean getSorted() {
-        return sorted;
+    public String getProperty() {
+        return property;
     }
 
-    public void setSorted(Boolean sorted) {
-        this.sorted = sorted;
+    public void setProperty(String property) {
+        this.property = property;
     }
 
-    public Boolean getUnsorted() {
-        return unsorted;
+    public Boolean getIgnoreCase() {
+        return ignoreCase;
     }
 
-    public void setUnsorted(Boolean unsorted) {
-        this.unsorted = unsorted;
+    public void setIgnoreCase(Boolean ignoreCase) {
+        this.ignoreCase = ignoreCase;
+    }
+
+    public String getNullHandling() {
+        return nullHandling;
+    }
+
+    public void setNullHandling(String nullHandling) {
+        this.nullHandling = nullHandling;
+    }
+
+    public Boolean getAscending() {
+        return ascending;
+    }
+
+    public void setAscending(Boolean ascending) {
+        this.ascending = ascending;
+    }
+
+    public Boolean getDescending() {
+        return descending;
+    }
+
+    public void setDescending(Boolean descending) {
+        this.descending = descending;
     }
 }

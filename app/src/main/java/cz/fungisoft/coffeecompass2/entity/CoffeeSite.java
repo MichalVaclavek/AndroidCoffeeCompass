@@ -774,7 +774,7 @@ public class CoffeeSite implements Serializable,
         for (int i = 0; i < list.size(); i++) {
             sb.append(list.get(i).toString().trim());
             if (i != list.size() - 1) { // not a last item in the array
-                sb.append(delimiter + " ");
+                sb.append(delimiter).append(" ");
             }
         }
         return sb.toString();

@@ -3,6 +3,8 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Class describing one component of the Page class returning from server
  * when requesting CoffeeSite or Comment by Page.
@@ -31,7 +33,7 @@ public class Pageable {
 
     @SerializedName("sort")
     @Expose
-    private Sort sort;
+    private List<Sort> sort;
 
     @SerializedName("unpaged")
     @Expose
@@ -69,11 +71,11 @@ public class Pageable {
         this.paged = paged;
     }
 
-    public Sort getSort() {
+    public List<Sort> getSort() {
         return sort;
     }
 
-    public void setSort(Sort sort) {
+    public void setSort(List<Sort> sort) {
         this.sort = sort;
     }
 

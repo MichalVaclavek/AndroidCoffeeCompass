@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
@@ -83,11 +82,11 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                                        .client(client)
-                                        .baseUrl(CoffeeSiteRESTInterface.COFFEESITE_API_PUBLIC_SEARCH_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
+                .client(client)
+                .baseUrl(CoffeeSiteRESTInterface.COFFEESITE_API_PUBLIC_SEARCH_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
 
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
@@ -109,7 +108,7 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
                         }
                         if (callingService != null) {
                             callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
-                         }
+                        }
                     } else {
                         error = "Returned empty response for loading CoffeeSites in range REST request.";
                         Log.i(TAG, error);
@@ -118,16 +117,12 @@ public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> 
                 } else {
                     try {
                         Log.i(TAG, "No CoffeeSite found.");
-                        if (response.code() == 404) { // No CoffeeSite found
-                            if (callingService != null) {
-                                callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
-                            }
-                        } else {
+                        if (callingService != null) {
                             error = response.errorBody().string();
                             callingService.onSitesInRangeReturnedFromServerError(error);
                         }
                     } catch (IOException e) {
-                        error =  e.getMessage();
+                        error = e.getMessage();
                         Log.e(TAG, error);
                         callingService.onSitesInRangeReturnedFromServerError(error);
                     }

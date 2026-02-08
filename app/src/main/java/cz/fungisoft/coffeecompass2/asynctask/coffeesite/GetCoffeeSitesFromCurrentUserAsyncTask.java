@@ -105,7 +105,7 @@ public class GetCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void
 
             Log.i(TAG, "start call");
 
-            call.enqueue(new Callback<List<CoffeeSite>>() {
+            call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                     if (response.isSuccessful()) {
