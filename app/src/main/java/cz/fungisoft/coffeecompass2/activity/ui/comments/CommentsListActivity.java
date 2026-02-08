@@ -41,7 +41,8 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAnd
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingLoadOperationListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.DeleteCommentAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.comment.GetCommentsForCoffeeSiteAsyncTask;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsLoadOperationListener;
+import cz.fungisoft.coffeecompass2.asynctask.comment.GetCommentsOfCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -69,7 +70,8 @@ public class CommentsListActivity extends AppCompatActivity
                                              DeleteCommentDialogFragment.DeleteCommentDialogListener,
                                              UsersCSRatingAndCommentSaveOperationListener,
                                              UsersCSRatingAndCommentUpdateOperationListener,
-                                             UsersCSRatingLoadOperationListener {
+                                             UsersCSRatingLoadOperationListener,
+                                             CommentsLoadOperationListener {
 
     private static final String TAG = "CommentsListActivity";
 
@@ -389,6 +391,24 @@ public class CommentsListActivity extends AppCompatActivity
         showRESTCallError(error);
     }
 
+    /**
+     * Callback from {@link GetCommentsOfCoffeeSiteAsyncTask} via {@link CommentsLoadOperationListener}
+     * when comments for the CoffeeSite are loaded via Retrofit.
+     */
+    @Override
+    public void onCommentsForCoffeeSiteLoaded(List<Comment> comments, CoffeeSite coffeeSite) {
+        processSaveComments(comments);
+    }
+
+    /**
+     * Callback from {@link GetCommentsOfCoffeeSiteAsyncTask} via {@link CommentsLoadOperationListener}
+     * when REST call fails.
+     */
+    @Override
+    public void onRESTCallError(Result.Error error) {
+        showRESTCallError(error);
+    }
+
     private void showComments(List<Comment> comments) {
         if (comments != null && comments.size() > 0) {
             recyclerViewAdapter.setComments(comments);
@@ -421,7 +441,7 @@ public class CommentsListActivity extends AppCompatActivity
     public void processNumberOfComments(int numberOfCommentsAfterDelete) {
         if (numberOfCommentsAfterDelete > 0) {
             if (Utils.isOnline(getApplicationContext())) {
-                new GetCommentsForCoffeeSiteAsyncTask(this, cs.getId()).execute();
+                new GetCommentsOfCoffeeSiteAsyncTask(this, cs).execute();
             }
         } else { // number of comments for this CoffeeSite is 0
             cs.clearComments();

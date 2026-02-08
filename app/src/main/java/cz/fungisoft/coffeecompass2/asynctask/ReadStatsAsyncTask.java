@@ -3,109 +3,86 @@ package cz.fungisoft.coffeecompass2.asynctask;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
-import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.AboutActivity;
+import cz.fungisoft.coffeecompass2.activity.interfaces.stats.StatisticsRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
+import cz.fungisoft.coffeecompass2.utils.Utils;
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * AsyncTask to read basic statistics from coffeecompass.cz about saved CoffeeSites.
  * The task runs at the start of the AboutActivity.
+ * Uses Retrofit for REST call and Gson for JSON deserialization.
  */
-// TODO refactor to read by Retrofit lib.
-public class ReadStatsAsyncTask extends AsyncTask<String, String, String> {
+public class ReadStatsAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "Read statistics";
-
-    private static final String bURL = BuildConfig.HOME_API_URL;
+    private static final String TAG = "ReadStatsAsyncTask";
 
     private final WeakReference<AboutActivity> parentActivity;
-
-    private Statistics stats;
 
     public ReadStatsAsyncTask(AboutActivity parentActivity) {
         this.parentActivity = new WeakReference<>(parentActivity);
     }
 
     @Override
-    protected String doInBackground(String... strings) {
+    protected Void doInBackground(Void... voids) {
+        Log.d(TAG, "ReadStatsAsyncTask REST request initiated");
 
-        String sJSON = null;
-        InputStream inpStream = null;
+        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
 
-        try {
-            URL url = new URL(bURL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
+        Gson gson = new GsonBuilder().create();
 
-            inpStream = new BufferedInputStream(conn.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inpStream, StandardCharsets.UTF_8));
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(StatisticsRESTInterface.HOME_BASE_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
 
-            StringBuilder sb = new StringBuilder();
-            String radek = null;
+        StatisticsRESTInterface api = retrofit.create(StatisticsRESTInterface.class);
 
-            while ((radek = reader.readLine()) != null) {
-                sb.append(radek + "\n");
+        Call<Statistics> call = api.getStatistics();
+
+        call.enqueue(new Callback<Statistics>() {
+            @Override
+            public void onResponse(Call<Statistics> call, Response<Statistics> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        Log.i(TAG, "onResponse() success");
+                        if (parentActivity.get() != null) {
+                            parentActivity.get().showAndSaveStatistics(response.body());
+                        }
+                    } else {
+                        Log.e(TAG, "Returned empty response for statistics request.");
+                    }
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "unknown error";
+                        Log.e(TAG, "Error reading statistics. Server response: " + errorBody);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading statistics." + e.getMessage());
+                    }
+                }
             }
 
-            sJSON = sb.toString();
-
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "MalformedURLException: " + e.getMessage());
-        } catch (ProtocolException e) {
-            Log.e(TAG, "ProtocolException: " + e.getMessage());
-        }
-        catch (IOException e) {
-            Log.e(TAG, "IOException: " + e.getMessage());
-        }
-        catch (Exception e) {
-            Log.e(TAG, "Exception: " + e.getMessage());
-        }
-        finally {
-            try {
-                if (inpStream != null) inpStream.close();
+            @Override
+            public void onFailure(Call<Statistics> call, Throwable t) {
+                Log.e(TAG, "Error reading statistics REST request." + t.getMessage());
             }
-            catch (Exception e) {
-                Log.e(TAG, "Error closing input stream: " + e.getMessage());
-            }
-        }
+        });
 
-        JSONObject jsonObject;
-
-        try {
-            assert sJSON != null;
-            jsonObject = new JSONObject(sJSON);
-
-            stats = new Statistics(jsonObject.getString("numOfAllSites"),
-                    jsonObject.getString("numOfNewSitesLast7Days"),
-                    jsonObject.getString("numOfNewSitesToday"),
-                    jsonObject.getString("numOfAllUsers"));
-
-        } catch (JSONException | NullPointerException | AssertionError e) {
-            Log.e(TAG, "Parsing JSON Exception: " + e.getMessage());
-        }
-
-        return sJSON;
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        if (parentActivity.get() != null && result != null) {
-            parentActivity.get().showAndSaveStatistics(stats);
-        }
+        return null;
     }
 }
