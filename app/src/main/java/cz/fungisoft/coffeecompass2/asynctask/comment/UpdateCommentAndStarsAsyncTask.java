@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -30,7 +29,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
  * by loged-in user.
  */
-public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UpdateCommentAndStarsAsyncTask {
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
@@ -46,8 +45,7 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
         this.userAccountService = userAccountService;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "UpdateCommentAndStarsAsyncTask REST request initiated");
 
         if (userAccountService.getLoggedInUser() != null) {
@@ -130,7 +128,6 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
             });
         }
 
-        return null;
     }
 
 }

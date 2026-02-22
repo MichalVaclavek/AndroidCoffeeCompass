@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.NextToMachineTypeDao;
 import io.reactivex.Single;
@@ -37,7 +36,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         new NextToMachineTypeRepository.insertAsyncTask(nextToMachineTypeDao).execute(nextToMachineType);
     }
 
-    private static class insertAsyncTask extends AsyncTask<NextToMachineType, Void, Void> {
+    private static class insertAsyncTask {
 
         private final NextToMachineTypeDao mAsyncTaskDao;
 
@@ -45,10 +44,8 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final NextToMachineType... params) {
-            mAsyncTaskDao.insertNextToMachineType(params[0]);
-            return null;
+        public void execute(final NextToMachineType... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertNextToMachineType(params[0]));
         }
     }
 
@@ -56,7 +53,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(nextToMachineTypeDao).execute(NextToMachineTypes);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<NextToMachineType>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final NextToMachineTypeDao mAsyncTaskDao;
 
@@ -64,10 +61,8 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<NextToMachineType>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<NextToMachineType>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

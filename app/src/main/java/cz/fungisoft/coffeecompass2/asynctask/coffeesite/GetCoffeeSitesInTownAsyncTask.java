@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -29,7 +28,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Async Task to run REST API request to obtain all coffeeSites in given town.
  */
-public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetCoffeeSitesInTownAsyncTask {
 
     private static final String TAG = "GetSitesInTownAsyncT";
 
@@ -56,8 +55,7 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
 
@@ -132,6 +130,5 @@ public class GetCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Void> {
             }
         });
 
-        return null;
     }
 }

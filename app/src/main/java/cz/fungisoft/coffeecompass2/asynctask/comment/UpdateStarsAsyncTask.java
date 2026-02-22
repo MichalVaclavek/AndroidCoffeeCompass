@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -31,7 +30,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to modify Stars rating for the CoffeeSite
  * by logged-in user.
  */
-public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UpdateStarsAsyncTask {
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
@@ -50,8 +49,7 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
         this.numOfStars = stars;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "UpdateCommentAndStarsAsyncTask REST request initiated");
 
         if (userAccountService.getLoggedInUser() != null) {
@@ -135,7 +133,6 @@ public class UpdateStarsAsyncTask extends AsyncTask<Void, Void, Void> {
             });
         }
 
-        return null;
     }
 
 }

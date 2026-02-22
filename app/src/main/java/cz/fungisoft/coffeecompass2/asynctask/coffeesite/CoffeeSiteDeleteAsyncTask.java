@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -30,7 +29,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * AsyncTask pro Delete operaci s CoffeeSite
  */
-public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class CoffeeSiteDeleteAsyncTask {
 
     private final CoffeeSite coffeeSite;
 
@@ -63,8 +62,7 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
         tag = "SiteOperationAsyncTask";
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(tag, "start");
         //operationResult = "";
         operationError = "";
@@ -164,7 +162,6 @@ public class CoffeeSiteDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
         }
-        return null;
     }
 
 }

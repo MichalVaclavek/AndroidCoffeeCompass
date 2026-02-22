@@ -8,7 +8,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -88,6 +87,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnect
 import cz.fungisoft.coffeecompass2.utils.FileCompressor;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import io.reactivex.disposables.CompositeDisposable;
 
 import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
@@ -1505,7 +1505,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * <p>
      * Used in OFFLINE mode only as in ONLINE the REST call AsyncTask does the job.
      */
-    private class CreateUpdateCoffeeSiteAsyncTask extends AsyncTask<CoffeeSite, Void, CoffeeSite> {
+    private class CreateUpdateCoffeeSiteAsyncTask {
 
         private final CoffeeSiteEntitiesViewModel model;
 
@@ -1513,49 +1513,47 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             this.model = model;
         }
 
-        @Override
         // coffeeSite to update/save
-        protected CoffeeSite doInBackground(final CoffeeSite... params) {
-            return createOrUpdateCoffeeSiteFromViewModel(params[0], model);
-        }
-
-        @Override
-        protected void onPostExecute(CoffeeSite result) {
-            super.onPostExecute(result);
-            currentCoffeeSite = result;
-            if (imagePhotoFile != null) {
-                currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
-            }
-            saveCoffeeSiteToDB(result);
-            // New CoffeeSite saved successfully to DB
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    getString(R.string.coffeesite_saved_to_db),
-                    Toast.LENGTH_SHORT);
-            toast.show();
-            if (result.getId().isEmpty()) {
-                goToMyCoffeeSitesActivity();
-            } else {
-                goBackAfterUpdate(result);
-            }
+        public void execute(final CoffeeSite coffeeSite) {
+            AsyncRunner.runInBackground(() -> {
+                CoffeeSite result = createOrUpdateCoffeeSiteFromViewModel(coffeeSite, model);
+                AsyncRunner.runOnMainThread(() -> {
+                    currentCoffeeSite = result;
+                    if (imagePhotoFile != null) {
+                        currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
+                    }
+                    saveCoffeeSiteToDB(result);
+                    // New CoffeeSite saved successfully to DB
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            getString(R.string.coffeesite_saved_to_db),
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                    if (result.getId().isEmpty()) {
+                        goToMyCoffeeSitesActivity();
+                    } else {
+                        goBackAfterUpdate(result);
+                    }
+                });
+            });
         }
     }
 
     /**
      * Inserts all data from DB to Create CoffeeSite form of this activity
      */
-    private class InsertEntitiesDataFromDBAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class InsertEntitiesDataFromDBAsyncTask {
 
         InsertEntitiesDataFromDBAsyncTask() {
         }
 
-        @Override
         // coffeeSite to update/save
-        protected Void doInBackground(final Void... params) {
-            coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
-            showCoffeeSiteTypes();
-            showLocationTypes();
-            showPriceRanges();
-            return null;
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
+                showCoffeeSiteTypes();
+                showLocationTypes();
+                showPriceRanges();
+            });
         }
     }
 

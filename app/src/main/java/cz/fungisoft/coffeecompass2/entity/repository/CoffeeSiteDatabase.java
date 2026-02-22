@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -13,6 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
@@ -138,7 +138,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
      * Deletes the database in the background. Used when DB needs to be cleared, before
      * new data are read from server.
      */
-    private static class DeleteCSEntitiesAsync extends AsyncTask<Void, Void, Void> {
+    private static class DeleteCSEntitiesAsync {
 
         private final CoffeeSiteDatabase mDB;
 
@@ -172,32 +172,31 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         }
 
 
-        @Override
-        protected Void doInBackground(final Void... params) {
-            // Start the app with a clean database every time.
-            // Not needed if you only populate the database when it is first created
-            averageStarsWithNumOfRatingsDao.deleteAll();
-            coffeeSiteRecordStatusDao.deleteAll();
-            coffeeSiteStatusDao.deleteAll();
-            coffeeSiteTypeDao.deleteAll();
-            coffeeSortDao.deleteAll();
-            cupTypeDao.deleteAll();
-            nextToMachineTypeDao.deleteAll();
-            otherOfferDao.deleteAll();
-            priceRangeDao.deleteAll();
-            siteLocationTypeDao.deleteAll();
-            starsQualityDescriptionDao.deleteAll();
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                // Start the app with a clean database every time.
+                // Not needed if you only populate the database when it is first created
+                averageStarsWithNumOfRatingsDao.deleteAll();
+                coffeeSiteRecordStatusDao.deleteAll();
+                coffeeSiteStatusDao.deleteAll();
+                coffeeSiteTypeDao.deleteAll();
+                coffeeSortDao.deleteAll();
+                cupTypeDao.deleteAll();
+                nextToMachineTypeDao.deleteAll();
+                otherOfferDao.deleteAll();
+                priceRangeDao.deleteAll();
+                siteLocationTypeDao.deleteAll();
+                starsQualityDescriptionDao.deleteAll();
 
-            mDB.fireCSEntitiesContentDeleted();
-
-            return null;
+                mDB.fireCSEntitiesContentDeleted();
+            });
         }
     }
 
     /**
      * Deletes the CoffeeSites database in the background.
      */
-    private static class DeleteCoffeeSitesAsync extends AsyncTask<Void, Void, Void> {
+    private static class DeleteCoffeeSitesAsync {
 
         private final CoffeeSiteDatabase mDB;
 
@@ -209,13 +208,12 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         }
 
 
-        @Override
-        protected Void doInBackground(final Void... params) {
-            // Not needed if you only populate the database when it is first created
-            coffeeSiteDao.deleteAll();
-            mDB.fireCoffeeSitesContentDeleted();
-
-            return null;
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                // Not needed if you only populate the database when it is first created
+                coffeeSiteDao.deleteAll();
+                mDB.fireCoffeeSitesContentDeleted();
+            });
         }
     }
 
@@ -224,7 +222,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
      * Used, when there are already some Offline created sites (not saved on server)
      * and CoffeeSites are downloaded for Offline mode by user.
      */
-    private static class DeleteCoffeeSitesExceptOfflineAsyncT extends AsyncTask<Void, Void, Void> {
+    private static class DeleteCoffeeSitesExceptOfflineAsyncT {
 
         private final CoffeeSiteDatabase mDB;
 
@@ -236,20 +234,19 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         }
 
 
-        @Override
-        protected Void doInBackground(final Void... params) {
-            // Not needed if you only populate the database when it is first created
-            coffeeSiteDao.deleteAllExceptNotSavedOnServer();
-            mDB.fireCoffeeSitesContentDeleted();
-
-            return null;
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                // Not needed if you only populate the database when it is first created
+                coffeeSiteDao.deleteAllExceptNotSavedOnServer();
+                mDB.fireCoffeeSitesContentDeleted();
+            });
         }
     }
 
     /**
      * Deletes the Comments database in the background.
      */
-    private static class DeleteCommentsAsync extends AsyncTask<Void, Void, Void> {
+    private static class DeleteCommentsAsync {
 
         private final CoffeeSiteDatabase mDB;
 
@@ -260,14 +257,13 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             commentDao = db.commentDao();
         }
 
-        @Override
-        protected Void doInBackground(final Void... params) {
-            // Start the app with a clean database every time.
-            // Not needed if you only populate the database when it is first created
-            commentDao.deleteAll();
-            mDB.fireCommentsContentDeleted();
-
-            return null;
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                // Start the app with a clean database every time.
+                // Not needed if you only populate the database when it is first created
+                commentDao.deleteAll();
+                mDB.fireCommentsContentDeleted();
+            });
         }
     }
 

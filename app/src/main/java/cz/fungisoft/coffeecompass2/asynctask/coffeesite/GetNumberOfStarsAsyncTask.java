@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Runs async task for REST call to get rating for one site ID from one user
  */
-public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
+public class GetNumberOfStarsAsyncTask {
 
     static final String REQ_TAG = "GetNumberOfStarsAsyncT";
 
@@ -33,8 +32,7 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
         this.parentActivity = parentActivity;
     }
 
-    @Override
-    protected Integer doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "GetNumberOfStarsAsyncTask REST request initiated");
 
         //Add the interceptor to the client builder.
@@ -89,7 +87,6 @@ public class GetNumberOfStarsAsyncTask extends AsyncTask<Void, Void, Integer> {
                 }
             }
         });
-        return null;
     }
 
 }

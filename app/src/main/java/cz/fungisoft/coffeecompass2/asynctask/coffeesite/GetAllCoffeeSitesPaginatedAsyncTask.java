@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -27,7 +26,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * Async Task to run REST api request to obtain All CoffeeSites. Used for "OFF-LINE" mode
  * of operation.
  */
-public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetAllCoffeeSitesPaginatedAsyncTask {
 
     private static final String TAG = "GetAllSitesPageAsnT";
 
@@ -53,8 +52,7 @@ public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, V
         this.pageSize = pageSize;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
         //operationResult = "";
@@ -133,7 +131,6 @@ public class GetAllCoffeeSitesPaginatedAsyncTask extends AsyncTask<Void, Void, V
                 }
             }
         });
-        return null;
     }
 
 }

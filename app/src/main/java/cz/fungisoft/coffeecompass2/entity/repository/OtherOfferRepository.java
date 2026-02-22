@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.OtherOfferDao;
@@ -47,7 +46,7 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
         new OtherOfferRepository.insertAsyncTask(otherOfferDao).execute(otherOffer);
     }
 
-    private static class insertAsyncTask extends AsyncTask<OtherOffer, Void, Void> {
+    private static class insertAsyncTask {
 
         private final OtherOfferDao mAsyncTaskDao;
 
@@ -55,10 +54,8 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final OtherOffer... params) {
-            mAsyncTaskDao.insertOtherOffer(params[0]);
-            return null;
+        public void execute(final OtherOffer... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertOtherOffer(params[0]));
         }
     }
 
@@ -66,7 +63,7 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(otherOfferDao).execute(OtherOffers);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<OtherOffer>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final OtherOfferDao mAsyncTaskDao;
 
@@ -74,10 +71,8 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<OtherOffer>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<OtherOffer>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

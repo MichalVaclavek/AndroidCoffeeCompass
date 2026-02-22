@@ -3,7 +3,6 @@ package cz.fungisoft.coffeecompass2.services;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_IN_TOWN;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -383,7 +382,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     /**
      * Async Task to start and get Single request result from DB.
      */
-    private static class GetSingleCoffeeSitesInTownAsyncTask extends AsyncTask<Void, Void, Disposable> {
+    private static class GetSingleCoffeeSitesInTownAsyncTask {
 
         private final String townName;
 
@@ -394,8 +393,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             this.latch = latch;
         }
 
-        @Override
-        protected Disposable doInBackground(Void... params) {
+        public void execute() {
             d = coffeeSiteRepository.getCoffeeSitesInTownSingle(townName)
                     .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
                     .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
@@ -420,8 +418,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                             latch.countDown();
                         }
                     });
-
-            return d;
         }
     }
 

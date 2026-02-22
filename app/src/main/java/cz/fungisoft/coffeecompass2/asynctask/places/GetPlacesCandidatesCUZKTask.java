@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.places;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -26,7 +25,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * Async Task to run REST api request to get {@link cz.fungisoft.coffeecompass2.activity.data.model.rest.places.Candidate}
  * from CUZK Places API.
  */
-public class GetPlacesCandidatesCUZKTask extends AsyncTask<Void, Void, Void> {
+public class GetPlacesCandidatesCUZKTask {
 
     private static final String TAG = "GetPlacesCUZKTask";
 
@@ -48,8 +47,7 @@ public class GetPlacesCandidatesCUZKTask extends AsyncTask<Void, Void, Void> {
         this.resultListener = resultListener;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
 
@@ -131,7 +129,6 @@ public class GetPlacesCandidatesCUZKTask extends AsyncTask<Void, Void, Void> {
             });
         }
 
-        return null;
     }
 
 }

@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.notification;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -34,7 +33,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface performing notification subscription.
  * If user is not null, then it calls Secured API otherwise public API.
  */
-public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Void> {
+public class NotificationSubscriptionAsyncTask {
 
     static final String REQ_TAG = "NotifSubscriptionAsyncT";
 
@@ -61,8 +60,7 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
         this.userAccountService = userAccountService;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "NotificationSubscriptionAsyncTask REST request initiated");
         OkHttpClient client;
         String baseUrl;
@@ -154,7 +152,6 @@ public class NotificationSubscriptionAsyncTask extends AsyncTask<Void, Void, Voi
             });
         }
 
-        return null;
     }
 
 }

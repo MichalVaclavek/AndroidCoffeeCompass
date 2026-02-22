@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -26,7 +25,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Async Task to run REST api request to obtain number of ccoffeeSites within current distance range.
  */
-public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetNumberOfCoffeeSitesInRangeAsyncTask {
 
     private static final String TAG = "GetNumOfSitesInRangeAsT";
 
@@ -62,8 +61,7 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
     }
 
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
 
@@ -124,6 +122,5 @@ public class GetNumberOfCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void
                 callingService.onSitesInRangeReturnedFromServerError(error);
             }
         });
-        return null;
     }
 }

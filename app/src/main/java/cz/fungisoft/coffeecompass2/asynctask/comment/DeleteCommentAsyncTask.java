@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Calls REST for deleting comment of the CommentID
  */
-public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
+public class DeleteCommentAsyncTask {
 
     static final String REQ_TAG = "DeleteCommentAsyncTask";
 
@@ -41,8 +40,7 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
         this.commentsActivity = new WeakReference<>(parentActivity);
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "DeleteCommentAsyncTask REST request initiated");
 
         // Inserts user authorization token to Authorization header
@@ -117,7 +115,6 @@ public class DeleteCommentAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
 
 }

@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Calls REST for obtaining number of comments already created for CoffeeSite.
  */
-public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetNumberOfCommentsAsyncTask {
 
     static final String REQ_TAG = "GetNumberOfCommentsAsyn";
 
@@ -33,8 +32,7 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
         this.coffeeSiteDetailActivity = new WeakReference<>(coffeeSiteDetailActivity);
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.d(REQ_TAG, "GetNumberOfCommentsAsyncTask REST request initiated");
 
@@ -90,7 +88,6 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
 
 }

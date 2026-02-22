@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.SiteLocationTypeDao;
 import io.reactivex.Single;
@@ -44,7 +43,7 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
         new SiteLocationTypeRepository.insertAsyncTask(siteLocationTypeDao).execute(siteLocationType);
     }
 
-    private static class insertAsyncTask extends AsyncTask<SiteLocationType, Void, Void> {
+    private static class insertAsyncTask {
 
         private final SiteLocationTypeDao mAsyncTaskDao;
 
@@ -52,10 +51,8 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final SiteLocationType... params) {
-            mAsyncTaskDao.insertSiteLocationType(params[0]);
-            return null;
+        public void execute(final SiteLocationType... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertSiteLocationType(params[0]));
         }
     }
 
@@ -63,7 +60,7 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(siteLocationTypeDao).execute(SiteLocationTypes);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<SiteLocationType>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final SiteLocationTypeDao mAsyncTaskDao;
 
@@ -71,10 +68,8 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<SiteLocationType>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<SiteLocationType>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

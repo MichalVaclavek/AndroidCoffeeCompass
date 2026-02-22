@@ -1,13 +1,11 @@
 package cz.fungisoft.coffeecompass2.asynctask.user;
 
-import android.os.AsyncTask;
-
 import cz.fungisoft.coffeecompass2.activity.data.UserAccountRepository;
 
 /**
  * Async task for deleteUser user account
  */
-public class DeleteUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
+public class DeleteUserRESTAsyncTask {
 
     private final UserAccountRepository registerRepository;
 
@@ -17,14 +15,7 @@ public class DeleteUserRESTAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         registerRepository.delete();
-        return null;
     }
-
-    @Override
-    protected void onPostExecute(Void result) {
-    }
-
 }

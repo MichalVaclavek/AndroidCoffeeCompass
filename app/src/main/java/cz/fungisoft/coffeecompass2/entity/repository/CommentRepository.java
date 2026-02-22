@@ -1,7 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -9,6 +7,7 @@ import androidx.lifecycle.Transformations;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsLoadOperationListener;
@@ -220,7 +219,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
 
     /** Helper inner classes to create AsyncTasks for inserting Comments */
 
-    private static class InsertCommentAsyncTask extends AsyncTask<Comment, Void, Void> {
+    private static class InsertCommentAsyncTask {
 
         private final CommentDao mAsyncTaskDao;
 
@@ -228,10 +227,8 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final Comment... params) {
-            mAsyncTaskDao.insertComment(params[0]);
-            return null;
+        public void execute(final Comment... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertComment(params[0]));
         }
     }
 
@@ -240,7 +237,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
     }
 
 
-    private static class InsertAllCommentsAsyncTask extends AsyncTask<List<Comment>, Void, Void> {
+    private static class InsertAllCommentsAsyncTask {
 
         private final CommentDao mAsyncTaskDao;
 
@@ -248,10 +245,8 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<Comment>... lists) {
-            mAsyncTaskDao.insertAllComments(lists[0]);
-            return null;
+        public void execute(List<Comment>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAllComments(lists[0]));
         }
     }
 

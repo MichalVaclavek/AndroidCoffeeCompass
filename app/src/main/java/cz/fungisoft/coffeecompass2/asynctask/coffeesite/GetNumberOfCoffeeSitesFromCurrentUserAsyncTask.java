@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,7 +26,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to perform REST Retrofit call to coffeecompass.cz to get number of active CoffeeSites
  * created by one user.
  */
-public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask {
 
     private static final String TAG = "GetNumSitesFromUserAT";
 
@@ -51,8 +50,7 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
         this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         //operationResult = "";
         operationError = "";
@@ -145,7 +143,6 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
                 }
             });
         }
-        return null;
     }
 
 }

@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.image;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -30,7 +29,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ImageUploadAsyncTask {
 
     private final UserAccountActionsProvider userAccountService;
 
@@ -58,8 +57,7 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         operationError = "";
 
@@ -154,7 +152,6 @@ public class ImageUploadAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
         }
-        return null;
     }
 
 }

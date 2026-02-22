@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ProgressBar;
 
@@ -214,53 +213,38 @@ public class ImageUtil {
      * @param imageFileName
      */
     public void downloadAndSaveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
-
-        class SaveThisImage extends AsyncTask<Void, Void, Void> {
-
-            private String myImageFileName;
-
-            @Override
-            protected void onPreExecute() {
-            }
-
-            @Override
-            protected Void doInBackground(Void... arg0) {
-
-                try {
-                    // File sdCard = Environment.getExternalStorageDirectory();
-                    // @SuppressLint("DefaultLocale")
-                    // String fileName = String.format("%d.jpg", System.currentTimeMillis());
-                    ContextWrapper cw = new ContextWrapper(context);
-                    final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE);
-                    final File myImageFile = new File(directory, imageFileName);
-                    // File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
-                    // dir.mkdirs();
-                    myImageFileName = myImageFile.getAbsolutePath();
-                    Bitmap bitmap = Picasso.get().load(myUrl).get();
-                    try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
-                        alreadySavedImagesCounter++;
-                    } catch (IOException e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                } catch (Exception e) {
+        AsyncRunner.runInBackground(() -> {
+            String myImageFileName;
+            try {
+                // File sdCard = Environment.getExternalStorageDirectory();
+                // @SuppressLint("DefaultLocale")
+                // String fileName = String.format("%d.jpg", System.currentTimeMillis());
+                ContextWrapper cw = new ContextWrapper(context);
+                final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE);
+                final File myImageFile = new File(directory, imageFileName);
+                // File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
+                // dir.mkdirs();
+                myImageFileName = myImageFile.getAbsolutePath();
+                Bitmap bitmap = Picasso.get().load(myUrl).get();
+                try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
+                    alreadySavedImagesCounter++;
+                } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
-                return null;
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+                myImageFileName = "";
             }
 
-            @Override
-            protected void onPostExecute(Void result) {
-                super.onPostExecute(result);
+            String finalImageFileName = myImageFileName;
+            AsyncRunner.runOnMainThread(() -> {
                 mProgressBar.setProgress(alreadySavedImagesCounter);
-                Log.i(TAG, "image saved to >>> " + myImageFileName + ". Saved/requested files: " + alreadySavedImagesCounter + "/" + numberOfImagesRequestedToDownload);
+                Log.i(TAG, "image saved to >>> " + finalImageFileName + ". Saved/requested files: " + alreadySavedImagesCounter + "/" + numberOfImagesRequestedToDownload);
                 if (numberOfImagesRequestedToDownload == alreadySavedImagesCounter) {
                     numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
                 }
-            }
-        }
-
-        SaveThisImage saveThisImage = new SaveThisImage();
-        saveThisImage.execute();
+            });
+        });
     }
 }

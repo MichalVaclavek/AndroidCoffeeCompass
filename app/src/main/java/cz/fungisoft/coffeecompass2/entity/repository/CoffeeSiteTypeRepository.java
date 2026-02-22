@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteTypeDao;
 import io.reactivex.Single;
@@ -44,7 +43,7 @@ public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
         new CoffeeSiteTypeRepository.insertAsyncTask(coffeeSiteTypeDao).execute(coffeeSiteType);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CoffeeSiteType, Void, Void> {
+    private static class insertAsyncTask {
 
         private final CoffeeSiteTypeDao mAsyncTaskDao;
 
@@ -52,10 +51,8 @@ public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSiteType... params) {
-            mAsyncTaskDao.insertCoffeeSiteType(params[0]);
-            return null;
+        public void execute(final CoffeeSiteType... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertCoffeeSiteType(params[0]));
         }
     }
 
@@ -63,7 +60,7 @@ public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(coffeeSiteTypeDao).execute(coffeeSiteTypes);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CoffeeSiteType>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final CoffeeSiteTypeDao mAsyncTaskDao;
 
@@ -71,10 +68,8 @@ public class CoffeeSiteTypeRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<CoffeeSiteType>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<CoffeeSiteType>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

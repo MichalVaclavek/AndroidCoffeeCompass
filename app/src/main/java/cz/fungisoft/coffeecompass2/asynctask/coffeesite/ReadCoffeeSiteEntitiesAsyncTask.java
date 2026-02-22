@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -43,7 +42,7 @@ import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepo
 /**
  * AsyncTask to load/create all CoffeeSiteEntity instancies from server.
  */
-public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ReadCoffeeSiteEntitiesAsyncTask {
 
     static final String REQ_ENTITIES_TAG = "ReadCoffeeSiteEntities";
 
@@ -78,8 +77,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
     /** Starts Retrofit requestedOperation to load all instancies of
      * all CoffeeSiteEntity class and save them to CoffeeSiteEntitiesRepository
      */
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_ENTITIES_TAG, "GetAllCoffeeSiteEntityValuesAsyncTask REST request initiated");
 
         Gson gson = new GsonBuilder().setLenient().create();
@@ -99,7 +97,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
             readAndSaveEntitiesFromServer(entityClass, api);
         }
 
-        return null;
     }
 
     /**

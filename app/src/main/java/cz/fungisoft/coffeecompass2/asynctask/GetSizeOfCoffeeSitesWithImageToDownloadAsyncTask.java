@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * Runs Async Task to call REST API endpoint for obtaining size of data to be downloaded,
  * when requesting Offline mode i.e. all CoffeeSites including their images.
  */
-public class GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask extends AsyncTask<Void, Void, Integer> {
+public class GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask {
 
     static final String REQ_TAG = "SitesImagesDownloadSize";
 
@@ -30,8 +29,7 @@ public class GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask extends AsyncTask<
         this.parentActivity = parentActivity;
     }
 
-    @Override
-    protected Integer doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask REST request initiated");
 
         //Add the interceptor to the client builder.
@@ -88,7 +86,6 @@ public class GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask extends AsyncTask<
             }
         });
 
-        return null;
     }
 
 }

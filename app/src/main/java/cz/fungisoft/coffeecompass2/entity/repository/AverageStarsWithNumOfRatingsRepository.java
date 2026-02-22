@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.AverageStarsWithNumOfRatingsDao;
 
@@ -32,7 +31,7 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
         new AverageStarsWithNumOfRatingsRepository.insertAsyncTask(averageStarsWithNumOfHodnoceniDao).execute(averageStarsWithNumOfHodnoceni);
     }
 
-    private static class insertAsyncTask extends AsyncTask<AverageStarsWithNumOfRatings, Void, Void> {
+    private static class insertAsyncTask {
 
         private final AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
 
@@ -40,10 +39,8 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final AverageStarsWithNumOfRatings... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
+        public void execute(final AverageStarsWithNumOfRatings... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insert(params[0]));
         }
     }
 
@@ -51,7 +48,7 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
         new InsertAllAsyncTask(averageStarsWithNumOfHodnoceniDao).execute(averageStarsWithNumOfHodnoceniList);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<AverageStarsWithNumOfRatings>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final AverageStarsWithNumOfRatingsDao mAsyncTaskDao;
 
@@ -59,10 +56,8 @@ public class AverageStarsWithNumOfRatingsRepository extends CoffeeSiteRepository
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<AverageStarsWithNumOfRatings>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<AverageStarsWithNumOfRatings>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

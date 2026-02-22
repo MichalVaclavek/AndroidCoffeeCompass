@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -32,7 +31,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * AsyncTask to call REST API to upload CoffeeSites created/updated when Offline.
  */
-public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UploadCoffeeSitesAsyncTask {
 
     private static final String TAG = "UploadCoffeeSitesAsyncT";
 
@@ -65,8 +64,7 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         this.userAccountService = userAccountService;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         operationError = "";
 
@@ -165,7 +163,6 @@ public class UploadCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
         }
-        return null;
     }
 
 }

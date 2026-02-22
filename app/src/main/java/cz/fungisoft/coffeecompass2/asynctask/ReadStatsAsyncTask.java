@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -26,7 +25,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * The task runs at the start of the AboutActivity.
  * Uses Retrofit for REST call and Gson for JSON deserialization.
  */
-public class ReadStatsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ReadStatsAsyncTask {
 
     private static final String TAG = "ReadStatsAsyncTask";
 
@@ -36,8 +35,7 @@ public class ReadStatsAsyncTask extends AsyncTask<Void, Void, Void> {
         this.parentActivity = new WeakReference<>(parentActivity);
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(TAG, "ReadStatsAsyncTask REST request initiated");
 
         OkHttpClient client = Utils.getOkHttpClientBuilder().build();
@@ -83,6 +81,5 @@ public class ReadStatsAsyncTask extends AsyncTask<Void, Void, Void> {
             }
         });
 
-        return null;
     }
 }

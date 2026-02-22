@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.image;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ImageDeleteAsyncTask {
 
     private final UserAccountActionsProvider userAccountService;
 
@@ -49,8 +48,7 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
         this.coffeeSiteId = coffeeSite.getId();
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         operationResult = "";
         operationError = "";
@@ -140,7 +138,6 @@ public class ImageDeleteAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
         }
-        return null;
     }
 
 }

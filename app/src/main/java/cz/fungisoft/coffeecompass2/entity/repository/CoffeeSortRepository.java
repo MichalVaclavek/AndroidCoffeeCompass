@@ -1,11 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSortDao;
 import io.reactivex.Single;
@@ -44,7 +43,7 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
         new CoffeeSortRepository.insertAsyncTask(coffeeSortDao).execute(coffeeSort);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CoffeeSort, Void, Void> {
+    private static class insertAsyncTask {
 
         private final CoffeeSortDao mAsyncTaskDao;
 
@@ -52,10 +51,8 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSort... params) {
-            mAsyncTaskDao.insertCoffeeSort(params[0]);
-            return null;
+        public void execute(final CoffeeSort... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertCoffeeSort(params[0]));
         }
     }
 
@@ -63,7 +60,7 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(coffeeSortDao).execute(CoffeeSorts);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CoffeeSort>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final CoffeeSortDao mAsyncTaskDao;
 
@@ -71,10 +68,8 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<CoffeeSort>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<CoffeeSort>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

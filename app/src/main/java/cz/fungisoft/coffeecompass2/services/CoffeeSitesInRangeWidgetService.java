@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -245,7 +244,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
      */
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
         isSearchingSites = true;
-        Log.i(TAG, "Start Async task for searching on server.");
+        Log.i(TAG, "Start REST call for searching on server.");
         new GetCoffeeSitesInRangeAsyncTask(this,
                 latitude, longitude,
                 range,
@@ -380,7 +379,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
     /**
      * Async Task to start and get Single request result from DB.
      */
-    private static class GetSingleCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Disposable> {
+    private static class GetSingleCoffeeSitesAsyncTask {
 
         private final int range;
 
@@ -394,8 +393,7 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             this.range = currentSearchRange;
         }
 
-        @Override
-        protected Disposable doInBackground(Void... params) {
+        public void execute() {
             d = coffeeSiteRepository.getCoffeeSitesInRangeSingle(searchLocation.latitude, searchLocation.longitude, range)
                     .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
                     .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
@@ -425,8 +423,6 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
                             latch.countDown();
                         }
                     });
-
-            return d;
         }
     }
 

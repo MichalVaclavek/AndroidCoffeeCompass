@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -27,7 +26,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Async Task to run REST api request to load CoffeeSites activated within last X days.
  */
-public class GetLatestCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetLatestCoffeeSitesAsyncTask {
 
     private static final String TAG = "GetALatestSitesAsyncT";
 
@@ -48,8 +47,7 @@ public class GetLatestCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         this.numberOfDaysBack = numberOfDaysBack;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
         operationError = "";
@@ -124,7 +122,6 @@ public class GetLatestCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
 
 }

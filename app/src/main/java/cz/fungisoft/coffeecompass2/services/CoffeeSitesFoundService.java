@@ -393,7 +393,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      */
     private void startSearchSitesInRangeFromServer(String coffeeSort, double latitude, double longitude, int range) {
         isSearching = true;
-        Log.i(TAG, "Start Async task for searching on server.");
+        Log.i(TAG, "Start REST call for searching on server.");
         new GetCoffeeSitesInRangeAsyncTask(this,
                 latitude,
                 longitude,

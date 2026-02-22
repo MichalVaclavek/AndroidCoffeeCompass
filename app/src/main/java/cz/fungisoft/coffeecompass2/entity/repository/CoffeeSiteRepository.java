@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -11,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import io.reactivex.Flowable;
@@ -210,7 +210,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
      * Deletes the CoffeeSites created in Offline mode, in the background.
      *  Used when they are already saved on server
      */
-    private static class DeleteCoffeeSitesNotSavedOnServerAsyncT extends AsyncTask<Void, Void, Integer> {
+    private static class DeleteCoffeeSitesNotSavedOnServerAsyncT {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
@@ -218,12 +218,12 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Integer doInBackground(final Void... params) {
-            //int deletedNum = mAsyncTaskDao.deleteAllCreatedAndNotSavedOnServer(CoffeeSiteRecordStatus.CREATED);
-            int deletedNum = mAsyncTaskDao.deleteAllNotSavedOnServer();
-            Log.i("DeleteCoffeeSitesAsyncT", "CoffeeSites not saved on server deleted. " + deletedNum);
-            return deletedNum;
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                //int deletedNum = mAsyncTaskDao.deleteAllCreatedAndNotSavedOnServer(CoffeeSiteRecordStatus.CREATED);
+                int deletedNum = mAsyncTaskDao.deleteAllNotSavedOnServer();
+                Log.i("DeleteCoffeeSitesAsyncT", "CoffeeSites not saved on server deleted. " + deletedNum);
+            });
         }
     }
 
@@ -235,7 +235,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         new DeleteAsyncTask(coffeeSiteDao).execute(coffeeSite);
     }
 
-    private static class DeleteAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+    private static class DeleteAsyncTask {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
@@ -243,10 +243,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSite... params) {
-            mAsyncTaskDao.delete(params[0]);
-            return null;
+        public void execute(final CoffeeSite... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.delete(params[0]));
         }
     }
 
@@ -256,7 +254,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         new UpdateAsyncTask(coffeeSiteDao).execute(coffeeSite);
     }
 
-    private static class UpdateAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+    private static class UpdateAsyncTask {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
@@ -264,10 +262,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSite... params) {
-            mAsyncTaskDao.updateCoffeeSite(params[0]);
-            return null;
+        public void execute(final CoffeeSite... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.updateCoffeeSite(params[0]));
         }
     }
 
@@ -277,7 +273,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         new InsertAsyncTask(coffeeSiteDao).execute(coffeeSite);
     }
 
-    private static class InsertAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+    private static class InsertAsyncTask {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
@@ -285,10 +281,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSite... params) {
-            mAsyncTaskDao.insertCoffeeSite(params[0]);
-            return null;
+        public void execute(final CoffeeSite... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertCoffeeSite(params[0]));
         }
     }
 
@@ -296,7 +290,7 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         new CoffeeSiteRepository.InsertAllAsyncTask(coffeeSiteDao).execute(coffeeSites);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CoffeeSite>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
         private final CoffeeSiteDao mAsyncTaskDao;
 
@@ -305,10 +299,8 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         }
 
         @SafeVarargs
-        @Override
-        protected final Void doInBackground(List<CoffeeSite>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public final void execute(List<CoffeeSite>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 
