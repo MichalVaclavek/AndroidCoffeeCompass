@@ -14,8 +14,14 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
+import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Copy from https://androidwave.com/capture-image-from-camera-gallery/
@@ -173,6 +179,12 @@ public class ImageUtil {
 
     private int alreadySavedImagesCounter = 0;
 
+    /**
+     * Counter for all processed image download attempts (successful or not).
+     * Used to track progress and detect when all requested downloads have been attempted.
+     */
+    private int alreadyProcessedImagesCounter = 0;
+
     private int numberOfImagesRequestedToDownload = 0;
 
     public void setNumberOfImagesRequestedToDownload(int numberOfImagesRequestedToDownload) {
@@ -184,6 +196,7 @@ public class ImageUtil {
 
     public void resetAlreadySavedImagesCounter() {
         alreadySavedImagesCounter = 0;
+        alreadyProcessedImagesCounter = 0;
         numberOfImagesRequestedToDownload = 0;
     }
 
@@ -242,6 +255,102 @@ public class ImageUtil {
                 mProgressBar.setProgress(alreadySavedImagesCounter);
                 Log.i(TAG, "image saved to >>> " + finalImageFileName + ". Saved/requested files: " + alreadySavedImagesCounter + "/" + numberOfImagesRequestedToDownload);
                 if (numberOfImagesRequestedToDownload == alreadySavedImagesCounter) {
+                    numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
+                }
+            });
+        });
+    }
+
+    /* ============== DOWNLOAD and SAVING IMAGE using new Images API (Retrofit) =========== */
+
+    /**
+     * Lazily initialized Retrofit instance for the new Images API.
+     */
+    private ImagesApiRESTInterface imagesApi;
+
+    private ImagesApiRESTInterface getImagesApi() {
+        if (imagesApi == null) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(Utils.getOkHttpClientBuilder().build())
+                    .baseUrl(ImagesApiRESTInterface.IMAGES_API_BASE_URL)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .build();
+            imagesApi = retrofit.create(ImagesApiRESTInterface.class);
+        }
+        return imagesApi;
+    }
+
+    /**
+     * Downloads the main image of a CoffeeSite in the specified size from the new Images API
+     * and saves it as a JPEG file into the app's private directory.<br>
+     * Uses the endpoint: GET /bytes/object/?objectExtId={coffeeSiteId}&type=main&size={imageSize}
+     * <p>
+     * This method runs on a background thread and reports progress on the main thread.
+     *
+     * @param context         application context
+     * @param coffeeSiteExtId external ID of the CoffeeSite (used as objectExtId in the Images API)
+     * @param imageSize       requested image size: "original", "hd", "large", "mid", "small"
+     * @param imageDir        directory name for saving image files
+     * @param imageFileName   file name for the saved image
+     */
+    public void downloadAndSaveImageFromApi(final Context context,
+                                            final String coffeeSiteExtId,
+                                            final String imageSize,
+                                            final String imageDir,
+                                            final String imageFileName) {
+        AsyncRunner.runInBackground(() -> {
+            String myImageFileName;
+            try {
+                ContextWrapper cw = new ContextWrapper(context);
+                final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE);
+                final File myImageFile = new File(directory, imageFileName);
+                myImageFileName = myImageFile.getAbsolutePath();
+
+                // Call the new Images API synchronously (we are already on a background thread)
+                Response<ResponseBody> response = getImagesApi()
+                        .getImageOfTypeAsBytes(coffeeSiteExtId, "main", imageSize)
+                        .execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    long totalBytesWritten = 0;
+                    try (InputStream inputStream = response.body().byteStream();
+                         FileOutputStream fos = new FileOutputStream(myImageFile)) {
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                            totalBytesWritten += bytesRead;
+                        }
+                        fos.flush();
+                    }
+                    if (totalBytesWritten > 0) {
+                        alreadySavedImagesCounter++;
+                    } else {
+                        // Empty response body - delete the empty file and do not count as saved
+                        myImageFile.delete();
+                        Log.w(TAG, "Empty image received for coffeeSite " + coffeeSiteExtId + ", skipping.");
+                        myImageFileName = "";
+                    }
+                } else {
+                    Log.e(TAG, "Failed to download image for coffeeSite " + coffeeSiteExtId
+                            + ". Response code: " + response.code());
+                    myImageFileName = "";
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error downloading image for coffeeSite " + coffeeSiteExtId
+                        + ": " + e.getMessage());
+                myImageFileName = "";
+            }
+
+            alreadyProcessedImagesCounter++;
+            String finalImageFileName = myImageFileName;
+            AsyncRunner.runOnMainThread(() -> {
+                mProgressBar.setProgress(alreadyProcessedImagesCounter);
+                Log.i(TAG, "image processed >>> " + finalImageFileName
+                        + ". Saved/processed/requested: " + alreadySavedImagesCounter
+                        + "/" + alreadyProcessedImagesCounter
+                        + "/" + numberOfImagesRequestedToDownload);
+                if (numberOfImagesRequestedToDownload == alreadyProcessedImagesCounter) {
                     numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
                 }
             });

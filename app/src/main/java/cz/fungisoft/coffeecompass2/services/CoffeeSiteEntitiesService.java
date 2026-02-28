@@ -307,7 +307,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImage++;
                         cs.setImageFileName(cs.getDefaultImageFileName());
-                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
+                        imageUtil.downloadAndSaveImageFromApi(getApplicationContext(), cs.getId(), "mid", ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                     }
                 }
             } else {
@@ -451,7 +451,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         }
         for (DataDownloadIndicatorListener listener : dataDownloadFinishedListeners) {
             if (result) {
-                DownloadDataOverview overview = new DownloadDataOverview(sitesAlreadyDownloaded, alreadyDownloadedComments, includingImages ? numOfSitesWithImage : 0);
+                DownloadDataOverview overview = new DownloadDataOverview(sitesAlreadyDownloaded, alreadyDownloadedComments, includingImages ? imageUtil.getAlreadySavedImagesCounter() : 0);
                 listener.onAllDataForOfflineModeDownloaded(overview);
                 // Saves status of data download
                 dataDownloadPreferenceHelper.putDownloadOverview(overview);
@@ -508,13 +508,13 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     @Override
                     public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
                         Log.i(TAG, "DB Single onSuccess()");
-                        // Download images
+                        // Download images using the new Images API (size "mid")
                         downloadInProgress = true;
                         if (coffeeSitesWithImage != null) {
                             for (CoffeeSite cs : coffeeSitesWithImage) {
                                 if (cs != null) {
                                     cs.setImageFileName(cs.getDefaultImageFileName());
-                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
+                                    imageUtil.downloadAndSaveImageFromApi(getApplicationContext(), cs.getId(), "mid", ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                                 }
                             }
                         }
