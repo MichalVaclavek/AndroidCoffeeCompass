@@ -37,7 +37,7 @@ public interface CommentsAndStarsRESTInterface {
 
     /**
      * REST call for obtaining all Comments paginated from server. Used when activating OFFLINE mode.
-     * https://coffeecompass.cz/rest/public/starsAndComments/comments/allPaginated?orderBy=created&direction=desc
+     * https://coffeecompass.cz/rest/starsAndComments/comments/allPaginated?orderBy=created&direction=desc
      *
      * @return
      */

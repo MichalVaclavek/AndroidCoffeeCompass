@@ -494,56 +494,51 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      */
     private void startDownloadImagesThread() {
 
-        final Runnable downloadThread = new Runnable() {
+        final Runnable downloadThread = () -> {
+            Log.d(TAG, "Thread to load images started.");
+            d = coffeeSiteRepository.getAllCoffeeSitesWithImageSingle()
+                .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
+                .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
 
-            public void run() {
-                Log.d(TAG, "Thread to load images started.");
-                d = coffeeSiteRepository.getAllCoffeeSitesWithImageSingle()
-                    .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
-                    .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
+                    @Override
+                    public void onStart() {
+                        Log.i(TAG, "Start DB Single request for CoffeeSites with Image");
+                    }
 
-                        @Override
-                        public void onStart() {
-                            Log.i(TAG, "Start DB Single request for CoffeeSites with Image");
-                        }
-
-                        @Override
-                        public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
-                            Log.i(TAG, "DB Single onSuccess()");
-                            // Download images
-                            downloadInProgress = true;
-                            if (coffeeSitesWithImage != null) {
-                                for (CoffeeSite cs : coffeeSitesWithImage) {
-                                    if (cs != null) {
-                                        cs.setImageFileName(cs.getDefaultImageFileName());
-                                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
-                                    }
+                    @Override
+                    public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
+                        Log.i(TAG, "DB Single onSuccess()");
+                        // Download images
+                        downloadInProgress = true;
+                        if (coffeeSitesWithImage != null) {
+                            for (CoffeeSite cs : coffeeSitesWithImage) {
+                                if (cs != null) {
+                                    cs.setImageFileName(cs.getDefaultImageFileName());
+                                    imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                                 }
                             }
                         }
+                    }
 
-                        @Override
-                        public void onError(@NonNull Throwable error) {
-                            Log.e(TAG, "Failed DB Single request for CoffeeSites with Image: " + error.getMessage());
-                        }
-                    });
-            }
+                    @Override
+                    public void onError(@NonNull Throwable error) {
+                        Log.e(TAG, "Failed DB Single request for CoffeeSites with Image: " + error.getMessage());
+                    }
+                });
         };
 
         imageDownloadHandle = scheduler.schedule(downloadThread, 0, SECONDS);
 
         // Next thread to check, if the imageDownloadThread is still running after given amount of time
         // i.e. After 5 minutes, so the imageDownloadHandle Task wil be canceled if still running
-        imageDownloadHandleCheck =  scheduler.schedule(new Runnable() {
-            public void run() {
-                Log.d(TAG, "Thread to check and cancel image loading thread, started.");
-                if (imageDownloadHandle != null && !imageDownloadHandle.isDone()) {
-                    imageDownloadHandle.cancel(true);
-                    Log.d(TAG, "Thread for loading images canceled due to timeout.");
-                }
-                // something bad happend if this thread was running, inform client
-                informClientAboutAllCoffeeSitesLoadResult(false);
+        imageDownloadHandleCheck =  scheduler.schedule(() -> {
+            Log.d(TAG, "Thread to check and cancel image loading thread, started.");
+            if (imageDownloadHandle != null && !imageDownloadHandle.isDone()) {
+                imageDownloadHandle.cancel(true);
+                Log.d(TAG, "Thread for loading images canceled due to timeout.");
             }
+            // something bad happend if this thread was running, inform client
+            informClientAboutAllCoffeeSitesLoadResult(false);
         }, 30 * 10, SECONDS); // 5 minutes to wait before start and check
     }
 

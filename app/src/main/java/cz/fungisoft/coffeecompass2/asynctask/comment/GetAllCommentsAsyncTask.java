@@ -55,7 +55,7 @@ public class GetAllCommentsAsyncTask {
 
         Call<List<Comment>> call = api.getAllComments();
 
-        call.enqueue(new Callback<List<Comment>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
                 if (response.isSuccessful()) {

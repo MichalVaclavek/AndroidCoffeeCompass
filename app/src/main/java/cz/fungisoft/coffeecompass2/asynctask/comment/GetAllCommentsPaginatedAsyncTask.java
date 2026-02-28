@@ -8,7 +8,6 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
@@ -65,7 +64,7 @@ public class GetAllCommentsPaginatedAsyncTask {
 
         Call<CommentsPageEnvelope> call = api.getAllCommentsPaginated(requestedPage, pageSize);
 
-        call.enqueue(new Callback<CommentsPageEnvelope>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<CommentsPageEnvelope> call, Response<CommentsPageEnvelope> response) {
                 if (response.isSuccessful()) {
