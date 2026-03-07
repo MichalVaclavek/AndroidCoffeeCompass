@@ -173,6 +173,7 @@
     <string name="status_created">VYTVOŘENO</string>
     <string name="coffee_site_load_failure">Nepodařilo se načíst data o lokaci.</string>
     <string name="no_comments_available">Žádné komentáře k dispozici</string>
+    <string name="coffee_site_no_photo_available">Foto není k dispozici</string>
 
     <string name="insert_author_comment_dialog_message">Vložte komentář:</string>
     <string name="insert_author_comment_dialog_confirm">Uložit</string>
@@ -296,5 +297,20 @@
 
     <string name="main_act_search_button_vyhledat_label_placeholder">VYHLEDAT<small><br>(%1$s)</br></small></string>
     <string name="main_act_search_button_vyhledat_label">VYHLEDAT</string>
+
+    <!-- CoffeeSiteImagesActivity - image management -->
+    <string name="manage_images_title">Správa fotek</string>
+    <string name="manage_images_add_photo">Přidat foto</string>
+    <string name="manage_images_delete_image">Smazat obrázek</string>
+    <string name="manage_images_delete_confirm_title">Smazat fotku</string>
+    <string name="manage_images_delete_confirm_message">Opravdu chcete smazat tuto fotku?</string>
+    <string name="manage_images_count">Fotek: %1$d / %2$d</string>
+    <string name="manage_images_upload_success">Fotka úspěšně nahrána.</string>
+    <string name="manage_images_upload_failure">Nahrání fotky selhalo.</string>
+    <string name="manage_images_delete_success">Fotka úspěšně smazána.</string>
+    <string name="manage_images_delete_failure">Smazání fotky selhalo.</string>
+    <string name="manage_images_load_failure">Načtení fotek selhalo.</string>
+    <string name="manage_images_max_reached">Maximální počet fotek dosažen.</string>
+    <string name="manage_images_menu_item">Spravovat foto</string>
 
 </resources>

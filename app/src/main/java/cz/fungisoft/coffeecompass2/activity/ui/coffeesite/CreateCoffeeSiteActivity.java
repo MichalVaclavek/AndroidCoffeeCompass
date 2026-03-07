@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -174,6 +175,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     MenuItem imageDeleteMenuItem;
     MenuItem saveMenuItem; // save and/or activate
+    MenuItem manageImagesMenuItem;
 
     private Location currentLocation;
     private boolean firstLocationDetection = true;
@@ -300,6 +302,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
         saveMenuItem.setEnabled(true);
         saveMenuItem.setTitle(R.string.coffeesite_save_menu_item);
+        manageImagesMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_manage_images);
+        manageImagesMenuItem.setEnabled(false); // enabled only in MODIFY mode for saved CoffeeSites
 
         mode = MODE_CREATE; // default mode (when Called from MainActivity)
 
@@ -413,6 +417,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                 // Show dialog to choose if the CoffeeSite should be cancelled or not
                                 DeleteCoffeeSiteImageDialogFragment dialog = new DeleteCoffeeSiteImageDialogFragment();
                                 dialog.show(getSupportFragmentManager(), "DeleteCoffeeSiteImageDialogFragment");
+                                return true;
+
+                            case R.id.navigation_manage_images:
+                                if (currentCoffeeSite != null) {
+                                    Intent manageImagesIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteImagesActivity.class);
+                                    manageImagesIntent.putExtra("coffeeSite", (Parcelable) currentCoffeeSite);
+                                    startActivity(manageImagesIntent);
+                                }
                                 return true;
                         }
                         return false;
@@ -586,6 +598,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                           || !coffeeSite.getMainImageFilePath().isEmpty();
 
         imageDeleteMenuItem.setEnabled(enableImageDeleteButton);
+
+        // Enable manage images menu item only for CoffeeSites already saved on server
+        boolean enableManageImages = (coffeeSite.isSavedOnServer() || coffeeSite.isStatusZaznamuAvailable())
+                                     && Utils.isOnline(getApplicationContext());
+        manageImagesMenuItem.setEnabled(enableManageImages);
     }
 
     /** Operations to start Photo or Image capture Intents and saving the result **** START ***/
@@ -596,12 +613,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private View.OnClickListener createSitePhotoViewOnClickListener() {
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectImage();
-            }
-        };
+        retVal = view -> selectImage();
         return retVal;
     }
 
@@ -1630,7 +1642,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * Shows location selected by user from Map in the respective latitude and longitude view
      */
     private void showCityStreetInView(double latitude, double longitude) {
-
         Geocoder geocoder;
         List<Address> addresses = null;
         geocoder = new Geocoder(this, Locale.getDefault());
@@ -1645,23 +1656,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (addresses != null && addresses.size() > 0) {
             Log.d(TAG, "Address found");
             // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            String street = addresses.get(0).getAddressLine(0).split(",")[0]; // getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat
+            String[] adresa = addresses.get(0).getAddressLine(0).split(",");
+            String street = adresa[0]; // getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat
             // Street nemuze zacinat cislem nebo slovy "Unnamed" ...
             if (street != null && (street.startsWith("Unnamed") || street.matches("^\\d.*"))) {
                 street = "";
             }
-            String city = addresses.get(0).getLocality();
-            city = (city == null) ? addresses.get(0).getSubLocality() : city;
-            if (city == null) {
-                String adminArea = addresses.get(0).getAdminArea();
-                if (adminArea != null) {
-                    String[] adminAreaSplit = adminArea.split(" ");
-                    city = adminAreaSplit[adminAreaSplit.length - 1]; // get last part of Admin Area. probably relevant only for "Hlavni mesto Praha"
-                }
-            }
+            // Derive mesto from addressline withoyt PSC number (getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat)
+            String mesto = adresa[1].replaceFirst("^ \\d{3} \\d{2} ", "");
+
             cityEditText.setTag("cityChangedProgrammatically");
             streetEditText.setTag("streetChangedProgrammatically");
-            cityEditText.setText(city);
+            cityEditText.setText(mesto);
             streetEditText.setText(street);
             cityEditText.setTag(null);
             streetEditText.setTag(null);
@@ -1800,10 +1806,15 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * On permanent denial opens settings dialog
      */
     private void requestStoragePermission(boolean isCamera) {
+        String[] permissions;
+        if (isCamera) {
+            permissions = new String[] { Manifest.permission.CAMERA };
+        } else {
+            permissions = new String[] { getReadImagesPermission() };
+        }
+
         Dexter.withContext(this)
-              .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
-//                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA) // probably not needed, also commented in AndroidManifest.xml
-                          Manifest.permission.CAMERA)
+              .withPermissions(permissions)
               .withListener(new MultiplePermissionsListener() {
 
                     @Override
@@ -1832,6 +1843,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                .show())
               .onSameThread()
               .check();
+    }
+
+    private String getReadImagesPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return Manifest.permission.READ_MEDIA_IMAGES;
+        }
+        return Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
     /**

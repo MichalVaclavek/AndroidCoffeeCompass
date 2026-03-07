@@ -52,7 +52,7 @@ public class GetPlacesCandidatesCUZKTask {
         Log.i(TAG, "start");
 
         operationError = "";
-        Call<CuzkCandidates> call = null;
+        Call<CuzkCandidates> call;
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(2, TimeUnit.SECONDS)
@@ -75,7 +75,7 @@ public class GetPlacesCandidatesCUZKTask {
 
         Log.i(TAG, "start call");
         if (call != null) {
-            call.enqueue(new Callback<CuzkCandidates>() {
+            call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<CuzkCandidates> call, Response<CuzkCandidates> response) {
                     if (response.isSuccessful()) {

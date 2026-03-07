@@ -95,13 +95,10 @@ public class SelectedTownFragment extends Fragment {
     private View.OnClickListener createOnClickListenerForCancelTownIcon() {
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Get selected cup image
-                if (view instanceof ImageView) {
-                    informTownFragmentRemovedListener();
-                }
+        retVal = view -> {
+            // Get selected cup image
+            if (view instanceof ImageView) {
+                informTownFragmentRemovedListener();
             }
         };
         return retVal;

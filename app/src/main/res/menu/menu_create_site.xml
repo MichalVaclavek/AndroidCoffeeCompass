@@ -12,4 +12,9 @@
         android:icon="@drawable/ic_delete_picture"
         android:title="@string/create_site_menu_smazat_foto" />
 
+    <item
+        android:id="@+id/navigation_manage_images"
+        android:icon="@drawable/ic_outline_add_photo_alternate_36"
+        android:title="@string/manage_images_menu_item" />
+
 </menu>

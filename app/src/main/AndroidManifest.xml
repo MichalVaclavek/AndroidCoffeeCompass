@@ -7,7 +7,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -90,6 +92,9 @@
         <activity android:name=".activity.ActivityWithLocationService" />
         <activity
             android:name=".activity.ui.coffeesite.CreateCoffeeSiteActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ui.coffeesite.CoffeeSiteImagesActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity"
