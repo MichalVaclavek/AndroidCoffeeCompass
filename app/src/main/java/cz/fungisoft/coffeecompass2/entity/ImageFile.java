@@ -3,6 +3,8 @@ package cz.fungisoft.coffeecompass2.entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
+
 /**
  * POJO model for a single image file entry returned by the Images API
  * endpoint {@code GET /object/{objectExtId}}.
@@ -90,10 +92,30 @@ public class ImageFile {
      * @return full URL with size query parameter appended
      */
     public String getBytesUrl(String size) {
-        if (baseBytesImageUrl == null || baseBytesImageUrl.isEmpty()) {
-            return "";
+        String url = baseBytesImageUrl;
+
+        if (url == null || url.isEmpty()) {
+            if (externalId == null || externalId.isEmpty()) {
+                return "";
+            }
+            url = BuildConfig.IMAGES_API_PUBLIC_URL + "bytes/?imageExtId=" + externalId;
+        } else if (isInternalImagesHost(url) && externalId != null && !externalId.isEmpty()) {
+            url = BuildConfig.IMAGES_API_PUBLIC_URL + "bytes/?imageExtId=" + externalId;
         }
-        String separator = baseBytesImageUrl.contains("?") ? "&" : "?";
-        return baseBytesImageUrl + separator + "size=" + size;
+
+        if (size != null && !size.isEmpty() && !url.contains("size=")) {
+            url = appendQueryParam(url, "size", size);
+        }
+
+        return url;
+    }
+
+    private boolean isInternalImagesHost(String url) {
+        return url.startsWith("https://images") || url.startsWith("http://images");
+    }
+
+    private String appendQueryParam(String url, String name, String value) {
+        String separator = url.contains("?") ? "&" : "?";
+        return url + separator + name + "=" + value;
     }
 }

@@ -19,6 +19,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,9 +81,13 @@ public class ImageUploadNewApiAsyncTask {
             return chain.proceed(request);
         };
 
+//        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
         OkHttpClient client = Utils.getOkHttpClientBuilder()
                 .addInterceptor(authInterceptor)
                 .authenticator(new TokenAuthenticator(userAccountService))
+//                .addInterceptor(logging)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -93,18 +98,19 @@ public class ImageUploadNewApiAsyncTask {
 
         // Build multipart parts
         RequestBody objectExtIdBody = RequestBody.create(objectExtId, MediaType.parse("text/plain"));
-        RequestBody descriptionBody = RequestBody.create("", MediaType.parse("text/plain"));
+        RequestBody descriptionBody = RequestBody.create("Popis", MediaType.parse("text/plain"));
         RequestBody imageTypeBody = RequestBody.create("main", MediaType.parse("text/plain"));
+        RequestBody typeBody = RequestBody.create("main", MediaType.parse("text/plain"));
 
         RequestBody fileBody = RequestBody.create(imageFile, MediaType.parse("image/jpeg"));
         MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", imageFile.getName(), fileBody);
 
         ImagesApiSecuredRESTInterface api = retrofit.create(ImagesApiSecuredRESTInterface.class);
-        Call<String> call = api.uploadImage(objectExtIdBody, descriptionBody, imageTypeBody, filePart);
+        Call<String> call = api.uploadImage(objectExtIdBody, descriptionBody, imageTypeBody, typeBody, filePart);
 
         Log.i(TAG, "Starting upload for objectExtId=" + objectExtId);
 
-        call.enqueue(new Callback<String>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful() && response.body() != null) {

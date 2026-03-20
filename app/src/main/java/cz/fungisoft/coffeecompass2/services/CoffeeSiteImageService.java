@@ -15,7 +15,9 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
@@ -126,6 +128,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
         Log.d(TAG, "ImageFile exists: " + imageFile.exists());
         if (imageFile.exists()) {
             new ImageUploadAsyncTask(this, userAccountService, imageFile, cs).execute();
+//            new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile, cs.getId()).execute();
         }
     }
 
@@ -136,6 +139,7 @@ public class CoffeeSiteImageService extends Service implements UserAccountServic
     public void deleteImage(CoffeeSite cs) {
         ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), cs);
         new ImageDeleteAsyncTask(this, userAccountService, cs).execute();
+//        new ImageDeleteNewApiAsyncTask(this, userAccountService, cs.getId(), imageFile.getExternalId()).execute();
     }
 
     /**

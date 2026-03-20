@@ -114,7 +114,7 @@ public class CoffeeSiteCreateUpdateAsyncTask {
 
             Log.i(tag, "start call");
 
-            call.enqueue(new Callback<CoffeeSite>() {
+            call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
                     if (response.isSuccessful()) {

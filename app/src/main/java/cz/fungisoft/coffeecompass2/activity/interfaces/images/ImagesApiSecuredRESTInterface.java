@@ -28,7 +28,8 @@ public interface ImagesApiSecuredRESTInterface {
      *
      * @param objectExtId the external ID of the object (CoffeeSite ID)
      * @param description optional description of the image
-     * @param imageType   image type, e.g. "main"
+     * @param imageType   image type, set by user, e.g. "main"
+     * @param type        image type
      * @param file        the image file binary part
      * @return the external ID (UUID) of the newly created image
      */
@@ -37,6 +38,7 @@ public interface ImagesApiSecuredRESTInterface {
     Call<String> uploadImage(@Part("objectExtId") RequestBody objectExtId,
                              @Part("description") RequestBody description,
                              @Part("imageType") RequestBody imageType,
+                             @Part("type") RequestBody type,
                              @Part MultipartBody.Part file);
 
     /**

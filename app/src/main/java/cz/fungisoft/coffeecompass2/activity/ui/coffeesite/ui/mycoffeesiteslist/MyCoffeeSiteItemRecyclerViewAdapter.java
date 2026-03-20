@@ -144,16 +144,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private View.OnClickListener createOnClickListenerForDetailActivityStart() {
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CoffeeSite item = (CoffeeSite) view.getTag();
-                if (item != null) {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) item);
-                    context.startActivity(intent);
-                }
+        retVal = view -> {
+            CoffeeSite item = (CoffeeSite) view.getTag();
+            if (item != null) {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                intent.putExtra("coffeeSite", (Parcelable) item);
+                context.startActivity(intent);
             }
         };
         return retVal;
@@ -169,17 +166,14 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
-                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-                    intent.putExtra("showImageFirst", true);
-                    context.startActivity(intent);
-                }
+        retVal = view -> {
+            CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
+            if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+                intent.putExtra("showImageFirst", true);
+                context.startActivity(intent);
             }
         };
         return retVal;
