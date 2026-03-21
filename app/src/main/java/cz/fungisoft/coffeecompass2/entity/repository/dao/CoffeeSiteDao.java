@@ -109,6 +109,9 @@ public interface CoffeeSiteDao {
     @Delete
     void delete(CoffeeSite coffeeSite);
 
+    @Query("DELETE FROM coffee_site_table WHERE id = :coffeeSiteId")
+    int deleteById(String coffeeSiteId);
+
     @Query("DELETE FROM coffee_site_table")
     void deleteAll();
 

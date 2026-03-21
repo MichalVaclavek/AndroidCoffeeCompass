@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_IN_TOWN;
 
 import android.content.Intent;
@@ -228,9 +230,9 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     public void findCoffeeSitesPageFromCurrentUser(int pageNumber, int pageSize) {
         if (pageNumber == 1) {
-            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+            requestedRESTOperation = COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
         } else if (pageNumber > 1) {
-            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
+            requestedRESTOperation = COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
         } else {
             return;
         }

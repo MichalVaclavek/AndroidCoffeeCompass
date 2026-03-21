@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
@@ -455,6 +456,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         if (coffeeSiteCUDOperationsService != null) {
             coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
         }
+        mParentActivity.removeCoffeeSiteFromCachedLists(selectedCoffeeSite);
         modifiedCoffeeSite = selectedCoffeeSite;
         Log.i(TAG, "CoffeeSite missing on server, deleting local DB record too. ID=" + selectedCoffeeSite.getId());
         return true;
@@ -652,7 +654,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
             mValues.remove(selectedCoffeeSite);
             this.notifyItemRemoved(selectedPosition);
         }
@@ -662,7 +664,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
 
             mValues.set(selectedPosition, modifiedCoffeeSite);
             this.notifyItemChanged(selectedPosition);
@@ -673,7 +675,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
             mValues.set(selectedPosition, modifiedCoffeeSite);
             this.notifyItemChanged(selectedPosition);
         }

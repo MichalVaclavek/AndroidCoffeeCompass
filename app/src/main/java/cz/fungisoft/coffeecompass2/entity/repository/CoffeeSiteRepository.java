@@ -232,7 +232,9 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     //*** Delete CoffeeSite from DB **/
     //*** Must run in a separate thread */
     public void deleteCoffeeSiteFromDB(CoffeeSite coffeeSite) {
-        new DeleteAsyncTask(coffeeSiteDao).execute(coffeeSite);
+        if (coffeeSite != null) {
+            new DeleteAsyncTask(coffeeSiteDao).execute(coffeeSite.getId());
+        }
     }
 
     private static class DeleteAsyncTask {
@@ -243,8 +245,11 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             mAsyncTaskDao = dao;
         }
 
-        public void execute(final CoffeeSite... params) {
-            AsyncRunner.runInBackground(() -> mAsyncTaskDao.delete(params[0]));
+        public void execute(final String... params) {
+            AsyncRunner.runInBackground(() -> {
+                int deletedNum = mAsyncTaskDao.deleteById(params[0]);
+                Log.i("DeleteCoffeeSiteAsyncT", "CoffeeSites deleted by id. " + deletedNum + ", id=" + params[0]);
+            });
         }
     }
 

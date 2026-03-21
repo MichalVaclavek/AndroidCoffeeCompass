@@ -29,6 +29,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -179,6 +180,30 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
     public static synchronized void setNotUploadedCoffeeSites(List<CoffeeSite> notUploadedCoffeeSites) {
         MyCoffeeSitesListActivity.notUploadedCoffeeSites = notUploadedCoffeeSites;
+    }
+
+    public synchronized void removeCoffeeSiteFromCachedLists(CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return;
+        }
+
+        removeCoffeeSiteById(content, coffeeSite.getId());
+        removeCoffeeSiteById(notUploadedCoffeeSites, coffeeSite.getId());
+        removeCoffeeSiteById(coffeeSitesInDBDownloaded, coffeeSite.getId());
+    }
+
+    private void removeCoffeeSiteById(List<CoffeeSite> coffeeSites, String coffeeSiteId) {
+        if (coffeeSites == null || coffeeSiteId == null || coffeeSiteId.isEmpty()) {
+            return;
+        }
+
+        Iterator<CoffeeSite> iterator = coffeeSites.iterator();
+        while (iterator.hasNext()) {
+            CoffeeSite coffeeSite = iterator.next();
+            if (coffeeSite != null && coffeeSiteId.equals(coffeeSite.getId())) {
+                iterator.remove();
+            }
+        }
     }
 
     /**
