@@ -61,7 +61,10 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("getSitesInRange/")
-    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range);
+    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1,
+                                                 @Query("lon1") double lon1,
+                                                 @Query("range") int range,
+                                                 @Query("recordStatus") String recordStatus);
 
     /**
      * @return

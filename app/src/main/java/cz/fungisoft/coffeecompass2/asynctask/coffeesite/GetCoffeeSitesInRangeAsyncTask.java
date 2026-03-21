@@ -29,6 +29,7 @@ import retrofit2.Response;
 public class GetCoffeeSitesInRangeAsyncTask {
 
     private static final String TAG = "GetSitesInRangeAsyncT";
+    private static final String ACTIVE_RECORD_STATUS = "ACTIVE";
 
     /**
      * A Service or component which invokes this REST caller and receives results.
@@ -61,7 +62,11 @@ public class GetCoffeeSitesInRangeAsyncTask {
                 .getRetrofit(CoffeeSiteRESTInterface.COFFEESITE_API_PUBLIC_SEARCH_URL)
                 .create(CoffeeSiteRESTInterface.class);
 
-        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(this.latFrom, this.longFrom, this.range);
+        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(
+                this.latFrom,
+                this.longFrom,
+                this.range,
+                ACTIVE_RECORD_STATUS);
 
         Log.i(TAG, "start call");
 
@@ -115,4 +120,5 @@ public class GetCoffeeSitesInRangeAsyncTask {
             }
         });
     }
+
 }
