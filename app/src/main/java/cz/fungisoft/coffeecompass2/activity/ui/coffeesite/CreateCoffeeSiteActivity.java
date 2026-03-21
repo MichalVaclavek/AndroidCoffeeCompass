@@ -2,6 +2,8 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -425,11 +427,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                 return true;
 
                             case R.id.navigation_manage_images:
-                                if (currentCoffeeSite != null) {
-                                    Intent manageImagesIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteImagesActivity.class);
-                                    manageImagesIntent.putExtra("coffeeSite", (Parcelable) currentCoffeeSite);
-                                    startActivity(manageImagesIntent);
-                                }
+                                openManageImagesActivity();
                                 return true;
                         }
                         return false;
@@ -597,17 +595,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         saveMenuItem.setEnabled(true);
         saveMenuItem.setTitle(R.string.save_coffeesite_updated);
-
-        // setup deleteUser image button
-        boolean enableImageDeleteButton = (!coffeeSite.getMainImageURL().isEmpty() && Utils.isOnline(getApplicationContext()))
-                                          || !coffeeSite.getMainImageFilePath().isEmpty();
-
-        imageDeleteMenuItem.setEnabled(enableImageDeleteButton);
-
-        // Enable manage images menu item only for CoffeeSites already saved on server
-        boolean enableManageImages = (coffeeSite.isSavedOnServer() || coffeeSite.isStatusZaznamuAvailable())
-                                     && Utils.isOnline(getApplicationContext());
-        manageImagesMenuItem.setEnabled(enableManageImages);
+        currentImageCount = hasMainImage() ? 1 : 0;
+        refreshImageActionState();
+        refreshImageCountIfNeeded();
     }
 
     /** Operations to start Photo or Image capture Intents and saving the result **** START ***/
@@ -618,7 +608,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private View.OnClickListener createSitePhotoViewOnClickListener() {
         View.OnClickListener retVal;
 
-        retVal = view -> selectImage();
+        retVal = view -> {
+            if (hasMainImage()) {
+                openManageImagesActivity();
+            } else {
+                selectImage();
+            }
+        };
         return retVal;
     }
 
@@ -640,9 +636,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     static final int REQUEST_TAKE_PHOTO = 100;
     static final int REQUEST_GALLERY_PHOTO = 101;
+    static final int REQUEST_MANAGE_IMAGES = 102;
 
     private File imagePhotoFile;
     private FileCompressor fileCompressor;
+    private int currentImageCount = 0;
+    private final ArrayList<String> localImagePaths = new ArrayList<>();
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -657,9 +656,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress photo file from camera.");
                     }
-                    // Show it in View
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
-                    imageDeleteMenuItem.setEnabled(true);
+                    showSelectedMainImage(imagePhotoFile);
                 }
                 break;
 
@@ -671,8 +668,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress image file from gallery.");
                     }
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
-                    imageDeleteMenuItem.setEnabled(true);
+                    showSelectedMainImage(imagePhotoFile);
+                }
+                break;
+
+                case REQUEST_MANAGE_IMAGES: {
+                    handleManagedImagesResult(data);
                 }
                 break;
 
@@ -719,24 +720,26 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            Log.e(TAG, "Create image file failed.", ex);
+        }
+        if (photoFile != null) {
+            imagePhotoFile = photoFile;
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    getString(R.string.file_provider),
+                    photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            takePictureIntent.setClipData(ClipData.newRawUri("", photoURI));
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.e(TAG, "Create image file failed.");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                imagePhotoFile = photoFile;
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        getString(R.string.file_provider),
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            } catch (ActivityNotFoundException | SecurityException ex) {
+                Log.e(TAG, "No camera app available for image capture.", ex);
+                Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -756,6 +759,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshImageCountIfNeeded();
     }
 
     @Override
@@ -974,9 +983,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             saveCoffeeSiteAndActivate(currentCoffeeSite);
         }
         if (dialog instanceof DeleteCoffeeSiteImageDialogFragment) {
-            imageDeleteMenuItem.setEnabled(false);
             if (imagePhotoFile != null) {
                 imagePhotoFile.delete();
+                imagePhotoFile = null;
+                localImagePaths.clear();
                 siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
             }
 
@@ -984,6 +994,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 if (!currentCoffeeSite.getMainImageFilePath().isEmpty()) {
                     ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), currentCoffeeSite);
                     currentCoffeeSite.setMainImageFilePath("");
+                    currentImageCount = 0;
+                    refreshImageActionState();
                 }
 
                 if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
@@ -994,7 +1006,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
                         Utils.showNoInternetToast(getApplicationContext());
                     }
+                } else if (currentCoffeeSite.getMainImageFilePath().isEmpty()) {
+                    currentImageCount = 0;
+                    refreshImageActionState();
                 }
+            } else {
+                currentImageCount = 0;
+                refreshImageActionState();
             }
         }
     }
@@ -1214,7 +1232,19 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageObjectLoaded(ImageObject imageObject) {
+        currentImageCount = imageObject != null ? imageObject.getObjectImages().size() : 0;
+        refreshImageActionState();
         if (!pendingImageDeleteLookup) {
+            if (currentImageCount == 0) {
+                if (currentCoffeeSite != null) {
+                    currentCoffeeSite.setMainImageURL("");
+                    currentCoffeeSite.setMainImageFilePath("");
+                }
+                imagePhotoFile = null;
+                localImagePaths.clear();
+                siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                        R.drawable.ic_outline_add_photo_alternate_36));
+            }
             return;
         }
         pendingImageDeleteLookup = false;
@@ -1296,16 +1326,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     private void onImageSaveSuccess(CoffeeSite coffeeSite, String imageSaveResult) {
         hideProgressbarAndEnableMenuItems();
-        // Image saved, button to deleteUser can be enabled, but probably
-        // not needed as after Save we are going to MyCoffeeSiteActivity
-        // after successful return from coffeeSiteCUDOperationsService.update(currentCoffeeSite);
-        imageDeleteMenuItem.setEnabled(true);
+        currentImageCount = Math.max(currentImageCount, 1);
         if (currentCoffeeSite != null) {
             currentCoffeeSite.setMainImageURL(imageSaveResult);
         }
         if (coffeeSite != null) {
             coffeeSite.setMainImageURL(imageSaveResult);
         }
+        refreshImageActionState();
 
         // if newly created CoffeeSite has now image saved too, we can delete it from DB
         if (currentCoffeeSite != null
@@ -1367,11 +1395,14 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 text,
                 Toast.LENGTH_SHORT);
         toast.show();
-        // No image here, disable deleteUser button
-        imageDeleteMenuItem.setEnabled(false);
+        currentImageCount = 0;
         if (currentCoffeeSite != null) {
             currentCoffeeSite.setMainImageURL("");
+            currentCoffeeSite.setMainImageFilePath("");
         }
+        imagePhotoFile = null;
+        localImagePaths.clear();
+        refreshImageActionState();
         siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
     }
 
@@ -1869,8 +1900,125 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      */
     public void hideProgressbarAndEnableMenuItems() {
         saveMenuItem.setEnabled(true);
-        imageDeleteMenuItem.setEnabled(true);
+        refreshImageActionState();
         saveCoffeeSiteProgressBar.setVisibility(View.GONE);
+    }
+
+    private boolean hasMainImage() {
+        boolean hasLocalImage = imagePhotoFile != null && imagePhotoFile.exists();
+        boolean hasCurrentCoffeeSiteImage = currentCoffeeSite != null
+                && (!currentCoffeeSite.getMainImageFilePath().isEmpty()
+                || !currentCoffeeSite.getMainImageURL().isEmpty());
+        return hasLocalImage || hasCurrentCoffeeSiteImage;
+    }
+
+    private boolean canOpenManageImages() {
+        return currentCoffeeSite != null
+                && !currentCoffeeSite.getId().isEmpty()
+                && (currentCoffeeSite.isSavedOnServer() || currentCoffeeSite.isStatusZaznamuAvailable())
+                && Utils.isOnline(getApplicationContext());
+    }
+
+    private void openManageImagesActivity() {
+        if (!hasMainImage()) {
+            return;
+        }
+        Intent manageImagesIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteImagesActivity.class);
+        manageImagesIntent.putExtra("coffeeSite", (Parcelable) getCoffeeSiteForManageImages());
+        manageImagesIntent.putStringArrayListExtra(CoffeeSiteImagesActivity.EXTRA_LOCAL_IMAGE_PATHS,
+                new ArrayList<>(localImagePaths));
+        startActivityForResult(manageImagesIntent, REQUEST_MANAGE_IMAGES);
+    }
+
+    private void refreshImageCountIfNeeded() {
+        if (canOpenManageImages()) {
+            new GetImageObjectAsyncTask(this, currentCoffeeSite.getId()).execute();
+        } else {
+            if (!localImagePaths.isEmpty()) {
+                currentImageCount = localImagePaths.size();
+                refreshImageActionState();
+                return;
+            }
+            boolean hasUnknownRemoteImages = currentCoffeeSite != null
+                    && !Utils.isOnline(getApplicationContext())
+                    && !currentCoffeeSite.getId().isEmpty()
+                    && currentCoffeeSite.getMainImageFilePath().isEmpty()
+                    && !currentCoffeeSite.getMainImageURL().isEmpty();
+            currentImageCount = hasUnknownRemoteImages ? 0 : (hasMainImage() ? 1 : 0);
+            refreshImageActionState();
+        }
+    }
+
+    private void refreshImageActionState() {
+        boolean hasMainImage = hasMainImage();
+        imageDeleteMenuItem.setEnabled(hasMainImage && currentImageCount == 1);
+        manageImagesMenuItem.setEnabled(hasMainImage);
+    }
+
+    private void showSelectedMainImage(File mainImageFile) {
+        if (mainImageFile == null) {
+            return;
+        }
+        Picasso.get().load(mainImageFile).into(siteFotoView);
+        replaceLocalImagesWithMainImage(mainImageFile);
+        if (currentCoffeeSite != null) {
+            currentCoffeeSite.setMainImageFilePath(mainImageFile.getPath());
+        }
+        currentImageCount = 1;
+        refreshImageActionState();
+    }
+
+    private void handleManagedImagesResult(@Nullable Intent data) {
+        if (data == null) {
+            return;
+        }
+        ArrayList<String> updatedLocalImagePaths = data.getStringArrayListExtra(
+                CoffeeSiteImagesActivity.EXTRA_LOCAL_IMAGE_PATHS);
+        if (updatedLocalImagePaths == null) {
+            return;
+        }
+        localImagePaths.clear();
+        localImagePaths.addAll(updatedLocalImagePaths);
+        applyLocalImagesState();
+    }
+
+    private CoffeeSite getCoffeeSiteForManageImages() {
+        if (currentCoffeeSite != null) {
+            return currentCoffeeSite;
+        }
+        CoffeeSite draftCoffeeSite = new CoffeeSite();
+        draftCoffeeSite.setName(coffeeSiteNameEditText.getText() != null
+                ? coffeeSiteNameEditText.getText().toString().trim()
+                : "");
+        return draftCoffeeSite;
+    }
+
+    private void replaceLocalImagesWithMainImage(File mainImageFile) {
+        localImagePaths.clear();
+        if (mainImageFile != null) {
+            localImagePaths.add(mainImageFile.getPath());
+        }
+    }
+
+    private void applyLocalImagesState() {
+        currentImageCount = localImagePaths.size();
+        if (localImagePaths.isEmpty()) {
+            imagePhotoFile = null;
+            if (currentCoffeeSite != null) {
+                currentCoffeeSite.setMainImageFilePath("");
+            }
+            siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                    R.drawable.ic_outline_add_photo_alternate_36));
+            refreshImageActionState();
+            return;
+        }
+
+        imagePhotoFile = new File(localImagePaths.get(0));
+        if (currentCoffeeSite != null) {
+            currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
+        }
+        Picasso.get().load(imagePhotoFile).into(siteFotoView);
+        refreshImageActionState();
     }
 
     /**

@@ -1,6 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -32,6 +34,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -65,12 +68,15 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
                    CoffeeSiteImageManageAdapter.OnImageDeleteClickListener {
 
     private static final String TAG = "CoffeeSiteImagesAct";
+    public static final String EXTRA_LOCAL_IMAGE_PATHS = "localImagePaths";
 
     private static final int REQUEST_TAKE_PHOTO = 200;
     private static final int REQUEST_GALLERY_PHOTO = 201;
     private static final int MAX_IMAGES = 10;
 
     private CoffeeSite coffeeSite;
+    private final ArrayList<String> localImagePaths = new ArrayList<>();
+    private boolean isDraftMode = false;
 
     private RecyclerView recyclerView;
     private CoffeeSiteImageManageAdapter adapter;
@@ -91,12 +97,9 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coffeesite_images);
 
-        // Read CoffeeSite from intent
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            coffeeSite = extras.getParcelable("coffeeSite");
-        }
-        if (coffeeSite == null) {
+        readIntentData();
+        isDraftMode = coffeeSite == null || coffeeSite.getId() == null || coffeeSite.getId().isEmpty();
+        if (coffeeSite == null && localImagePaths.isEmpty()) {
             Log.e(TAG, "No CoffeeSite provided. Finishing.");
             finish();
             return;
@@ -108,7 +111,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.manage_images_title);
-            toolbar.setSubtitle(coffeeSite.getName());
+            toolbar.setSubtitle(coffeeSite != null ? coffeeSite.getName() : "");
         }
 
         progressBar = findViewById(R.id.manage_images_progress_bar);
@@ -132,21 +135,21 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
         fileCompressor = new FileCompressor(this);
 
-        // Bind UserAccountService for auth tokens
-        doBindUserAccountService();
+        initializeImagesSource();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Load images when activity becomes visible
-        loadImages();
+        loadImagesForCurrentMode();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        doUnbindUserAccountService();
+        if (!isDraftMode) {
+            doUnbindUserAccountService();
+        }
     }
 
     @Override
@@ -161,7 +164,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     // -------- Image loading --------
 
     private void loadImages() {
-        if (coffeeSite == null || !Utils.isOnline(getApplicationContext())) {
+        if (isDraftMode || coffeeSite == null || !Utils.isOnline(getApplicationContext())) {
             return;
         }
         showProgress();
@@ -189,6 +192,10 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     // -------- Image upload --------
 
     private void uploadImage(File imageFile) {
+        if (isDraftMode) {
+            addDraftImage(imageFile);
+            return;
+        }
         if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
             Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
             return;
@@ -227,6 +234,10 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     }
 
     private void deleteImage(ImageFile imageFile, int position) {
+        if (isDraftMode) {
+            deleteDraftImage(position);
+            return;
+        }
         if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
             Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
             return;
@@ -258,6 +269,14 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         pendingDeletePosition = -1;
         Log.e(TAG, "Delete failed: " + (error != null ? error.getDetail() : ""));
         Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isDraftMode) {
+            setResult(RESULT_OK, buildDraftResultIntent());
+        }
+        super.onBackPressed();
     }
 
     // -------- Image picker (camera / gallery) --------
@@ -320,19 +339,25 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            Log.e(TAG, "Create image file failed.", ex);
+        }
+        if (photoFile != null) {
+            imagePhotoFile = photoFile;
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    getString(R.string.file_provider), photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            takePictureIntent.setClipData(ClipData.newRawUri("", photoURI));
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                Log.e(TAG, "Create image file failed.", ex);
-            }
-            if (photoFile != null) {
-                imagePhotoFile = photoFile;
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        getString(R.string.file_provider), photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            } catch (ActivityNotFoundException | SecurityException ex) {
+                Log.e(TAG, "No camera app available for image capture.", ex);
+                Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -449,5 +474,80 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
     private void updateAddButtonState() {
         addButton.setEnabled(adapter.getImageCount() < MAX_IMAGES);
+    }
+
+    private void updateDraftImages() {
+        adapter.setImageFiles(createDraftImageFiles());
+        updateCountLabel();
+        updateAddButtonState();
+    }
+
+    private void readIntentData() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return;
+        }
+        coffeeSite = extras.getParcelable("coffeeSite");
+        ArrayList<String> paths = extras.getStringArrayList(EXTRA_LOCAL_IMAGE_PATHS);
+        if (paths != null) {
+            localImagePaths.addAll(paths);
+        }
+    }
+
+    private void initializeImagesSource() {
+        if (isDraftMode) {
+            updateDraftImages();
+        } else {
+            doBindUserAccountService();
+        }
+    }
+
+    private void loadImagesForCurrentMode() {
+        if (isDraftMode) {
+            updateDraftImages();
+        } else {
+            loadImages();
+        }
+    }
+
+    private void addDraftImage(File imageFile) {
+        if (imageFile == null || !imageFile.exists()) {
+            return;
+        }
+        localImagePaths.add(imageFile.getPath());
+        updateDraftImages();
+        Toast.makeText(this, R.string.manage_images_upload_success, Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteDraftImage(int position) {
+        if (position < 0 || position >= localImagePaths.size()) {
+            return;
+        }
+        File localImageFile = new File(localImagePaths.remove(position));
+        if (localImageFile.exists()) {
+            localImageFile.delete();
+        }
+        updateDraftImages();
+        Toast.makeText(this, R.string.manage_images_delete_success, Toast.LENGTH_SHORT).show();
+    }
+
+    private Intent buildDraftResultIntent() {
+        Intent resultIntent = new Intent();
+        resultIntent.putStringArrayListExtra(EXTRA_LOCAL_IMAGE_PATHS, new ArrayList<>(localImagePaths));
+        return resultIntent;
+    }
+
+    private List<ImageFile> createDraftImageFiles() {
+        List<ImageFile> localImages = new ArrayList<>();
+        for (String path : localImagePaths) {
+            if (path == null || path.isEmpty()) {
+                continue;
+            }
+            ImageFile imageFile = new ImageFile();
+            imageFile.setBaseBytesImageUrl(Uri.fromFile(new File(path)).toString());
+            imageFile.setImageType(localImages.isEmpty() ? "main" : "other");
+            localImages.add(imageFile);
+        }
+        return localImages;
     }
 }

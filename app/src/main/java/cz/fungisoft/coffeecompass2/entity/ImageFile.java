@@ -99,6 +99,8 @@ public class ImageFile {
                 return "";
             }
             url = BuildConfig.IMAGES_API_PUBLIC_URL + "bytes/?imageExtId=" + externalId;
+        } else if (url.startsWith("file://")) {
+            return url;
         } else if (isInternalImagesHost(url) && externalId != null && !externalId.isEmpty()) {
             url = BuildConfig.IMAGES_API_PUBLIC_URL + "bytes/?imageExtId=" + externalId;
         }

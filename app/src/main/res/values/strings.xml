@@ -162,6 +162,7 @@
     <string name="permissions_camera_storage_request">Pro provedení této operace je nutný souhlas s použitím fotoaparátu a úložiště zařízení.</string>
     <string name="permissions_camera_storage_canel">Zrušit</string>
     <string name="permissions_camera_storage_settings">NASTAVENÍ</string>
+    <string name="no_camera_available">V zařízení není dostupná aplikace fotoaparátu.</string>
     <string name="delete_image_dialog_title">Mazání fotky</string>
     <string name="delete_image_dialog_question">Opravdu chcete smazat fotku pro tuto lokaci?</string>
     <string name="delete_image_dialog_confirm">SMAZAT</string>
