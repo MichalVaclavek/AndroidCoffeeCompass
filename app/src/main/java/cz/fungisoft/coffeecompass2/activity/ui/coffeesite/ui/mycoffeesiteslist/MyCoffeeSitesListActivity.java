@@ -570,7 +570,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         if (recyclerView != null) {
             recyclerView.setLayoutManager(layoutManager);
-            setupRecyclerView((RecyclerView) recyclerView);
+            setupRecyclerView(recyclerView);
         }
     }
 

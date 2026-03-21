@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
@@ -19,6 +20,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -102,7 +104,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
 
             Call<CoffeeSite> call = null;
 
-            //TODO overeni, ze CoffeeSite ma aktualni status vhodny ke pozadovane operaci
+            //TODO overeni, ze CoffeeSite ma aktualni status vhodny k pozadovane operaci
             // tj. atributy canBeActivated, atd. viz DTO object
             switch (this.requestedRESTOperationCode) {
                 case COFFEE_SITE_ACTIVATE:
@@ -140,16 +142,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
                             }
                         }
                     } else {
-                        try {
-                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(operationError);
-                        } catch (IOException e) {
-                            Log.e(tag, e.getMessage());
-                            operationError = "Chyba komunikace se serverem.";
-                        }
-                        if (error == null) {
-                            error = new Result.Error(operationError);
-                        }
+                        error = createHttpErrorResult(response);
                         if (callingListenerService != null) {
                             callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                         }
@@ -165,7 +158,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
                     if (callingListenerService != null) {
                         callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                     }
-                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    if (t.getMessage() != null && t.getMessage().startsWith("Refreshing access token failed")) {
                         userAccountService.clearLoggedInUser();
                         // go to login activity
                         Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
@@ -173,6 +166,49 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
                 }
             });
         }
+    }
+
+    private Result.Error createHttpErrorResult(Response<CoffeeSite> response) {
+        String errorBody = "";
+        try (ResponseBody responseBody = response.errorBody()) {
+            if (responseBody != null) {
+                errorBody = responseBody.string();
+            }
+        } catch (IOException e) {
+            Log.e(tag, "Failed to read error body.", e);
+        }
+
+        if (!errorBody.isEmpty()) {
+            RestError restError = Utils.getRestError(errorBody);
+            if (restError.getStatus() == 0) {
+                restError.setStatus(response.code());
+            }
+            if (restError.getDetail() == null || restError.getDetail().isEmpty() || "Not Available".equals(restError.getDetail())) {
+                restError.setDetail(buildHttpFallbackMessage(response, errorBody));
+            }
+
+            operationError = restError.getDetail();
+            return new Result.Error(restError);
+        }
+
+        operationError = buildHttpFallbackMessage(response, "");
+        return new Result.Error(new IOException(operationError));
+    }
+
+    private String buildHttpFallbackMessage(Response<CoffeeSite> response, String errorBody) {
+        String responseMessage = response.message() != null && !response.message().isEmpty()
+                                 ? response.message()
+                                 : "Unknown error";
+
+        if (response.code() == 404) {
+            return !errorBody.isEmpty()
+                   ? errorBody
+                   : "HTTP 404 Not Found";
+        }
+
+        return !errorBody.isEmpty()
+               ? errorBody
+               : "HTTP " + response.code() + " " + responseMessage;
     }
 
 }

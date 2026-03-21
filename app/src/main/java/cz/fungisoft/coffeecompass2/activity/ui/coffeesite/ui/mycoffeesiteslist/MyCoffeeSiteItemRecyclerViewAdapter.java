@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
@@ -410,7 +411,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         Log.i(TAG, "Deactivate success?: " + error.isEmpty());
         if (!error.isEmpty()) {
-            showCoffeeSiteDeactivateFailure(error);
+            if (deleteCoffeeSiteLocallyIfMissingOnServer(error)) {
+                showCoffeeSiteCancelSuccess();
+                updateRecyclerViewItemRemoved();
+            } else {
+                showCoffeeSiteDeactivateFailure(error);
+            }
         }
         else {
             showCoffeeSiteDeactivateSuccess();
@@ -425,12 +431,45 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         Log.i(TAG, "Cancel success?: " + error.isEmpty());
         if (!error.isEmpty()) {
-            showCoffeeSiteCancelFailure(error);
+            if (deleteCoffeeSiteLocallyIfMissingOnServer(error)) {
+                showCoffeeSiteCancelSuccess();
+                updateRecyclerViewItemRemoved();
+            } else {
+                showCoffeeSiteCancelFailure(error);
+            }
         }
         else {
             showCoffeeSiteCancelSuccess();
             updateRecyclerViewItemRemoved();
         }
+    }
+
+    /**
+     * If server reports the CoffeeSite no longer exists, remove the stale local record too.
+     */
+    private boolean deleteCoffeeSiteLocallyIfMissingOnServer(String error) {
+        if (!isCoffeeSiteMissingOnServer(error) || selectedCoffeeSite == null) {
+            return false;
+        }
+
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
+        }
+        modifiedCoffeeSite = selectedCoffeeSite;
+        Log.i(TAG, "CoffeeSite missing on server, deleting local DB record too. ID=" + selectedCoffeeSite.getId());
+        return true;
+    }
+
+    private boolean isCoffeeSiteMissingOnServer(String error) {
+        if (error == null || error.isEmpty()) {
+            return false;
+        }
+
+        String normalizedError = error.toLowerCase(Locale.ROOT);
+        return normalizedError.contains("no value present")
+               || normalizedError.contains("not found")
+               || normalizedError.contains("does not exist")
+               || normalizedError.contains("neexist");
     }
 
     /**
