@@ -16,9 +16,9 @@ import io.reactivex.Flowable;
  */
 public class FileCompressor {
 
-    //max width and height values of the compressed image is taken as 960x1280
-    private int maxWidth = 960;
-    private int maxHeight = 1280;
+    //max width and height values of the compressed image is taken as HD 1920x1080
+    private int maxWidth = 1080;
+    private int maxHeight = 1920;
     private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     private int quality = 90;
     private String destinationDirectoryPath;

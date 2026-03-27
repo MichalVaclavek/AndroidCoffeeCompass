@@ -5,16 +5,18 @@ import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.util.Log;
 import android.widget.ProgressBar;
 
+import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -34,6 +36,7 @@ public class ImageUtil {
     }
 
     private static ImageUtil instance;
+    private Picasso offlineDownloadPicasso;
 
     /**
      * If instance is requiered
@@ -48,6 +51,15 @@ public class ImageUtil {
         return instance;
     }
 
+    private synchronized Picasso getOfflineDownloadPicasso(Context context) {
+        if (offlineDownloadPicasso == null) {
+            offlineDownloadPicasso = new Picasso.Builder(context.getApplicationContext())
+                    .downloader(new OkHttp3Downloader(Utils.getOkHttpClientBuilder().build()))
+                    .build();
+        }
+        return offlineDownloadPicasso;
+    }
+
     static File compressImage(File imageFile, int reqWidth, int reqHeight,
                               Bitmap.CompressFormat compressFormat, int quality, String destinationPath)
             throws IOException {
@@ -58,7 +70,7 @@ public class ImageUtil {
         }
         try {
             fileOutputStream = new FileOutputStream(destinationPath);
-            // write the compressed bitmap at the destination specified by destinationPath.
+            // write the compressed bitmap at the destination specified by destinationPath
             decodeSampledBitmapFromFile(imageFile, reqWidth, reqHeight).compress(compressFormat, quality,
                     fileOutputStream);
         } finally {
@@ -177,13 +189,16 @@ public class ImageUtil {
      */
     private BunchOfImagesDownloadListener numberOfDownloadsListener;
 
-    private int alreadySavedImagesCounter = 0;
+    private AtomicInteger alreadySavedImagesCounter = new AtomicInteger(0);
 
     /**
      * Counter for all processed image download attempts (successful or not).
      * Used to track progress and detect when all requested downloads have been attempted.
      */
-    private int alreadyProcessedImagesCounter = 0;
+    private AtomicInteger alreadyProcessedImagesCounter = new AtomicInteger(0);
+
+    private static final int MAX_DOWNLOAD_RETRIES = 3;
+    private static final long DOWNLOAD_RETRY_DELAY_MS = 1_500L;
 
     private int numberOfImagesRequestedToDownload = 0;
 
@@ -195,13 +210,17 @@ public class ImageUtil {
     private ProgressBar mProgressBar;
 
     public void resetAlreadySavedImagesCounter() {
-        alreadySavedImagesCounter = 0;
-        alreadyProcessedImagesCounter = 0;
+        alreadySavedImagesCounter = new AtomicInteger(0);
+        alreadyProcessedImagesCounter = new AtomicInteger(0);
         numberOfImagesRequestedToDownload = 0;
     }
 
     public int getAlreadySavedImagesCounter() {
-        return alreadySavedImagesCounter;
+        return alreadySavedImagesCounter.get();
+    }
+
+    public int getAlreadyProcessedImagesCounter() {
+        return alreadyProcessedImagesCounter.get();
     }
 
     /**
@@ -226,35 +245,60 @@ public class ImageUtil {
      * @param imageFileName
      */
     public void downloadAndSaveImage(final Context context, final String myUrl, final String imageDir, final String imageFileName) {
+        downloadAndSaveImage(context, myUrl, imageDir, imageFileName, 1);
+    }
+
+    private void downloadAndSaveImage(final Context context,
+                                      final String myUrl,
+                                      final String imageDir,
+                                      final String imageFileName,
+                                      final int attemptNumber) {
         AsyncRunner.runInBackground(() -> {
             String myImageFileName;
+            boolean downloadSucceeded = false;
             try {
-                // File sdCard = Environment.getExternalStorageDirectory();
-                // @SuppressLint("DefaultLocale")
-                // String fileName = String.format("%d.jpg", System.currentTimeMillis());
                 ContextWrapper cw = new ContextWrapper(context);
                 final File directory = cw.getDir(imageDir, Context.MODE_PRIVATE);
                 final File myImageFile = new File(directory, imageFileName);
-                // File dir = new File(sdCard.getAbsolutePath() + "/" + imageFileName);
-                // dir.mkdirs();
                 myImageFileName = myImageFile.getAbsolutePath();
-                Bitmap bitmap = Picasso.get().load(myUrl).get();
+                Bitmap bitmap = getOfflineDownloadPicasso(context).load(myUrl).get();
                 try (FileOutputStream fos = new FileOutputStream(myImageFile)) {
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
-                    alreadySavedImagesCounter++;
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                    Log.i(TAG, "image size: " + bitmap.getByteCount());
+                    Log.i(TAG, "image saved to >>> " + myImageFileName);
+                    alreadySavedImagesCounter.incrementAndGet();
+                    downloadSucceeded = true;
                 } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
+                    Log.e(TAG, "Failed to save image on attempt " + attemptNumber + " for URL " + myUrl, e);
+                    myImageFileName = "";
                 }
             } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, "Failed to download image on attempt " + attemptNumber + " for URL " + myUrl, e);
                 myImageFileName = "";
             }
 
+            if (!downloadSucceeded && attemptNumber < MAX_DOWNLOAD_RETRIES) {
+                Log.w(TAG, "Retrying image download " + attemptNumber + "/" + MAX_DOWNLOAD_RETRIES
+                        + " for URL " + myUrl);
+                try {
+                    Thread.sleep(DOWNLOAD_RETRY_DELAY_MS * attemptNumber);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Log.w(TAG, "Image download retry interrupted for URL " + myUrl, e);
+                }
+                downloadAndSaveImage(context, myUrl, imageDir, imageFileName, attemptNumber + 1);
+                return;
+            }
+
+            alreadyProcessedImagesCounter.incrementAndGet();
             String finalImageFileName = myImageFileName;
             AsyncRunner.runOnMainThread(() -> {
-                mProgressBar.setProgress(alreadySavedImagesCounter);
-                Log.i(TAG, "image saved to >>> " + finalImageFileName + ". Saved/requested files: " + alreadySavedImagesCounter + "/" + numberOfImagesRequestedToDownload);
-                if (numberOfImagesRequestedToDownload == alreadySavedImagesCounter) {
+                mProgressBar.setProgress(alreadyProcessedImagesCounter.get());
+                Log.i(TAG, "image processed: " + finalImageFileName
+                        + ". Saved/processed/requested: " + alreadySavedImagesCounter.get()
+                        + "/" + alreadyProcessedImagesCounter.get()
+                        + "/" + numberOfImagesRequestedToDownload);
+                if (numberOfImagesRequestedToDownload == alreadyProcessedImagesCounter.get()) {
                     numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
                 }
             });
@@ -324,7 +368,7 @@ public class ImageUtil {
                         fos.flush();
                     }
                     if (totalBytesWritten > 0) {
-                        alreadySavedImagesCounter++;
+                        alreadySavedImagesCounter.incrementAndGet();
                     } else {
                         // Empty response body - delete the empty file and do not count as saved
                         myImageFile.delete();
@@ -342,15 +386,15 @@ public class ImageUtil {
                 myImageFileName = "";
             }
 
-            alreadyProcessedImagesCounter++;
+            alreadyProcessedImagesCounter.incrementAndGet();
             String finalImageFileName = myImageFileName;
             AsyncRunner.runOnMainThread(() -> {
-                mProgressBar.setProgress(alreadyProcessedImagesCounter);
+                mProgressBar.setProgress(alreadyProcessedImagesCounter.get());
                 Log.i(TAG, "image processed >>> " + finalImageFileName
                         + ". Saved/processed/requested: " + alreadySavedImagesCounter
                         + "/" + alreadyProcessedImagesCounter
                         + "/" + numberOfImagesRequestedToDownload);
-                if (numberOfImagesRequestedToDownload == alreadyProcessedImagesCounter) {
+                if (numberOfImagesRequestedToDownload == alreadyProcessedImagesCounter.get()) {
                     numberOfDownloadsListener.onRequestedNumberOfImagesToDownloadReached();
                 }
             });

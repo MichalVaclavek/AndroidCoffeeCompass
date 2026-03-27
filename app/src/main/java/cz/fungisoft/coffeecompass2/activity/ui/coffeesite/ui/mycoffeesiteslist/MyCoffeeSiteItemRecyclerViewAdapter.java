@@ -262,8 +262,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 enableDisableAllButtons(viewHolder, false);
         }
 
-        if (!coffeeSite.getMesto().isEmpty()) {
-            viewHolder.cityView.setText(coffeeSite.getMesto());
+        String cityName = coffeeSite.getMesto();
+        if (cityName != null && !cityName.isEmpty()) {
+            viewHolder.cityView.setText(cityName);
+            viewHolder.cityView.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.cityView.setText("");
+            viewHolder.cityView.setVisibility(View.GONE);
         }
 
         // Set CoffeeSite instance of this RecyclerView item as a tag to all buttons

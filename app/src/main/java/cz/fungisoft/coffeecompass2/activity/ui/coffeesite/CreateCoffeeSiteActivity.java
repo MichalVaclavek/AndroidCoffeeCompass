@@ -56,6 +56,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -325,7 +326,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
             // We are editing site here - insert input values to View from currentCoffeeSite
             // "Edit mode"
-            if (currentCoffeeSite != null && !currentCoffeeSite.getId().isEmpty()) {
+            if (currentCoffeeSite != null) {
                 mode = MODE_MODIFY;
                 if (coffeeSitePositionInRecyclerView == -1) { // called from CoffeeSiteDetailActivity
                     mode = MODE_MODIFY_FROM_DETAILACTIVITY; // this is to go back to CoffeeSiteDetailActivity if called from there
@@ -1588,14 +1589,35 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * a chip name (Chip of the group), then it is selected
      */
     private void selectChipsInGroupAccordingText(ChipGroup chipGroup, List<? extends CoffeeSiteEntity> strings) {
+        if (strings == null) {
+            return;
+        }
         for (CoffeeSiteEntity str : strings) {
             for (int i = 0; i < chipGroup.getChildCount(); i++) {
                 View child = chipGroup.getChildAt(i);
-                if (child instanceof Chip && str.toString().equalsIgnoreCase(((Chip) child).getText().toString())) {
+                if (child instanceof Chip && areChipValuesEquivalent(str.toString(), ((Chip) child).getText().toString())) {
                     ((Chip) child).setChecked(true);
                 }
             }
         }
+    }
+
+    private boolean areChipValuesEquivalent(String entityValue, String chipValue) {
+        String normalizedEntityValue = normalizeChipValue(entityValue);
+        String normalizedChipValue = normalizeChipValue(chipValue);
+
+        return normalizedEntityValue.equals(normalizedChipValue)
+               || normalizedEntityValue.startsWith(normalizedChipValue)
+               || normalizedChipValue.startsWith(normalizedEntityValue);
+    }
+
+    private String normalizeChipValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalizedValue = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return normalizedValue.toLowerCase(Locale.ROOT).trim();
     }
 
     /**
@@ -1688,7 +1710,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                             getString(R.string.coffeesite_saved_to_db),
                             Toast.LENGTH_SHORT);
                     toast.show();
-                    if (result.getId().isEmpty()) {
+                    if (coffeeSite == null) {
                         goToMyCoffeeSitesActivity();
                     } else {
                         goBackAfterUpdate(result);

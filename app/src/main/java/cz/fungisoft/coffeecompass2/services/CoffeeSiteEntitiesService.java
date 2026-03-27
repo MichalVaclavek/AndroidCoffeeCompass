@@ -307,7 +307,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     if (!cs.getMainImageURL().isEmpty()) {
                         numOfSitesWithImage++;
                         cs.setImageFileName(cs.getDefaultImageFileName());
-                        imageUtil.downloadAndSaveImageFromApi(getApplicationContext(), cs.getId(), "mid", ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
+                        imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                     }
                 }
             } else {
@@ -381,6 +381,12 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         imageUtil.resetAlreadySavedImagesCounter();
         imageUtil.setNumberOfImagesRequestedToDownload(numOfSitesWithImage);
         imageUtil.setNumberOfDownloadsListener(this);
+
+        if (numOfSitesWithImage == 0) {
+            Log.i(TAG, "No CoffeeSite images available for offline download.");
+            informClientAboutAllCoffeeSitesLoadResult(true);
+            return;
+        }
 
         startDownloadImagesThread();
     }
@@ -508,14 +514,17 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                     @Override
                     public void onSuccess(@Nullable final List<CoffeeSite> coffeeSitesWithImage) {
                         Log.i(TAG, "DB Single onSuccess()");
-                        // Download images using the new Images API (size "mid")
+                        // Download images from the CoffeeSite mainImageURL for offline mode.
                         downloadInProgress = true;
-                        if (coffeeSitesWithImage != null) {
-                            for (CoffeeSite cs : coffeeSitesWithImage) {
-                                if (cs != null) {
-                                    cs.setImageFileName(cs.getDefaultImageFileName());
-                                    imageUtil.downloadAndSaveImageFromApi(getApplicationContext(), cs.getId(), "mid", ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
-                                }
+                        if (coffeeSitesWithImage == null || coffeeSitesWithImage.isEmpty()) {
+                            onRequestedNumberOfImagesToDownloadReached();
+                            return;
+                        }
+
+                        for (CoffeeSite cs : coffeeSitesWithImage) {
+                            if (cs != null && !cs.getMainImageURL().isEmpty()) {
+                                cs.setImageFileName(cs.getDefaultImageFileName());
+                                imageUtil.downloadAndSaveImage(getApplicationContext(), cs.getMainImageURL(), ImageUtil.COFFEESITE_IMAGE_DIR, cs.getImageFileName());
                             }
                         }
                     }
@@ -527,7 +536,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 });
         };
 
-        imageDownloadHandle = scheduler.schedule(downloadThread, 0, SECONDS);
+        imageDownloadHandle = scheduler.schedule(downloadThread, 0, TimeUnit.SECONDS);
 
         // Next thread to check, if the imageDownloadThread is still running after given amount of time
         // i.e. After 5 minutes, so the imageDownloadHandle Task wil be canceled if still running
@@ -537,9 +546,9 @@ public class CoffeeSiteEntitiesService extends LifecycleService
                 imageDownloadHandle.cancel(true);
                 Log.d(TAG, "Thread for loading images canceled due to timeout.");
             }
-            // something bad happend if this thread was running, inform client
+            // something bad happen if this thread was running, inform client
             informClientAboutAllCoffeeSitesLoadResult(false);
-        }, 30 * 10, SECONDS); // 5 minutes to wait before start and check
+        }, 60 * 10, TimeUnit.SECONDS); // 10 minutes to wait before start and check
     }
 
 }

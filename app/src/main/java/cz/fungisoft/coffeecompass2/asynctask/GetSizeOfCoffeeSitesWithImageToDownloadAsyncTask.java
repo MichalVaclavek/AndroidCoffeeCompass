@@ -5,9 +5,12 @@ import android.util.Log;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.datadownload.DataDownloadSizesRESTInterface;
 import cz.fungisoft.coffeecompass2.services.interfaces.DataDownloadSizeRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,9 +35,16 @@ public class GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask {
     public void execute() {
         Log.d(REQ_TAG, "GetSizeOfCoffeeSitesWithImageToDownloadAsyncTask REST request initiated");
 
+//        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
+//                .addInterceptor(logging)
+                .build();
+
         //Add the interceptor to the client builder.
         Retrofit retrofit = new Retrofit.Builder()
-                .client(Utils.getOkHttpClientBuilder().build())
+                .client(client)
                 .baseUrl(DataDownloadSizesRESTInterface.GET_DATA_DOWNLOAD_SIZE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();

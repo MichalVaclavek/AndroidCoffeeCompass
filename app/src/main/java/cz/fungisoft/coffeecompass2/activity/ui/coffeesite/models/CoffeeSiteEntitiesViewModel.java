@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
@@ -373,12 +375,30 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
         List<OtherOffer> retVal = new ArrayList<>();
         for (String otherOfferValue : otherOfferValues) {
             for (OtherOffer otherOffer : getOtherOffers()) {
-                if (otherOffer.getOffer().equalsIgnoreCase(otherOfferValue)) {
+                if (areEntityValuesEquivalent(otherOffer.getOffer(), otherOfferValue)) {
                     retVal.add(otherOffer);
                 }
             }
         }
         return retVal;
+    }
+
+    private boolean areEntityValuesEquivalent(String entityValue, String selectedValue) {
+        String normalizedEntityValue = normalizeEntityValue(entityValue);
+        String normalizedSelectedValue = normalizeEntityValue(selectedValue);
+
+        return normalizedEntityValue.equals(normalizedSelectedValue)
+               || normalizedEntityValue.startsWith(normalizedSelectedValue)
+               || normalizedSelectedValue.startsWith(normalizedEntityValue);
+    }
+
+    private String normalizeEntityValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalizedValue = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return normalizedValue.toLowerCase(Locale.ROOT).trim();
     }
 
 

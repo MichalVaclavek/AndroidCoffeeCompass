@@ -16,7 +16,7 @@ public interface DataDownloadSizesRESTInterface {
      *
      * @return
      */
-    @GET("all/sizeKB/")
+    @GET("all/sizeKB")
     Call<Integer> getSizeOfAllToDownload();
 
     /**
@@ -25,7 +25,7 @@ public interface DataDownloadSizesRESTInterface {
      *
      * @return
      */
-    @GET("allExceptImages/sizeKB/")
+    @GET("allExceptImages/sizeKB")
     Call<Integer> getSizeOfAllWithoutImageToDownload();
 
 }
