@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,7 +10,6 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -373,9 +371,16 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
      */
     public List<OtherOffer> createOtherOffersList(String[] otherOfferValues) {
         List<OtherOffer> retVal = new ArrayList<>();
+        List<OtherOffer> otherOffers = getOtherOffers();
+        if (otherOffers == null || otherOfferValues == null) {
+            return retVal;
+        }
         for (String otherOfferValue : otherOfferValues) {
-            for (OtherOffer otherOffer : getOtherOffers()) {
-                if (areEntityValuesEquivalent(otherOffer.getOffer(), otherOfferValue)) {
+            if (normalizeEntityValue(otherOfferValue).isEmpty()) {
+                continue;
+            }
+            for (OtherOffer otherOffer : otherOffers) {
+                if (areEntityValuesEquivalent(otherOffer.getOtherOffer(), otherOfferValue)) {
                     retVal.add(otherOffer);
                 }
             }
@@ -387,9 +392,8 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
         String normalizedEntityValue = normalizeEntityValue(entityValue);
         String normalizedSelectedValue = normalizeEntityValue(selectedValue);
 
-        return normalizedEntityValue.equals(normalizedSelectedValue)
-               || normalizedEntityValue.startsWith(normalizedSelectedValue)
-               || normalizedSelectedValue.startsWith(normalizedEntityValue);
+        return !normalizedEntityValue.isEmpty()
+               && normalizedEntityValue.equals(normalizedSelectedValue);
     }
 
     private String normalizeEntityValue(String value) {

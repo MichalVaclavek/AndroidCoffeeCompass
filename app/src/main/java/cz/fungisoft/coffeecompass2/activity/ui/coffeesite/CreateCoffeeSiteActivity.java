@@ -85,7 +85,9 @@ import cz.fungisoft.coffeecompass2.entity.ImageFile;
 import cz.fungisoft.coffeecompass2.entity.ImageObject;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
+import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
@@ -1589,26 +1591,67 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * a chip name (Chip of the group), then it is selected
      */
     private void selectChipsInGroupAccordingText(ChipGroup chipGroup, List<? extends CoffeeSiteEntity> strings) {
+        chipGroup.clearCheck();
         if (strings == null) {
             return;
         }
         for (CoffeeSiteEntity str : strings) {
+            String chipSelectionValue = getChipSelectionValue(str);
+            if (chipSelectionValue.isEmpty()) {
+                continue;
+            }
             for (int i = 0; i < chipGroup.getChildCount(); i++) {
                 View child = chipGroup.getChildAt(i);
-                if (child instanceof Chip && areChipValuesEquivalent(str.toString(), ((Chip) child).getText().toString())) {
+                if (child instanceof Chip && areChipValuesEquivalent(chipSelectionValue, ((Chip) child).getText().toString())) {
                     ((Chip) child).setChecked(true);
                 }
             }
         }
     }
 
+    @NonNull
+    private String getChipSelectionValue(@Nullable CoffeeSiteEntity entity) {
+        if (entity == null) {
+            return "";
+        }
+
+        String entityValue = entity.toString();
+        if (!normalizeChipValue(entityValue).isEmpty()) {
+            return entityValue;
+        }
+
+        if (entity instanceof OtherOffer) {
+            List<OtherOffer> otherOffers = coffeeSiteEntitiesViewModel.getOtherOffers();
+            if (otherOffers == null) {
+                return "";
+            }
+            for (OtherOffer otherOffer : otherOffers) {
+                if (otherOffer != null && otherOffer.getId().equals(entity.getId())) {
+                    return otherOffer.getOtherOffer();
+                }
+            }
+        }
+
+        if (entity instanceof CoffeeSort) {
+            List<CoffeeSort> coffeeSorts = coffeeSiteEntitiesViewModel.getCoffeeSorts();
+            if (coffeeSorts == null) {
+                return "";
+            }
+            for (CoffeeSort coffeeSort : coffeeSorts) {
+                if (coffeeSort != null && coffeeSort.getId().equals(entity.getId())) {
+                    return coffeeSort.getCoffeeSort();
+                }
+            }
+        }
+
+        return "";
+    }
+
     private boolean areChipValuesEquivalent(String entityValue, String chipValue) {
         String normalizedEntityValue = normalizeChipValue(entityValue);
         String normalizedChipValue = normalizeChipValue(chipValue);
 
-        return normalizedEntityValue.equals(normalizedChipValue)
-               || normalizedEntityValue.startsWith(normalizedChipValue)
-               || normalizedChipValue.startsWith(normalizedEntityValue);
+        return normalizedEntityValue.equals(normalizedChipValue);
     }
 
     private String normalizeChipValue(String value) {
@@ -1669,9 +1712,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
         }
 
-        //if (mode == MODE_CREATE) {
         coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
-        //}
 
         Log.i(TAG, "CoffeeSite created/updated");
         return coffeeSite;
@@ -1742,16 +1783,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
 
     private String[] getSelectedChipsStrings(ChipGroup chipGroup) {
-        String[] retVal = new String[chipGroup.getCheckedChipIds().size()];
-
-        int i = 0;
+        List<String> selectedChipValues = new ArrayList<>();
         for (int chipId : chipGroup.getCheckedChipIds()) {
             Chip chip = (Chip) findViewById(chipId);
-            retVal[i] = chip.getText().toString();
-            i++;
+            if (chip == null) {
+                continue;
+            }
+            String chipValue = chip.getText() != null ? chip.getText().toString().trim() : "";
+            if (!chipValue.isEmpty()) {
+                selectedChipValues.add(chipValue);
+            }
         }
-
-        return retVal;
+        return selectedChipValues.toArray(new String[0]);
     }
 
     /**

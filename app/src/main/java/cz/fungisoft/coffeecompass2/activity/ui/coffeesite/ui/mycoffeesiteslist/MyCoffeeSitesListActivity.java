@@ -667,58 +667,107 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         if (returnedCoffeeSites != null) {
             switchAB.setChecked(false);
-            /**
-             * List of CoffeeSites returned from server after their create/update
-             */
+            List<CoffeeSite> originalCoffeeSitesWithImages = getOriginalCoffeeSitesWithImages();
             coffeeSitesWithImageToBeUploaded = 0;
-            for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
-                if (!cs.getMainImageFilePath().isEmpty()) {
-                    coffeeSitesWithImageToBeUploaded++;
-                    cs.setImageFileName(cs.getDefaultImageFileName());
-                }
-            }
-            if (coffeeSitesWithImageToBeUploaded <= 0) {
+
+            if (originalCoffeeSitesWithImages.isEmpty()) {
                 // delete already uploaded coffee sites from local DB, if without images
                 // if with images, then will be deleted after images upload
                 coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
+                return;
             }
-            if (coffeeSitesWithImageToBeUploaded > 0) {
-                // Start upload of the CoffeeSite's images
-                coffeeSitesWithImageUploaded = 0;
-                //showProgressbarAndDisableMenuItems();
-                showProgressbar();
-                for (CoffeeSite cs : returnedCoffeeSites) {
-                    // As the returned, saved CoffeeSites have right ID, they do not have getMainImageFilePath correct
-                    // Therefore, we need to find correct getMainImageFilePath from notSavedCoffeeSites
-                    // The time of creation is used to assign correct MainImageFilePath to correct CoffeeSite
-                    String imageFilePath = getMainImageFilePath(cs);
-                    if (!imageFilePath.isEmpty()) {
-                        uploadCoffeeSiteImage(ImageUtil.getImageFile(imageFilePath), cs);
-                    }
+
+            coffeeSitesWithImageUploaded = 0;
+            showProgressbar();
+            List<CoffeeSite> unmatchedOriginalCoffeeSites = new ArrayList<>(originalCoffeeSitesWithImages);
+            for (CoffeeSite returnedCoffeeSite : returnedCoffeeSites) {
+                CoffeeSite originalCoffeeSite = findOriginalCoffeeSiteForReturnedSite(
+                        returnedCoffeeSite, unmatchedOriginalCoffeeSites);
+                if (originalCoffeeSite == null) {
+                    continue;
                 }
+
+                String imageFilePath = originalCoffeeSite.getMainImageFilePath();
+                if (imageFilePath == null || imageFilePath.isEmpty()) {
+                    continue;
+                }
+
+                File imageFile = ImageUtil.getImageFile(imageFilePath);
+                if (!imageFile.exists()) {
+                    Log.w(TAG, "Image file for uploaded CoffeeSite does not exist: " + imageFilePath);
+                    continue;
+                }
+
+                returnedCoffeeSite.setImageFileName(returnedCoffeeSite.getDefaultImageFileName());
+                coffeeSitesWithImageToBeUploaded++;
+                uploadCoffeeSiteImage(imageFile, returnedCoffeeSite);
+            }
+
+            if (coffeeSitesWithImageToBeUploaded <= 0) {
+                hideProgressbar();
+                coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
+                reloadAllUsersCoffeeSites();
             }
         }
     }
 
     /**
-     * Helper method to find MainImageFilePath relevant to CoffeeSite returned from server after upload.
-     * As they have new/different ID, then those saved in local DB {@code notSavedCoffeeSites} and empty
-     * MainImageFilePath, the corresponding CoffeeSite from {@code notSavedCoffeeSites} (with correct MainImageFilePath)
-     * will be assigned based on Date of creation, which is unique in this scenario.
-     *
-     * @param returnedCS
-     * @return
+     * Returns the subset of offline CoffeeSites that still have a local image file to upload.
      */
-    private String getMainImageFilePath(CoffeeSite returnedCS) {
-        if (returnedCS != null) {
-            for (CoffeeSite cs : getNotUploadedCoffeeSites()) {
-                if (!cs.getMainImageFilePath().isEmpty()
-                    && cs.getCreatedOn().equals(returnedCS.getCreatedOn())) {
-                        return cs.getMainImageFilePath();
-                }
+    @NonNull
+    private List<CoffeeSite> getOriginalCoffeeSitesWithImages() {
+        List<CoffeeSite> originalCoffeeSites = getNotUploadedCoffeeSites();
+        if (originalCoffeeSites == null || originalCoffeeSites.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<CoffeeSite> coffeeSitesWithImages = new ArrayList<>();
+        for (CoffeeSite coffeeSite : originalCoffeeSites) {
+            if (coffeeSite != null
+                    && coffeeSite.getMainImageFilePath() != null
+                    && !coffeeSite.getMainImageFilePath().isEmpty()) {
+                coffeeSitesWithImages.add(coffeeSite);
             }
         }
-        return "";
+        return coffeeSitesWithImages;
+    }
+
+    @Nullable
+    private CoffeeSite findOriginalCoffeeSiteForReturnedSite(CoffeeSite returnedCoffeeSite,
+                                                             List<CoffeeSite> unmatchedOriginalCoffeeSites) {
+        if (returnedCoffeeSite == null || unmatchedOriginalCoffeeSites == null || unmatchedOriginalCoffeeSites.isEmpty()) {
+            return null;
+        }
+
+        for (Iterator<CoffeeSite> iterator = unmatchedOriginalCoffeeSites.iterator(); iterator.hasNext(); ) {
+            CoffeeSite originalCoffeeSite = iterator.next();
+            if (isSameCoffeeSiteAfterUpload(returnedCoffeeSite, originalCoffeeSite)) {
+                iterator.remove();
+                return originalCoffeeSite;
+            }
+        }
+
+        CoffeeSite fallbackCoffeeSite = unmatchedOriginalCoffeeSites.remove(0);
+        Log.w(TAG, "Falling back to positional image pairing for CoffeeSite: " + returnedCoffeeSite.getName());
+        return fallbackCoffeeSite;
+    }
+
+    private boolean isSameCoffeeSiteAfterUpload(CoffeeSite returnedCoffeeSite, CoffeeSite originalCoffeeSite) {
+        if (returnedCoffeeSite == null || originalCoffeeSite == null) {
+            return false;
+        }
+
+        boolean sameName = Objects.equals(returnedCoffeeSite.getName(), originalCoffeeSite.getName());
+        boolean sameLatitude = Double.compare(returnedCoffeeSite.getLatitude(), originalCoffeeSite.getLatitude()) == 0;
+        boolean sameLongitude = Double.compare(returnedCoffeeSite.getLongitude(), originalCoffeeSite.getLongitude()) == 0;
+        boolean sameCity = Objects.equals(returnedCoffeeSite.getMesto(), originalCoffeeSite.getMesto());
+        boolean sameStreet = Objects.equals(returnedCoffeeSite.getUliceCP(), originalCoffeeSite.getUliceCP());
+
+        if (sameName && sameLatitude && sameLongitude && sameCity && sameStreet) {
+            return true;
+        }
+
+        return Objects.equals(returnedCoffeeSite.getCreatedOnString(), originalCoffeeSite.getCreatedOnString());
     }
 
 

@@ -19,7 +19,7 @@ public interface OtherOfferDao {
     @Query("SELECT * FROM other_offer_table")
     Single<List<OtherOffer>> getOtherOffersSingle();
 
-    @Query("SELECT * FROM other_offer_table WHERE offer = :stringValue LIMIT 1")
+    @Query("SELECT * FROM other_offer_table WHERE otherOffer = :stringValue LIMIT 1")
     Single<OtherOffer> getOtherOffer(String stringValue);
 
     @Query("DELETE FROM other_offer_table")

@@ -91,7 +91,7 @@ public class CoffeeSiteEntitiesFactory {
             }
             if (entityType.equalsIgnoreCase("OtherOffer")) {
                 retVal = new OtherOffer();
-                ((OtherOffer) retVal).setOffer(jsonObject.getString("offer"));
+                ((OtherOffer) retVal).setOtherOffer(jsonObject.getString("offer"));
             }
             if (entityType.equalsIgnoreCase("PriceRange")) {
                 retVal = new PriceRange();

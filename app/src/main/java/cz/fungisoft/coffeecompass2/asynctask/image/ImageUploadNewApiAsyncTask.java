@@ -113,8 +113,8 @@ public class ImageUploadNewApiAsyncTask {
         call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String imageExtId = response.body().trim();
+                if (response.isSuccessful()) {
+                    String imageExtId = response.body() != null ? response.body().trim() : "";
                     Log.i(TAG, "Upload success, imageExtId=" + imageExtId);
                     if (listener.get() != null) {
                         listener.get().onImageUploaded(imageExtId);

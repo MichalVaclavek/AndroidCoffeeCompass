@@ -13,7 +13,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
 
     public OtherOffer(String id, String entityValue) {
         super(id);
-        this.offer = entityValue;
+        this.otherOffer = entityValue;
     }
 
     public OtherOffer() {
@@ -21,20 +21,20 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
     }
 
     @Expose
-    @SerializedName("offer")
-    private String offer;
+    @SerializedName("otherOffer")
+    private String otherOffer;
 
-    public String getOffer() {
-        return offer == null ? "" : offer;
+    public String getOtherOffer() {
+        return otherOffer == null ? "" : otherOffer;
     }
 
-    public void setOffer(String offer) {
-        this.offer = offer;
+    public void setOtherOffer(String otherOffer) {
+        this.otherOffer = otherOffer;
     }
 
     protected OtherOffer(Parcel in) {
         this.id = in.readString();
-        offer = in.readString();
+        otherOffer = in.readString();
     }
 
     public static final Creator<OtherOffer> CREATOR = new Creator<OtherOffer>() {
@@ -51,7 +51,7 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public String toString() {
-        return getOffer();
+        return getOtherOffer();
     }
 
     @Override
@@ -62,6 +62,6 @@ public class OtherOffer extends CoffeeSiteEntity implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
-        dest.writeString(offer);
+        dest.writeString(otherOffer);
     }
 }
