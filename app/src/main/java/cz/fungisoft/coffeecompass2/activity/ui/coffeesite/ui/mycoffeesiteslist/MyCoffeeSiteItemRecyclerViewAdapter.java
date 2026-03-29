@@ -512,6 +512,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     void updateEditedCoffeeSite(CoffeeSite editedCoffeeSite, int position) {
         this.selectedCoffeeSite = editedCoffeeSite;
         this.selectedPosition = position;
+        if (selectedCoffeeSite != null && !selectedCoffeeSite.getMainImageURL().isEmpty()) {
+            Picasso.get().invalidate(selectedCoffeeSite.getMainImageURL());
+        }
         mValues.set(selectedPosition, selectedCoffeeSite);
         this.notifyItemChanged(selectedPosition);
     }

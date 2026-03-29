@@ -131,6 +131,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                                                  UserAccountServiceConnectionListener {
 
     private static final String TAG = "CreateCoffeeSiteAct";
+    private static final String IMAGE_TYPE_MAIN = "main";
+    private static final String IMAGE_TYPE_OTHER = "other";
 
     private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
     private CoffeeSiteCreateModel createCoffeeSiteViewModel;
@@ -645,6 +647,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private FileCompressor fileCompressor;
     private int currentImageCount = 0;
     private final ArrayList<String> localImagePaths = new ArrayList<>();
+    private final ArrayList<File> pendingCreateImageUploads = new ArrayList<>();
+    private CoffeeSite pendingCreatedCoffeeSite;
+    private int pendingCreateImageUploadIndex = -1;
+    private int pendingCreateImageUploadFailures = 0;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1117,6 +1123,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite) {
+        uploadCoffeeSiteImage(imageFile, coffeeSite, IMAGE_TYPE_MAIN);
+    }
+
+    private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite, String imageType) {
         showProgressbarAndDisableMenuItems();
         pendingImageOperationCoffeeSite = coffeeSite;
         if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
@@ -1125,7 +1135,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             return;
         }
         if (imageFile != null && imageFile.exists() && coffeeSite != null) {
-            new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile, coffeeSite.getId()).execute();
+            new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile,
+                    coffeeSite.getId(), imageType).execute();
         } else {
             hideProgressbarAndEnableMenuItems();
         }
@@ -1170,27 +1181,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             // New CoffeeSite saved successfully
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_SAVE, "OK");
 
-            if (!currentCoffeeSite.getMainImageFilePath().isEmpty()) {
-                uploadCoffeeSiteImage(ImageUtil.getImageFile(currentCoffeeSite.getMainImageFilePath()), savedCoffeeSite);
+            if (startPendingCreateImageUploads(savedCoffeeSite)) {
                 return;
             }
-            if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()
-                    && currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
-                // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
-                // restore original, phone's DB, id of the edited CoffeeSite,
-                // which has to be changed to 0 before saving on server
-                // original ID is needed to deleteUser it from local DB
-                currentCoffeeSite.restoreId();
-                updateCoffeeSiteInDB(currentCoffeeSite);
-                coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
-            }
-            // Was also activation requested?
-            if (saveAndActivateRequested) {
-                activateCoffeeSite(savedCoffeeSite);
-                return;
-            }
-            goToMyCoffeeSitesActivity();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
         } else { // There was error saving CoffeeSite
+            clearPendingCreateImageUploads();
             // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
             // restore original, phone's DB, id of the edited CoffeeSite,
             // which has to be changed to 0 before saving on server
@@ -1210,6 +1206,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             showCoffeeSiteUpdateFailure(error);
         }
         else {
+            syncUpdatedCoffeeSiteImageState(updatedCoffeeSite);
             // successful return from CoffeeSite update REST call
             // If the CoffeeSite is updated, then it's image is updated too, we can proceed to MyCoffeeSitesListActivity
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_UPDATE, "OK");
@@ -1247,6 +1244,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 localImagePaths.clear();
                 siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                         R.drawable.ic_outline_add_photo_alternate_36));
+            } else {
+                syncCurrentCoffeeSiteMainImage(imageObject);
             }
             return;
         }
@@ -1270,7 +1269,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (objectExtId == null || objectExtId.isEmpty()) {
             objectExtId = pendingImageOperationCoffeeSite != null ? pendingImageOperationCoffeeSite.getId() : "";
         }
-        if (objectExtId == null || objectExtId.isEmpty()) {
+        if (objectExtId.isEmpty()) {
             hideProgressbarAndEnableMenuItems();
             Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
             pendingImageOperationCoffeeSite = null;
@@ -1292,6 +1291,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageUploaded(String imageExtId) {
+        if (isPendingCreateImageUploadInProgress()) {
+            handlePendingCreateImageUploadSuccess();
+            return;
+        }
         CoffeeSite coffeeSite = pendingImageOperationCoffeeSite != null
                 ? pendingImageOperationCoffeeSite
                 : currentCoffeeSite;
@@ -1302,6 +1305,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     @Override
     public void onImageUploadFailed(Result.Error error) {
+        if (isPendingCreateImageUploadInProgress()) {
+            handlePendingCreateImageUploadFailure(error);
+            return;
+        }
         CoffeeSite coffeeSite = pendingImageOperationCoffeeSite != null
                 ? pendingImageOperationCoffeeSite
                 : currentCoffeeSite;
@@ -1339,15 +1346,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         refreshImageActionState();
 
         // if newly created CoffeeSite has now image saved too, we can delete it from DB
-        if (currentCoffeeSite != null
-                && !currentCoffeeSite.isSavedOnServer()
-                && !currentCoffeeSite.isStatusZaznamuAvailable()
-                && !currentCoffeeSite.getMainImageFilePath().isEmpty()) { // All DONE, newly Offline created CoffeeSite can be deleted from local DB
-            currentCoffeeSite.restoreId();
-            updateCoffeeSiteInDB(currentCoffeeSite);
-            coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
-            ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), currentCoffeeSite);
-        }
+        cleanupOfflineDraftAfterServerSave();
 
         if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
             // If we are in MODIFY MODE, then Image was saved first
@@ -1380,6 +1379,135 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 coffeeSiteCUDOperationsService.update(coffeeSite);
             }
         }
+    }
+
+    private boolean startPendingCreateImageUploads(CoffeeSite savedCoffeeSite) {
+        clearPendingCreateImageUploads();
+        for (String localImagePath : localImagePaths) {
+            if (localImagePath == null || localImagePath.isEmpty()) {
+                continue;
+            }
+            File localImageFile = ImageUtil.getImageFile(localImagePath);
+            if (localImageFile.exists()) {
+                pendingCreateImageUploads.add(localImageFile);
+            } else {
+                Log.w(TAG, "Draft image file for upload does not exist: " + localImagePath);
+            }
+        }
+        if (pendingCreateImageUploads.isEmpty()) {
+            clearPendingCreateImageUploads();
+            return false;
+        }
+        pendingCreatedCoffeeSite = savedCoffeeSite;
+        pendingCreateImageUploadIndex = 0;
+        uploadNextPendingCreateImage();
+        return true;
+    }
+
+    private boolean isPendingCreateImageUploadInProgress() {
+        return pendingCreatedCoffeeSite != null
+                && pendingCreateImageUploadIndex >= 0
+                && pendingCreateImageUploadIndex < pendingCreateImageUploads.size();
+    }
+
+    private void uploadNextPendingCreateImage() {
+        if (!isPendingCreateImageUploadInProgress()) {
+            finishPendingCreateImageUploads();
+            return;
+        }
+        uploadCoffeeSiteImage(pendingCreateImageUploads.get(pendingCreateImageUploadIndex),
+                pendingCreatedCoffeeSite,
+                pendingCreateImageUploadIndex == 0 ? IMAGE_TYPE_MAIN : IMAGE_TYPE_OTHER);
+    }
+
+    private void handlePendingCreateImageUploadSuccess() {
+        if (pendingCreatedCoffeeSite == null || pendingCreateImageUploadIndex < 0) {
+            clearPendingCreateImageUploads();
+            hideProgressbarAndEnableMenuItems();
+            return;
+        }
+        if (pendingCreateImageUploadIndex == 0) {
+            String mainImageUrl = buildMainImageUrl(pendingCreatedCoffeeSite.getId());
+            pendingCreatedCoffeeSite.setMainImageURL(mainImageUrl);
+            if (currentCoffeeSite != null) {
+                currentCoffeeSite.setMainImageURL(mainImageUrl);
+            }
+            currentImageCount = Math.max(currentImageCount, 1);
+            refreshImageActionState();
+        }
+        pendingCreateImageUploadIndex++;
+        uploadNextPendingCreateImage();
+    }
+
+    private void handlePendingCreateImageUploadFailure(@Nullable Result.Error error) {
+        pendingCreateImageUploadFailures++;
+        Log.e(TAG, "Draft image upload failed: "
+                + (error != null && error.getDetail() != null ? error.getDetail() : ""));
+        pendingCreateImageUploadIndex++;
+        uploadNextPendingCreateImage();
+    }
+
+    private void finishPendingCreateImageUploads() {
+        CoffeeSite savedCoffeeSite = pendingCreatedCoffeeSite;
+        int uploadFailures = pendingCreateImageUploadFailures;
+        clearPendingCreateImageUploads();
+        hideProgressbarAndEnableMenuItems();
+        if (savedCoffeeSite != null && uploadFailures == 0) {
+            deleteLocalDraftImages();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
+            return;
+        }
+        if (savedCoffeeSite != null) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.manage_images_upload_failure),
+                    Toast.LENGTH_SHORT).show();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
+        }
+    }
+
+    private void finishCoffeeSiteCreateAfterSave(CoffeeSite savedCoffeeSite) {
+        cleanupOfflineDraftAfterServerSave();
+        if (saveAndActivateRequested) {
+            activateCoffeeSite(savedCoffeeSite);
+            return;
+        }
+        goToMyCoffeeSitesActivity();
+    }
+
+    private void cleanupOfflineDraftAfterServerSave() {
+        if (currentCoffeeSite == null
+                || currentCoffeeSite.isSavedOnServer()
+                || currentCoffeeSite.isStatusZaznamuAvailable()) {
+            return;
+        }
+        currentCoffeeSite.restoreId();
+        updateCoffeeSiteInDB(currentCoffeeSite);
+        coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
+        deleteLocalDraftImages();
+    }
+
+    private void deleteLocalDraftImages() {
+        for (String localImagePath : localImagePaths) {
+            if (localImagePath == null || localImagePath.isEmpty()) {
+                continue;
+            }
+            File localImageFile = ImageUtil.getImageFile(localImagePath);
+            if (localImageFile.exists()) {
+                localImageFile.delete();
+            }
+        }
+        localImagePaths.clear();
+        imagePhotoFile = null;
+        if (currentCoffeeSite != null) {
+            currentCoffeeSite.setMainImageFilePath("");
+        }
+    }
+
+    private void clearPendingCreateImageUploads() {
+        pendingCreateImageUploads.clear();
+        pendingCreatedCoffeeSite = null;
+        pendingCreateImageUploadIndex = -1;
+        pendingCreateImageUploadFailures = 0;
     }
 
     /**
@@ -1417,6 +1545,39 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         : getString(R.string.manage_images_delete_failure),
                 Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    private void syncCurrentCoffeeSiteMainImage(@Nullable ImageObject imageObject) {
+        if (currentCoffeeSite == null || imageObject == null) {
+            return;
+        }
+        ImageFile mainImage = getMainImageFile(imageObject);
+        if (mainImage == null) {
+            return;
+        }
+        String mainImageUrl = mainImage.getBytesUrl("mid");
+        if (mainImageUrl.isEmpty()) {
+            mainImageUrl = buildMainImageUrl(currentCoffeeSite.getId());
+        }
+        currentCoffeeSite.setMainImageURL(mainImageUrl);
+        currentCoffeeSite.setMainImageFilePath("");
+        imagePhotoFile = null;
+        Picasso.get().invalidate(mainImageUrl);
+        Picasso.get().load(mainImageUrl)
+                .resize(0, siteFotoView.getMaxHeight())
+                .placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                .into(siteFotoView);
+    }
+
+    private void syncUpdatedCoffeeSiteImageState(@Nullable CoffeeSite updatedCoffeeSite) {
+        if (updatedCoffeeSite == null || currentCoffeeSite == null) {
+            return;
+        }
+        updatedCoffeeSite.setMainImageURL(currentCoffeeSite.getMainImageURL());
+        updatedCoffeeSite.setMainImageFilePath(currentCoffeeSite.getMainImageFilePath());
+        if (!updatedCoffeeSite.getMainImageURL().isEmpty()) {
+            Picasso.get().invalidate(updatedCoffeeSite.getMainImageURL());
+        }
     }
 
 

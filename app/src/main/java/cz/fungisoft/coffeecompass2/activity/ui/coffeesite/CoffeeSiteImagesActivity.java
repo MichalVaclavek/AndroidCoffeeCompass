@@ -73,6 +73,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     private static final int REQUEST_TAKE_PHOTO = 200;
     private static final int REQUEST_GALLERY_PHOTO = 201;
     private static final int MAX_IMAGES = 10;
+    private static final String IMAGE_TYPE_OTHER = "other";
 
     private CoffeeSite coffeeSite;
     private final ArrayList<String> localImagePaths = new ArrayList<>();
@@ -201,7 +202,8 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
             return;
         }
         showProgress();
-        new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile, coffeeSite.getId()).execute();
+        new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile,
+                coffeeSite.getId(), IMAGE_TYPE_OTHER).execute();
     }
 
     @Override

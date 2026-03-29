@@ -42,15 +42,18 @@ public class ImageUploadNewApiAsyncTask {
     private final UserAccountActionsProvider userAccountService;
     private final File imageFile;
     private final String objectExtId;
+    private final String imageType;
 
     public ImageUploadNewApiAsyncTask(CoffeeSiteImageManageListener listener,
                                       UserAccountActionsProvider userAccountService,
                                       File imageFile,
-                                      String objectExtId) {
+                                      String objectExtId,
+                                      String imageType) {
         this.listener = new WeakReference<>(listener);
         this.userAccountService = userAccountService;
         this.imageFile = imageFile;
         this.objectExtId = objectExtId;
+        this.imageType = imageType;
     }
 
     public void execute() {
@@ -99,8 +102,8 @@ public class ImageUploadNewApiAsyncTask {
         // Build multipart parts
         RequestBody objectExtIdBody = RequestBody.create(objectExtId, MediaType.parse("text/plain"));
         RequestBody descriptionBody = RequestBody.create("Popis", MediaType.parse("text/plain"));
-        RequestBody imageTypeBody = RequestBody.create("main", MediaType.parse("text/plain"));
-        RequestBody typeBody = RequestBody.create("main", MediaType.parse("text/plain"));
+        RequestBody imageTypeBody = RequestBody.create(imageType, MediaType.parse("text/plain"));
+        RequestBody typeBody = RequestBody.create(imageType, MediaType.parse("text/plain"));
 
         RequestBody fileBody = RequestBody.create(imageFile, MediaType.parse("image/jpeg"));
         MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", imageFile.getName(), fileBody);
