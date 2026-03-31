@@ -7,6 +7,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                       AverageStarsWithNumOfRatings.class, NextToMachineType.class,
                       OtherOffer.class, PriceRange.class, SiteLocationType.class,
                       StarsQualityDescription.class , Comment.class},
-                      version = 28, exportSchema = false)
+                      version = 29, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
@@ -83,6 +84,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                             // Wipes and rebuilds instead of migrating
                             // if no Migration object.
                             .fallbackToDestructiveMigration()
+                            .addMigrations(MIGRATION_28_29)
                             .addCallback(sCoffeeSiteDatabaseCallback)
                             .build();
                 }
@@ -90,6 +92,13 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         }
         return DB_INSTANCE;
     }
+
+    static final Migration MIGRATION_28_29 = new Migration(28, 29) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE coffee_site_table ADD COLUMN localImagePaths TEXT");
+        }
+    };
 
     private static final CoffeeSiteDatabase.Callback sCoffeeSiteDatabaseCallback =
             new CoffeeSiteDatabase.Callback() {

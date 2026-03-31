@@ -117,6 +117,10 @@ public class CoffeeSite implements Serializable,
     @ColumnInfo(name = "imageFileName")
     private String imageFileName = ""; // name of image downloaded from server and saved in all sites image directory, see ImageUtils.COFFEESITE_IMAGE_DIR
 
+    @ColumnInfo(name = "localImagePaths")
+    @TypeConverters(DbDataListsConverters.class)
+    private List<String> localImagePaths = new ArrayList<>();
+
     public String getImageFileName() {
         return imageFileName;
     }
@@ -321,6 +325,8 @@ public class CoffeeSite implements Serializable,
         mainImageURL = in.readString();
         mainImageFilePath = in.readString();
         imageFileName = in.readString();
+        localImagePaths = new ArrayList<>();
+        in.readStringList(localImagePaths);
 
         mesto = in.readString();
         uliceCP = in.readString();
@@ -372,6 +378,7 @@ public class CoffeeSite implements Serializable,
         dest.writeString(getMainImageURL());
         dest.writeString(getMainImageFilePath());
         dest.writeString(getImageFileName());
+        dest.writeStringList(getLocalImagePaths());
 
         dest.writeString(mesto);
         dest.writeString(uliceCP);
@@ -461,6 +468,21 @@ public class CoffeeSite implements Serializable,
 
     public String getDefaultImageFileName() {
         return PHOTO_FILE_NAME_PREFIX + getId();
+    }
+
+    public List<String> getLocalImagePaths() {
+        if (localImagePaths == null) {
+            localImagePaths = new ArrayList<>();
+        }
+        return new ArrayList<>(localImagePaths);
+    }
+
+    public void setLocalImagePaths(List<String> localImagePaths) {
+        if (localImagePaths == null) {
+            this.localImagePaths = new ArrayList<>();
+        } else {
+            this.localImagePaths = new ArrayList<>(localImagePaths);
+        }
     }
 
     public String getCreatedByUserName() {

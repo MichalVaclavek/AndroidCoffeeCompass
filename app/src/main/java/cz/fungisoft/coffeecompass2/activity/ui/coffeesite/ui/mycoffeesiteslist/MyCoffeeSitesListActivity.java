@@ -36,14 +36,18 @@ import java.util.Objects;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteUploadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.MyCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.ImageObject;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageServiceConnector;
@@ -650,6 +654,23 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
      */
     private int coffeeSitesWithImageUploaded = 0;
 
+    private final ArrayList<PendingOfflineImageUpload> pendingOfflineImageUploads = new ArrayList<>();
+    private final ArrayList<String> pendingOfflineImagePathsToDelete = new ArrayList<>();
+    private int pendingOfflineImageUploadIndex = -1;
+    private int pendingOfflineImageUploadFailures = 0;
+
+    private static class PendingOfflineImageUpload {
+        private final CoffeeSite coffeeSite;
+        private final File imageFile;
+        private final String imageType;
+
+        PendingOfflineImageUpload(CoffeeSite coffeeSite, File imageFile, String imageType) {
+            this.coffeeSite = coffeeSite;
+            this.imageFile = imageFile;
+            this.imageType = imageType;
+        }
+    }
+
     @Override
     public void onCoffeeSitesUploaded(List<CoffeeSite> returnedCoffeeSites, String error) {
         hideProgressbar();
@@ -669,6 +690,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             switchAB.setChecked(false);
             List<CoffeeSite> originalCoffeeSitesWithImages = getOriginalCoffeeSitesWithImages();
             coffeeSitesWithImageToBeUploaded = 0;
+            clearPendingOfflineImageUploads();
 
             if (originalCoffeeSitesWithImages.isEmpty()) {
                 // delete already uploaded coffee sites from local DB, if without images
@@ -687,27 +709,18 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
                     continue;
                 }
 
-                String imageFilePath = originalCoffeeSite.getMainImageFilePath();
-                if (imageFilePath == null || imageFilePath.isEmpty()) {
-                    continue;
-                }
-
-                File imageFile = ImageUtil.getImageFile(imageFilePath);
-                if (!imageFile.exists()) {
-                    Log.w(TAG, "Image file for uploaded CoffeeSite does not exist: " + imageFilePath);
-                    continue;
-                }
-
-                returnedCoffeeSite.setImageFileName(returnedCoffeeSite.getDefaultImageFileName());
-                coffeeSitesWithImageToBeUploaded++;
-                uploadCoffeeSiteImage(imageFile, returnedCoffeeSite);
+                queueOfflineImageUploads(returnedCoffeeSite, originalCoffeeSite);
             }
 
             if (coffeeSitesWithImageToBeUploaded <= 0) {
                 hideProgressbar();
                 coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
                 reloadAllUsersCoffeeSites();
+                return;
             }
+
+            pendingOfflineImageUploadIndex = 0;
+            uploadNextPendingOfflineImage();
         }
     }
 
@@ -723,9 +736,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
 
         List<CoffeeSite> coffeeSitesWithImages = new ArrayList<>();
         for (CoffeeSite coffeeSite : originalCoffeeSites) {
-            if (coffeeSite != null
-                    && coffeeSite.getMainImageFilePath() != null
-                    && !coffeeSite.getMainImageFilePath().isEmpty()) {
+            if (coffeeSite != null && hasOfflineLocalImages(coffeeSite)) {
                 coffeeSitesWithImages.add(coffeeSite);
             }
         }
@@ -770,6 +781,54 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         return Objects.equals(returnedCoffeeSite.getCreatedOnString(), originalCoffeeSite.getCreatedOnString());
     }
 
+    private void queueOfflineImageUploads(CoffeeSite returnedCoffeeSite, CoffeeSite originalCoffeeSite) {
+        List<String> localImagePaths = getOfflineLocalImagePaths(originalCoffeeSite);
+        if (localImagePaths.isEmpty()) {
+            return;
+        }
+
+        String imageFilePath = localImagePaths.get(0);
+        if (imageFilePath == null || imageFilePath.isEmpty()) {
+            return;
+        }
+
+        File imageFile = ImageUtil.getImageFile(imageFilePath);
+        if (!imageFile.exists()) {
+            Log.w(TAG, "Image file for uploaded CoffeeSite does not exist: " + imageFilePath);
+            return;
+        }
+
+        returnedCoffeeSite.setImageFileName(returnedCoffeeSite.getDefaultImageFileName());
+        pendingOfflineImageUploads.add(new PendingOfflineImageUpload(
+                returnedCoffeeSite,
+                imageFile,
+                "main"));
+        pendingOfflineImagePathsToDelete.add(imageFilePath);
+        coffeeSitesWithImageToBeUploaded++;
+    }
+
+    private boolean hasOfflineLocalImages(CoffeeSite coffeeSite) {
+        return !getOfflineLocalImagePaths(coffeeSite).isEmpty();
+    }
+
+    @NonNull
+    private List<String> getOfflineLocalImagePaths(@Nullable CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> localImagePaths = coffeeSite.getLocalImagePaths();
+        if (localImagePaths != null && !localImagePaths.isEmpty()) {
+            return localImagePaths;
+        }
+
+        if (coffeeSite.getMainImageFilePath() != null && !coffeeSite.getMainImageFilePath().isEmpty()) {
+            return Collections.singletonList(coffeeSite.getMainImageFilePath());
+        }
+
+        return Collections.emptyList();
+    }
+
 
     private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite) {
         if (coffeeSiteImageService != null
@@ -777,6 +836,104 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
             setLoadingPage(true);
             coffeeSiteImageService.uploadImage(imageFile, coffeeSite);
         }
+    }
+
+    private void uploadNextPendingOfflineImage() {
+        if (pendingOfflineImageUploadIndex < 0
+                || pendingOfflineImageUploadIndex >= pendingOfflineImageUploads.size()) {
+            finishPendingOfflineImageUploads();
+            return;
+        }
+
+        if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
+            pendingOfflineImageUploadFailures++;
+            finishPendingOfflineImageUploads();
+            return;
+        }
+
+        setLoadingPage(true);
+        PendingOfflineImageUpload pendingUpload = pendingOfflineImageUploads.get(pendingOfflineImageUploadIndex);
+        new ImageUploadNewApiAsyncTask(new CoffeeSiteImageManageListener() {
+            @Override
+            public void onImageObjectLoaded(ImageObject imageObject) {
+            }
+
+            @Override
+            public void onImageObjectLoadFailed(Result.Error error) {
+            }
+
+            @Override
+            public void onImageUploaded(String imageExtId) {
+                onPendingOfflineImageUploaded(pendingUpload);
+            }
+
+            @Override
+            public void onImageUploadFailed(Result.Error error) {
+                onPendingOfflineImageUploadFailed(error);
+            }
+
+            @Override
+            public void onImageDeleted(String imageExtId) {
+            }
+
+            @Override
+            public void onImageDeleteFailed(Result.Error error) {
+            }
+        }, userAccountService, pendingUpload.imageFile, pendingUpload.coffeeSite.getId(), pendingUpload.imageType).execute();
+    }
+
+    private void onPendingOfflineImageUploaded(PendingOfflineImageUpload pendingUpload) {
+        setLoadingPage(false);
+        coffeeSitesWithImageUploaded++;
+        if ("main".equalsIgnoreCase(pendingUpload.imageType)) {
+            recyclerViewAdapter.invalidateImageUrl(pendingUpload.coffeeSite);
+        }
+        pendingOfflineImageUploadIndex++;
+        uploadNextPendingOfflineImage();
+    }
+
+    private void onPendingOfflineImageUploadFailed(@Nullable Result.Error error) {
+        setLoadingPage(false);
+        coffeeSitesWithImageUploaded++;
+        pendingOfflineImageUploadFailures++;
+        Log.e(TAG, "Offline image upload failed: "
+                + (error != null && error.getDetail() != null ? error.getDetail() : ""));
+        pendingOfflineImageUploadIndex++;
+        uploadNextPendingOfflineImage();
+    }
+
+    private void finishPendingOfflineImageUploads() {
+        setLoadingPage(false);
+        int uploadFailures = pendingOfflineImageUploadFailures;
+        deletePendingOfflineImageFiles();
+        clearPendingOfflineImageUploads();
+        coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
+        if (uploadFailures == 0) {
+            showCoffeeSitesImagesUploadSuccess();
+        } else {
+            showImageUploadFailure("");
+        }
+        hideProgressbar();
+        reloadAllUsersCoffeeSites();
+    }
+
+    private void deletePendingOfflineImageFiles() {
+        for (String imageFilePath : pendingOfflineImagePathsToDelete) {
+            if (imageFilePath == null || imageFilePath.isEmpty()) {
+                continue;
+            }
+            File imageFile = ImageUtil.getImageFile(imageFilePath);
+            if (imageFile.exists()) {
+                imageFile.delete();
+            }
+        }
+    }
+
+    private void clearPendingOfflineImageUploads() {
+        pendingOfflineImageUploads.clear();
+        pendingOfflineImagePathsToDelete.clear();
+        pendingOfflineImageUploadIndex = -1;
+        pendingOfflineImageUploadFailures = 0;
     }
 
     /**

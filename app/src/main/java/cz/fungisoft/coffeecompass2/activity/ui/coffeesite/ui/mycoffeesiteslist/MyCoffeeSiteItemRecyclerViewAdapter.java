@@ -22,6 +22,7 @@ import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -300,9 +301,14 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                          .into(viewHolder.siteFoto);
         }
         if (!isOnline || coffeeSite.getMainImageURL().isEmpty()) {
-            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite))
-                         .fit().placeholder(R.drawable.kafe_backround_120x160)
-                         .into(viewHolder.siteFoto);
+            File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite);
+            if (coffeeSiteImageFile.exists()) {
+                Picasso.get().load(coffeeSiteImageFile)
+                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .into(viewHolder.siteFoto);
+            } else {
+                viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+            }
         }
     }
 

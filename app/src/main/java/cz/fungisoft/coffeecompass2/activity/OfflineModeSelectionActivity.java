@@ -297,8 +297,8 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     public void onSizeOfAllDataToDownload(Result<Integer> result) {
         if (result instanceof Result.Success) {
             // Size of data returned from server are not precise
-            // according testing, the real size of data to be downloaded must be multiplication by factor 1.2 (approximately)
-            float sizeOfAllDataToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024f  * 1.2f;
+            // according testing, the real size of data to be downloaded must be multiplication by factor 1.1 (approximately)
+            float sizeOfAllDataToDownloadMB = ((Result.Success<Integer>) result).getData() / 1024f  * 1.1f;
             DecimalFormat df = new DecimalFormat("#");
             sizeOfDataWithImageTextView.setText(getString(R.string.all_data_to_download_size, df.format(sizeOfAllDataToDownloadMB)));
         }

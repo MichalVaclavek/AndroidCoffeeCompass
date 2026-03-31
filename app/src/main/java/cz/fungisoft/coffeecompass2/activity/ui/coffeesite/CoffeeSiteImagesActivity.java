@@ -99,7 +99,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         setContentView(R.layout.activity_coffeesite_images);
 
         readIntentData();
-        isDraftMode = coffeeSite == null || coffeeSite.getId() == null || coffeeSite.getId().isEmpty();
+        isDraftMode = coffeeSite == null || coffeeSite.getId().isEmpty() || !coffeeSite.isSavedOnServer() && !coffeeSite.isStatusZaznamuAvailable();
         if (coffeeSite == null && localImagePaths.isEmpty()) {
             Log.e(TAG, "No CoffeeSite provided. Finishing.");
             finish();

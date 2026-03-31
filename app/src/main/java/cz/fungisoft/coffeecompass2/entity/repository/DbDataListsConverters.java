@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
@@ -113,5 +114,26 @@ public class DbDataListsConverters implements Serializable {
         Type type = new TypeToken<List<OtherOffer>>(){}.getType();
         List<OtherOffer> otherOffers = gson.fromJson(otherOffersString, type);
         return otherOffers;
+    }
+
+    @TypeConverter
+    public String fromStringList(List<String> stringList) {
+        if (stringList == null) {
+            return null;
+        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>(){}.getType();
+        return gson.toJson(stringList, type);
+    }
+
+    @TypeConverter
+    public List<String> toStringList(String stringListString) {
+        if (stringListString == null || stringListString.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>(){}.getType();
+        List<String> stringList = gson.fromJson(stringListString, type);
+        return stringList != null ? stringList : new ArrayList<>();
     }
 }
