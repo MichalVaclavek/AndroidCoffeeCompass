@@ -308,9 +308,12 @@
     <string name="manage_images_count">Fotek: %1$d / %2$d</string>
     <string name="manage_images_upload_success">Fotka úspěšně nahrána.</string>
     <string name="manage_images_upload_failure">Nahrání fotky selhalo.</string>
+    <string name="manage_images_upload_progress">Nahrávání fotky na server…</string>
     <string name="manage_images_delete_success">Fotka úspěšně smazána.</string>
     <string name="manage_images_delete_failure">Smazání fotky selhalo.</string>
+    <string name="manage_images_delete_progress">Mazání fotky ze serveru…</string>
     <string name="manage_images_load_failure">Načtení fotek selhalo.</string>
+    <string name="manage_images_loading_progress">Načítání fotek…</string>
     <string name="manage_images_max_reached">Maximální počet fotek dosažen.</string>
     <string name="manage_images_menu_item">Spravovat foto</string>
 

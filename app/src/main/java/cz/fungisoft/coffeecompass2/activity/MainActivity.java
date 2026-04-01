@@ -806,17 +806,14 @@ public class MainActivity extends ActivityWithLocationService
         searchAutoComplete.setThreshold(2);
         searchAutoComplete.setAdapter(townNamesArrayAdapter);
 
-        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // City name is selected from list
-                String townName = parent.getItemAtPosition(position).toString();
-                if (townName.length() > 1) {
-                    searchView.setQuery(townName, true);
-                    // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
-                }
-                Log.i(TAG, "Selected town: " + townName);
+        searchAutoComplete.setOnItemClickListener((parent, view, position, id) -> {
+            // City name is selected from list
+            String townName = parent.getItemAtPosition(position).toString();
+            if (townName.length() > 1) {
+                searchView.setQuery(townName, true);
+                // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
             }
+            Log.i(TAG, "Selected town: " + townName);
         });
 
         return true;

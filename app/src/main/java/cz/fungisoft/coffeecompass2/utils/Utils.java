@@ -22,12 +22,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
@@ -355,48 +349,11 @@ public class Utils {
 
     /**
      * Returns a pre-configured OkHttpClient.Builder.
-     * If BuildConfig.DEBUG is true, it returns a builder that ignores SSL certificate issues
-     * (useful for development with IP addresses or domain mismatches).
      *
      * @return OkHttpClient.Builder
      */
     public static OkHttpClient.Builder getOkHttpClientBuilder() {
-        if (BuildConfig.DEBUG) {
-            return getUnsafeOkHttpClientBuilder();
-        }
         return new OkHttpClient.Builder();
-    }
-
-    private static OkHttpClient.Builder getUnsafeOkHttpClientBuilder() {
-        try {
-            // Vytvoření TrustManageru, který nekontroluje řetězec certifikátů
-            final TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new java.security.cert.X509Certificate[]{};
-                        }
-                    }
-            };
-
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-
-            // Toto vyřeší chybu "Hostname not verified"
-            builder.hostnameVerifier((hostname, session) -> true);
-
-            return builder;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

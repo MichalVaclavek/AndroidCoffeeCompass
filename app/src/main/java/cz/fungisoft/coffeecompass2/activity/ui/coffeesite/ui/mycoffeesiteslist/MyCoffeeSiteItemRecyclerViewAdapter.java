@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -316,19 +317,55 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     @NonNull
     private String getDisplayMainImageUrl(@NonNull CoffeeSite coffeeSite) {
-        if (coffeeSite.getMainImageURL() != null && !coffeeSite.getMainImageURL().isEmpty()) {
-            return coffeeSite.getMainImageURL();
+        String mainImageUrl = normalizeMainImageUrl(coffeeSite.getMainImageURL());
+        if (!mainImageUrl.isEmpty()) {
+            coffeeSite.setMainImageURL(mainImageUrl);
+            return mainImageUrl;
         }
 
         if (coffeeSite.getId().isEmpty() || !coffeeSite.isSavedOnServer()) {
             return "";
         }
 
-        String mainImageUrl = BuildConfig.IMAGES_API_PUBLIC_URL
+        mainImageUrl = BuildConfig.IMAGES_API_PUBLIC_URL
                 + "bytes/object/?objectExtId=" + coffeeSite.getId()
                 + "&type=main&size=mid";
         coffeeSite.setMainImageURL(mainImageUrl);
         return mainImageUrl;
+    }
+
+    @NonNull
+    private String normalizeMainImageUrl(String originalUrl) {
+        if (originalUrl == null || originalUrl.isEmpty()) {
+            return "";
+        }
+
+        if (originalUrl.startsWith(BuildConfig.IMAGES_API_PUBLIC_URL)
+                || originalUrl.startsWith("https://coffeecompass.cz/api/v1/images/")) {
+            return originalUrl;
+        }
+
+        Uri uri = Uri.parse(originalUrl);
+        String path = uri.getEncodedPath();
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+
+        String relativePath = path;
+        String imagesPathPrefix = "/api/v1/images/";
+        int imagesPrefixIndex = path.indexOf(imagesPathPrefix);
+        if (imagesPrefixIndex >= 0) {
+            relativePath = path.substring(imagesPrefixIndex + imagesPathPrefix.length());
+        } else if (relativePath.startsWith("/")) {
+            relativePath = relativePath.substring(1);
+        }
+
+        String rebuiltUrl = BuildConfig.IMAGES_API_PUBLIC_URL + relativePath;
+        String query = uri.getEncodedQuery();
+        if (query != null && !query.isEmpty()) {
+            rebuiltUrl += "?" + query;
+        }
+        return rebuiltUrl;
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {

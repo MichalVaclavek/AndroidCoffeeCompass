@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +36,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,11 +86,14 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private CoffeeSiteImageManageAdapter adapter;
     private ProgressBar progressBar;
+    private View progressOverlay;
+    private TextView progressTextView;
     private TextView countLabel;
     private com.google.android.material.button.MaterialButton addButton;
 
-    private File imagePhotoFile;
-    private FileCompressor fileCompressor;
+    private static File imagePhotoFile;
+    private static FileCompressor fileCompressor;
+    private CompressImageForUploadAsyncTask compressImageForUploadAsyncTask;
 
     // UserAccountService binding
     protected UserAccountService userAccountService;
@@ -116,6 +123,8 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         }
 
         progressBar = findViewById(R.id.manage_images_progress_bar);
+        progressOverlay = findViewById(R.id.manage_images_progress_overlay);
+        progressTextView = findViewById(R.id.manage_images_progress_text);
         countLabel = findViewById(R.id.manage_images_count_label);
         addButton = findViewById(R.id.manage_images_add_button);
 
@@ -147,6 +156,9 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        if (compressImageForUploadAsyncTask != null) {
+            compressImageForUploadAsyncTask.cancel(true);
+        }
         super.onDestroy();
         if (!isDraftMode) {
             doUnbindUserAccountService();
@@ -168,7 +180,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         if (isDraftMode || coffeeSite == null || !Utils.isOnline(getApplicationContext())) {
             return;
         }
-        showProgress();
+        showProgress(R.string.manage_images_loading_progress);
         new GetImageObjectAsyncTask(this, coffeeSite.getId()).execute();
     }
 
@@ -194,14 +206,16 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
     private void uploadImage(File imageFile) {
         if (isDraftMode) {
+            hideProgress();
             addDraftImage(imageFile);
             return;
         }
         if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
+            hideProgress();
             Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
             return;
         }
-        showProgress();
+        showProgress(R.string.manage_images_upload_progress);
         new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile,
                 coffeeSite.getId(), IMAGE_TYPE_OTHER).execute();
     }
@@ -244,7 +258,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
             Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
             return;
         }
-        showProgress();
+        showProgress(R.string.manage_images_delete_progress);
         // Store position for removal after success
         pendingDeletePosition = position;
         new ImageDeleteNewApiAsyncTask(this, userAccountService,
@@ -387,28 +401,12 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
         switch (requestCode) {
             case REQUEST_TAKE_PHOTO:
-                try {
-                    imagePhotoFile = fileCompressor.compressToFile(imagePhotoFile);
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed to compress photo from camera.", e);
-                }
-                if (imagePhotoFile != null && imagePhotoFile.exists()) {
-                    uploadImage(imagePhotoFile);
-                }
+                startCompressAndUpload(null);
                 break;
 
             case REQUEST_GALLERY_PHOTO:
                 if (data != null && data.getData() != null) {
-                    Uri selectedImage = data.getData();
-                    try {
-                        imagePhotoFile = fileCompressor.compressToFile(
-                                new File(Utils.getRealPathFromUri(selectedImage, this)));
-                    } catch (IOException e) {
-                        Log.e(TAG, "Failed to compress image from gallery.", e);
-                    }
-                    if (imagePhotoFile != null && imagePhotoFile.exists()) {
-                        uploadImage(imagePhotoFile);
-                    }
+                    startCompressAndUpload(data.getData());
                 }
                 break;
 
@@ -461,12 +459,123 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
 
     // -------- UI helpers --------
 
-    private void showProgress() {
+    private void startCompressAndUpload(@Nullable Uri selectedImageUri) {
+        showProgress(R.string.manage_images_upload_progress);
+        if (compressImageForUploadAsyncTask != null) {
+            compressImageForUploadAsyncTask.cancel(true);
+        }
+        compressImageForUploadAsyncTask = new CompressImageForUploadAsyncTask(
+                this,
+                getApplicationContext(),
+                fileCompressor,
+                selectedImageUri,
+                imagePhotoFile);
+        compressImageForUploadAsyncTask.execute();
+    }
+
+    private void showProgress(@StringRes int progressMessageRes) {
         progressBar.setVisibility(View.VISIBLE);
+        progressOverlay.setVisibility(View.VISIBLE);
+        progressTextView.setText(progressMessageRes);
+        addButton.setEnabled(false);
+        recyclerView.setEnabled(false);
+        recyclerView.setAlpha(0.6f);
     }
 
     private void hideProgress() {
         progressBar.setVisibility(View.GONE);
+        progressOverlay.setVisibility(View.GONE);
+        progressTextView.setText(null);
+        recyclerView.setEnabled(true);
+        recyclerView.setAlpha(1.0f);
+        updateAddButtonState();
+    }
+
+    private static final class CompressImageForUploadAsyncTask extends AsyncTask<Void, Void, File> {
+
+        private final WeakReference<CoffeeSiteImagesActivity> activityReference;
+        private final Context appContext;
+        private final FileCompressor fileCompressor;
+        @Nullable
+        private final Uri selectedImageUri;
+        @Nullable
+        private final File sourceImageFile;
+        @Nullable
+        private Exception compressionException;
+
+        private CompressImageForUploadAsyncTask(@NonNull CoffeeSiteImagesActivity activity,
+                                                @NonNull Context appContext,
+                                                @NonNull FileCompressor fileCompressor,
+                                                @Nullable Uri selectedImageUri,
+                                                @Nullable File sourceImageFile) {
+            this.activityReference = new WeakReference<>(activity);
+            this.appContext = appContext;
+            this.fileCompressor = fileCompressor;
+            this.selectedImageUri = selectedImageUri;
+            this.sourceImageFile = sourceImageFile;
+        }
+
+        @Override
+        protected File doInBackground(Void... voids) {
+            try {
+                if (selectedImageUri != null) {
+                    String realPath = Utils.getRealPathFromUri(selectedImageUri, appContext);
+                    if (realPath == null || realPath.isEmpty()) {
+                        return null;
+                    }
+                    return fileCompressor.compressToFile(new File(realPath));
+                }
+
+                if (sourceImageFile == null || !sourceImageFile.exists()) {
+                    return null;
+                }
+
+                return fileCompressor.compressToFile(sourceImageFile);
+            } catch (Exception e) {
+                compressionException = e;
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(File compressedImageFile) {
+            CoffeeSiteImagesActivity activity = activityReference.get();
+            if (activity == null) {
+                return;
+            }
+
+            activity.compressImageForUploadAsyncTask = null;
+
+            if (activity.isFinishing() || activity.isDestroyed()) {
+                return;
+            }
+
+            if (compressedImageFile != null && compressedImageFile.exists()) {
+                activity.imagePhotoFile = compressedImageFile;
+                activity.uploadImage(compressedImageFile);
+                return;
+            }
+
+            activity.hideProgress();
+            if (compressionException != null) {
+                Log.e(TAG, "Failed to prepare image for upload.", compressionException);
+            }
+            Toast.makeText(activity,
+                    R.string.manage_images_upload_failure, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onCancelled() {
+            CoffeeSiteImagesActivity activity = activityReference.get();
+            if (activity == null) {
+                return;
+            }
+
+            activity.compressImageForUploadAsyncTask = null;
+            if (!activity.isFinishing() && !activity.isDestroyed()) {
+                activity.hideProgress();
+            }
+        }
     }
 
     private void updateCountLabel() {
