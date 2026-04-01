@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
@@ -171,7 +172,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         retVal = view -> {
             CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
-            if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+            if (coffeeSite != null && !getDisplayMainImageUrl(coffeeSite).isEmpty()) {
                 Context context = view.getContext();
                 Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
@@ -295,12 +296,13 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         // Set CoffeeSite's image
         boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
-        if (isOnline && !coffeeSite.getMainImageURL().isEmpty()) {
-            Picasso.get().load(coffeeSite.getMainImageURL())
+        String mainImageUrl = getDisplayMainImageUrl(coffeeSite);
+        if (isOnline && !mainImageUrl.isEmpty()) {
+            Picasso.get().load(mainImageUrl)
                          .fit().placeholder(R.drawable.kafe_backround_120x160)
                          .into(viewHolder.siteFoto);
         }
-        if (!isOnline || coffeeSite.getMainImageURL().isEmpty()) {
+        if (!isOnline || mainImageUrl.isEmpty()) {
             File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite);
             if (coffeeSiteImageFile.exists()) {
                 Picasso.get().load(coffeeSiteImageFile)
@@ -310,6 +312,23 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
                 viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
             }
         }
+    }
+
+    @NonNull
+    private String getDisplayMainImageUrl(@NonNull CoffeeSite coffeeSite) {
+        if (coffeeSite.getMainImageURL() != null && !coffeeSite.getMainImageURL().isEmpty()) {
+            return coffeeSite.getMainImageURL();
+        }
+
+        if (coffeeSite.getId().isEmpty() || !coffeeSite.isSavedOnServer()) {
+            return "";
+        }
+
+        String mainImageUrl = BuildConfig.IMAGES_API_PUBLIC_URL
+                + "bytes/object/?objectExtId=" + coffeeSite.getId()
+                + "&type=main&size=mid";
+        coffeeSite.setMainImageURL(mainImageUrl);
+        return mainImageUrl;
     }
 
     private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
@@ -705,7 +724,10 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     public void invalidateImageUrl(CoffeeSite coffeeSite) {
-        Picasso.get().invalidate(coffeeSite.getMainImageURL());
+        String imageUrl = getDisplayMainImageUrl(coffeeSite);
+        if (!imageUrl.isEmpty()) {
+            Picasso.get().invalidate(imageUrl);
+        }
     }
 
     /**

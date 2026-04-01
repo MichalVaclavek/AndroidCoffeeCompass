@@ -2171,11 +2171,21 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 && !coffeeSite.isStatusZaznamuAvailable();
     }
 
+    private boolean isCreateMode() {
+        return mode == MODE_CREATE || mode == MODE_CREATE_FROM_MYCOFFEESITESACTIVITY;
+    }
+
     private boolean canOpenManageImages() {
-        return currentCoffeeSite != null
-                && !currentCoffeeSite.getId().isEmpty()
-                && (currentCoffeeSite.isSavedOnServer() || currentCoffeeSite.isStatusZaznamuAvailable())
-                && Utils.isOnline(getApplicationContext());
+        if (!Utils.isOnline(getApplicationContext())) {
+            return false;
+        }
+        if (currentCoffeeSite == null) {
+            return isCreateMode();
+        }
+        if (currentCoffeeSite.getId().isEmpty()) {
+            return isCreateMode();
+        }
+        return currentCoffeeSite.isSavedOnServer() || currentCoffeeSite.isStatusZaznamuAvailable();
     }
 
     private void openManageImagesActivity() {
@@ -2190,7 +2200,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void refreshImageCountIfNeeded() {
-        if (canOpenManageImages()) {
+        if (canOpenManageImages()
+                && currentCoffeeSite != null
+                && !currentCoffeeSite.getId().isEmpty()) {
             new GetImageObjectAsyncTask(this, currentCoffeeSite.getId()).execute();
         } else {
             if (!localImagePaths.isEmpty()) {
