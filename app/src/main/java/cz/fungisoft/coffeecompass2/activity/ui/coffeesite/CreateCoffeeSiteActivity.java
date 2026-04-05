@@ -2185,6 +2185,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (currentCoffeeSite.getId().isEmpty()) {
             return isCreateMode();
         }
+        if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
+            return true;
+        }
         return currentCoffeeSite.isSavedOnServer() || currentCoffeeSite.isStatusZaznamuAvailable();
     }
 
@@ -2222,8 +2225,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private void refreshImageActionState() {
         boolean hasMainImage = hasMainImage();
-        imageDeleteMenuItem.setEnabled(hasMainImage && currentImageCount == 1);
-        manageImagesMenuItem.setEnabled(hasMainImage && canOpenManageImages());
+        int effectiveImageCount = currentImageCount > 0 ? currentImageCount : (hasMainImage ? 1 : 0);
+        imageDeleteMenuItem.setEnabled(effectiveImageCount == 1);
+        manageImagesMenuItem.setEnabled(effectiveImageCount > 0 && canOpenManageImages());
     }
 
     private void showSelectedMainImage(File mainImageFile) {

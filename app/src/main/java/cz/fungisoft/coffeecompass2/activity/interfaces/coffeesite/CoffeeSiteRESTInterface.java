@@ -34,7 +34,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("number/")
-    Call<Integer> getNumberOfStars(@Query("siteID") String siteID, @Query("userID") String userID);
+    Call<Integer> getNumberOfStars(@Query("siteId") String siteID, @Query("userId") String userID);
 
     /**
      * REST call for obtaining one CoffeeSite by it's ID
