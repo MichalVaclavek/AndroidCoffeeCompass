@@ -1,6 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,18 +8,19 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
-//import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-//import cz.fungisoft.coffeecompass2.services.CoffeeSiteService;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,16 +36,15 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * CANCEL
  *
  */
-public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ChangeStatusOfCoffeeSiteAsyncTask {
 
     private final CoffeeSite coffeeSiteToModify;
 
     /**
-     * Current logged-in user
+     * Provides current logged-in user info
      */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
-    //private String operationResult = "";
     private String operationError = "";
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
@@ -56,42 +56,37 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
     public ChangeStatusOfCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
                                              CoffeeSite coffeeSite,
-                                             LoggedInUser currentUser,
+                                             UserAccountActionsProvider userAccountService,
                                              CoffeeSiteRESTResultListener callingService) {
         this.coffeeSiteToModify = coffeeSite;
-        this.currentUser = currentUser;
+        this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         tag = "SiteStatusAsynTask";
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(tag, "start");
         //operationResult = "";
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
-        if (currentUser != null && coffeeSiteToModify != null) {
-
+        Log.i(tag, "currentUser is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null && coffeeSiteToModify != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
-            //HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .addInterceptor(headerAuthorizationInterceptor)
-                    //.addInterceptor(logging)
+                    .authenticator(new TokenAuthenticator(userAccountService))
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
@@ -109,7 +104,7 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
             Call<CoffeeSite> call = null;
 
-            //TODO overeni, ze CoffeeSite ma aktualni status vhodny ke pozadovane operaci
+            //TODO overeni, ze CoffeeSite ma aktualni status vhodny k pozadovane operaci
             // tj. atributy canBeActivated, atd. viz DTO object
             switch (this.requestedRESTOperationCode) {
                 case COFFEE_SITE_ACTIVATE:
@@ -139,25 +134,15 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
                             }
 
                         } else {
-                            Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                            Log.i(tag, "Returned empty response for changing CoffeeSite state request.");
+                            error = new Result.Error(new IOException("Error changing CoffeeSite state. Response empty."));
                             operationError = error.toString();
                             if (callingListenerService != null) {
                                 callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                             }
                         }
                     } else {
-                        try {
-                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
-                        } catch (IOException e) {
-                            Log.e(tag, e.getMessage());
-
-                            operationError = "Chyba komunikace se serverem.";
-                        }
-                        if (error == null) {
-                            error = new Result.Error(operationError);
-                        }
+                        error = createHttpErrorResult(response);
                         if (callingListenerService != null) {
                             callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                         }
@@ -166,16 +151,64 @@ public class ChangeStatusOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Voi
 
                 @Override
                 public void onFailure(Call<CoffeeSite> call, Throwable t) {
-                    Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                    Log.e(tag, "Error changing CoffeeSite state REST request." + t.getMessage());
+                    error = new Result.Error(new IOException("Error changing CoffeeSite state.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage() != null && t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
         }
-        return null;
+    }
+
+    private Result.Error createHttpErrorResult(Response<CoffeeSite> response) {
+        String errorBody = "";
+        try (ResponseBody responseBody = response.errorBody()) {
+            if (responseBody != null) {
+                errorBody = responseBody.string();
+            }
+        } catch (IOException e) {
+            Log.e(tag, "Failed to read error body.", e);
+        }
+
+        if (!errorBody.isEmpty()) {
+            RestError restError = Utils.getRestError(errorBody);
+            if (restError.getStatus() == 0) {
+                restError.setStatus(response.code());
+            }
+            if (restError.getDetail() == null || restError.getDetail().isEmpty() || "Not Available".equals(restError.getDetail())) {
+                restError.setDetail(buildHttpFallbackMessage(response, errorBody));
+            }
+
+            operationError = restError.getDetail();
+            return new Result.Error(restError);
+        }
+
+        operationError = buildHttpFallbackMessage(response, "");
+        return new Result.Error(new IOException(operationError));
+    }
+
+    private String buildHttpFallbackMessage(Response<CoffeeSite> response, String errorBody) {
+        String responseMessage = response.message() != null && !response.message().isEmpty()
+                                 ? response.message()
+                                 : "Unknown error";
+
+        if (response.code() == 404) {
+            return !errorBody.isEmpty()
+                   ? errorBody
+                   : "HTTP 404 Not Found";
+        }
+
+        return !errorBody.isEmpty()
+               ? errorBody
+               : "HTTP " + response.code() + " " + responseMessage;
     }
 
 }

@@ -7,7 +7,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
 
 /**
- * Listener interface implemented by Activities/Services to listen async results
+ * Listener interface implemented by Activities/Services to listen Results
  * of operations performed by {@link CoffeeSiteLoadOperationsService}
  */
 public interface CoffeeSiteLoadServiceOperationsListener {
@@ -23,4 +23,20 @@ public interface CoffeeSiteLoadServiceOperationsListener {
     default void onNumberOfCoffeeSiteFromLoggedInUserLoaded(int coffeeSitesNumber, String error) {}
 
     default void onAllCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
+
+    /**
+     * on load of CoffeeSites activated in last days
+     *
+     * @param coffeeSites
+     * @param error
+     */
+    default void onLatestCoffeeSitesLoaded(List<CoffeeSite> coffeeSites, String error) {}
+
+    /**
+     * on load of CoffeeSites in town
+     *
+     * @param coffeeSites
+     * @param error
+     */
+    default void onCoffeeSitesInTownLoaded(List<CoffeeSite> coffeeSites, String error) {}
 }

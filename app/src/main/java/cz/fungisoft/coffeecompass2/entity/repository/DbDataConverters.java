@@ -8,7 +8,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
@@ -17,6 +16,9 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 
+/**
+ * Converters used for saving CoffeeSite fields as JSON formatted strings into DB
+ */
 public class DbDataConverters implements Serializable {
 
     @TypeConverter

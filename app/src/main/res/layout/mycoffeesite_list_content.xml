@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.google.android.material.card.MaterialCardView xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -31,14 +30,32 @@
             android:layout_weight="9"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/cs_name_TextView"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <TextView
+                    android:id="@+id/cs_name_TextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:text="TextView"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/notSavedOnServerImageView"
+                    android:layout_width="14dp"
+                    android:layout_height="12dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/location_bad"
+                    tools:visibility="gone" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/created_on_linear_layout"
@@ -88,15 +105,6 @@
                         android:textSize="18sp" />
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/insert_creator_comment_ImageButton"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_baseline_comment_36" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -111,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_baseline_edit_36" />
+                    android:src="@drawable/ic_baseline_edit_32" />
 
                 <ImageButton
                     android:id="@+id/button_activate_coffeesite"
@@ -122,20 +130,21 @@
                     android:src="@drawable/ic_play_circle_outline_green_36" />
 
                 <ImageButton
-                    android:id="@+id/button_deactivate_coffeesite"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_pause_circle_outline_black_36" />
-
-                <ImageButton
                     android:id="@+id/button_cancel_coffeesite"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_baseline_delete_outline_36" />
+
+                <ImageButton
+                    android:id="@+id/insert_creator_comment_ImageButton"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_baseline_comment_36" />
 
             </LinearLayout>
 

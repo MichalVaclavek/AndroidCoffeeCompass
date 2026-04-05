@@ -10,8 +10,8 @@ public class SearchDistancePreferenceHelper {
 
     private final String SEARCH_DISTANCE = "searchDistance";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     public SearchDistancePreferenceHelper(Context context) {
         app_prefs = context.getSharedPreferences("sharedDistance",

@@ -30,7 +30,8 @@ public interface CoffeeSitesInRangeUpdateListener {
      * Called, when there are sites out of current range detected.
      *
      * @param goneSitesOutOfRange
+     * @param to indicate if the searching was in location/range or town. can leads to different recyclerView behaviour
      */
-    void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange);
+    void onSitesOutOfRange(List<CoffeeSiteMovable> goneSitesOutOfRange, boolean searchInRange);
 
 }

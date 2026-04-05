@@ -4,14 +4,29 @@
     <color name="colorPrimaryDark">#3A1A00</color>
     <color name="colorAccent">#D55C00</color>
     <color name="login_backround">#86BA4B</color>
-    <color name="card_backround">#F0F4C3</color>
-    <color name="colorNiceYellow">#FCCA03</color>
+    <color name="card_backround">#F4F2C3</color>
+    <color name="colorNiceYellow">#FFFCCA03</color>
+    <color name="colorNiceYellow_alpha">#44FCCA03</color>
     <color name="colorPrimary2">#804314</color>
-    <color name="activityBackround">#FFE0B2</color>
+    <color name="colorPrimary2Widget">#BB804314</color>
+    <color name="activityBackround">#EFDABA</color>
+    <color name="activityBackroundWidget">#BBFFE0B2</color>
     <color name="selectedSearchDistanceBackround">#C1F1CC8A</color>
     <color name="listOfDistancesBackround">#FCD8A6</color>
     <color name="chip_gray">#DDDDDD</color>
+    <color name="gray_transparent">#AADDDDDD</color>
+    <color name="gray_light">#DEDEDE</color>
+    <color name="white_transparent">#DAFCFCFC</color>
     <color name="site_status_gray">#C5C5C5</color>
     <color name="site_status_dark_gray">#959595</color>
-</resources>
+    <color name="light_blue_50">#FFE1F5FE</color>
+    <color name="light_blue_200">#FF81D4FA</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+    <color name="green_emptycard" >#B1C34A</color>
+    <color name="main_button_backround" >#FFB23A</color>
+    <color name="main_button_stroke_light" >#FBE1D8</color>
 
+    <color name="black_alpha_40">#66000000</color>
+    <color name="quantum_googblue">#4285F4</color>
+</resources>

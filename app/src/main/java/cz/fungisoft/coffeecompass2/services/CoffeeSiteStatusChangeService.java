@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.ChangeStatusOfCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -26,7 +25,7 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountServ
  * Service uses usually AsyncTasks to perform REST calls to coffeecompass.cz server.
  * Respective status change methods are called by Activities.<br>
  * Service must implement {@link CoffeeSiteRESTResultListener} which informs about result
- * of the respectve Async tasks. The results are then passed to Activities, which
+ * of the respective Async tasks. The results are then passed to Activities, which
  * implement {@link CoffeeSiteServiceStatusOperationsListener}
  */
 public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountService
@@ -46,7 +45,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
 
     // Listeners, usually Activities, which called respective service method
     // and wants to be informed about resutl later, as all the operations are Async
-    private List<CoffeeSiteServiceStatusOperationsListener> coffeeSiteStatusOperationsListeners = new ArrayList<>();
+    private final List<CoffeeSiteServiceStatusOperationsListener> coffeeSiteStatusOperationsListeners = new ArrayList<>();
 
     public void addCoffeeSiteStatusOperationsListener(CoffeeSiteServiceStatusOperationsListener listener) {
         if (!coffeeSiteStatusOperationsListeners.contains(listener)) {
@@ -86,17 +85,11 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         Log.d(TAG, "Service started.");
     }
 
-    /**
-     * Current CoffeeSite which is used for server operations save, update, activate and so on
-     */
-    //private CoffeeSite coffeeSite;
-
-
     public void activate(CoffeeSite coffeeSite) {
         requestedRESTOperation = COFFEE_SITE_ACTIVATE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -105,7 +98,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         requestedRESTOperation = COFFEE_SITE_DEACTIVATE;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -114,7 +107,7 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         requestedRESTOperation = COFFEE_SITE_CANCEL;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, currentUser,
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, userAccountService,
                     this).execute();
         }
     }
@@ -125,11 +118,12 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         if (result instanceof Result.Success) {
             returnedCoffeeSite = ((Result.Success<CoffeeSite>) result).getData();
             informClientAboutCoffeeSiteStatusChangeResult(oper, returnedCoffeeSite, "");
-
         } else {
-            RestError error = ((Result.Error) result).getRestError();
-            informClientAboutCoffeeSiteStatusChangeResult(oper, null, error.getDetail());
-            Log.e(TAG, "Error when obtaining coffee sites." + error.getDetail());
+            Result.Error error = (Result.Error) result;
+            if (error != null) {
+                informClientAboutCoffeeSiteStatusChangeResult(oper, null, error.getDetail());
+                Log.e(TAG, "Error when changing state of coffee sites. " + error.getDetail());
+            }
         }
     }
 

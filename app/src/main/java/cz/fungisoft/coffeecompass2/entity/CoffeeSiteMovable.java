@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.services.LocationService;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
@@ -20,13 +21,14 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Another Class can also to register listeners for 'distance'
  * change event of this CoffeeSiteMovable class
  */
-public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable
-{
+public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListener, Parcelable {
+
     private static final String TAG = "CoffeeSiteMovable";
+
     /**
      * Support for property change, 'distance' in this case.
      */
-    private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     private static  LocationService locService;
 
@@ -58,17 +60,29 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     };
 
     public void setLocationService(LocationService locationService) {
-        this.locService = locationService;
+        locService = locationService;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         changeSupport.addPropertyChangeListener(pcl);
-        Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+        Log.d(TAG, "Posluchac zmeny vzdalenosti pridan: " + pcl);
+        //Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         changeSupport.removePropertyChangeListener(pcl);
-        Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+        Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
+        //Log.d(TAG, "Coffee Site objID: " + this + ". Coffee Site: " + getName() + ". Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
+    }
+
+    public void removeAllDistanceChangeListeners() {
+        for (PropertyChangeListener pcl : changeSupport.getPropertyChangeListeners()) {
+            if (pcl instanceof DistanceChangeTextView) {
+                changeSupport.removePropertyChangeListener(pcl);
+                Log.d(TAG, "Posluchac zmeny vzdalenosti odebran: " + pcl);
+            }
+        }
+        Log.d(TAG,  "Pocet posluchacu zmeny vzdalenosti: " + changeSupport.getPropertyChangeListeners().length);
     }
 
     public CoffeeSiteMovable() {
@@ -83,6 +97,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
     public CoffeeSiteMovable(CoffeeSite coffeeSite) {
         super();
         this.setId(coffeeSite.getId());
+        this.setStatusZaznamu(coffeeSite.getStatusZaznamu());
         this.setName(coffeeSite.getName());
         this.setDistance(coffeeSite.getDistance());
 
@@ -90,7 +105,8 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setLongitude(coffeeSite.getLongitude());
 
         this.setMainImageURL(coffeeSite.getMainImageURL());
-        this.setMainImageFileName(coffeeSite.getMainImageFileName());
+        this.setMainImageFilePath(coffeeSite.getMainImageFilePath());
+        this.setImageFileName(coffeeSite.getImageFileName());
 
         this.setCena(coffeeSite.getCena());
 
@@ -120,12 +136,11 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
      * @param coffeeSite
      */
     public CoffeeSiteMovable(CoffeeSite coffeeSite, LatLng searchLocationFrom) {
-
         this(coffeeSite);
         this.setDistance(Utils.countDistanceMetersFromSearchPoint(coffeeSite.getLatitude(), coffeeSite.getLongitude(), searchLocationFrom.latitude, searchLocationFrom.longitude));
     }
 
-    public CoffeeSiteMovable(int id, String name, long dist) {
+    public CoffeeSiteMovable(String id, String name, long dist) {
         super(id, name, dist);
     }
 
@@ -143,5 +158,13 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
 
     public boolean isLocationServiceAssigned() {
         return locService != null;
+    }
+
+    @Override
+    public String toString() {
+        return "CoffeeSiteMovable{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                '}';
     }
 }

@@ -5,7 +5,7 @@ package cz.fungisoft.coffeecompass2.activity.ui.login;
  */
 public class LoggedInUserView {
 
-    private String displayName;
+    private final String displayName;
     //... other data fields that may be accessible to the UI
 
     public LoggedInUserView(String displayName) {

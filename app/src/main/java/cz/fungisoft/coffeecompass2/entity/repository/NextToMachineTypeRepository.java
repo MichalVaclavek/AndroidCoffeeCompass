@@ -1,19 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.NextToMachineTypeDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
+/**
+ * Repository class for NextToMachineType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
 
-    private NextToMachineTypeDao nextToMachineTypeDao;
-    private LiveData<List<NextToMachineType>> mAllNextToMachineTypes;
+    private final NextToMachineTypeDao nextToMachineTypeDao;
+    private final LiveData<List<NextToMachineType>> mAllNextToMachineTypes;
 
     NextToMachineTypeRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -25,7 +28,7 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         return mAllNextToMachineTypes;
     }
 
-    public Flowable<NextToMachineType> getNextToMachineType(String nextToMachineTypeValue) {
+    public Single<NextToMachineType> getNextToMachineType(String nextToMachineTypeValue) {
         return nextToMachineTypeDao.getNextToMachineType(nextToMachineTypeValue);
     }
 
@@ -33,18 +36,16 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         new NextToMachineTypeRepository.insertAsyncTask(nextToMachineTypeDao).execute(nextToMachineType);
     }
 
-    private static class insertAsyncTask extends AsyncTask<NextToMachineType, Void, Void> {
+    private static class insertAsyncTask {
 
-        private NextToMachineTypeDao mAsyncTaskDao;
+        private final NextToMachineTypeDao mAsyncTaskDao;
 
         insertAsyncTask(NextToMachineTypeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final NextToMachineType... params) {
-            mAsyncTaskDao.insertNextToMachineType(params[0]);
-            return null;
+        public void execute(final NextToMachineType... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertNextToMachineType(params[0]));
         }
     }
 
@@ -52,18 +53,16 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(nextToMachineTypeDao).execute(NextToMachineTypes);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<NextToMachineType>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private NextToMachineTypeDao mAsyncTaskDao;
+        private final NextToMachineTypeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(NextToMachineTypeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<NextToMachineType>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<NextToMachineType>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

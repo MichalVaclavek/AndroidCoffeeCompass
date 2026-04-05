@@ -1,29 +1,41 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescriptionDao;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
+/**
+ * Repository class for StarsQualityDescription objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase {
 
-    private StarsQualityDescriptionDao starsQualityDescriptionDao;
-    private LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
+    private final StarsQualityDescriptionDao starsQualityDescriptionDao;
+    private final LiveData<List<StarsQualityDescription>> mAllStarsQualityDescriptions;
+    private final Single<List<StarsQualityDescription>> mAllStarsQualityDescriptionsSingle;
+
 
     StarsQualityDescriptionRepository(CoffeeSiteDatabase db) {
         super(db);
         starsQualityDescriptionDao = db.starsQualityDescriptionDao();
         mAllStarsQualityDescriptions = starsQualityDescriptionDao.getAllStarsQualityDescriptions();
+        mAllStarsQualityDescriptionsSingle = starsQualityDescriptionDao.getAllStarsQualityDescriptionsSingle();
     }
 
     public LiveData<List<StarsQualityDescription>> getAllStarsQualityDescriptions() {
         return mAllStarsQualityDescriptions;
     }
+
+    public Single<List<StarsQualityDescription>> getAllCoffeeSiteTypesSingle() {
+        return mAllStarsQualityDescriptionsSingle;
+    }
+
 
     public Flowable<StarsQualityDescription> getStarsQualityDescription(int starsQualityDescriptionValue) {
         return starsQualityDescriptionDao.getStarsQualityDescriptionByNumber(starsQualityDescriptionValue);
@@ -33,18 +45,16 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
         new StarsQualityDescriptionRepository.insertAsyncTask(starsQualityDescriptionDao).execute(starsQualityDescription);
     }
 
-    private static class insertAsyncTask extends AsyncTask<StarsQualityDescription, Void, Void> {
+    private static class insertAsyncTask {
 
-        private StarsQualityDescriptionDao mAsyncTaskDao;
+        private final StarsQualityDescriptionDao mAsyncTaskDao;
 
         insertAsyncTask(StarsQualityDescriptionDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final StarsQualityDescription... params) {
-            mAsyncTaskDao.insertStarsQualityDescription(params[0]);
-            return null;
+        public void execute(final StarsQualityDescription... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertStarsQualityDescription(params[0]));
         }
     }
 
@@ -52,18 +62,16 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
         new InsertAllAsyncTask(starsQualityDescriptionDao).execute(StarsQualityDescriptions);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<StarsQualityDescription>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private StarsQualityDescriptionDao mAsyncTaskDao;
+        private final StarsQualityDescriptionDao mAsyncTaskDao;
 
         InsertAllAsyncTask(StarsQualityDescriptionDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<StarsQualityDescription>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<StarsQualityDescription>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

@@ -1,18 +1,18 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
-import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -29,41 +29,41 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
  * by loged-in user.
  */
-public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UpdateCommentAndStarsAsyncTask {
 
     static final String REQ_TAG = "UpdateCommentAsyncREST";
 
-    private final LoggedInUser user;
+    private final UserAccountActionsProvider userAccountService;
 
-    private final WeakReference<CommentsListActivity> commentsActivity;
+    private final UsersCSRatingAndCommentUpdateOperationListener callingActivity;
 
-    private Comment commentAndStarsToUpdate;
+    private final Comment commentAndStarsToUpdate;
 
-    public UpdateCommentAndStarsAsyncTask(LoggedInUser user, CommentsListActivity commentsActivity, Comment commentAndStarsToUpdate) {
-        this.commentsActivity = new WeakReference<>(commentsActivity);
+    public UpdateCommentAndStarsAsyncTask(UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentUpdateOperationListener callingActivity, Comment commentAndStarsToUpdate) {
+        this.callingActivity = callingActivity;
         this.commentAndStarsToUpdate = commentAndStarsToUpdate;
-        this.user = user;
+        this.userAccountService = userAccountService;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "UpdateCommentAndStarsAsyncTask REST request initiated");
 
-        if (user != null) {
-
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
+                                                  .authenticator(new TokenAuthenticator(userAccountService))
+                                                  .addInterceptor(headerAuthorizationInterceptor).build();
 
             Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                          .excludeFieldsWithoutExposeAnnotation()
@@ -86,27 +86,27 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_TAG, "onResponse() success");
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().processUpdatedComment(response.body());
+                            if (callingActivity != null) {
+                                callingActivity.processUpdatedComment(response.body());
                             }
                         } else {
                             Log.i(REQ_TAG, "Returned empty response for updating comment request.");
                             Result.Error error = new Result.Error(new IOException("Error updating comment. Response empty."));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentUpdate(error);
                             }
                         }
                     } else {
                         try {
                             String errorBody = response.errorBody().string();
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentUpdate(new Result.Error(Utils.getRestError(errorBody)));
                             }
                         } catch (IOException e) {
                             Log.e(REQ_TAG, "Error updating comment." + e.getMessage());
                             Result.Error error = new Result.Error(new IOException("Error updating comment.", e));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentUpdate(error);
                             }
                         }
                     }
@@ -116,14 +116,18 @@ public class UpdateCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> 
                 public void onFailure(Call<Comment> call, Throwable t) {
                     Log.e(REQ_TAG, "Error updating comment REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error updating comment.", t));
-                    if (commentsActivity.get() != null) {
-                        commentsActivity.get().showRESTCallError(error);
+                    if (callingActivity != null) {
+                        callingActivity.processFailedCommentUpdate(error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
         }
-        //return retVal;
-        return null;
+
     }
 
 }

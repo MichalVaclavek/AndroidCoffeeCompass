@@ -1,31 +1,37 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.PriceRangeDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
+/**
+ * Repository class for PriceRange objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
 
-    private PriceRangeDao priceRangeDao;
-    private LiveData<List<PriceRange>> mAllPriceRanges;
+    private final PriceRangeDao priceRangeDao;
+
+    private final LiveData<List<PriceRange>> mAllPriceRanges;
+    private final Single<List<PriceRange>> mAllPriceRangesSingle;
 
     PriceRangeRepository(CoffeeSiteDatabase db) {
         super(db);
         priceRangeDao = db.priceRangeDao();
         mAllPriceRanges = priceRangeDao.getAllPriceRanges();
+        mAllPriceRangesSingle = priceRangeDao.getAllPriceRangesSingle();
     }
 
     public LiveData<List<PriceRange>> getAllPriceRanges() {
         return mAllPriceRanges;
     }
 
-    public Flowable<PriceRange> getPriceRange(String priceRangeValue) {
+    public Single<PriceRange> getPriceRange(String priceRangeValue) {
         return priceRangeDao.getPriceRange(priceRangeValue);
     }
 
@@ -33,18 +39,20 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
         new PriceRangeRepository.insertAsyncTask(priceRangeDao).execute(priceRange);
     }
 
-    private static class insertAsyncTask extends AsyncTask<PriceRange, Void, Void> {
+    public Single<List<PriceRange>> getAllPriceRangesSingle() {
+        return mAllPriceRangesSingle;
+    }
 
-        private PriceRangeDao mAsyncTaskDao;
+    private static class insertAsyncTask {
+
+        private final PriceRangeDao mAsyncTaskDao;
 
         insertAsyncTask(PriceRangeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final PriceRange... params) {
-            mAsyncTaskDao.insertPriceRange(params[0]);
-            return null;
+        public void execute(final PriceRange... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertPriceRange(params[0]));
         }
     }
 
@@ -52,18 +60,16 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(priceRangeDao).execute(PriceRanges);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<PriceRange>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private PriceRangeDao mAsyncTaskDao;
+        private final PriceRangeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(PriceRangeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<PriceRange>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<PriceRange>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

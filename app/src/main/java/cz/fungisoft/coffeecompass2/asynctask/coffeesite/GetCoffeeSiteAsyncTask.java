@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,12 +7,13 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,11 +26,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * ASyncTask to call REST api obtaining one CoffeeSite
  * by its id
  */
-public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetCoffeeSiteAsyncTask {
 
     private static final String TAG = "GetCoffeeSiteAsyncTask";
 
-    private final long coffeeSiteId;
+    private final String coffeeSiteId;
 
     private String operationResult = "";
     private String operationError = "";
@@ -40,22 +40,33 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private Result.Error error;
 
+    private String coffeeSiteURL = "";
+
+    /**
+     * Starts AsyncTask to load CoffeeSite either by coffeeSiteId or by CoffeeSiteURL
+     *
+     * @param requestedRESTOperationCode - requested load operation
+     * @param callingService - service implementing CoffeeSiteRESTResultListener
+     * @param coffeeSiteId - can be 0, means that coffeeSiteURL is used
+     * @param coffeeSiteURL - REST endpoint URL to load CoffeeSite. Can be empty, then coffeeSiteId is used.
+     */
     public GetCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                  CoffeeSiteRESTResultListener callingService, long coffeeSiteId) {
+                                  CoffeeSiteRESTResultListener callingService, String coffeeSiteId, String coffeeSiteURL) {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
         this.callingListenerService = callingService;
         this.coffeeSiteId = coffeeSiteId;
+        this.coffeeSiteURL = coffeeSiteURL;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         operationResult = "";
         operationError = "";
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                .build();
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
                 .setDateFormat("dd. MM. yyyy HH:mm")
@@ -70,7 +81,12 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
 
         CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 
-        Call<CoffeeSite> call = api.getCoffeeSiteById(coffeeSiteId);
+        Call<CoffeeSite> call;
+        if (this.coffeeSiteURL.isEmpty()) {
+            call = api.getCoffeeSiteById(coffeeSiteId);
+        } else {
+            call = api.getCoffeeSiteByURL(this.coffeeSiteURL);
+        }
 
         Log.i(TAG, "start call");
 
@@ -122,7 +138,6 @@ public class GetCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
 
 }

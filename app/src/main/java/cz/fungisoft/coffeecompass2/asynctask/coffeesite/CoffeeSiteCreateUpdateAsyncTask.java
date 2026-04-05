@@ -1,6 +1,6 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,16 +8,18 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
+import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,14 +30,14 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * AsyncTasky pro Create, Update operace s CoffeeSite
  */
-public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void> {
+public class CoffeeSiteCreateUpdateAsyncTask {
 
     private final CoffeeSite coffeeSite;
 
     /**
-     * Current logged-in user
+     * Provides current logged-in user info
      */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userAccountService;
 
     private String operationError = "";
 
@@ -48,44 +50,42 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
 
     public CoffeeSiteCreateUpdateAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
                                            CoffeeSite coffeeSite,
-                                           LoggedInUser currentUser,
+                                           UserAccountActionsProvider userAccountService,
                                            CoffeeSiteRESTResultListener callingService) {
 
         this.coffeeSite = coffeeSite;
-        this.currentUser = currentUser;
+        this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
 
         tag = "SiteOperationAsyncTask";
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(tag, "start");
-        //operationResult = "";
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + String.valueOf(currentUser == null));
-        if (currentUser != null) {
-
+        Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
-            //HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+//            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
                     .addInterceptor(headerAuthorizationInterceptor)
-                    //.addInterceptor(logging)
+                    .authenticator(new TokenAuthenticator(userAccountService))
+//                    .addInterceptor(logging)
                     .build();
 
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
@@ -114,7 +114,7 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
 
             Log.i(tag, "start call");
 
-            call.enqueue(new Callback<CoffeeSite>() {
+            call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
                     if (response.isSuccessful()) {
@@ -137,7 +137,7 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                     } else {
                         try {
                             operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                            error = new Result.Error(operationError);
                         } catch (IOException e) {
                             Log.e(tag, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";
@@ -156,13 +156,18 @@ public class CoffeeSiteCreateUpdateAsyncTask extends AsyncTask<Void, Void, Void>
                     Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
         }
-        return null;
     }
 
 }

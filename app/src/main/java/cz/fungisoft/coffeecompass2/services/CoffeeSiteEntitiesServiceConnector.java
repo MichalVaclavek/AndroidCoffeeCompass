@@ -11,7 +11,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesService
 
 public class CoffeeSiteEntitiesServiceConnector implements ServiceConnection {
 
-        private List<CoffeeSiteEntitiesServiceConnectionListener> connectionListenerList = new ArrayList<>();
+        private final List<CoffeeSiteEntitiesServiceConnectionListener> connectionListenerList = new ArrayList<>();
 
         public void addCoffeeSiteEntitiesServiceConnectionListener(CoffeeSiteEntitiesServiceConnectionListener listener) {
             this.connectionListenerList.add(listener);

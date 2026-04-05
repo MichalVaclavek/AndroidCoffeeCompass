@@ -1,60 +1,70 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
+import android.annotation.SuppressLint;
+import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
+import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
-import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeFoundService;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.StaticCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.notification.TownNamesArrayAdapter;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
+import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesInRangeUpdateServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeSearchOperationListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
-import cz.fungisoft.coffeecompass2.activity.MapsActivity;
-import cz.fungisoft.coffeecompass2.activity.support.CoffeeSiteMovableItemRecyclerViewAdapter;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovableListContent;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.widgets.MainAppWidgetProvider;
 
 
 /**
- * An activity representing a list of CoffeeSites.
+ * An activity representing a list of CoffeeSites found in the current search range.
+ * <p>
  * This activity has different presentations for handset and tablet-size devices.
  * On handsets, the activity presents a list of items, which when touched,
- * lead to a {@link CoffeeSiteDetailActivity} representing
- * item details.
+ * lead to a {@link CoffeeSiteDetailActivity} representing item details.
  * On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p><p/>
- * Used to start AsyncTask for searching CoffeeSites in range and to show
- * list of found CoffeeSites based on location.
+ * Uses FoundCoffeeSitesViewModel, which holds information about CoffeeSites
+ * newly entered into search range and CoffeeSites, which left the current range.
+ * This is used to be inserted to FoundCoffeeSitesRecyclerViewAdapter, which shows
+ * changes of CoffeeSites in the current search range (and location).
  * <p>
- * Another activity is used to show CoffeeSites created by user.
  */
-public class FoundCoffeeSitesListActivity extends ActivityWithLocationService implements CoffeeSitesInRangeSearchOperationListener,
-                                                                                         CoffeeSitesInRangeServiceConnectionListener {
+public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
+                                          implements CoffeeSitesInRangeSearchOperationListener,
+                                                     CoffeeSitesInRangeServiceConnectionListener,
+                                                     CoffeeSitesFoundListener {
+
     private static final String TAG = "FoundCoffeeSitesAct";
 
     /**
@@ -70,20 +80,16 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
      * The main attribute of activity containing all the CoffeeSites to show
      * on this or child Activities
      */
-    private CoffeeSiteMovableListContent content = new CoffeeSiteMovableListContent();
-
-    private CoffeeSiteMovableItemRecyclerViewAdapter recyclerViewAdapter;
-    private Parcelable mListState;
+    private final CoffeeSiteListContent currentContent = new CoffeeSiteListContent();
 
     /**
-     * Service which provides updates of CoffeeSites list in the current
-     * search Range
+     * Adapter to show current CoffeeSites in range.
      */
-    private CoffeeSitesInRangeFoundService sitesInRangeUpdateService;
-    private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
-    private boolean mShouldUpdateSitesInRangeUnbind;
+    private FoundCoffeeSitesRecyclerViewAdapter recyclerViewAdapter;
+    private Parcelable mListState;
 
     private int searchRange;
+    private List<Integer> searchRanges; // possible ranges of search distances to be selected by user
     private LatLng searchLocation;
     private String searchCoffeeSort;
 
@@ -93,34 +99,53 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     private String originalToolbarTitle;
 
     /**
-     * Model providing found coffeeSites to Activity and it's recycler view adapter
+     * Model providing "new" and "old" CoffeeSites to the Activity and it's recycler view adapter
      */
-    private FoundCoffeeSitesViewModel coffeeSitesViewModel;
+    private static FoundCoffeeSitesViewModel coffeeSitesViewModel;
+
+    /**
+     * Flag to indicate, if current search is based on location/range or town
+     * Used to update view/recyclerViewAdapter in case searching is finished.
+     */
+    private boolean searchingInRange = true;
+
+    /**
+     * Service which provides updates of CoffeeSites list in the current
+     * search Range to FoundCoffeeSitesViewModel to further evaluation of the "new"/"old"
+     * CoffeeSites.
+     */
+    private CoffeeSitesFoundService foundSitesService;
+    private CoffeeSitesInRangeUpdateServiceConnector sitesInRangeUpdateServiceConnector;
+    private boolean mShouldUpdateSitesInRangeUnbind;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_coffeesite_list);
-
-        if (findViewById(R.id.coffeesite_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
+        setContentView(R.layout.activity_found_coffeesites_list);
 
         this.searchLocation = (LatLng) getIntent().getExtras().get("latLongFrom");
         this.searchCoffeeSort = (String) getIntent().getExtras().get("coffeeSort");
-        this.searchRange = (int) getIntent().getExtras().get("searchRange");
+        if (getIntent().getExtras().get("searchRange") != null) {
+            this.searchRange = (int) getIntent().getExtras().get("searchRange");
+        }
+        if (getIntent().getExtras().get("searchRanges") != null) {
+            this.searchRanges = getIntent().getIntegerArrayListExtra("searchRanges");
+        }
 
         toolbar = (Toolbar) findViewById(R.id.sitesListToolbar);
         setSupportActionBar(toolbar);
 
-        originalToolbarTitle = String.valueOf(getTitle());
+        // Show the Up button in the action bar.
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
+        setTitle(R.string.found_coffeesite_activity_title);
+        originalToolbarTitle = String.valueOf(getTitle());
         layoutManager = new LinearLayoutManager(this);
 
         doBindSitesInRangeService();
@@ -128,14 +153,6 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
         prepareAndActivateRecyclerView();
     }
 
-    /**
-     * Setup locationService listeners and RecyclerView which also
-     * requires locationService to be activated/connected.
-     */
-    @Override
-    public void onLocationServiceConnected() {
-        super.onLocationServiceConnected();
-    }
 
     private void prepareAndActivateRecyclerView() {
         Bundle extras = getIntent().getExtras();
@@ -144,19 +161,18 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
 
         recyclerView.setLayoutManager(layoutManager);
         if (extras != null) {
-            setupRecyclerView( recyclerView, content);
+            setupRecyclerView( recyclerView);
         }
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView, CoffeeSiteMovableListContent listContent) {
-        recyclerViewAdapter = new CoffeeSiteMovableItemRecyclerViewAdapter(this, listContent, this.searchRange, Utils.isOfflineModeOn(getApplicationContext()), mTwoPane);
+    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+        recyclerViewAdapter = new FoundCoffeeSitesRecyclerViewAdapter(this, this.searchRange, mTwoPane);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-
         // Save CoffeeSites list state
         mListState = layoutManager.onSaveInstanceState();
         state.putParcelable(LIST_STATE_KEY, mListState);
@@ -165,11 +181,8 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     @Override
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
-
         // Retrieve CoffeeSites list state and item positions
-        if (state != null) {
-            mListState = state.getParcelable(LIST_STATE_KEY);
-        }
+        mListState = state.getParcelable(LIST_STATE_KEY);
     }
 
     @Override
@@ -191,83 +204,18 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
 
     @Override
     public void onDestroy() {
-        if ((locationService != null) && (content != null)) {
-            for (CoffeeSiteMovable csm : content.getItems()) {
-                if (csm.isLocationServiceAssigned()) {
-                    locationService.removePropertyChangeListener(csm);
-                }
-            }
-        }
-
-        doUnBindSitesInRangeService();
-        coffeeSitesViewModel.removeSitesInRangeUpdateListener(recyclerViewAdapter);
         super.onDestroy();
+        doUnBindSitesInRangeService();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.action_map:
-                if (Utils.isOnline()) {
-                    openMap();
-                } else {
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "No Internet connection.",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    /**
-     * Starts MapsActivity to show found CoffeeSites
-     */
-    private void openMap() {
-        Intent mapIntent = new Intent(this, MapsActivity.class);
-        mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
-        mapIntent.putExtra("listContent", (Parcelable) content);
-        startActivity(mapIntent);
-    }
-
-    @Override
-    public void onStartSearchingSitesInRange() {
-        recyclerViewAdapter.newSitesInRangeSearchingStarted();
-    }
-
-    @Override
-    public void onSearchingSitesInRangeFinished() {
-        recyclerViewAdapter.newSitesInRangeSearchingFinished();
-        if (recyclerViewAdapter.getCurrentNumberOfSitesShown() > 0) {
-            toolbar.setTitle(originalToolbarTitle + " : " + Utils.convertSearchDistanceNoBrackets(this.searchRange) + " (" + recyclerViewAdapter.getCurrentNumberOfSitesShown() + ")");
-        } else {
-            toolbar.setTitle(originalToolbarTitle);
-        }
-    }
-
-    @Override
-    public void onSearchingSitesInRangeError(String error) {
-        Toast toast = Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT);
-        toast.show();
-    }
 
     private void doBindSitesInRangeService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // Attempts to establish a connection with the service. We use an
+        // explicit class name because we want a specific service implementation,
+        // that we know will be running in our own process
+        // (and thus won't be supporting component replacement by other applications).
         sitesInRangeUpdateServiceConnector = new CoffeeSitesInRangeUpdateServiceConnector(this);
-        if (bindService(new Intent(this, CoffeeSitesInRangeFoundService.class),
+        if (bindService(new Intent(this, CoffeeSitesFoundService.class),
                 sitesInRangeUpdateServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUpdateSitesInRangeUnbind = true;
         } else {
@@ -279,8 +227,9 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
     public void doUnBindSitesInRangeService() {
         // Release information about the service's state.
         if (mShouldUpdateSitesInRangeUnbind) {
-            if (sitesInRangeUpdateService != null) {
-                sitesInRangeUpdateService.removeSitesInRangeSearchOperationListener(this);
+            if (foundSitesService != null) {
+                foundSitesService.removeFoundSitesSearchOperationListener(this);
+                foundSitesService.removeSitesFoundListener(coffeeSitesViewModel);
             }
             unbindService(sitesInRangeUpdateServiceConnector);
             mShouldUpdateSitesInRangeUnbind = false;
@@ -289,31 +238,168 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService im
 
     @Override
     public void onCoffeeSitesInRangeUpdateServiceConnected() {
-        sitesInRangeUpdateService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
-        sitesInRangeUpdateService.addSitesInRangeSearchOperationListener(this);
+        foundSitesService = sitesInRangeUpdateServiceConnector.getSitesInRangeUpdateService();
+        foundSitesService.addFoundSitesSearchOperationListener(this);
 
+        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(this);
+        coffeeSitesViewModel.setCoffeeSitesInRangeFoundService(foundSitesService);
+        foundSitesService.addSitesFoundListener(coffeeSitesViewModel);
+
+        // NEW sites in search range
+        coffeeSitesViewModel.getNewSitesInRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSiteMovable> newCoffeeSitesInRange) {
+                // Update the cached copy of the newCoffeeSitesInRange in the adapter.
+                if (newCoffeeSitesInRange != null) {
+                    for (CoffeeSiteMovable csm : newCoffeeSitesInRange) {
+                        // Add new CoffeeSites as locationService listeners
+                        csm.setLocationService(locationService);
+                        if (locationService != null) {
+                            locationService.addPropertyChangeListener(csm);
+                            currentContent.add(csm);
+                        }
+                    }
+                    recyclerViewAdapter.newSitesSearchingFinished();
+                    recyclerViewAdapter.onNewSitesInRange(newCoffeeSitesInRange);
+                    updateTitle(recyclerViewAdapter.getCurrentNumberOfSitesShown());
+                }
+                // updates app's Widget
+                MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), newCoffeeSitesInRange, true);
+            }
+        });
+
+        // Sites REMOVED from search range
+        coffeeSitesViewModel.getGoneSitesOutOfRange().observe(this, new Observer<List<CoffeeSiteMovable>>() {
+            @Override
+            public void onChanged(@Nullable final List<CoffeeSiteMovable> goneCoffeeSitesInRange) {
+                // Update the cached copy of the goneCoffeeSitesInRange in the adapter.
+                if (goneCoffeeSitesInRange != null) {
+                    for (CoffeeSiteMovable csm : goneCoffeeSitesInRange) {
+                        if (locationService != null) {
+                            locationService.removePropertyChangeListener(csm);
+                            currentContent.getItems().remove(csm);
+                        }
+                    }
+                    recyclerViewAdapter.newSitesSearchingFinished();
+                    recyclerViewAdapter.onSitesOutOfRange(goneCoffeeSitesInRange, searchingInRange);
+                    updateTitle(recyclerViewAdapter.getCurrentNumberOfSitesShown());
+                }
+                // updates app's Widget
+                MainAppWidgetProvider.updateCoffeeSiteWidget(getApplicationContext(), currentContent.getItems(), true);
+            }
+        });
+
+        startSearchingSites();
+    }
+
+    /**
+     * Processes changes of the 'new' and/or 'old' CoffeeSites LiveData in range
+     * as provided by coffeeSitesViewModel
+     */
+    private void startSearchingSites() {
         final int currentSearchRange = this.searchRange;
         final LatLng currentSearchFromLocation = this.searchLocation;
 
-        final boolean offlineModeOn = Utils.isOfflineModeOn(getApplicationContext());
-
-        sitesInRangeUpdateService.requestUpdatesOfCurrentSitesInRange(currentSearchFromLocation, currentSearchRange, this.searchCoffeeSort, offlineModeOn);
-
-        coffeeSitesViewModel = new FoundCoffeeSitesViewModel(getApplication(), locationService, sitesInRangeUpdateService);
-        coffeeSitesViewModel.addSitesInRangeUpdateListener(recyclerViewAdapter);
-
-        if (offlineModeOn) {
-            coffeeSitesViewModel.getFoundCoffeeSites().observe(this, new Observer<List<CoffeeSiteMovable>>() {
-                @Override
-                public void onChanged(@Nullable final List<CoffeeSiteMovable> coffeeSitesInRange) {
-                    // Update the cached copy of the coffeeSitesInRange in the adapter.
-                    coffeeSitesViewModel = coffeeSitesViewModel.processFoundCoffeeSites(coffeeSitesInRange);
-                    recyclerViewAdapter.onNewSitesInRange(coffeeSitesViewModel.getNewSitesInRange());
-                    recyclerViewAdapter.onSitesOutOfRange(coffeeSitesViewModel.getGoneSitesOutOfRange());
-                    onSearchingSitesInRangeFinished();
-                }
-            });
+        if (coffeeSitesViewModel != null) {
+            coffeeSitesViewModel.setCurrentLocationAndSearchDistance(currentSearchFromLocation, currentSearchRange, this.searchRanges, this.searchCoffeeSort);
         }
     }
 
+    @SuppressLint("RestrictedApi") // due to searchAutoComplete.setThreshold(2);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_found_sites_list, menu);
+
+        // Get the SearchView (for searching sites in town) and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        // StaticCoffeeSitesListActivity is the activity to show result of searchView input
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, StaticCoffeeSitesListActivity.class)));
+        searchView.setQueryHint(getString(R.string.search_by_city_hint));
+        searchView.setIconifiedByDefault(true); // iconify the widget; and expand after user's click
+
+        TownNamesArrayAdapter townNamesArrayAdapter = new TownNamesArrayAdapter(getApplicationContext(), R.layout.suggestion);
+        townNamesArrayAdapter.setNotifyOnChange(true);
+
+        SearchView.SearchAutoComplete searchAutoComplete = (SearchView.SearchAutoComplete) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchAutoComplete.setThreshold(2);
+        searchAutoComplete.setAdapter(townNamesArrayAdapter);
+
+        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // City name is selected from list
+                String townName =  parent.getItemAtPosition(position).toString();
+                if (townName.length() > 1) {
+                    searchView.setQuery(townName, true);
+                    // handleSearchInTownIntent() follows in StaticCoffeeSiteActivity
+                }
+                Log.i(TAG, "Selected town: " + townName);
+            }
+        });
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.action_map:
+                // Map can be opened even in Offline, if the user has downloaded a map ...?
+                openMap();
+                return true;
+            case android.R.id.home:
+                goToMainActivityAndFinish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void goToMainActivityAndFinish() {
+        // go to MainActivity
+        goToMainActivity();
+        finish();
+    }
+
+    private void goToMainActivity() {
+        Intent i = new Intent(FoundCoffeeSitesListActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(i);
+    }
+
+    /**
+     * Starts MapsActivity to show found CoffeeSites. Available only Online.
+     */
+    private void openMap() {
+        Intent mapIntent = new Intent(this, MapsActivity.class);
+        mapIntent.putExtra("currentLocation", locationService.getCurrentLatLng());
+        mapIntent.putExtra("listContent", currentContent);
+        startActivity(mapIntent);
+    }
+
+    @Override
+    public void onStartSearchingSites() {
+        recyclerViewAdapter.newSitesSearchingStarted();
+    }
+
+    public void updateTitle(int numOfCoffeeSites) {
+        String currentTitle = originalToolbarTitle;
+        if (numOfCoffeeSites > 0) {
+            currentTitle = originalToolbarTitle + " (" + numOfCoffeeSites + ")";
+        }
+        if (!Utils.isOnline(getApplicationContext())) {
+            currentTitle = currentTitle + " - offline";
+        }
+        toolbar.setTitle(currentTitle);
+    }
+
+    @Override
+    public void onSearchingSitesError(String error) {
+        recyclerViewAdapter.newSitesSearchingFinished();
+        Toast toast = Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT);
+        toast.show();
+    }
 }

@@ -1,7 +1,10 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
+import android.content.Context;
+
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -15,9 +18,9 @@ import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 
 /**
- * Class to hold instances of CoffeeSite entities repositories, whose content is read from server
- * and saved into DB.
- * Can return instances of any such type.<br></>
+ * Class to hold instances of CoffeeSite related entities repositories, whose content is read from server
+ * and saved into DB.<br>
+ * Can return instances of any such type.<br>
  */
 public class CoffeeSiteEntityRepositories {
 
@@ -30,16 +33,21 @@ public class CoffeeSiteEntityRepositories {
             CoffeeSort.class, CupType.class, NextToMachineType.class, OtherOffer.class, PriceRange.class,
             SiteLocationType.class, StarsQualityDescription.class};
 
-    public static boolean isDataReadFromServer() {
-        return dataReadedFromServer;
+    // Indication that data are available in the repository i.e. where read from server
+    private static boolean dataSaved = false;
+
+    // To save data to PreferencesHelper
+    private static Context mContext;
+
+    public static boolean isDataSaved() {
+        return dataSaved;
     }
 
-    public void setDataReadedFromServer(boolean dataReadedFromServer) {
-        this.dataReadedFromServer = dataReadedFromServer;
+    public static void setDataSaved(boolean dataSaved) {
+        CoffeeSiteEntityRepositories.dataSaved = dataSaved;
+        DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(mContext);
+        dataForOfflineModePreferenceHelper.putCSEntitiesDownloaded(dataSaved);
     }
-
-    // Indication that data are available in the repository i.e. where readed from server
-    private static boolean dataReadedFromServer = false;
 
     public AverageStarsWithNumOfRatingsRepository getAverageStarsWithNumOfHodnoceniRepository() {
         return averageStarsWithNumOfHodnoceniRepository;
@@ -47,10 +55,6 @@ public class CoffeeSiteEntityRepositories {
 
     public CoffeeSiteTypeRepository getCoffeeSiteTypesRepository() {
         return coffeeSiteTypesRepository;
-    }
-
-    public CoffeeSiteRepository getCoffeeSiteRepository() {
-        return coffeeSiteRepository;
     }
 
     public CoffeeSiteRecordStatusRepository getCoffeeSiteRecordStatusRepository() {
@@ -63,10 +67,6 @@ public class CoffeeSiteEntityRepositories {
 
     public CoffeeSortRepository getCoffeeSortRepository() {
         return coffeeSortRepository;
-    }
-
-    public CommentRepository getCommentRepository() {
-        return commentRepository;
     }
 
     public CupTypeRepository getCupTypeRepository() {
@@ -94,33 +94,28 @@ public class CoffeeSiteEntityRepositories {
     }
 
     /* REPOSITORIES */
-    private AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
-    private CoffeeSiteTypeRepository coffeeSiteTypesRepository;
-    private CoffeeSiteRepository coffeeSiteRepository;
-    private CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
-    private CoffeeSiteStatusRepository coffeeSiteStatusRepository;
+    private final AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
+    private final CoffeeSiteTypeRepository coffeeSiteTypesRepository;
+    private final CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
+    private final CoffeeSiteStatusRepository coffeeSiteStatusRepository;
 
-    private CoffeeSortRepository coffeeSortRepository;
-    private CommentRepository commentRepository;
-    private CupTypeRepository cupTypeRepository;
-    private NextToMachineTypeRepository nextToMachineTypeRepository;
-    private OtherOfferRepository otherOfferRepository;
-    private PriceRangeRepository priceRangeRepository;
-    private SiteLocationTypeRepository siteLocationTypeRepository;
-    private StarsQualityDescriptionRepository starsQualityDescriptionRepository;
+    private final CoffeeSortRepository coffeeSortRepository;
+    private final CupTypeRepository cupTypeRepository;
+    private final NextToMachineTypeRepository nextToMachineTypeRepository;
+    private final OtherOfferRepository otherOfferRepository;
+    private final PriceRangeRepository priceRangeRepository;
+    private final SiteLocationTypeRepository siteLocationTypeRepository;
+    private final StarsQualityDescriptionRepository starsQualityDescriptionRepository;
     /* REPOSITORIES */
 
     private static CoffeeSiteEntityRepositories instance;
 
     private CoffeeSiteEntityRepositories(final CoffeeSiteDatabase db) {
         coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(db);
-        coffeeSiteRepository = new CoffeeSiteRepository(db);
         averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(db);
-        coffeeSiteRepository = new CoffeeSiteRepository(db);
         coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
         coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
         coffeeSortRepository = new CoffeeSortRepository(db);
-        commentRepository = CommentRepository.getInstance(db);
         cupTypeRepository = new CupTypeRepository(db);
         nextToMachineTypeRepository = new NextToMachineTypeRepository(db);
         otherOfferRepository = new OtherOfferRepository(db);
@@ -129,10 +124,11 @@ public class CoffeeSiteEntityRepositories {
         starsQualityDescriptionRepository = new StarsQualityDescriptionRepository(db);
     }
 
-    public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db) {
+    public static CoffeeSiteEntityRepositories getInstance(final CoffeeSiteDatabase db, Context context) {
         if (instance == null) {
             instance = new CoffeeSiteEntityRepositories(db);
         }
+        mContext = context;
         return instance;
     }
 
@@ -176,14 +172,14 @@ public class CoffeeSiteEntityRepositories {
     }
 
     public void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
-        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
-            stars.setId(stars.getNumOfStars());
-        }
+//        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
+//            stars.setId(stars.getNumOfStars());
+//        }
         starsQualityDescriptionRepository.insertAll(allStarsQualityDescriptions);
     }
 
 
-    public <T extends List<? extends CoffeeSiteEntity>> void setEntities(T response) {
+    public void setEntities(List<? extends CoffeeSiteEntity> response) {
         if (response.size() > 0) {
             if (response.get(0) instanceof CoffeeSiteType) {
                 setAllCoffeeSiteTypes((List<CoffeeSiteType>) response);

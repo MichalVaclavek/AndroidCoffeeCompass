@@ -1,0 +1,149 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_shape"
+    android:orientation="horizontal"
+    android:padding="@dimen/widget_margin"
+    android:theme="@style/ThemeOverlay.CoffeeCompass.AppWidgetContainer">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="65"
+        android:orientation="vertical"
+        android:paddingLeft="2dp">
+
+        <TextView
+            android:id="@+id/widget_nearest_site_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingLeft="2dp"
+            android:weightSum="100">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="75"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_locAndTypeTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="@string/widget_no_coffee"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/widget_coffee_sort_and_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="25"
+                android:orientation="vertical"
+                android:weightSum="10">
+
+                <TextView
+                    android:id="@+id/widget_number_of_other_sites"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="5"
+                    android:textAlignment="textEnd"
+                    android:textColor="@color/colorNiceYellow"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_nearest_site_distance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="5"
+                    android:textAlignment="textEnd"
+                    android:textColor="@color/chip_gray"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/widget_nearest_site_image"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="25"
+        android:paddingStart="1dp"
+        android:paddingEnd="1dp"
+        android:rotation="0"
+        android:scaleType="fitStart" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_weight="10"
+        android:orientation="vertical"
+        android:scrollbarTrackVertical="@null"
+        android:weightSum="8">
+
+        <ImageButton
+            android:id="@+id/widget_refresh_button"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="start"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="3"
+            android:background="@null"
+            android:paddingTop="2dp"
+            android:src="@android:drawable/ic_popup_sync" />
+
+        <TextView
+            android:id="@+id/widget_update_time"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:text="00:01"
+            android:textAlignment="center"
+            android:textColor="@color/activityBackround"
+            android:textSize="10sp" />
+
+        <ImageButton
+            android:id="@+id/widget_settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="3"
+            android:background="@null"
+            android:src="@drawable/ic_settings_white_24dp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

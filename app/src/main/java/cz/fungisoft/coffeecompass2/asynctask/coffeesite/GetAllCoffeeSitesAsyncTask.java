@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -28,7 +28,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * Async Task to run REST api request to obtain All CoffeeSites. Used for "OFF-LINE" mode
  * of operation.
  */
-public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetAllCoffeeSitesAsyncTask {
 
     private static final String TAG = "GetAllSitesAsyncTask";
 
@@ -46,25 +46,26 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
         this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.i(TAG, "start");
         operationError = "";
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        clientBuilder.connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(360, TimeUnit.SECONDS)
-                .build();
+                .readTimeout(180, TimeUnit.SECONDS); // 5 minutes
+
+//        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
                 .setDateFormat("dd. MM. yyyy HH:mm")
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
+                .client(clientBuilder.build())
                 .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
@@ -76,7 +77,7 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<List<CoffeeSite>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 if (response.isSuccessful()) {
@@ -123,7 +124,6 @@ public class GetAllCoffeeSitesAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
 
 }

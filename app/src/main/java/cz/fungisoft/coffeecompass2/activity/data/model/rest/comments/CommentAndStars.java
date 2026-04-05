@@ -48,7 +48,9 @@ public class CommentAndStars {
         public Stars() {}
 
         public Stars(int numOfStars) {
-            this.numOfStars = numOfStars;
+            if (numOfStars > 0 && numOfStars <= 5) {
+                this.numOfStars = numOfStars;
+            }
         }
 
         public int getNumOfStars() {

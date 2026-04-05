@@ -4,6 +4,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import retrofit2.Call;
@@ -13,6 +14,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Retrofit interface for REST requests related to user's Comments and Rating(Stars)
@@ -22,9 +24,7 @@ import retrofit2.http.Path;
 public interface CommentsAndStarsRESTInterface {
 
     String SAVE_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_SECURED_URL;
-
     String GET_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_PUBLIC_URL;
-
     String DELETE_COMMENT_URL = BuildConfig.STARS_AND_COMMENTS_API_SECURED_URL;
 
     /**
@@ -36,6 +36,15 @@ public interface CommentsAndStarsRESTInterface {
     Call<List<Comment>> getAllComments();
 
     /**
+     * REST call for obtaining all Comments paginated from server. Used when activating OFFLINE mode.
+     * https://coffeecompass.cz/rest/starsAndComments/comments/allPaginated?orderBy=created&direction=desc
+     *
+     * @return
+     */
+    @GET("comments/allPaginated")
+    Call<CommentsPageEnvelope> getAllCommentsPaginated(@Query("page") int page, @Query("size") int size);
+
+    /**
      * Calls saving of Comment and Stars for CoffeeSiteID=siteID. Returns list of all
      * Comments for this CoffeeSite.
      * Requires Authorization header.
@@ -45,7 +54,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @POST("saveStarsAndComment/{siteID}")
-    Call<List<Comment>> saveCommentAndStars(@Path("siteID") int siteID, @Body CommentAndStars commentAndStarsToSave);
+    Call<List<Comment>> saveCommentAndStars(@Path("siteID") String siteID, @Body CommentAndStars commentAndStarsToSave);
 
     /**
      * Calls REST updating of Comment and Stars for CoffeeSiteID=siteID. Returns updated Comment.
@@ -58,12 +67,21 @@ public interface CommentsAndStarsRESTInterface {
     Call<Comment> updateCommentAndStars(@Body Comment commentAndStarsToUpdate);
 
     /**
+     * Calls REST updating of Stars for CoffeeSiteID=siteID and user ID.
+     * Requires Authorization header.
+     *
+     * @return entered stars rating for the coffee site and user
+     */
+    @PUT("updateStarsForCoffeeSiteAndUser/coffeeSite/{coffeeSiteId}/user/{userId}/stars/{numOfStars}")
+    Call<Integer> updateStars(@Path("coffeeSiteId") String siteID, @Path("userId") String userId,  @Path("numOfStars") int numOfStars);
+
+    /**
      * REST call for obtaining number of Comments for the CoffeeSite with id=siteID
      * @param siteID
      * @return
      */
     @GET("comments/number/{siteID}")
-    Call<Integer> getNumberOfComments(@Path("siteID") int siteID);
+    Call<Integer> getNumberOfComments(@Path("siteID") String siteID);
 
     /**
      * REST call for obtaining Comments for the CoffeeSite with id=siteID
@@ -72,15 +90,15 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @GET("comments/{siteID}")
-    Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") long siteID);
+    Call<List<Comment>> getCommentsForCoffeeSite(@Path("siteID") String siteID);
 
     /**
-     * Deletes comment of commentID. Return commentID back or 0? if the delete request failed
+     * Deletes comment of commentID. Return commentID back or 0? if the deleteUser request failed
      * Requires Authorization header.
      *
      * @param commentID
      * @return
      */
     @DELETE("deleteComment/{commentID}")
-    Call<Integer> deleteComment(@Path("commentID") int commentID);
+    Call<Integer> deleteComment(@Path("commentID") String commentID);
 }

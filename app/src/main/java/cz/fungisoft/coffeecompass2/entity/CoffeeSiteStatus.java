@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 
 import com.google.gson.annotations.Expose;
@@ -17,14 +16,14 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
         super();
     }
 
-    public CoffeeSiteStatus(int id, String entityValue) {
+    public CoffeeSiteStatus(String id, String entityValue) {
         super(id);
         this.status = entityValue;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected CoffeeSiteStatus(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         status = in.readString();
     }
 
@@ -65,7 +64,7 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(status);
     }
 }

@@ -19,7 +19,7 @@ public class Result<T> {
             return "Success[data=" + success.getData().toString() + "]";
         } else if (this instanceof Result.Error) {
             Result.Error error = (Result.Error) this;
-            return "Error[exception=" + error.getException().toString() + "]";
+            return "Error[exception=" + error.detailToDisplay + "]";
         }
         return "";
     }
@@ -27,7 +27,7 @@ public class Result<T> {
     // Success sub-class
     public final static class Success<T> extends Result {
 
-        private T data;
+        private final T data;
 
         public Success(T data) {
             this.data = data;
@@ -44,24 +44,23 @@ public class Result<T> {
         private Exception exception;
         private RestError error;
 
-        private String detailToDisplay;
+        private final String detailToDisplay;
 
         public Error(Exception error) {
-
             this.exception = error;
             this.detailToDisplay = error.getMessage();
         }
-        public Error(RestError error) {
 
+        public Error(RestError error) {
             this.error = error;
             this.detailToDisplay = error.getDetail();
         }
-        public Error(String error) {
 
+        public Error(String error) {
             this.detailToDisplay = error;
         }
-        public Exception getException() {
 
+        public Exception getException() {
             return this.exception;
         }
 

@@ -1,17 +1,17 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.BuildConfig;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
@@ -26,6 +26,10 @@ import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,17 +42,15 @@ import static cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepo
 /**
  * AsyncTask to load/create all CoffeeSiteEntity instancies from server.
  */
-public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void> {
+public class ReadCoffeeSiteEntitiesAsyncTask {
 
-    static final String REQ_ENTITIES_TAG = "GetCoffeeSiteEntities";
+    static final String REQ_ENTITIES_TAG = "ReadCoffeeSiteEntities";
 
-    private CoffeeSiteEntityRepositories entitiesRepository;
+    private final CoffeeSiteEntityRepositories entitiesRepository;
 
     private String operationError = "";
 
     private final CoffeeSiteEntitiesLoadRESTResultListener callingListenerService;
-
-    private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
 
     private Result.Error error;
 
@@ -70,24 +72,23 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
                                            CoffeeSiteEntityRepositories entitiesRepository) {
         this.entitiesRepository = entitiesRepository;
         this.callingListenerService = callingListenerService;
-        this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
     /** Starts Retrofit requestedOperation to load all instancies of
      * all CoffeeSiteEntity class and save them to CoffeeSiteEntitiesRepository
      */
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_ENTITIES_TAG, "GetAllCoffeeSiteEntityValuesAsyncTask REST request initiated");
 
         Gson gson = new GsonBuilder().setLenient().create();
 
-        //Add the interceptor to the client builder.
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .baseUrl(CoffeeSiteEntitiesRESTInterface.GET_ENTITY_BASE)
                 .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+                .addConverterFactory(GsonConverterFactory.create(gson));
+
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+        Retrofit retrofit = retrofitBuilder.client(clientBuilder.build()).build();
 
         CoffeeSiteEntitiesRESTInterface api = retrofit.create(CoffeeSiteEntitiesRESTInterface.class);
 
@@ -96,7 +97,6 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
             readAndSaveEntitiesFromServer(entityClass, api);
         }
 
-        return null;
     }
 
     /**
@@ -108,7 +108,7 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
      * @param api
      * @param <T>
      */
-    private <T extends List<? extends CoffeeSiteEntity>> void readAndSaveEntitiesFromServer(Class<? extends CoffeeSiteEntity> entityClass,
+    private synchronized <T extends List<? extends CoffeeSiteEntity>> void readAndSaveEntitiesFromServer(Class<? extends CoffeeSiteEntity> entityClass,
                                                                                             CoffeeSiteEntitiesRESTInterface api) {
         operationError = "";
 
@@ -158,15 +158,17 @@ public class ReadCoffeeSiteEntitiesAsyncTask extends AsyncTask<Void, Void, Void>
         if (call != null) {
             call.enqueue(new Callback<T>() {
                 @Override
-                public void onResponse(Call<T> call, Response<T> response) {
+                public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
                     incrementEntitiesCallCounter();
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_ENTITIES_TAG, "onResponse() success");
+                            // Saves data to repository
                             entitiesRepository.setEntities(response.body());
 
                             if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                                entitiesRepository.setDataReadedFromServer(true);
+                                Log.i(REQ_ENTITIES_TAG, "onResponse() success ALL.");
+                                //CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
                                 Result.Success<Boolean> result = new Result.Success<>(true);
                                 if (callingListenerService != null) {
                                     callingListenerService.onCoffeeSiteEntitiesLoaded(result);

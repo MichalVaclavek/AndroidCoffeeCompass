@@ -9,7 +9,6 @@ import androidx.room.Ignore;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
@@ -29,16 +28,21 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     @SerializedName("common")
     private String common;
 
-    public AverageStarsWithNumOfRatings() {}
+    public AverageStarsWithNumOfRatings() {
+        super();
+    }
 
-    public AverageStarsWithNumOfRatings(float avgStars, int numOfHodnoceni, String common) {
+    @Ignore // for Room processing
+    public AverageStarsWithNumOfRatings(String id, float avgStars, int numOfHodnoceni, String common) {
+        super(id);
         this.avgStars = avgStars;
         this.numOfHodnoceni = numOfHodnoceni;
         this.common = common;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
+        this.id = in.readString();
         avgStars = in.readFloat();
         numOfHodnoceni = in.readInt();
         common = in.readString();
@@ -47,7 +51,6 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
     public static final Creator<AverageStarsWithNumOfRatings> CREATOR = new Creator<AverageStarsWithNumOfRatings>() {
 
         @NotNull
-        @Contract("_ -> new")
         @Override
         public AverageStarsWithNumOfRatings createFromParcel(Parcel in) {
             return new AverageStarsWithNumOfRatings(in);
@@ -88,6 +91,10 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
         return Utils.round(avgStars, 1) + " (" + numOfHodnoceni + ")";
     }
 
+    public String toStringShort() {
+        return  " (" + Utils.round(avgStars, 1) + ")";
+    }
+
 
     @Override
     public int describeContents() {
@@ -96,6 +103,7 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
 
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeFloat(avgStars);
         dest.writeInt(numOfHodnoceni);
         dest.writeString(common);

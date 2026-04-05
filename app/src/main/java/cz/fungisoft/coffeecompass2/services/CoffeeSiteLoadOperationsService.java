@@ -1,5 +1,9 @@
 package cz.fungisoft.coffeecompass2.services;
 
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_IN_TOWN;
+
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -8,29 +12,37 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetAllCoffeeSitesAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCfSitesFromLoggedUserPaginatedAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSiteAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserAsyncTask;
-import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesFromCurrentUserPaginatedAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInTownAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetLatestCoffeeSitesAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesFromCurrentUserAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteRepository;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
-
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
-import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
+import cz.fungisoft.coffeecompass2.utils.Utils;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
- * Service to perform CoffeeSite load operations i.e. loading of one CoffeeSite,
- * loading of all CoffeeSites created by user and so on.
- * It has to listen some interface, especialy those called by AsyncTasks when REST
- * calls are performed to load CoffeeSites
+ * Service to perform CoffeeSite load operations i.e.: downloading of one CoffeeSite,
+ * downloading of all CoffeeSites created by user and so on.<br>
+ * <p>
+ * It has to listen some interface, especially those called by AsyncTasks when REST
+ * calls are performed to load CoffeeSites.
  */
 public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountService
                                              implements CoffeeSiteRESTResultListener,
@@ -39,21 +51,40 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     static final String TAG = "CoffeeSiteLoadService";
 
-    // Listeners, usualy Activities, which called respective service method
-    // and wants to be informed about resutl later, as all the operations are Async
-    private List<CoffeeSiteLoadServiceOperationsListener> loadOperationsListeners = new ArrayList<>();
+
+    /**
+     * To detect, that search request to server is running
+     */
+    private boolean isSearching = false;
+
+    /**
+     * To keep town name when searching for CoffeeSites in town
+     */
+    private String townName;
+
+
+    /**
+     * CoffeeSites repository to be used in case of OFFLINE mode
+     */
+    private static CoffeeSiteRepository coffeeSiteRepository;
+
+    // Listeners, usually Activities, which called respective service method
+    // and wants to be informed about result later, as all the operations are Async
+    private final List<CoffeeSiteLoadServiceOperationsListener> loadOperationsListeners = new ArrayList<>();
 
     public void addLoadOperationsListener(CoffeeSiteLoadServiceOperationsListener listener) {
         if (!loadOperationsListeners.contains(listener)) {
             loadOperationsListeners.add(listener);
         }
     }
+
     public void removeLoadOperationsListener(CoffeeSiteLoadServiceOperationsListener listener) {
         loadOperationsListeners.remove(listener);
     }
 
     // This is the object that receives interactions from clients.
     private final IBinder mBinder = new CoffeeSiteLoadOperationsService.LocalBinder();
+
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -76,23 +107,23 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     @Override
     public void onCreate() {
         super.onCreate();
+        coffeeSiteRepository = new CoffeeSiteRepository(CoffeeSiteDatabase.getDatabase(getApplicationContext()));
         Log.d(TAG, "Service started.");
     }
 
 
     @Override
     public void onNumberOfCoffeeSitesReturned(CoffeeSiteRESTOper oper, Result<Integer> result) {
-        int coffeeSitesNumber = 0;
         if (result instanceof Result.Success) {
-            coffeeSitesNumber = ((Result.Success<Integer>) result).getData();
+            int coffeeSitesNumber = ((Result.Success<Integer>) result).getData();
             if (oper == CoffeeSiteRESTOper.COFFEE_SITES_NUMBER_FROM_CURRENT_USER) {
                 informClientAboutNumberOfCoffeeSitesFromLoggedInUser(oper, coffeeSitesNumber, "");
             }
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
                 informClientAboutNumberOfCoffeeSitesFromLoggedInUser(oper, 0, error.getDetail());
-                Log.e(TAG, "Error when obtaining number of coffee sites from user." + error.getDetail());
+                Log.e(TAG, "Error when obtaining number of coffee sites from user. " + error.getDetail());
             }
         }
     }
@@ -100,7 +131,7 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
 
     @Override
     public void onCoffeeSiteReturned(CoffeeSiteRESTOper oper, Result<CoffeeSite> result) {
-        CoffeeSite coffeeSite = null;
+        CoffeeSite coffeeSite;
         if (result instanceof Result.Success) {
             coffeeSite = ((Result.Success<CoffeeSite>) result).getData();
             switch (oper) {
@@ -109,10 +140,10 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
                 informClientAboutLoadedCoffeeSite(null, error.getDetail());
-                Log.e(TAG, "Error when obtaining coffee site." + error.getDetail());
+                Log.e(TAG, "Error when obtaining coffee site. " + error.getDetail());
             }
         }
     }
@@ -128,6 +159,8 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                     case COFFEE_SITES_FROM_USER_LOAD:
                     case COFFEE_SITE_LOAD_ALL:
                     case COFFEE_SITES_FROM_CURRENT_USER_LOAD:
+                    case COFFEE_SITES_LOAD_LATEST:
+                    case COFFEE_SITES_IN_TOWN:
                         informClientAboutLoadedCoffeeSitesList(oper, coffeeSites, "");
                         break;
                 }
@@ -144,10 +177,14 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
             }
 
         } else {
-            RestError error = ((Result.Error) result).getRestError();
+            Result.Error error = (Result.Error) result;
             if (error != null) {
-                informClientAboutLoadedCoffeeSitesList(oper, null, error.getDetail());
                 Log.e(TAG, "Error when obtaining coffee sites." + error.getDetail());
+                if (oper == COFFEE_SITES_IN_TOWN) {
+                    informClientAboutLoadedCoffeeSitesList(oper, null, getString(R.string.no_site_in_town, this.townName));
+                } else {
+                    informClientAboutLoadedCoffeeSitesList(oper, null, error.getDetail());
+                }
             }
         }
     }
@@ -155,57 +192,66 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
     public void findAllCoffeeSitesByUserId(long userId) {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_USER_LOAD;
         if (currentUser != null) {
-            new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
+            new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, userAccountService, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
     public void findNumberOfCoffeeSitesFromCurrentUser() {
-
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_NUMBER_FROM_CURRENT_USER;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
+            new GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, userAccountService, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
+    }
+
+    public void getCoffeeSitesActivatedLastDays(int daysBack) {
+        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_LOAD_LATEST;
+        new GetLatestCoffeeSitesAsyncTask(requestedRESTOperation, this, daysBack).execute();
+    }
+
+    public void getCoffeeSitesInTown(String townName) {
+        this.townName = townName;
+        startSearchingSitesInTown(townName);
     }
 
     public void findAllCoffeeSitesFromCurrentUser() {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_LOAD;
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, currentUser, this).execute();
+            new GetCoffeeSitesFromCurrentUserAsyncTask(requestedRESTOperation, userAccountService, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
     public void findCoffeeSitesPageFromCurrentUser(int pageNumber, int pageSize) {
         if (pageNumber == 1) {
-            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
+            requestedRESTOperation = COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD;
         } else if (pageNumber > 1) {
-            requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
+            requestedRESTOperation = COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD;
         } else {
             return;
         }
         currentUser = getCurrentUser();
         if (currentUser != null) {
-            new GetCoffeeSitesFromCurrentUserPaginatedAsyncTask(requestedRESTOperation, pageNumber, pageSize, currentUser, this).execute();
+            new GetCfSitesFromLoggedUserPaginatedAsyncTask(requestedRESTOperation, pageNumber, pageSize, userAccountService, this).execute();
         } else {
-            Log.i(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
+            Log.w(TAG, "Current user is null. Cannot execute GetNumberOfCoffeeSitesFromCurrentUserAsyncTask.execute()");
         }
     }
 
-    public void getAllCoffeeSites() {
-        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD_ALL;
-        new GetAllCoffeeSitesAsyncTask(requestedRESTOperation, this).execute();
+    public void findCoffeeSiteById(String coffeeSiteId) {
+        requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD;
+        new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, coffeeSiteId, "").execute();
     }
 
-    public void findCoffeeSiteById(long coffeeSiteId) {
+    public void findCoffeeSiteByURL(String coffeeSiteURL) {
         requestedRESTOperation = CoffeeSiteRESTOper.COFFEE_SITE_LOAD;
-        new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, coffeeSiteId).execute();
+        new GetCoffeeSiteAsyncTask(requestedRESTOperation,this, "", coffeeSiteURL).execute();
     }
 
 
@@ -234,6 +280,10 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
                     break;
                 case COFFEE_SITE_LOAD_ALL: listener.onAllCoffeeSitesLoaded(coffeeSites, error);
                     break;
+                case COFFEE_SITES_LOAD_LATEST: listener.onLatestCoffeeSitesLoaded(coffeeSites, error);
+                    break;
+                case COFFEE_SITES_IN_TOWN: listener.onCoffeeSitesInTownLoaded(coffeeSites, error);
+                    break;
                 default: break;
             }
         }
@@ -251,7 +301,6 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         }
     }
 
-
     /**
      * Expects that operationResult and operationError are set by
      * methods calling this method
@@ -266,4 +315,120 @@ public class CoffeeSiteLoadOperationsService extends CoffeeSiteWithUserAccountSe
         }
     }
 
+    /**
+     * Starts request for CoffeeSites in town from server (REST API) or starts Async
+     *
+     * @param town
+     */
+    public void startSearchingSitesInTown(String town) {
+        if (!Utils.isOfflineModeOn(getApplicationContext())) {
+            startSearchSitesInTownFromServer(town);
+        }
+        else { // updates LiveData returned from DB
+            startSearchCoffeeSitesInTownFromDB(town);
+        }
+    }
+
+    /**
+     * Calls REST async. task.
+     *
+     * @param town
+     */
+    private void startSearchSitesInTownFromServer(String town) {
+        isSearching = true;
+        Log.i(TAG, "Start Async task for searching on server.");
+        new GetCoffeeSitesInTownAsyncTask(this, COFFEE_SITES_IN_TOWN, town).execute();
+    }
+
+    /**
+     * Result of the DB request
+     */
+    private static List<CoffeeSite> coffeeSitesInTownFromDB;
+
+    /**
+     * Disposable of the Single DB request
+     */
+    private static Disposable d;
+
+    private static String readDBError = "";
+
+    /**
+     * Starts GetSingleCoffeeSitesInTownAsyncTask to find CoffeeSites in town from DB.
+     *
+     * @param townName town to be searched for CoffeeSites
+     */
+    private void startSearchCoffeeSitesInTownFromDB(String townName) {
+       /*
+        Needed to process results of DB search returned as Single in the Main thread
+        DB request must run in separate thread, therefore AsyncTask is created,
+        but Picasso library works in Main thread, therefore update of RecyclerView cannot
+        be called from AsyncTask from onSuccess() of the DisposableSingleObserver?
+        */
+        final CountDownLatch latch = new CountDownLatch(1);
+        isSearching = true;
+        Log.i(TAG, "Start Async task for searching CoffeeSites in town in DB.");
+        new GetSingleCoffeeSitesInTownAsyncTask(latch, townName)
+                .execute();
+        try {
+            latch.await(); // wait to finish Async task assignment to coffeeSitesFromDB
+            isSearching = false;
+            if (coffeeSitesInTownFromDB != null) {
+                // Process result
+                informClientAboutLoadedCoffeeSitesList(COFFEE_SITES_IN_TOWN, coffeeSitesInTownFromDB, readDBError);
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Error waiting for CountDownLatch of CoffeeSites in town DB search.");
+        }
+    }
+
+    /**
+     * Async Task to start and get Single request result from DB.
+     */
+    private static class GetSingleCoffeeSitesInTownAsyncTask {
+
+        private final String townName;
+
+        private final CountDownLatch latch;
+
+        public GetSingleCoffeeSitesInTownAsyncTask(CountDownLatch latch, String townName) {
+            this.townName = townName;
+            this.latch = latch;
+        }
+
+        public void execute() {
+            d = coffeeSiteRepository.getCoffeeSitesInTownSingle(townName)
+                    .delay(10, TimeUnit.MILLISECONDS, Schedulers.io())
+                    .subscribeWith(new DisposableSingleObserver<List<CoffeeSite>>() {
+
+                        @Override
+                        public void onStart() {
+                            Log.i(TAG, "Start DB Single request for sites in town: " + townName);
+                        }
+
+                        @Override
+                        public void onSuccess(@NonNull List<CoffeeSite> coffeeSites) {
+                            Log.i(TAG, "DB Single onSuccess()");
+                            coffeeSitesInTownFromDB = coffeeSites;
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            Log.e(TAG, "DB Single request failed. Error: " + error.getMessage());
+                            coffeeSitesInTownFromDB = null;
+                            readDBError = "DB Single request failed. Error: " + error.getMessage();
+                            latch.countDown();
+                        }
+                    });
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        if (d != null) {
+            d.dispose();
+        }
+        super.onDestroy();
+    }
 }

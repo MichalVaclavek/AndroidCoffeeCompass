@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.services.interfaces;
 
 
+import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
 
 /**
@@ -19,4 +20,8 @@ public interface UserLoginServiceListener {
     void onUserLoggedInSuccess(LoginOrRegisterResult loginResult);
 
     void onUserLoggedInFailure(LoginOrRegisterResult loginResult);
+
+    default void onRefreshTokenSuccess(LoggedInUser user) {}
+
+    default void onRefreshTokenFailure(LoggedInUser user) {}
 }

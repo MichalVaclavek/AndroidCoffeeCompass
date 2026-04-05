@@ -1,18 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coffeesiteimage"
+    android:id="@+id/coffeesite_detail_image_fragment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".ui.fragments.CoffeeSiteImageFragment">
+    android:layout_gravity="center"
+    android:background="@android:color/transparent"
+    tools:context=".activity.ui.fragments.CoffeeSiteImageFragment">
 
-    <ImageView
-        android:id="@+id/coffeesitePictureImageView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:maxHeight="600dp"
-        android:rotation="0"
-        android:scaleType="centerInside" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <!-- Image pager with arrow overlays -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/coffeesite_detail_image_max_height">
+
+            <cz.fungisoft.coffeecompass2.utils.NestedScrollableHost
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/coffeesite_image_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:overScrollMode="never" />
+
+            </cz.fungisoft.coffeecompass2.utils.NestedScrollableHost>
+
+            <!-- Left arrow -->
+            <TextView
+                android:id="@+id/image_pager_arrow_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/image_pager_arrow_background"
+                android:paddingStart="10dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="\u276E"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+            <!-- Right arrow -->
+            <TextView
+                android:id="@+id/image_pager_arrow_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/image_pager_arrow_background"
+                android:paddingStart="12dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="\u276F"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- Dot indicator -->
+        <LinearLayout
+            android:id="@+id/coffeesite_image_dot_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/site_detail_no_photo_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="12dp"
+            android:text="@string/coffee_site_no_photo_available"
+            android:textStyle="italic" />
+    </LinearLayout>
 
 </FrameLayout>
+
+

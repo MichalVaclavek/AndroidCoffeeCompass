@@ -31,7 +31,7 @@ public class UserAccountServiceConnector implements ServiceConnection {
         this.callingCoffeeSiteImageService = callingCoffeeSiteImageService;
     }
 
-    private List<UserAccountServiceConnectionListener> connectionListenerList = new ArrayList<>();
+    private final List<UserAccountServiceConnectionListener> connectionListenerList = new ArrayList<>();
 
     public void addUserAccountServiceConnectionListener( UserAccountServiceConnectionListener listener) {
         this.connectionListenerList.add(listener);

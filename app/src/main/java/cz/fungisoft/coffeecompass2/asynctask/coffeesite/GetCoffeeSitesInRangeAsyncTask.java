@@ -1,142 +1,124 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
 import android.util.Log;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesInRangeFromServerResultListener;
-import okhttp3.OkHttpClient;
+import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesFoundFromServerResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
- * Async Task to run REST api request to obtain all coffeeSites
- * within current distance range.
+ * REST caller to obtain all CoffeeSites within current distance range.
+ * <p>
+ * Replaces the former {@code AsyncTask}-based implementation.
+ * Since Retrofit's {@link Call#enqueue(Callback)} is already asynchronous
+ * (network I/O on a background thread, callbacks on the main thread),
+ * there is no need for an additional {@code AsyncTask} wrapper.
+ * <p>
+ * The public API ({@link #execute()}) is kept intentionally so that callers
+ * require minimal changes.
  */
-public class GetCoffeeSitesInRangeAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetCoffeeSitesInRangeAsyncTask {
 
     private static final String TAG = "GetSitesInRangeAsyncT";
+    private static final String ACTIVE_RECORD_STATUS = "ACTIVE";
 
     /**
-     * A Service, which invokes this async. task
+     * A Service or component which invokes this REST caller and receives results.
      */
-    private CoffeeSitesInRangeFromServerResultListener callingService;
+    private final CoffeeSitesFoundFromServerResultListener callingService;
 
-    private String error;
+    private final double latFrom;
+    private final double longFrom;
+    private final int range;
 
-    private double latFrom;
-    private double longFrom;
-    private int range;
-    private String coffeeSort;
-
-
-    public GetCoffeeSitesInRangeAsyncTask(CoffeeSitesInRangeFromServerResultListener parentService,
+    public GetCoffeeSitesInRangeAsyncTask(CoffeeSitesFoundFromServerResultListener parentService,
                                           double latFrom, double longFrom, int range, String coffeeSort) {
         this.callingService = parentService;
-        initSearchParameters(latFrom, longFrom, range, coffeeSort);
-    }
-
-    /**
-     * Method to perform initialization of search parameters before REST request is sent to
-     * server.
-     */
-    private void initSearchParameters(double latFrom, double longFrom, int range, String coffeeSort) {
         this.latFrom = latFrom;
         this.longFrom = longFrom;
         this.range = range;
-        this.coffeeSort = coffeeSort.isEmpty() ? "?" : coffeeSort;
     }
 
-
-    @Override
-    protected Void doInBackground(Void... voids) {
-
+    /**
+     * Starts the asynchronous REST call. Results are delivered via the
+     * {@link CoffeeSitesFoundFromServerResultListener} callback on the main thread.
+     * <p>
+     * This method can be called from any thread (including the main thread)
+     * because {@link Call#enqueue(Callback)} handles threading internally.
+     */
+    public void execute() {
         Log.i(TAG, "start");
 
-        //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
+        CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofit(CoffeeSiteRESTInterface.COFFEESITE_API_PUBLIC_SEARCH_URL)
+                .create(CoffeeSiteRESTInterface.class);
 
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("dd. MM. yyyy HH:mm")
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                                        .client(client)
-                                        .baseUrl(CoffeeSiteRESTInterface.COFFEESITE_API_PUBLIC_SEARCH_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
-
-        CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
-
-        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(this.latFrom, this.longFrom, this.range, this.coffeeSort);
+        Call<List<CoffeeSite>> call = api.getCoffeeSitesInRange(
+                this.latFrom,
+                this.longFrom,
+                this.range,
+                ACTIVE_RECORD_STATUS);
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<List<CoffeeSite>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
                 if (response.isSuccessful()) {
+                    Log.i(TAG, "onSuccess()");
                     if (response.body() != null) {
-                        Log.i(TAG, "onSuccess()");
                         List<CoffeeSite> coffeeSites = response.body();
-                        // Convert to CoffeeSiteMovable
                         for (CoffeeSite cs : coffeeSites) {
                             coffeeSiteMovables.add(new CoffeeSiteMovable(cs));
                         }
                         if (callingService != null) {
                             callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
-                         }
+                        }
                     } else {
-                        error = "Returned empty response for loading CoffeeSites in range REST request.";
+                        String error = "Returned empty response for loading CoffeeSites in range REST request.";
                         Log.i(TAG, error);
-                        callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
+                        if (callingService != null) {
+                            callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
+                        }
                     }
                 } else {
                     try {
-                        if (response.code() == 404) { // No CoffeeSite found
-                            if (callingService != null) {
-                                callingService.onSitesInRangeReturnedFromServer(coffeeSiteMovables);
-                            }
-                        } else {
-                            error = response.errorBody().string();
+                        Log.i(TAG, "No CoffeeSite found.");
+                        if (callingService != null) {
+                            String error = response.errorBody() != null
+                                    ? response.errorBody().string()
+                                    : "Unknown error";
                             callingService.onSitesInRangeReturnedFromServerError(error);
                         }
                     } catch (IOException e) {
-                        error =  e.getMessage();
+                        String error = e.getMessage();
                         Log.e(TAG, error);
-                        callingService.onSitesInRangeReturnedFromServerError(error);
+                        if (callingService != null) {
+                            callingService.onSitesInRangeReturnedFromServerError(error);
+                        }
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<List<CoffeeSite>> call, Throwable t) {
-                error = "Error loading CoffeeSites  in range REST request." + t.getMessage();
+                String error = "Error loading CoffeeSites in range REST request." + t.getMessage();
                 Log.e(TAG, error);
-                callingService.onSitesInRangeReturnedFromServerError(error);
+                if (callingService != null) {
+                    callingService.onSitesInRangeReturnedFromServerError(error);
+                }
             }
         });
-        return null;
     }
 
 }

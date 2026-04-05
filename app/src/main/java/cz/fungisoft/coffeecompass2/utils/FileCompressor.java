@@ -2,22 +2,27 @@ package cz.fungisoft.coffeecompass2.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import io.reactivex.Flowable;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import io.reactivex.Flowable;
+
 /**
- * Copy from https://androidwave.com/capture-image-from-camera-gallery/
+ * Copy from https://androidwave.com/capture-image-from-camera-gallery/ <br>
+ *
+ * Used for compress CoffeeSites images created by user's mobile phone
  */
 public class FileCompressor {
 
-    //max width and height values of the compressed image is taken as 960x1280
-    private int maxWidth = 960; // orig. 612, 960
-    private int maxHeight = 1280; // orig. 816, 1280
+    //max width and height values of the compressed image is taken as HD 1920x1080
+    private int maxWidth = 1080;
+    private int maxHeight = 1920;
     private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
-    private int quality = 85;
+    private int quality = 90;
     private String destinationDirectoryPath;
+
 
     public FileCompressor(Context context) {
         destinationDirectoryPath = context.getCacheDir().getPath() + File.separator + "images";

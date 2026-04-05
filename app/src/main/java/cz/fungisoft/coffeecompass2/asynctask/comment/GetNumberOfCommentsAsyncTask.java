@@ -1,15 +1,14 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,27 +18,27 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 /**
  * Calls REST for obtaining number of comments already created for CoffeeSite.
  */
-public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetNumberOfCommentsAsyncTask {
 
     static final String REQ_TAG = "GetNumberOfCommentsAsyn";
 
-    private int coffeeSiteId;
+    private final String coffeeSiteId;
 
     private final WeakReference<CoffeeSiteDetailActivity> coffeeSiteDetailActivity;
 
 
-    public GetNumberOfCommentsAsyncTask(int coffeeSiteId, CoffeeSiteDetailActivity coffeeSiteDetailActivity) {
+    public GetNumberOfCommentsAsyncTask(String coffeeSiteId, CoffeeSiteDetailActivity coffeeSiteDetailActivity) {
         this.coffeeSiteId = coffeeSiteId;
         this.coffeeSiteDetailActivity = new WeakReference<>(coffeeSiteDetailActivity);
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
 
         Log.d(REQ_TAG, "GetNumberOfCommentsAsyncTask REST request initiated");
 
         //Add the interceptor to the client builder.
         Retrofit retrofit = new Retrofit.Builder()
+                .client(Utils.getOkHttpClientBuilder().build())
                 .baseUrl(CommentsAndStarsRESTInterface.GET_COMMENT_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
@@ -89,6 +88,6 @@ public class GetNumberOfCommentsAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             }
         });
-        return null;
     }
+
 }

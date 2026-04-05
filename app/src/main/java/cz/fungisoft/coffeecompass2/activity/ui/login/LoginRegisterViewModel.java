@@ -1,17 +1,18 @@
 package cz.fungisoft.coffeecompass2.activity.ui.login;
 
+import android.util.Patterns;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import android.util.Patterns;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ui.register.RegisterFormState;
 
 public class LoginRegisterViewModel extends ViewModel {
 
-    private MutableLiveData<LoginFormValidationState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
+    private final MutableLiveData<LoginFormValidationState> loginFormState = new MutableLiveData<>();
+    private final MutableLiveData<RegisterFormState> registerFormState = new MutableLiveData<>();
 
     public LiveData<LoginFormValidationState> getLoginFormState() {
         return loginFormState;

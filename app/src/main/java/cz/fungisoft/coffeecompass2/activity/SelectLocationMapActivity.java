@@ -1,13 +1,13 @@
 package cz.fungisoft.coffeecompass2.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,14 +39,12 @@ public class SelectLocationMapActivity extends AppCompatActivity implements OnMa
 
     private MarkerOptions movableLocationMarker;
 
-    private Toolbar mainToolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_to_select_location);
 
-        mainToolbar = (Toolbar) findViewById(R.id.toolbar_select_map);
+        Toolbar mainToolbar = (Toolbar) findViewById(R.id.toolbar_select_map);
         setSupportActionBar(mainToolbar);
 
         // When started from CreateCoffeeSiteActivity
@@ -116,5 +114,4 @@ public class SelectLocationMapActivity extends AppCompatActivity implements OnMa
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation, 16));
         }
     }
-
 }

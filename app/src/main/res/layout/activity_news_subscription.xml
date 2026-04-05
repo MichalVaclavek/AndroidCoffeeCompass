@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.ui.notification.NewsSubscriptionActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/subscribe_notification_appbar"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary2">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/subscribe_notification_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.AppBarOverlay"
+                app:layout_collapseMode="none" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/activityBackround"
+            android:fitsSystemWindows="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="15dp"
+                android:paddingRight="10dp">
+
+                <!--  Name Label -->
+                <TextView
+                    android:id="@+id/subscription_text_for_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="@string/subscription_for_news_description"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="Aktuální seznam notifikací:"
+                    android:textColor="@color/colorPrimaryDark" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/list_of_subscribed_towns_cardView"
+                    style="@style/Widget.MaterialComponents.CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    app:cardBackgroundColor="@color/light_blue_50"
+                    app:strokeColor="@color/colorPrimary2">
+
+                    <LinearLayout
+                        android:id="@+id/list_of_subscribed_towns_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="horizontal"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/subscribed_town_default_TextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/no_notifications_subscribed"
+                            android:textSize="18sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <RelativeLayout
+                    android:id="@+id/edit_cancel_buttons_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingTop="5dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/edit_towns_imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                        app:backgroundTint="@color/green_emptycard"
+                        app:icon="@drawable/ic_baseline_edit_32"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="?attr/actionMenuTextColor" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/cancel_all_subscriptions_imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:backgroundTint="@color/gray_transparent"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                        app:icon="@drawable/ic_baseline_delete_outline_36"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="@color/quantum_deeporange800" />
+                </RelativeLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/edit_towns_CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="20dp"
+                    app:strokeColor="@color/colorPrimary2"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp">
+
+                        <ImageView
+                            android:id="@+id/close_edit_towns_view_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="5dp"
+                            app:srcCompat="@drawable/quantum_ic_clear_grey600_24" />
+
+                        <CheckBox
+                            android:id="@+id/all_towns_checkBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:focusableInTouchMode="false"
+                            android:text="@string/all_towns" />
+
+                        <LinearLayout
+                            android:id="@+id/selected_towns_list_vertical_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="10dp"
+                            android:orientation="vertical"></LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/town_name_input_layout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="auto"
+                            android:hint="@string/prompt_subscribe_town_name"
+                            android:theme="@style/SiteInput.HintAppearance"
+                            app:endIconMode="clear_text"
+                            app:errorEnabled="true"
+                            app:errorIconTintMode="src_over">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/town_name_dropdown"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:cursorVisible="true"
+                                android:inputType="text"
+                                android:lines="1"
+                                android:singleLine="true"
+                                android:textSize="18sp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_subscribe_for_notifications"
+                            style="@style/Widget.AppCompat.Button.Colored"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="18dp"
+                            android:layout_marginBottom="24dp"
+                            android:background="@drawable/rounded_orange_button"
+                            android:focusableInTouchMode="true"
+                            android:padding="12dp"
+                            android:text="@string/action_subscribe_news" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Signup Button -->
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ProgressBar
+            android:id="@+id/progress_subscribe_for_news"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="false"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

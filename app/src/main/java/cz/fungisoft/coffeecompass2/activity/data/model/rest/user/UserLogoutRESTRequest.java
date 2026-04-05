@@ -1,15 +1,16 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -28,7 +29,7 @@ public class UserLogoutRESTRequest {
 
     // Activity or Service implementing interface for evaluation of the
     // user logout REST call attempt response
-    private UserAccountActionsEvaluator userAccountService;
+    private final UserAccountActionsProvider userAccountService;
 
     /**
      * User to be logged-out
@@ -60,14 +61,16 @@ public class UserLogoutRESTRequest {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 okhttp3.Request request = chain.request();
-                Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getToken().getTokenType() + " " + currentUser.getToken().getAccessToken()).build();
                 request = request.newBuilder().headers(headers).build();
                 return chain.proceed(request);
             }
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+        OkHttpClient client = Utils.getOkHttpClientBuilder()
+                                              .authenticator(new TokenAuthenticator(userAccountService))
+                                              .addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .client(client)
@@ -109,8 +112,13 @@ public class UserLogoutRESTRequest {
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e(REQ_TAG, "Error executing Logout user REST request." + t.getMessage());
+                Log.e(REQ_TAG, "Error executing Logout user REST request. " + t.getMessage());
                 userAccountService.evaluateLogoutResult(new Result.Error(new IOException("Error logout user.", t)));
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userAccountService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
+                }
             }
         });
     }

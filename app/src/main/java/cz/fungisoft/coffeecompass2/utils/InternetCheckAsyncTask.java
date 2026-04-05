@@ -14,7 +14,7 @@ import android.os.AsyncTask;
  */
 public class InternetCheckAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-    private Consumer mConsumer;
+    private final Consumer mConsumer;
 
     public interface Consumer {
         void accept(Boolean internet);

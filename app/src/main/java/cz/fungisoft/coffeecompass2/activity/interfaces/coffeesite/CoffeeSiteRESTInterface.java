@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite;
 
 import java.util.List;
+import java.util.Map;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSitePageEnvelope;
@@ -13,6 +14,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 /**
  * Retrofit calls interface for CoffeeSite operations
@@ -20,21 +22,19 @@ import retrofit2.http.Query;
 public interface CoffeeSiteRESTInterface {
 
     String COFFEESITE_API_PUBLIC_SEARCH_URL = BuildConfig.COFFEESITE_API_PUBLIC_SEARCH_URL;
-
     String GET_NUMBER_OF_STARS_URL = BuildConfig.STARS_API_PUBLIC_URL;
-
     String GET_COFFEE_SITE_URL = BuildConfig.COFFEESITE_API_PUBLIC_URL;
-
     String COFFEE_SITE_SECURED_URL = BuildConfig.COFFEESITE_API_SECURED_URL;
 
     /**
      * REST call for obtaining number of Stars, which were given by the User to the CoffeeSite.
      * URL example https://coffeecompass.cz/rest/site/stars/?siteID=2&userID=5
      * @param siteID
+     * @param userID
      * @return
      */
     @GET("number/")
-    Call<Integer> getNumberOfStars(@Query("siteID") int siteID, @Query("userID") long userID);
+    Call<Integer> getNumberOfStars(@Query("siteId") String siteID, @Query("userId") String userID);
 
     /**
      * REST call for obtaining one CoffeeSite by it's ID
@@ -43,15 +43,43 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("{siteId}")
-    Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") long siteId);
+    Call<CoffeeSite> getCoffeeSiteById(@Path("siteId") String siteId);
 
     /**
-     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange + "&sort=" + this.searchCoffeeSort;
+     * REST call for obtaining one CoffeeSite by it's URL returned from server
+     *
+     * URL example https://coffeecompass.cz/rest/site/50
      *
      * @return
      */
-    @GET("searchSites/")
-    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1, @Query("lon1") double lon1, @Query("range") int range, @Query("sort") String sort);
+    @GET
+    Call<CoffeeSite> getCoffeeSiteByURL(@Url String CoffeeSiteUrl);
+
+    /**
+     * sURL = sURLCore + "?lat1=" + latFrom + "&lon1=" + longFrom + "&range=" + this.searchRange
+     *
+     * @return
+     */
+    @GET("getSitesInRange/")
+    Call<List<CoffeeSite>> getCoffeeSitesInRange(@Query("lat1") double lat1,
+                                                 @Query("lon1") double lon1,
+                                                 @Query("range") int range,
+                                                 @Query("recordStatus") String recordStatus);
+
+    /**
+     * @return
+     */
+    @POST("getNumberOfSitesInGivenDistances/")
+    Call<Map<String, Integer>> getNumbersOfCoffeeSitesInRanges(@Query("lat1") double lat1, @Query("lon1") double lon1, @Body Map<String, List<Integer>> distances);
+
+    /**
+     * URL example https://coffeecompass.cz/rest/site/getSitesInTown/?townName=Tišnov
+     *
+     * @return
+     */
+    @GET("getSitesInTown/")
+    Call<List<CoffeeSite>> getCoffeeSitesInTown(@Query("townName") String townName);
+
 
     /**
      * REST call for obtaining all CoffeeSites created by userId
@@ -60,7 +88,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @GET("site/byUser/{userId}")
-    Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") long userId);
+    Call<List<CoffeeSite>> getAllCoffeeSitesByUser(@Path("userId") String userId);
 
     /**
      * REST call for obtaining all CoffeeSites created by current user
@@ -90,13 +118,24 @@ public interface CoffeeSiteRESTInterface {
     Call<List<CoffeeSite>> getAllCoffeeSites();
 
     /**
-     * REST call for obtaining all CoffeeSites
-     * https://coffeecompass.cz/rest/site/allSites/
+     * REST call for obtaining all CoffeeSites paginated
+     * https://coffeecompass.cz/rest/site/allSitesPaginated/
      *
      * @return
      */
     @GET("allSitesPaginated/")
     Call<CoffeeSitePageEnvelope> getAllCoffeeSitesPaginated(@Query("page") int page, @Query("size") int size);
+
+    /**
+     * REST call for obtaining CoffeeSites created within last X days
+     *
+     * https://coffeecompass.cz/rest/site/activeSitesInLastDays/7
+     *
+     * @return
+     */
+    @GET("activeSitesInLastDays/{numOfDays}")
+
+    Call<List<CoffeeSite>> getLatestCoffeeSites(@Path("numOfDays") int numOfDays);
 
     /**
      * REST call for obtaining number of CoffeeSites created by current User
@@ -132,7 +171,7 @@ public interface CoffeeSiteRESTInterface {
      * @return
      */
     @PUT("update/{siteId}")
-    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") int siteId, @Body CoffeeSite coffeeSite);
+    Call<CoffeeSite> updateCoffeeSite(@Path("siteId") String siteId, @Body CoffeeSite coffeeSite);
 
     /**
      * Calls update of CoffeeSite instance. Expects same siteId returned as positive response.
@@ -140,19 +179,28 @@ public interface CoffeeSiteRESTInterface {
      * @param siteId
      * @return
      */
-    @DELETE("delete/{siteId}")
-    Call<Integer> deleteCoffeeSite(@Path("siteId") int siteId);
+    @DELETE("deleteUser/{siteId}")
+    Call<Integer> deleteCoffeeSite(@Path("siteId") String siteId);
 
 
     /** STATUS change operations **/
 
     @PUT("{siteId}/activate")
-    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> activateCoffeeSite(@Path("siteId") String siteId);
 
     @PUT("{siteId}/deactivate")
-    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> deactivateCoffeeSite(@Path("siteId") String siteId);
 
     @PUT("{siteId}/cancel")
-    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") int siteId);
+    Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") String siteId);
 
+
+    /**
+     * Calls upload of CoffeeSites. Expects boolean as return value
+     *
+     * @param coffeeSitesToUpload - CoffeeSites to be uploaded to server
+     * @return list of CoffeeSites saved/updated returned by server (with actual IDs)
+     */
+    @POST("insertCoffeeSitesWithResult")
+    Call<List<CoffeeSite>> uploadCoffeeSites(@Body List<CoffeeSite> coffeeSitesToUpload);
 }

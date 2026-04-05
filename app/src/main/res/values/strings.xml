@@ -16,19 +16,24 @@
 
     <string name="action_settings">Nastavení</string>
     <string name="action_about">O aplikaci</string>
+    <string name="about_toolbar_title">O aplikaci</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_map">Mapa</string>
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 1.3.0</string>
-    <string name="about_datum">10. 10. 2020</string>
+    <string name="about_version">v. 2.3.0</string>
+    <string name="about_datum">04. 04. 2026</string>
+
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
-    <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, cukrárny, bistra, občerstvení, benzinky</b>, atp.</string>
-    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokací,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>.</string>
-    <string name="about_sentence4">"Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="coffeecompass.cz">coffeecompass.cz</a></b>, kde lze také evidovat další kávové lokace."</string>
-    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem coffeecompass.cz, kde jsou uložena data o lokacích.</string>
-    <string name="about_coffeecompass_link">"<a href="http://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
+    <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
+    <string name="about_sentence3">Dále aplikace umožňuje, přihlášeným uživatelům, <b>evidovat novou kávovou lokaci,</b> <b>ohodnotit kvalitu kávy</b> v dané lokaci a <b>přidat komentář</b>. Lokaci lze vytvořit i bez aktuálního připojení k internetu a nahrát na server později.</string>
+    <string name="about_sentence5">Lze si také objednat odběr novinek, tj. upozornění, že byla zaevidována nová kávová lokace.</string>
+    <string name="about_sentence4">Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="https://www.coffeecompass.cz">coffeecompass.cz</a></b>, a pomozte evidovat další kávové lokace.</string>
+<!--    <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>-->
+    <string name="about_sentence_widget"></string>
+    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
+    <string name="about_coffeecompass_link">"<a href="https://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
     <string name="local_service_stopped">Location service stoped.</string>
@@ -37,6 +42,7 @@
     <string name="local_service_disconnected">Disconnected from location service.</string>
 
     <string name="no_site_in_range">Žádná káva poblíž &#128533;</string>
+    <string name="no_site_in_town">Káva ve městě %1$s neevidována.</string>
     <string name="current_range_label">"Aktuální okruh vyhledávání: "</string>
     <string name="still_searching">vyhledávám ... </string>
 
@@ -82,7 +88,10 @@
     <string name="user_profile_createdon_label">Vytvořen:</string>
     <string name="user_profile_delete_button">Smazat</string>
     <string name="user_register_failure">Registrace neúspěšná.</string>
-    <string name="toast_no_internet">Připojení k internetu není k dispozici.</string>
+    <string name="toast_no_internet">Připojení k internetu není k dispozici</string>
+    <string name="toast_new_login_needed">Je nutné nové přihlášení.</string>
+    <string name="toast_no_internet_map_not_available">Mapa je k dispozici pouze online</string>
+    <string name="toast_no_internet_no_offline_data">Internet ani offline data nejsou k dispozici.</string>
     <string name="rest_public_user_url">https://coffeecompass.cz/rest/public/user/</string>
     <string name="rest_secured_user_url">https://coffeecompass.cz/rest/secured/user/</string>
     <string name="cancel">Zrušit</string>
@@ -121,7 +130,7 @@
     <string name="sladkosti_other_machines_chip">sladkosti</string>
     <string name="bagety_other_machines_chip">bagety</string>
     <string name="other_other_machines_chip">ostatní</string>
-    <string name="invalid_coffeesitename">Jméno lokace - alespoň 4 znaky a max. 30 znaků.</string>
+    <string name="invalid_coffeesitename">Jméno lokace - alespoň 4 znaky a max. 35 znaků</string>
     <string name="invalid_longitude">Nesprávná hodnota zem. délky</string>
     <string name="invalid_latitude">Nesprávná hodnota zem. šířky</string>
     <string name="coffee_site_create_failure">Nepodařilo se vytvořit lokaci. Na tomto místě je pravděpodobně již jiná lokace.</string>
@@ -142,7 +151,7 @@
     <string name="save_and_activate_coffeesite_confirm">ULOŽIT A AKTIVOVAT</string>
     <string name="cancel_coffeesite_save">Zrušit</string>
     <string name="save_only_coffeesite_confirm">Pouze uložit</string>
-    <string name="coffeesite_save_activate">Uložit/aktivovat</string>
+    <string name="coffeesite_save_menu_item">Uložit</string>
     <string name="save_and_activate_dialog_title">Uložit a aktivovat</string>
     <string name="save_coffeesite_updated">Uložit</string>
     <string name="action_add_coffeesite">Vytvořit novou lokaci</string>
@@ -153,6 +162,7 @@
     <string name="permissions_camera_storage_request">Pro provedení této operace je nutný souhlas s použitím fotoaparátu a úložiště zařízení.</string>
     <string name="permissions_camera_storage_canel">Zrušit</string>
     <string name="permissions_camera_storage_settings">NASTAVENÍ</string>
+    <string name="no_camera_available">V zařízení není dostupná aplikace fotoaparátu.</string>
     <string name="delete_image_dialog_title">Mazání fotky</string>
     <string name="delete_image_dialog_question">Opravdu chcete smazat fotku pro tuto lokaci?</string>
     <string name="delete_image_dialog_confirm">SMAZAT</string>
@@ -164,6 +174,7 @@
     <string name="status_created">VYTVOŘENO</string>
     <string name="coffee_site_load_failure">Nepodařilo se načíst data o lokaci.</string>
     <string name="no_comments_available">Žádné komentáře k dispozici</string>
+    <string name="coffee_site_no_photo_available">Foto není k dispozici</string>
 
     <string name="insert_author_comment_dialog_message">Vložte komentář:</string>
     <string name="insert_author_comment_dialog_confirm">Uložit</string>
@@ -175,13 +186,135 @@
 
     <string name="title_activity_select_location_map">Vybrat polohu</string>
     <string name="move_map_marker">Přidrž a přesuň na místo kávové lokace</string>
-    <string name="initial_searching">VYHLEDÁVÁM ...</string>
+    <string name="initial_searching">VYHLEDÁVÁM …</string>
     <string name="title_found_sites">Nalezené lokace</string>
-    <string name="searching_will_start_after_move_message">Čekám na změnu polohy ...</string>
+    <string name="searching_will_start_after_move_message">Čekám na změnu polohy …</string>
     <string name="permissions_location_title">Přístup k poloze</string>
     <string name="permissions_location_request">Pro správné fungování aplikace je nutný přístup k poloze zařízení.</string>
     <string name="permissions_location_settings">NASTAVENÍ</string>
     <string name="permissions_location_cancel">Zrušit</string>
-    <string name="action_offline">Offline</string>
+
+    <string name="action_offline">Offline …</string>
+    <string name="offline_seetings_description">Stažení dat o lokacích vám umožní vyhledávat kávové lokace i bez připojení k internetu.</string>
+    <string name="offline_seetings_main_label"> OFFLINE režim</string>
+    <string name="offline_seetings_includes_photos"> včetně obrázků?</string>
+    <string name="offline_seetings_download_button"> Stáhnout</string>
+    <string name="map_available_online_only">Mapa je k dispozici pouze online.</string>
+    <string name="data_download_success">Data stažena úspěšně.</string>
+    <string name="data_download_failure">Chyba při stahování dat. Zkontrolujte připojení k internetu nebo zkuste později …</string>
+    <string name="last_offline_data_download_status">Naposledy staženo: %1$s</string>
+    <string name="last_offline_data_not_yet_downloaded">Data zatím nebyla stažena.</string>
+    <string name="offline_data_downloaded_sites">Kávové lokace: %1$s</string>
+    <string name="offline_data_downloaded_comments">Komentáře: %1$s</string>
+    <string name="offline_data_downloaded_images">Obrázky: %1$s</string>
+
+    <string name="appwidget_text">Káva s sebou</string>
+    <string name="add_widget">Add widget</string>
+
+    <string name="empty_view_text">Žádná lokace …</string>
+    <string name="toast_format_string">%1$s!</string>
+    <string name="item_format_string">%1$d\u00B0 on %2$s</string>
+    <string name="header_format_string">%1$d\u00B0 in %2$s</string>
+
+    <string name="detail_rating_label">Hodnocení (%1$d):</string>
+
+    <string name="refresh">Refresh</string>
+    <string name="city_name">Káva s sebou</string>
+    <string name="widget_confirm_toast">Káva s sebou - obnoveno.</string>
+    <string name="title_activity_widget_configuration">WidgetConfigurationActivity</string>
+
+    <string name="widget_notification_title">Hledání nejbližší kávy s sebou</string>
+    <string name="widget_notification_message">zjišťování polohy …</string>
+    <string name="widget_ticker_text">ticker_coffee_compass</string>
+    <string name="widget_no_coffee">Žádná káva poblíž</string>
+    <string name="widget_toast_searching_coffee">Hledám nejbližší kávu …</string>
+    <string name="widget_toast_searching_phone_location">Hledání polohy zařízení …</string>
+
+    <string name="rating_dialog_label">Vaše hodnocení</string>
+    <string name="rating_lowest">břečka</string>
+    <string name="rating_middle">průměr</string>
+    <string name="rating_best">vynikající</string>
+    <string name="your_comment_dialog_label">Váš komentář</string>
+    <string name="dialog_comment_hint">max. 320 znaků</string>
+    <string name="create_site_missing_attributes">Chybí povinná položka</string>
+    <string name="create_site_menu_smazat_foto">Smazat foto</string>
+
+    <string name="offline_downloading_images_status">Stahování fotek lokací …</string>
+    <string name="download_comments_progress_message">Stahování komentářů k lokacím …</string>
+    <string name="download_sites_inprogress_message">Stahování dat o lokacích …</string>
+
+    <string name="firebase_token_msg">"Firebase token: "</string>
+
+    <string name="prompt_subscribe_town_name">Jméno města</string>
+    <string name="title_susbscription_for_news">Novinky</string>
+    <string name="subscription_for_news_description">Zde si můžete objednat odběr novinek, tj. upozornění na nově zaevidované \'kávové lokace\'. Lze objednat upozornění na všechny nové lokace nebo jen na lokace ve vybraných městech. Lze zadat až 5 různých měst.</string>
+    <string name="action_subscribe_news">ODEBÍRAT</string>
+    <string name="invalid_townname">Chybné jméno města</string>
+    <string name="user_profile_notif_subscription">ODBĚR NOVINEK</string>
+    <string name="all_towns">všechna města</string>
+    <string name="all_towns_subtopic">all_towns</string>
+    <string name="town_name_already_used">Již vybráno</string>
+    <string name="news_subscribe_label">Novinky</string>
+    <string name="subscription_call_succeeded">Notifikace objednány úspěšně</string>
+    <string name="action_unsubscribe_news">Zrušit odběr</string>
+    <string name="cancel_subscription_call_succeeded">Zrušení odběru novinek úspěšné</string>
+    <string name="subscription_call_failed">Objednání novinek selhalo, prosím zkuste později.</string>
+    <string name="cancel_subscription_call_failed">Zrušení odběru selhalo, zkuste prosím později.</string>
+    <string name="notif_subscription_appbar_title">Odběr novinek</string>
+    <string name="notification_new_sites_list_appbar">Novinky</string>
+    <string name="no_notifications_subscribed">Žádné notifikace.</string>
+    <string name="cancel_subscriptions_dialog_question">Zrušit všechna upozornění?</string>
+    <string name="cancel_subscriptions_confirm">Zrušit</string>
+    <string name="main_statistics_news_label">Přehled</string>
+    <string name="coffeesite_saved_to_db">Lokace uložena do databáze telefonu.</string>
+    <string name="data_for_offline_coffee_site_create_not_available">Data pro vytvoření lokace nejsou k dispozici. Pro úvodní synchronizaci je potřebný přístup k internetu.</string>
+    <string name="action_upload_coffeesites">ulož na server</string>
+    <string name="coffeesites_upload_failure">Uložení na serveru neúspěšné. Zkuste to prosím později.</string>
+    <string name="coffeesites_upload_success">Uložení na server úspěšné.</string>
+    <string name="coffeesites_image_upload_failure">Chyba při nahrávání fotky na server.</string>
+    <string name="toast_site_not_saved_on_server">Lokaci nejprve uložte na server.</string>
+    <string name="coffeesites_images_upload_success">Obrázky k lokacím nahrány na server úspěšně.</string>
+
+    <string name="my_sites_activity_toolbar_mainlabel">Moje lokace</string>
+    <string name="my_sites_activity_toolbar_tosave_label">K uložení na server</string>
+    <string name="upload_coffeesites_dialog_label">Uložit na server?</string>
+    <string name="upload_dialog_number_of_new_coffeesites">nové nebo upravené lokace: %1$s</string>
+    <string name="upload_coffeesites_dialog_title">Uložení</string>
+
+    <string name="search_by_city_hint">hledat ve městě</string>
+    <string name="found_coffeesite_activity_title">Nejbližší</string>
+    <string name="coffeesite_not_found_in_town">Káva s sebou neevidována.</string>
+
+    <string name="all_data_to_download_size">(%1$s MB)</string>
+    <string name="data_without_images_to_download_size">(%1$s MB)</string>
+
+    <string name="moje_lokace">Moje lokace</string>
+    <string name="novinky">Novinky</string>
+
+    <string name="searching_label_main_activity">VYHLEDAT</string>
+
+    <string name="main_act_search_button_kava_label">KÁVA</string>
+    <string name="main_act_search_button_kava_label_placeholder">KÁVA (%1$d)</string>
+
+    <string name="main_act_search_button_vyhledat_label_placeholder">VYHLEDAT<small><br>(%1$s)</br></small></string>
+    <string name="main_act_search_button_vyhledat_label">VYHLEDAT</string>
+
+    <!-- CoffeeSiteImagesActivity - image management -->
+    <string name="manage_images_title">Správa fotek</string>
+    <string name="manage_images_add_photo">Přidat foto</string>
+    <string name="manage_images_delete_image">Smazat obrázek</string>
+    <string name="manage_images_delete_confirm_title">Smazat fotku</string>
+    <string name="manage_images_delete_confirm_message">Opravdu chcete smazat tuto fotku?</string>
+    <string name="manage_images_count">Fotek: %1$d / %2$d</string>
+    <string name="manage_images_upload_success">Fotka úspěšně nahrána.</string>
+    <string name="manage_images_upload_failure">Nahrání fotky selhalo.</string>
+    <string name="manage_images_upload_progress">Nahrávání fotky na server…</string>
+    <string name="manage_images_delete_success">Fotka úspěšně smazána.</string>
+    <string name="manage_images_delete_failure">Smazání fotky selhalo.</string>
+    <string name="manage_images_delete_progress">Mazání fotky ze serveru…</string>
+    <string name="manage_images_load_failure">Načtení fotek selhalo.</string>
+    <string name="manage_images_loading_progress">Načítání fotek…</string>
+    <string name="manage_images_max_reached">Maximální počet fotek dosažen.</string>
+    <string name="manage_images_menu_item">Spravovat foto</string>
 
 </resources>

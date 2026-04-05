@@ -40,12 +40,13 @@ public class UserPreferencesHelper {
 
     private final String DEVICE_ID = "deviceID";
 
-    private final String LOGIN_TOKEN = "loginToken";
+    private final String ACCESS_TOKEN = "loginToken";
+    private final String REFRESH_TOKEN = "refreshToken";
     private final String LOGIN_TOKEN_TYPE = "loginTokenType";
     private final String LOGIN_TOKEN_EXPIRY = "loginTokenExpiry";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     private final String nameOfSharedPreferences = "sharedUser2";
 
@@ -64,13 +65,13 @@ public class UserPreferencesHelper {
         return app_prefs.getBoolean(INTRO, false);
     }
 
-    private void putUserId(long userId) {
+    private void putUserId(String userId) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putLong(USER_ID, userId);
+        edit.putString(USER_ID, userId);
         edit.apply();
     }
-    private long getUserId() {
-        return app_prefs.getLong(USER_ID, 0);
+    private String getUserId() {
+        return app_prefs.getString(USER_ID, "");
     }
 
     private void putDisplayName(String displayName) {
@@ -169,7 +170,7 @@ public class UserPreferencesHelper {
         rolesArray = userRoles.toArray(rolesArray);
         SharedPreferences.Editor edit = app_prefs.edit();
         for (int i=0; i < rolesArray.length; i++) {
-            edit.putString(USER_ROLES + String.valueOf(i), rolesArray[i]);
+            edit.putString(USER_ROLES + i, rolesArray[i]);
         }
         edit.apply();
     }
@@ -177,8 +178,8 @@ public class UserPreferencesHelper {
     private List<String> getUserRoles() {
         List<String> retVal = new ArrayList<>();
         int rolesCounter = 0;
-        while (!app_prefs.getString(USER_ROLES + String.valueOf(rolesCounter), "").isEmpty()) {
-            retVal.add(app_prefs.getString(USER_ROLES  + String.valueOf(rolesCounter), "USER"));
+        while (!app_prefs.getString(USER_ROLES + rolesCounter, "").isEmpty()) {
+            retVal.add(app_prefs.getString(USER_ROLES  + rolesCounter, "USER"));
             rolesCounter++;
         }
         return retVal;
@@ -195,20 +196,27 @@ public class UserPreferencesHelper {
 
     private void putLoginToken(JwtUserToken loginToken) {
         SharedPreferences.Editor edit = app_prefs.edit();
-        edit.putString(LOGIN_TOKEN, loginToken.getAccessToken());
-        edit.putString(LOGIN_TOKEN_EXPIRY, loginToken.getExpiryDateFormated());
-        edit.putString(LOGIN_TOKEN_TYPE, loginToken.getTokenType());
-
+        if (loginToken != null) {
+            edit.putString(ACCESS_TOKEN, loginToken.getAccessToken());
+            edit.putString(REFRESH_TOKEN, loginToken.getRefreshToken());
+            edit.putString(LOGIN_TOKEN_EXPIRY, loginToken.getExpiryDateFormated());
+            edit.putString(LOGIN_TOKEN_TYPE, loginToken.getTokenType());
+        }
         edit.apply();
     }
 
     public JwtUserToken getLoginToken() {
 
-        JwtUserToken userToken = new JwtUserToken(app_prefs.getString(LOGIN_TOKEN, ""),
-                                                  getLoginTokenExpiry(),
-                                                  getLoginTokenType());
+        return new JwtUserToken(getAccessToken(), getLoginTokenExpiry(), getLoginTokenType(),
+                                getRefreshToken());
+    }
 
-        return userToken;
+    private String getAccessToken() {
+        return app_prefs.getString(ACCESS_TOKEN, "");
+    }
+
+    private String getRefreshToken() {
+        return app_prefs.getString(REFRESH_TOKEN, "");
     }
 
     private String getLoginTokenExpiry() {
@@ -230,7 +238,7 @@ public class UserPreferencesHelper {
         putEmail(user.getEmail());
         putFirstName(user.getFirstName());
         putLastName(user.getLastName());
-        putLoginToken(user.getLoginToken());
+        putLoginToken(user.getToken());
         putNumOfCreatedSites(user.getNumOfCreatedSites());
         putNumOfUpdatedSites(user.getNumOfUpdatedSites());
         putNumOfDeletedSites(user.getNumOfDeletedSites());
@@ -251,7 +259,7 @@ public class UserPreferencesHelper {
             user.setLastName(getLastName());
 
             user.setCreatedOn(getCreatedOn());
-            user.setLoginToken(getLoginToken());
+            user.setToken(getLoginToken());
             user.setEmail(getEmail());
             user.setDisplayName(getDisplayName());
             user.setDeviceID(getDeviceId());
@@ -265,7 +273,7 @@ public class UserPreferencesHelper {
     }
 
     /**
-     * To delete/remove saved user data, if user loged-out
+     * To deleteUser/remove saved user data, if user loged-out
      */
     public void removeUserData() {
         SharedPreferences.Editor edit = app_prefs.edit();

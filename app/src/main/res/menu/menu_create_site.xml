@@ -4,12 +4,17 @@
         android:id="@+id/navigation_ulozit_and_or_aktivovat"
         android:enabled="false"
         android:icon="@drawable/ic_floppy_disk"
-        android:title="@string/coffeesite_save_activate" />
+        android:title="@string/coffeesite_save_menu_item" />
 
     <item
         android:id="@+id/navigation_foto_delete"
         android:enabled="false"
         android:icon="@drawable/ic_delete_picture"
-        android:title="Smazat foto" />
+        android:title="@string/create_site_menu_smazat_foto" />
+
+    <item
+        android:id="@+id/navigation_manage_images"
+        android:icon="@drawable/ic_outline_add_photo_alternate_36"
+        android:title="@string/manage_images_menu_item" />
 
 </menu>

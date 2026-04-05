@@ -18,43 +18,76 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/coffee_site_detail_app_bar"
             android:layout_width="match_parent"
-            android:layout_height="96dp"
+            android:layout_height="72dp"
             android:background="@color/colorPrimary2"
-            android:fitsSystemWindows="true"
+            android:fitsSystemWindows="false"
+            android:textAlignment="center"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/detail_toolbar_layout"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:toolbarId="@+id/sitesListToolbar">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/detail_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    app:layout_collapseMode="pin"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
+                android:textAlignment="center"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
+                app:titleTextAppearance="@style/Toolbar.TitleText" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <!--
         <androidx.core.widget.NestedScrollView
             android:id="@+id/coffeesite_detail_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         </androidx.core.widget.NestedScrollView>
+
+        -->
+
+        <FrameLayout
+            android:id="@+id/coffeesite_detail_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"></FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/distance_detail_linear_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/vzdalenostLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingRight="5dp"
+                android:text="Vzdálenost: "
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView
+                android:id="@+id/distanceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:baselineAligned="false">
 
             <TableRow
@@ -64,46 +97,47 @@
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/mapButton"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/roundedbutton"
-                    android:onClick="onMapButtonClick"
-                    android:paddingLeft="2dp"
-                    android:paddingRight="2dp"
-                    android:text="Mapa"
-                    android:textColor="@android:color/white" />
-
-                <Button
-                    android:id="@+id/imageButton"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/roundedbutton"
-                    android:enabled="false"
-                    android:onClick="onImageButtonClick"
-                    android:paddingLeft="2dp"
-                    android:paddingRight="2dp"
-                    android:text="Foto"
-                    android:textColor="@android:color/white"
-                    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
-                    android:visibility="gone" />
-
-                <Button
                     android:id="@+id/commentsButton"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
-                    android:background="@drawable/roundedbutton"
+                    android:background="@drawable/rounded_orange_button"
                     android:enabled="true"
                     android:onClick="onCommentsButtonClick"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
                     android:text="komentáře"
+                    android:textColor="@android:color/white"
+                    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
+                    android:visibility="visible" />
+
+                <Button
+                    android:id="@+id/mapButton"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/rounded_orange_button"
+                    android:onClick="onMapButtonClick"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text="Mapa"
+                    android:textColor="@android:color/white"
+                    android:visibility="visible" />
+
+                <Button
+                    android:id="@+id/navigationButton"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/rounded_orange_button"
+                    android:enabled="true"
+                    android:onClick="onNavigationButtonClick"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:text="navigovat"
                     android:textColor="@android:color/white"
                     android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
                     android:visibility="visible" />

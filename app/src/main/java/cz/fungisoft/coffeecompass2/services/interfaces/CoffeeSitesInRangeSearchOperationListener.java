@@ -2,8 +2,8 @@ package cz.fungisoft.coffeecompass2.services.interfaces;
 
 
 /**
- * Interface to define start and finished of coffee sites in range operations.
- * Can be implemented by classes needed to know when such operations stars and finishes
+ * Interface to define start and finish of coffee sites in range operations.
+ * Can be implemented by classes needed to know when such operations starts and finishes
  * like Activity to show or hide progress bar.
  */
 public interface CoffeeSitesInRangeSearchOperationListener {
@@ -11,13 +11,16 @@ public interface CoffeeSitesInRangeSearchOperationListener {
     /**
      * Called, when searching of sites in range starts.
      */
-    void onStartSearchingSitesInRange();
+    void onStartSearchingSites();
 
     /**
-     * Called, when searching of sites in range finished.
+     * Called, when searching of number of coffee sites in different range is finished.
      */
-    void onSearchingSitesInRangeFinished();
+    default void onSearchingSitesFinished(int numOfSitesInRanges) {}
 
-    void onSearchingSitesInRangeError(String error);
-
+    /**
+     *
+     * @param error
+     */
+    void onSearchingSitesError(String error);
 }

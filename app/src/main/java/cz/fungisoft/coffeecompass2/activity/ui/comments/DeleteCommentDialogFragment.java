@@ -4,8 +4,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.fragment.app.DialogFragment;
+
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 import cz.fungisoft.coffeecompass2.R;
 
@@ -14,7 +15,7 @@ public class DeleteCommentDialogFragment extends DialogFragment {
     public interface DeleteCommentDialogListener {
 
         void onDeleteCommentDialogPositiveClick(DeleteCommentDialogFragment dialog);
-        default void onDeleteCommentDialogNegativeClick(DeleteCommentDialogFragment dialog) {};
+        default void onDeleteCommentDialogNegativeClick(DeleteCommentDialogFragment dialog) {}
     }
 
     // Use this instance of the interface to deliver action events

@@ -8,19 +8,19 @@ import androidx.room.Query;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 @Dao
 public interface PriceRangeDao {
 
-//    @Query("SELECT * FROM CoffeeSite")
-//    public List<CoffeeSiteWithCsStatus> loadCoffeeSiteWithCsStatuses();
-
     @Query("SELECT * FROM price_range_table")
     LiveData<List<PriceRange>> getAllPriceRanges();
 
-    @Query("SELECT * FROM price_range_table WHERE priceRange LIKE :stringValue  LIMIT 1")
-    Flowable<PriceRange> getPriceRange(String stringValue);
+    @Query("SELECT * FROM price_range_table")
+    Single<List<PriceRange>> getAllPriceRangesSingle();
+
+    @Query("SELECT * FROM price_range_table WHERE priceRange = :stringValue LIMIT 1")
+    Single<PriceRange> getPriceRange(String stringValue);
 
     @Query("DELETE FROM price_range_table")
     void deleteAll();
@@ -30,4 +30,5 @@ public interface PriceRangeDao {
 
     @Insert
     void insertPriceRange(PriceRange priceRange);
+
 }

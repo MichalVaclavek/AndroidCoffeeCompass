@@ -1,22 +1,25 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -31,45 +34,45 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
  * by loged-in user.
  */
-public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
+public class SaveCommentAndStarsAsyncTask {
 
     static final String REQ_TAG = "SaveCommentAsyncREST";
 
-    private int coffeeSiteId;
+    private final String coffeeSiteId;
 
-    private final LoggedInUser user;
+    private final UserAccountActionsProvider userAccountService;
 
+    private final UsersCSRatingAndCommentSaveOperationListener callingActivity;
 
-    private final WeakReference<CommentsListActivity> commentsActivity;
+    private final CommentAndStars commentAndStarsToSave;
 
-    private CommentAndStars commentAndStarsToSave;
-
-    public SaveCommentAndStarsAsyncTask(int coffeeSiteId, LoggedInUser user, CommentsListActivity commentsActivity, CommentAndStars commentAndStarsToSave) {
+    public SaveCommentAndStarsAsyncTask(String coffeeSiteId, UserAccountActionsProvider userAccountService, UsersCSRatingAndCommentSaveOperationListener callingActivity, CommentAndStars commentAndStarsToSave) {
         this.coffeeSiteId = coffeeSiteId;
-        this.commentsActivity = new WeakReference<>(commentsActivity);
+        this.callingActivity = callingActivity;
         this.commentAndStarsToSave = commentAndStarsToSave;
-        this.user = user;
+        this.userAccountService = userAccountService;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "SaveCommentAndStarsAsyncTask REST request initiated");
 
-        if (user != null) {
-
+        if (userAccountService != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
+                @NonNull
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", user.getLoginToken().getTokenType() + " " + user.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
-            //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+            // Add authenticator and the interceptor to the client builder
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
+                    .authenticator(new TokenAuthenticator(userAccountService))
+                    .addInterceptor(headerAuthorizationInterceptor).build();
 
             Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                          .create();
@@ -87,31 +90,31 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
 
             call.enqueue(new Callback<List<Comment>>() {
                 @Override
-                public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+                public void onResponse(@NonNull Call<List<Comment>> call, @NonNull Response<List<Comment>> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(REQ_TAG, "onResponse() success");
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().processComments(response.body());
+                            if (callingActivity != null) {
+                                callingActivity.processSaveComments(response.body());
                             }
                         } else {
                             Log.i(REQ_TAG, "Returned empty response for saving comment request.");
                             Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(error);
                             }
                         }
                     } else {
                         try {
                             String errorBody = response.errorBody().string();
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(new Result.Error(Utils.getRestError(errorBody)));
                             }
                         } catch (IOException e) {
                             Log.e(REQ_TAG, "Error saving comment." + e.getMessage());
                             Result.Error error = new Result.Error(new IOException("Error saving comment.", e));
-                            if (commentsActivity.get() != null) {
-                                commentsActivity.get().showRESTCallError(error);
+                            if (callingActivity != null) {
+                                callingActivity.processFailedCommentSave(error);
                             }
                         }
                     }
@@ -121,13 +124,18 @@ public class SaveCommentAndStarsAsyncTask extends AsyncTask<Void, Void, Void> {
                 public void onFailure(Call<List<Comment>> call, Throwable t) {
                     Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
-                    if (commentsActivity.get() != null) {
-                        commentsActivity.get().showRESTCallError(error);
+
+                    if (callingActivity != null) {
+                        callingActivity.processFailedCommentSave(error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
         }
-        return null;
     }
 
 }

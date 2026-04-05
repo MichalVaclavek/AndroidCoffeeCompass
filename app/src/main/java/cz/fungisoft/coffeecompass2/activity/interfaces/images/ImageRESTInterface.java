@@ -1,6 +1,8 @@
 package cz.fungisoft.coffeecompass2.activity.interfaces.images;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadAsyncTask;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
@@ -11,14 +13,13 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
-* Retrofit interface for REST requests related to CoffeeSite's image object.
-* Used by {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageUploadAsyncTask}
- * and {@link cz.fungisoft.coffeecompass2.asynctask.coffeesite.ImageDeleteAsyncTask}
-*/
+ * Retrofit interface for REST requests related to CoffeeSite's image object.<br>
+ * Used by {@link ImageUploadAsyncTask}
+ * and {@link ImageDeleteAsyncTask}
+ */
 public interface ImageRESTInterface {
 
     String UPLOAD_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
-
     String DELETE_IMAGE_URL = BuildConfig.IMAGES_API_SECURED_URL;
 
     /**
@@ -29,11 +30,11 @@ public interface ImageRESTInterface {
      */
     @Multipart
     @POST("upload")
-    Call<String> uploadImage(@Part MultipartBody.Part file, @Query("coffeeSiteId") long coffeeSiteId);
+    Call<String> uploadImage(@Part MultipartBody.Part file, @Query("coffeeSiteId") String coffeeSiteId);
 
 
     /**
-     * Calls delete of CoffeeSite"s image. Input is an ID of the CoffeeSite
+     * Calls deleteUser of CoffeeSite"s image. Input is an ID of the CoffeeSite
      * to whom the image belongs to.
      *
      * Example: https://coffeecompass.cz/rest/secured/image/delete/site/320
@@ -42,10 +43,10 @@ public interface ImageRESTInterface {
      * @return
      */
     @DELETE("delete/site/{siteId}")
-    Call<Integer> deleteImageBySiteId(@Path("siteId") int siteId);
+    Call<Integer> deleteImageBySiteId(@Path("siteId") String siteId);
 
     /**
-     * Calls delete of CoffeeSite|s image. Input is an ID of the CoffeeSite
+     * Calls deleteUser of CoffeeSite|s image. Input is an ID of the CoffeeSite
      * to whom the image belongs to.
      *
      * Example: https://coffeecompass.cz/rest/secured/image/delete/567

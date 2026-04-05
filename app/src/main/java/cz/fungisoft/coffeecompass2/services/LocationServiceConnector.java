@@ -18,10 +18,16 @@ public class LocationServiceConnector implements ServiceConnection {
         this.callingActivity = callingActivity;
     }
 
-    private CoffeeSitesInRangeFoundService callingService;
+    private CoffeeSitesFoundService callingService;
 
-    public LocationServiceConnector(CoffeeSitesInRangeFoundService callingService) {
+    public LocationServiceConnector(CoffeeSitesFoundService callingService) {
         this.callingService = callingService;
+    }
+
+    private CoffeeSitesInRangeWidgetService callingService2;
+
+    public LocationServiceConnector(CoffeeSitesInRangeWidgetService callingService) {
+        this.callingService2 = callingService;
     }
 
     // To invoke the bound service, first make sure that this value
@@ -56,6 +62,10 @@ public class LocationServiceConnector implements ServiceConnection {
         if (this.callingService != null) {
             this.callingService.onLocationServiceConnected();
         }
+
+        if (this.callingService2 != null) {
+            this.callingService2.onLocationServiceConnected();
+        }
     }
 
     @Override
@@ -66,5 +76,4 @@ public class LocationServiceConnector implements ServiceConnection {
         // see this happen.
         mBoundService = null;
     }
-
 }

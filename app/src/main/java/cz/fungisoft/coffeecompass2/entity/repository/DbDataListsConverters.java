@@ -7,27 +7,24 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
-import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.NextToMachineType;
 import cz.fungisoft.coffeecompass2.entity.OtherOffer;
-import cz.fungisoft.coffeecompass2.entity.PriceRange;
-import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 
+/**
+ * Converters used for saving CoffeeSite fields as JSON formatted strings into DB
+ */
 public class DbDataListsConverters implements Serializable {
 
     /* **** Converter for List of CoffeeSort **** */
 
     @TypeConverter
     public String fromCoffeeSorts(List<CoffeeSort> coffeeSorts){
-        if(coffeeSorts == null){
+        if (coffeeSorts == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -38,7 +35,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<CoffeeSort> toCoffeeSorts(String coffeeSortsString){
-        if(coffeeSortsString == null){
+        if (coffeeSortsString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -51,7 +48,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromCupTypes(List<CupType> cupTypes){
-        if(cupTypes == null) {
+        if (cupTypes == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -62,7 +59,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<CupType> toCupTypes(String cupTypesString){
-        if(cupTypesString == null) {
+        if (cupTypesString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -75,7 +72,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromNextToMachineTypes(List<NextToMachineType> nextToMachineTypes){
-        if(nextToMachineTypes == null){
+        if (nextToMachineTypes == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -86,7 +83,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<NextToMachineType> toNextToMachineTypes(String nextToMachineTypesString){
-        if(nextToMachineTypesString == null) {
+        if (nextToMachineTypesString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -99,7 +96,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public String fromOtherOffers(List<OtherOffer> otherOffers){
-        if(otherOffers == null) {
+        if (otherOffers == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -110,7 +107,7 @@ public class DbDataListsConverters implements Serializable {
 
     @TypeConverter
     public List<OtherOffer> toOtherOffers(String otherOffersString){
-        if(otherOffersString == null){
+        if (otherOffersString == null) {
             return (null);
         }
         Gson gson = new Gson();
@@ -119,4 +116,24 @@ public class DbDataListsConverters implements Serializable {
         return otherOffers;
     }
 
+    @TypeConverter
+    public String fromStringList(List<String> stringList) {
+        if (stringList == null) {
+            return null;
+        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>(){}.getType();
+        return gson.toJson(stringList, type);
+    }
+
+    @TypeConverter
+    public List<String> toStringList(String stringListString) {
+        if (stringListString == null || stringListString.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>(){}.getType();
+        List<String> stringList = gson.fromJson(stringListString, type);
+        return stringList != null ? stringList : new ArrayList<>();
+    }
 }

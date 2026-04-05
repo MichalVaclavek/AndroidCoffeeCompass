@@ -22,14 +22,14 @@
             android:layout_height="?attr/actionBarSize"
             app:menu="@menu/menu_my_coffeesites_list"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Moje lokace" />
+            app:title="@string/my_sites_activity_toolbar_mainlabel" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/my_coffeesite_frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
 
         android:background="@color/activityBackround"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">

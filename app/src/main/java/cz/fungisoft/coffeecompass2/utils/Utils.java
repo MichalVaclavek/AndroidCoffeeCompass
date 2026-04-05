@@ -1,15 +1,18 @@
 package cz.fungisoft.coffeecompass2.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,14 +22,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.function.Consumer;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.activity.data.OfflineModePreferenceHelper;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginActivity;
+import okhttp3.OkHttpClient;
 
 /**
  * Utility class.
@@ -38,46 +40,38 @@ public class Utils {
     private static final String COMMAND_TO_DETECT_ONLINE = BuildConfig.ONLINE_DETECTION_COMMAND;
 
     /**
-     * Checks if the connection to internet is available.
-     * Basic method, can be used in UI thread.
-     *
-     * @return
+     * Checks if the connection to INTERNET is available.
+     * Modernized version for API 23+ (which is your minSdk).
+     * @return true if internet connection is available
      */
-    public static boolean isOnline() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec(COMMAND_TO_DETECT_ONLINE); // 8.8.8.8 is google.com
-            int     exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        }
-        catch (IOException e)          { Log.e(TAG," Problem during internet connection check."); }
-        catch (InterruptedException e) { Log.e(TAG," Problem during internet connection check."); }
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
 
-        return false;
-    }
+        Network network = cm.getActiveNetwork();
+        if (network == null) return false;
 
-    private static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null;
+        NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
+        return capabilities != null && (
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+        );
     }
 
     /**
      * Check internet connection availability.
      * Must run in AsyncTask, i.e. not in UI thread.
-     * Here we use {@link InternetCheckAsyncTask} to call this method.
      *
      * @param context
      * @return
      */
     public static boolean hasInternetAccess(Context context) {
-
-        if (isNetworkAvailable(context)) {
-
+        if (isOnline(context)) {
             try {
                 HttpURLConnection urlc = (HttpURLConnection)
-                                         (new URL("http://clients3.google.com/generate_204")
+                                         (new URL("https://clients3.google.com/generate_204")
                                          .openConnection());
                 urlc.setRequestProperty("User-Agent", "Android");
                 urlc.setRequestProperty("Connection", "close");
@@ -103,6 +97,36 @@ public class Utils {
         toast.show();
     }
 
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showSiteNotSavedOnServerToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_site_not_saved_on_server,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showMapNotAvailableIfNoInternetToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_no_internet_map_not_available,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    /**
+     * Show info Toast message, that internet connection is not available
+     */
+    public static void showNoInternetNoOfflineDataToast(Context appContext) {
+        Toast toast = Toast.makeText(appContext,
+                R.string.toast_no_internet_no_offline_data,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
     public static String getDeviceID(AppCompatActivity parentActivity) {
         return Settings.Secure.getString(parentActivity.getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
@@ -114,7 +138,6 @@ public class Utils {
      * @return
      */
     public static synchronized RestError getRestError(String restErrorBody) {
-
         RestError retVal = new RestError();
         try {
             JSONObject jsonObject = new JSONObject(restErrorBody);
@@ -127,12 +150,11 @@ public class Utils {
                                         : "",
                                     jsonObject.getString("instance"));
 
-            if (jsonObject.getString("errorParameter") != null) {
-                retVal.setErrorParameter(jsonObject.getString("errorParameter"));
-            }
-            if (jsonObject.getString("errorParameterValue") != null) {
-                retVal.setErrorParameterValue(jsonObject.getString("errorParameterValue"));
-            }
+            jsonObject.getString("errorParameter");
+            retVal.setErrorParameter(jsonObject.getString("errorParameter"));
+
+            jsonObject.getString("errorParameterValue");
+            retVal.setErrorParameterValue(jsonObject.getString("errorParameterValue"));
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -197,7 +219,6 @@ public class Utils {
      * @return
      */
     public static String getDistanceInBetterReadableForm(long distance) {
-
         if (distance == 0) {
             return "- m";
         }
@@ -239,17 +260,100 @@ public class Utils {
         return distance;
     }
 
-    // Reading OFFLINE mode status
-    private static OfflineModePreferenceHelper offlineModePreferenceHelper;
-
     /**
      * Finds from Preferences if the OFFLINE mode is switched ON or OFF
      *
      * @return
      */
     public static boolean isOfflineModeOn(Context context) {
-        offlineModePreferenceHelper = new OfflineModePreferenceHelper(context);
-        return offlineModePreferenceHelper.getOfflineMode();
+        return !isOnline(context) && offlineDataAvailable(context);
+    }
+
+    /**
+     * Finds from Preferences if some CoffeeSites data are saved in DB after download.
+     *
+     * @return
+     */
+    public static boolean offlineDataAvailable(Context context) {
+        DataForOfflineModePreferenceHelper offlineModePreferenceHelper = new DataForOfflineModePreferenceHelper(context);
+        return offlineModePreferenceHelper.getDownloaded();
+    }
+
+    /**
+     * Finds from Preferences, if some CoffeeSites data are saved in DB after creation in OFFLINE mode.
+     *
+     * @return
+     */
+    public static boolean offlineDataSavedAvailable(Context context) {
+        DataForOfflineModePreferenceHelper offlineModePreferenceHelper = new DataForOfflineModePreferenceHelper(context);
+        return offlineModePreferenceHelper.getDataSavedOfflineAvailable();
+    }
+
+    /**
+     * Class to define fractions of 1 full cup rating.
+     * Currently available: QUARTER, HALF, THREE_QUARTERS, FULL
+     */
+    public enum RatingFractions {
+        QUARTER, HALF, THREE_QUARTERS, FULL, EMPTY
+    }
+
+
+    /**
+     * Method to calculate, what is the fraction of whole cup rating.
+     * This is the definition:
+     * FULL: >= 0.88 and <= 0.12
+     * QUARTER: > 0.12 and <= 0.37
+     * HALF: > 0.37 and < 0.63
+     * THREE_QUARTERS: >= 0.63 < .88
+     */
+    public static RatingFractions getRatingFraction(float rating) {
+        int intPart = (int) rating;
+        float fraction = rating - intPart;
+
+        if (fraction > 0.12 && fraction <= 0.37) {
+            return RatingFractions.QUARTER;
+        }
+        if (fraction > 0.37 && fraction < 0.63) {
+            return RatingFractions.HALF;
+        }
+        if (fraction >= 0.63 && fraction < .88) {
+            return RatingFractions.THREE_QUARTERS;
+        }
+
+        if ((fraction >= 0.88 && fraction <= 1)) {
+            return RatingFractions.FULL;
+        }
+        // Nothing applied before, then we are in a 'EMPTY' range
+        // i.e. something between 0 and 0.12 i.e. (fraction >= 0 && fraction <= 0.12)
+        return RatingFractions.EMPTY;
+
+    }
+
+    /**
+     * Called when refreshing access token failed, mainly due to refresh token expiry.
+     * @param context
+     */
+    public static void openLoginActivityOnRefreshTokenFailed(Context context) {
+        if (isOnline(context)) {
+            Toast toast = Toast.makeText(context,
+                    R.string.toast_new_login_needed,
+                    Toast.LENGTH_SHORT);
+            toast.show();
+            Intent activityIntent = new Intent(context, LoginActivity.class);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(activityIntent);
+            return;
+        }
+        showNoInternetToast(context);
+    }
+
+    /**
+     * Returns a pre-configured OkHttpClient.Builder.
+     *
+     * @return OkHttpClient.Builder
+     */
+    public static OkHttpClient.Builder getOkHttpClientBuilder() {
+        return new OkHttpClient.Builder();
     }
 
 }

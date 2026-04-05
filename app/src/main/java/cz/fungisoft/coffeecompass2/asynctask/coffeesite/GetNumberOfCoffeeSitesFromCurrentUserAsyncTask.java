@@ -1,16 +1,18 @@
 package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -24,10 +26,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to perform REST Retrofit call to coffeecompass.cz to get number of active CoffeeSites
  * created by one user.
  */
-public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG = "GetSitesFromUserAsnTsk";
+public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask {
 
-    private final LoggedInUser currentUser;
+    private static final String TAG = "GetNumSitesFromUserAT";
+
+    private final UserAccountActionsProvider userAccountService;
 
     /**
      * Only one result listener is expected for Async task
@@ -36,40 +39,41 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
 
     private final CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode;
 
-    //private String operationResult = "";
     private String operationError = "";
     private Result.Error error;
 
     public GetNumberOfCoffeeSitesFromCurrentUserAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
-                                                          LoggedInUser user,
+                                                          UserAccountActionsProvider userAccountService,
                                                           CoffeeSiteNumbersRESTResultListener callingService) {
-        this.currentUser = user;
+        this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.i(TAG, "start");
         //operationResult = "";
         operationError = "";
 
-        Log.i(TAG, "currentUSer is null? " + String.valueOf(currentUser == null));
-        if (currentUser != null) {
-
+        Log.i(TAG, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        if (userAccountService.getLoggedInUser() != null) {
             // Inserts currentUser authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = new Interceptor() {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", currentUser.getLoginToken().getTokenType() + " " + currentUser.getLoginToken().getAccessToken()).build();
+                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
                     request = request.newBuilder().headers(headers).build();
                     return chain.proceed(request);
                 }
             };
 
             //Add the interceptor to the client builder.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient client = Utils.getOkHttpClientBuilder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(5, TimeUnit.SECONDS)
+                    .authenticator(new TokenAuthenticator(userAccountService))
                     .addInterceptor(headerAuthorizationInterceptor)
                     .build();
 
@@ -127,13 +131,18 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask extends AsyncTask<Vo
                     Log.e(TAG, "Error obtaining CoffeeSites number created by User REST request." + t.getMessage());
                     error = new Result.Error(new IOException("Error obtaining CoffeeSites number created by User REST request.", t));
                     operationError = error.toString();
+
                     if (callingListenerService != null) {
                         callingListenerService.onNumberOfCoffeeSitesReturned(requestedRESTOperationCode, error);
+                    }
+                    if (t.getMessage().startsWith("Refreshing access token failed")) {
+                        userAccountService.clearLoggedInUser();
+                        // go to login activity
+                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
                     }
                 }
             });
         }
-        return null;
     }
 
 }

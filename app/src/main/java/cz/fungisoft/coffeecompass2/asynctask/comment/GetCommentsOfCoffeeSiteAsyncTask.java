@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.asynctask.comment;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -28,7 +27,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
  * by loged-in user.
  */
-public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void> {
+public class GetCommentsOfCoffeeSiteAsyncTask {
 
     static final String REQ_TAG = "GetCommentsOfCSAsynT";
 
@@ -41,11 +40,10 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
         this.coffeeSite = coffeeSite;
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
+    public void execute() {
         Log.d(REQ_TAG, "GetAllCommentsAsyncTask REST request initiated");
 
-        OkHttpClient client = new OkHttpClient.Builder().build();
+        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
 
         Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
                                      .create();
@@ -74,20 +72,20 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
                         Log.i(REQ_TAG, "Returned empty response for saving comment request.");
                         Result.Error error = new Result.Error(new IOException("Error saving comment. Response empty."));
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(error);
+                            resultListener.get().onRESTCallError(error);
                         }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
+                            resultListener.get().onRESTCallError(new Result.Error(Utils.getRestError(errorBody)));
                         }
                     } catch (IOException e) {
                         Log.e(REQ_TAG, "Error saving comment." + e.getMessage());
                         Result.Error error = new Result.Error(new IOException("Error saving comment.", e));
                         if (resultListener.get() != null) {
-                            resultListener.get().showRESTCallError(error);
+                            resultListener.get().onRESTCallError(error);
                         }
                     }
                 }
@@ -98,12 +96,11 @@ public class GetCommentsOfCoffeeSiteAsyncTask extends AsyncTask<Void, Void, Void
                 Log.e(REQ_TAG, "Error saving comment REST request." + t.getMessage());
                 Result.Error error = new Result.Error(new IOException("Error saving comment.", t));
                 if (resultListener.get() != null) {
-                    resultListener.get().showRESTCallError(error);
+                    resultListener.get().onRESTCallError(error);
                 }
             }
         });
 
-        return null;
     }
 
 }

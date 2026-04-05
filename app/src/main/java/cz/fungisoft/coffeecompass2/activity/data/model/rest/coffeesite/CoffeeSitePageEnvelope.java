@@ -9,7 +9,7 @@ import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
  * Class to map JSON response for Pageable CoffeeSites,
- * for example {@link CoffeeSiteRESTInterface.getAllCoffeeSitesFromCurrentUserPaginated() }
+ * for example {@link CoffeeSiteRESTInterface#getAllCoffeeSitesFromCurrentUserPaginated() }
  */
 public class CoffeeSitePageEnvelope {
 
@@ -47,7 +47,7 @@ public class CoffeeSitePageEnvelope {
 
     @SerializedName("sort")
     @Expose
-    private Sort sort;
+    private List<Sort> sort;
 
     @SerializedName("totalElements")
     @Expose
@@ -121,11 +121,11 @@ public class CoffeeSitePageEnvelope {
         this.size = size;
     }
 
-    public Sort getSort() {
+    public List<Sort> getSort() {
         return sort;
     }
 
-    public void setSort(Sort sort) {
+    public void setSort(List<Sort> sort) {
         this.sort = sort;
     }
 

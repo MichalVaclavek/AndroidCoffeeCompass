@@ -2,19 +2,20 @@ package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import androidx.appcompat.widget.AppCompatImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -22,20 +23,24 @@ import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteImageActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 
 /**
  * Adapter to show loaded list of CoffeeSites created by logged-in user
@@ -50,8 +55,6 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private CoffeeSite selectedCoffeeSite;
     private int selectedPosition;
-
-    private final boolean offlineModeOn;
 
     /**
      * To indicate, that update Author's comment function was selected by user.
@@ -87,30 +90,15 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         notifyDataSetChanged();
     }
 
-    public void addCoffeeSites(List<CoffeeSite> newSites) {
-        this.mValues.addAll( removeCanceledElements(newSites));
-        notifyDataSetChanged();
-    }
-
-    public void addCoffeeSitesFirstPage(@NotNull List<CoffeeSite> firstPage) {
-        this.mValues.addAll(firstPage);
-        notifyDataSetChanged();
-    }
-
-    public void addCoffeeSitesNextPage(@NotNull List<CoffeeSite> nextPage) {
-        this.mValues.addAll(nextPage);
-        notifyDataSetChanged();
-    }
-
     /**
      * Used for opening CoffeeSiteDetailActivity
      */
-    private View.OnClickListener mOnClickListenerToCoffeeSiteDetailActivityStart;
+    private final View.OnClickListener mOnClickListenerToCoffeeSiteDetailActivityStart;
 
     /**
      * Used for opening CoffeeSiteImageActivity
      */
-    private View.OnClickListener mOnClickListenerToCoffeeSiteImageActivityStart;
+    private final View.OnClickListener mOnClickListenerToCoffeeSiteImageActivityStart;
 
     /**
      * Used for changing status of selected CoffeeSite from/to ACTIVE/INACTIVE/CANCEL
@@ -137,7 +125,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /**
      * Request type to ask CreateCoffeeSiteActivity to edit CoffeeSite
      */
-    static final int EDIT_COFFEESITE_REQUEST = 1;
+    public static final int EDIT_COFFEESITE_REQUEST = 1;
 
     /**
      * Standard constructor of the class MyCoffeeSiteItemRecyclerViewAdapter
@@ -146,8 +134,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      * @param offlineModeOn
      * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      */
-    public MyCoffeeSiteItemRecyclerViewAdapter( MyCoffeeSitesListActivity parent, boolean offlineModeOn) {
-        this.offlineModeOn = offlineModeOn;
+     public MyCoffeeSiteItemRecyclerViewAdapter( MyCoffeeSitesListActivity parent) {
         mParentActivity = parent;
         mOnClickListenerToCoffeeSiteDetailActivityStart = createOnClickListenerForDetailActivityStart();
         mOnClickListenerToCoffeeSiteImageActivityStart = createOnClickListenerForShowImageActivityStart();
@@ -162,46 +149,43 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private View.OnClickListener createOnClickListenerForDetailActivityStart() {
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CoffeeSite item = (CoffeeSite) view.getTag();
-                if (item != null) {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) item);
-                    context.startActivity(intent);
-                }
+        retVal = view -> {
+            CoffeeSite item = (CoffeeSite) view.getTag();
+            if (item != null) {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                intent.putExtra("coffeeSite", (Parcelable) item);
+                context.startActivity(intent);
             }
         };
         return retVal;
     }
 
     /**
-     * OnClick listener to open CoffeeSiteDetailActivity to show details
-     * of the CoffeeSite as it is shown when searching and looking into the detailes.
+     * OnClick listener to open CoffeeSiteImageActivity to show picture
+     * of the CoffeeSite as it is shown when searching and looking into the details.
      *
      * @return
      */
     private View.OnClickListener createOnClickListenerForShowImageActivityStart() {
+
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
-                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, CoffeeSiteImageActivity.class);
-                    intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
-                    context.startActivity(intent);
-                }
+        retVal = view -> {
+            CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
+            if (coffeeSite != null && !getDisplayMainImageUrl(coffeeSite).isEmpty()) {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+                intent.putExtra("showImageFirst", true);
+                context.startActivity(intent);
             }
         };
         return retVal;
     }
 
 
+    @NotNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -228,116 +212,173 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     public void clearList() {
         if (mValues != null) {
-            int size = mValues.size();
-            if (size > 0) {
-                for (int i = 0; i < size; i++) {
-                    mValues.remove(0);
-                }
-                this.notifyItemRangeRemoved(0, size);
-            }
+            mValues.clear();
+            notifyDataSetChanged();
         }
     }
 
-
     private void setupBasicViewHolder(int position, ViewHolder viewHolder) {
+        CoffeeSite coffeeSite = this.mValues.get(position);
 
-        viewHolder.csNameView.setText(this.mValues.get(position).getName());
-        viewHolder.locAndTypeView.setText(this.mValues.get(position).getTypPodniku().toString() + ", " +  this.mValues.get(position).getTypLokality().toString());
-        viewHolder.createdOnView.setText(this.mValues.get(position).getCreatedOnString());
+        viewHolder.csNameView.setText(coffeeSite.getName());
+        if (coffeeSite.getTypPodniku() != null && coffeeSite.getTypLokality() != null) {
+            viewHolder.locAndTypeView.setText(coffeeSite.getTypPodniku().toString() + ", " + coffeeSite.getTypLokality().toString());
+        }
+        viewHolder.createdOnView.setText(coffeeSite.getCreatedOnString());
+
+        // Default enable all buttons
+        enableDisableAllButtons(viewHolder, true);
 
         // Set default color for CoffeeSite Status view
         viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_gray));
-        // Prelozeni jmen statusu CoffeeSitu
-        String status = this.mValues.get(position).getStatusZaznamu().toString();
-        switch(status) {
+        // Prelozeni jmen statusu CoffeeSitu a nastaveni active/inactive na obrazky tlacitek
+        String status = coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "";
+        switch (status) {
             case "ACTIVE":
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.colorPrimary));
                 viewHolder.statusView.setText(R.string.status_active);
+                if (!coffeeSite.isSavedOnServer()) {
+                    viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(false);
+                }
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
 
-                viewHolder.activateCoffeeSiteButton.setEnabled(false);
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_grey_36);
-
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(true);
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
                 break;
             case "INACTIVE":
                 viewHolder.statusView.setText(R.string.status_inactive);
-                viewHolder.activateCoffeeSiteButton.setEnabled(true);
+                if (!coffeeSite.isSavedOnServer()) {
+                    viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(false);
+                }
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
 
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
-
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
+            case "" : // for new CoffeeSite created when offline, not saved on server yet
             case "CREATED":
                 viewHolder.statusView.setText(R.string.status_created);
                 viewHolder.statusView.setTextColor(mParentActivity.getResources().getColor(R.color.site_status_dark_gray));
 
-                viewHolder.activateCoffeeSiteButton.setEnabled(true);
-                viewHolder.activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+                viewHolder.activateDeactivateCoffeeSiteButton.setEnabled(true);
+                viewHolder.activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
 
-                viewHolder.deactivateCoffeeSiteButton.setEnabled(false);
-                viewHolder.deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_gray_36);
                 break;
-            default:
-                viewHolder.statusView.setText(this.mValues.get(position).getStatusZaznamu().toString());
+            default: // CANCELED too, all buttons disabled.
+                viewHolder.statusView.setText(coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "");
+                enableDisableAllButtons(viewHolder, false);
         }
 
-        if (!this.mValues.get(position).getMesto().isEmpty()) {
-            viewHolder.cityView.setText(this.mValues.get(position).getMesto());
-        }
-
-        // Set CoffeeSite's image
-        if (!this.mValues.get(position).getMainImageURL().isEmpty()) {
-            if (!offlineModeOn) {
-                Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                             .fit().placeholder(R.drawable.kafe_backround_120x160)
-                             .into(viewHolder.siteFoto);
-            } else {
-                Picasso.get().load(ImageUtil.getImageFile(mParentActivity.getApplicationContext(), ImageUtil.COFFEESITE_IMAGE_DIR, this.mValues.get(position).getMainImageFileName()))
-                        .fit().placeholder(R.drawable.kafe_backround_120x160)
-                        .into(viewHolder.siteFoto);
-            }
+        String cityName = coffeeSite.getMesto();
+        if (cityName != null && !cityName.isEmpty()) {
+            viewHolder.cityView.setText(cityName);
+            viewHolder.cityView.setVisibility(View.VISIBLE);
         } else {
-            viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+            viewHolder.cityView.setText("");
+            viewHolder.cityView.setVisibility(View.GONE);
         }
 
         // Set CoffeeSite instance of this RecyclerView item as a tag to all buttons
         // to be available later in button's onClick methods
-        viewHolder.editCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.activateCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.deactivateCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.cancelCoffeeSiteButton.setTag(this.mValues.get(position));
-        viewHolder.insertCommentButton.setTag(this.mValues.get(position));
+        viewHolder.editCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.activateDeactivateCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.cancelCoffeeSiteButton.setTag(coffeeSite);
+        viewHolder.insertCommentButton.setTag(coffeeSite);
 
         // Foto and main Label with CoffeeSite name are clickable
-        viewHolder.siteFoto.setTag(this.mValues.get(position));
+        viewHolder.siteFoto.setTag(coffeeSite);
         viewHolder.siteFoto.setOnClickListener(mOnClickListenerToCoffeeSiteImageActivityStart);
+        viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160); // default image
 
-        viewHolder.csNameView.setTag(this.mValues.get(position));
+        viewHolder.csNameView.setTag(coffeeSite);
         viewHolder.csNameView.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
-        viewHolder.createdOnLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.createdOnLinearLayout.setTag(coffeeSite);
         viewHolder.createdOnLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
-        viewHolder.locationAndStatusLinearLayout.setTag(this.mValues.get(position));
+        viewHolder.locationAndStatusLinearLayout.setTag(coffeeSite);
         viewHolder.locationAndStatusLinearLayout.setOnClickListener(mOnClickListenerToCoffeeSiteDetailActivityStart);
 
-        viewHolder.activateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeActivated());
-        viewHolder.deactivateCoffeeSiteButton.setEnabled(this.mValues.get(position).canBeDeactivated());
+        viewHolder.notSavedOnServerMark.setVisibility(coffeeSite.isSavedOnServer() ? View.GONE : View.VISIBLE);
 
-        // If OFFLINE mode is on, all buttons are INVISIBLE/GONE
-        if (offlineModeOn) {
-            viewHolder.editCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.activateCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.deactivateCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.cancelCoffeeSiteButton.setVisibility(View.GONE);
-            viewHolder.insertCommentButton.setVisibility(View.GONE);
+        // Set CoffeeSite's image
+        boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
+        String mainImageUrl = getDisplayMainImageUrl(coffeeSite);
+        if (isOnline && !mainImageUrl.isEmpty()) {
+            Picasso.get().load(mainImageUrl)
+                         .fit().placeholder(R.drawable.kafe_backround_120x160)
+                         .into(viewHolder.siteFoto);
         }
+        if (!isOnline || mainImageUrl.isEmpty()) {
+            File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite);
+            if (coffeeSiteImageFile.exists()) {
+                Picasso.get().load(coffeeSiteImageFile)
+                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .into(viewHolder.siteFoto);
+            } else {
+                viewHolder.siteFoto.setImageResource(R.drawable.kafe_backround_120x160);
+            }
+        }
+    }
+
+    @NonNull
+    private String getDisplayMainImageUrl(@NonNull CoffeeSite coffeeSite) {
+        String mainImageUrl = normalizeMainImageUrl(coffeeSite.getMainImageURL());
+        if (!mainImageUrl.isEmpty()) {
+            coffeeSite.setMainImageURL(mainImageUrl);
+            return mainImageUrl;
+        }
+
+        if (coffeeSite.getId().isEmpty() || !coffeeSite.isSavedOnServer()) {
+            return "";
+        }
+
+        mainImageUrl = BuildConfig.IMAGES_API_PUBLIC_URL
+                + "bytes/object/?objectExtId=" + coffeeSite.getId()
+                + "&type=main&size=mid";
+        coffeeSite.setMainImageURL(mainImageUrl);
+        return mainImageUrl;
+    }
+
+    @NonNull
+    private String normalizeMainImageUrl(String originalUrl) {
+        if (originalUrl == null || originalUrl.isEmpty()) {
+            return "";
+        }
+
+        if (originalUrl.startsWith(BuildConfig.IMAGES_API_PUBLIC_URL)
+                || originalUrl.startsWith("https://coffeecompass.cz/api/v1/images/")) {
+            return originalUrl;
+        }
+
+        Uri uri = Uri.parse(originalUrl);
+        String path = uri.getEncodedPath();
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+
+        String relativePath = path;
+        String imagesPathPrefix = "/api/v1/images/";
+        int imagesPrefixIndex = path.indexOf(imagesPathPrefix);
+        if (imagesPrefixIndex >= 0) {
+            relativePath = path.substring(imagesPrefixIndex + imagesPathPrefix.length());
+        } else if (relativePath.startsWith("/")) {
+            relativePath = relativePath.substring(1);
+        }
+
+        String rebuiltUrl = BuildConfig.IMAGES_API_PUBLIC_URL + relativePath;
+        String query = uri.getEncodedQuery();
+        if (query != null && !query.isEmpty()) {
+            rebuiltUrl += "?" + query;
+        }
+        return rebuiltUrl;
+    }
+
+    private void enableDisableAllButtons(ViewHolder viewHolder, boolean enable) {
+        viewHolder.editCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.activateDeactivateCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.cancelCoffeeSiteButton.setVisibility(enable ? View.VISIBLE : View.GONE);
+        viewHolder.insertCommentButton.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     /**
      * Show the dialog to confirm CoffeeSite cancelation
      */
-    private void showConfirmDeleteAccountDialog() {
+    private void showConfirmCanceCoffeeSiteDialog() {
         // Create an instance of the dialog fragment and show it
         CancelCoffeeSiteDialogFragment dialog = new CancelCoffeeSiteDialogFragment();
         dialog.show(mParentActivity.getSupportFragmentManager(), "CancelCoffeeSiteDialogFragment");
@@ -348,7 +389,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      */
     private void showInsertAuthorsCommentDialog() {
         // Create an instance of the dialog fragment and show it
-        //Passes CoffeeSite's author comment into the dialog
+        // Passes CoffeeSite's author comment into the dialog
         InsertAuthorCommentDialogFragment dialog = newInstance(this.selectedCoffeeSite.getUvodniKoment());
         dialog.show(mParentActivity.getSupportFragmentManager(), "InsertAuthorCommentDialogFragment");
     }
@@ -367,9 +408,25 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     /* ********************************************************************* */
 
     void onCancelCoffeeSiteDialogPositiveClick() {
-        if (Utils.isOnline()) {
+        // Only newly created and not saved on server CoffeeSite can be deleted from DB
+        if (!selectedCoffeeSite.isSavedOnServer()) {
+            if (!selectedCoffeeSite.isStatusZaznamuAvailable()) { // newly created site
+                coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
+            } else { // modified site
+                // means modification was cancelled - keep previously modified site as unmodified id DB
+                coffeeSiteCUDOperationsService.cancelUpdateInDB(selectedCoffeeSite);
+            }
+            // applies to both newly created and/or modified
+            showCoffeeSiteCancelSuccess();
+            // to ensure correct refresh of the RecycleView list after CoffeeSite deleteUser
+            modifiedCoffeeSite = selectedCoffeeSite;
+            updateRecyclerViewItemRemoved();
+            return;
+        }
+
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             if (coffeeSiteStatusChangeService != null) {
-                mParentActivity.showProgressbarAndDisableMenuItems();
+                mParentActivity.showProgressbar();
                 coffeeSiteStatusChangeService.cancel(selectedCoffeeSite);
             }
         } else {
@@ -382,27 +439,27 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     void onInsertAuthorCommentDialogPositiveClick(InsertAuthorCommentDialogFragment dialog) {
         if (dialog != null && !dialog.getAuthorComment().equals(selectedCoffeeSite.getUvodniKoment())) {
-            if (Utils.isOnline()) {
-                if (coffeeSiteStatusChangeService != null) {
-                    mParentActivity.showProgressbarAndDisableMenuItems();
-                    updatingCommentOnly = true;
-                    selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
+            if (coffeeSiteCUDOperationsService != null) {
+                mParentActivity.showProgressbar();
+                updatingCommentOnly = true;
+                selectedCoffeeSite.setUvodniKoment(dialog.getAuthorComment());
+                if (selectedCoffeeSite.isStatusZaznamuAvailable()) {
                     coffeeSiteCUDOperationsService.update(selectedCoffeeSite);
+                } else {
+                    coffeeSiteCUDOperationsService.updateInDB(selectedCoffeeSite);
+                    mParentActivity.hideProgressbar();
                 }
-            } else {
-                Utils.showNoInternetToast(mParentActivity.getApplicationContext());
             }
         }
     }
 
-    void onInsertAuthorCommentDialogNegativeClick(InsertAuthorCommentDialogFragment dialog) {
-    }
+    void onInsertAuthorCommentDialogNegativeClick(InsertAuthorCommentDialogFragment dialog) {}
 
     /* *************************************************** */
 
     @Override
     public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
-        mParentActivity.hideProgressbarAndEnableMenuItems();
+        mParentActivity.hideProgressbar();
         modifiedCoffeeSite = activeCoffeeSite;
 
         Log.i(TAG, "Activation success?: " + error.isEmpty());
@@ -417,12 +474,17 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     @Override
     public void onCoffeeSiteDeactivated(CoffeeSite inactiveCoffeeSite, String error) {
-        mParentActivity.hideProgressbarAndEnableMenuItems();
+        mParentActivity.hideProgressbar();
         modifiedCoffeeSite = inactiveCoffeeSite;
 
         Log.i(TAG, "Deactivate success?: " + error.isEmpty());
         if (!error.isEmpty()) {
-            showCoffeeSiteDeactivateFailure(error);
+            if (deleteCoffeeSiteLocallyIfMissingOnServer(error)) {
+                showCoffeeSiteCancelSuccess();
+                updateRecyclerViewItemRemoved();
+            } else {
+                showCoffeeSiteDeactivateFailure(error);
+            }
         }
         else {
             showCoffeeSiteDeactivateSuccess();
@@ -432,12 +494,17 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
     @Override
     public void onCoffeeSiteCanceled(CoffeeSite canceledCoffeeSite, String error) {
-        mParentActivity.hideProgressbarAndEnableMenuItems();
+        mParentActivity.hideProgressbar();
         modifiedCoffeeSite = canceledCoffeeSite;
 
         Log.i(TAG, "Cancel success?: " + error.isEmpty());
         if (!error.isEmpty()) {
-            showCoffeeSiteCancelFailure(error);
+            if (deleteCoffeeSiteLocallyIfMissingOnServer(error)) {
+                showCoffeeSiteCancelSuccess();
+                updateRecyclerViewItemRemoved();
+            } else {
+                showCoffeeSiteCancelFailure(error);
+            }
         }
         else {
             showCoffeeSiteCancelSuccess();
@@ -446,13 +513,42 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     }
 
     /**
-     * Pomocna metoda to remove CANCELED elements from the list
+     * If server reports the CoffeeSite no longer exists, remove the stale local record too.
+     */
+    private boolean deleteCoffeeSiteLocallyIfMissingOnServer(String error) {
+        if (!isCoffeeSiteMissingOnServer(error) || selectedCoffeeSite == null) {
+            return false;
+        }
+
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.deleteFromDB(selectedCoffeeSite);
+        }
+        mParentActivity.removeCoffeeSiteFromCachedLists(selectedCoffeeSite);
+        modifiedCoffeeSite = selectedCoffeeSite;
+        Log.i(TAG, "CoffeeSite missing on server, deleting local DB record too. ID=" + selectedCoffeeSite.getId());
+        return true;
+    }
+
+    private boolean isCoffeeSiteMissingOnServer(String error) {
+        if (error == null || error.isEmpty()) {
+            return false;
+        }
+
+        String normalizedError = error.toLowerCase(Locale.ROOT);
+        return normalizedError.contains("no value present")
+               || normalizedError.contains("not found")
+               || normalizedError.contains("does not exist")
+               || normalizedError.contains("neexist");
+    }
+
+    /**
+     * Helper method to remove CANCELED elements from the list.
      */
     private List<CoffeeSite> removeCanceledElements(List<CoffeeSite> inputCoffeeSiteList) {
         Iterator<CoffeeSite> iter = inputCoffeeSiteList.iterator();
         while (iter.hasNext()) {
             CoffeeSite p = iter.next();
-            if (p.getStatusZaznamu().toString().equalsIgnoreCase("CANCELED")) {
+            if (p != null && "CANCELED".equalsIgnoreCase(p.getStatusZaznamu() != null ? p.getStatusZaznamu().toString() : "")) {
                 iter.remove();
             }
         }
@@ -478,6 +574,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     void updateEditedCoffeeSite(CoffeeSite editedCoffeeSite, int position) {
         this.selectedCoffeeSite = editedCoffeeSite;
         this.selectedPosition = position;
+        if (selectedCoffeeSite != null && !selectedCoffeeSite.getMainImageURL().isEmpty()) {
+            Picasso.get().invalidate(selectedCoffeeSite.getMainImageURL());
+        }
         mValues.set(selectedPosition, selectedCoffeeSite);
         this.notifyItemChanged(selectedPosition);
     }
@@ -495,41 +594,63 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         this.notifyItemChanged(selectedPosition);
     }
 
-    /** ========== Buttons onClick methods =============== **/
+    /**
+     * Called from parent activity, if CoffeeSite was uploaded to server.
+     *
+     * @param editedCoffeeSite
+     */
+    public void updateCoffeeSiteAfterUpload(CoffeeSite uploadedCoffeeSite) {
+        int position = mValues.indexOf(uploadedCoffeeSite);
+        mValues.set(position, uploadedCoffeeSite);
+        this.notifyItemChanged(position);
+    }
+
+    /** ========== Buttons onClick handler methods =============== **/
 
     /** Assigned to buttons in mycoffeesite_list_content.xml editor **/
 
     private void onEditButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
         selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
-        activityIntent.putExtra("coffeeSite", (Parcelable) selectedCoffeeSite);
-        activityIntent.putExtra("coffeeSitePosition", selectedPosition);
 
+        if (!selectedCoffeeSite.isSavedOnServer()) {
+            DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(mParentActivity.getApplicationContext());
+            if (!dataForOfflineModePreferenceHelper.getCSEntitiesDownloaded()) {
+                Snackbar mySnackbar = Snackbar.make(v, R.string.data_for_offline_coffee_site_create_not_available, Snackbar.LENGTH_LONG);
+                mySnackbar.show();
+                return;
+            }
+        }
+
+        goToEditCoffeeSiteActivity(selectedCoffeeSite);
+    }
+
+    private void goToEditCoffeeSiteActivity(CoffeeSite coffeeSite) {
+        Intent activityIntent = new Intent(mParentActivity, CreateCoffeeSiteActivity.class);
+        activityIntent.putExtra("coffeeSite", (Parcelable) coffeeSite);
+        activityIntent.putExtra("coffeeSitePosition", selectedPosition);
         mParentActivity.startActivityForResult(activityIntent, EDIT_COFFEESITE_REQUEST);
     }
 
 
-    private void onActivateButtonClick(View v) {
-        if (Utils.isOnline()) {
+    private void onActivateDeactivateButtonClick(View v) {
+        if (Utils.isOnline(mParentActivity.getApplicationContext())) {
             selectedCoffeeSite = (CoffeeSite) v.getTag();
             selectedPosition = mValues.indexOf(selectedCoffeeSite);
-            if (coffeeSiteStatusChangeService != null) {
-                mParentActivity.showProgressbarAndDisableMenuItems();
-                coffeeSiteStatusChangeService.activate(selectedCoffeeSite);
-            }
-        } else {
-            Utils.showNoInternetToast(mParentActivity.getApplicationContext());
-        }
-    }
 
-    private void onDeactivateButtonClick(View v) {
-        if (Utils.isOnline()) {
-            selectedCoffeeSite = (CoffeeSite) v.getTag();
-            selectedPosition = mValues.indexOf(selectedCoffeeSite);
-            if (coffeeSiteStatusChangeService != null) {
-                mParentActivity.showProgressbarAndDisableMenuItems();
-                coffeeSiteStatusChangeService.deactivate(selectedCoffeeSite);
+            if (selectedCoffeeSite.isSavedOnServer()) {
+                if (coffeeSiteStatusChangeService != null) {
+                    if (selectedCoffeeSite.canBeActivated()) {
+                        mParentActivity.showProgressbar();
+                        coffeeSiteStatusChangeService.activate(selectedCoffeeSite);
+                    }
+                    if (selectedCoffeeSite.canBeDeactivated()) {
+                        mParentActivity.showProgressbar();
+                        coffeeSiteStatusChangeService.deactivate(selectedCoffeeSite);
+                    }
+                }
+            } else {
+                Utils.showSiteNotSavedOnServerToast(mParentActivity.getApplicationContext());
             }
         } else {
             Utils.showNoInternetToast(mParentActivity.getApplicationContext());
@@ -539,8 +660,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
     private void onCancelButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
         selectedPosition = mValues.indexOf(selectedCoffeeSite);
-        showConfirmDeleteAccountDialog();
+        showConfirmCanceCoffeeSiteDialog();
     }
+
 
     private void onInsertCommentButtonClick(View v) {
         selectedCoffeeSite = (CoffeeSite) v.getTag();
@@ -602,7 +724,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
             mValues.remove(selectedCoffeeSite);
             this.notifyItemRemoved(selectedPosition);
         }
@@ -612,7 +734,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
 
             mValues.set(selectedPosition, modifiedCoffeeSite);
             this.notifyItemChanged(selectedPosition);
@@ -623,7 +745,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         int position = mValues.indexOf(selectedCoffeeSite);
         if (position == selectedPosition
             && modifiedCoffeeSite != null && selectedCoffeeSite != null
-            && modifiedCoffeeSite.getId() == selectedCoffeeSite.getId()) {
+            && Objects.equals(modifiedCoffeeSite.getId(), selectedCoffeeSite.getId())) {
             mValues.set(selectedPosition, modifiedCoffeeSite);
             this.notifyItemChanged(selectedPosition);
         }
@@ -638,6 +760,12 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
     }
 
+    public void invalidateImageUrl(CoffeeSite coffeeSite) {
+        String imageUrl = getDisplayMainImageUrl(coffeeSite);
+        if (!imageUrl.isEmpty()) {
+            Picasso.get().invalidate(imageUrl);
+        }
+    }
 
     /**
      * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter
@@ -650,6 +778,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         final TextView statusView; // to show record status of the CoffeeSite
         final TextView cityView; // to show city name of the CoffeeSite
 
+        final ImageView notSavedOnServerMark; // shows red mark if the CoffeeSite is not saved on server, yet
+
         /**
          * To insert listener to whole group of TextViews
          */
@@ -660,8 +790,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
 
         /* Buttons */
         final AppCompatImageButton editCoffeeSiteButton;
-        final AppCompatImageButton activateCoffeeSiteButton;
-        final AppCompatImageButton deactivateCoffeeSiteButton;
+        final AppCompatImageButton activateDeactivateCoffeeSiteButton;
         final AppCompatImageButton cancelCoffeeSiteButton;
         final AppCompatImageButton insertCommentButton;
 
@@ -679,18 +808,15 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
             statusView = (TextView) view.findViewById(R.id.cs_status_TextView);
             cityView = (TextView) view.findViewById(R.id.city_TextView);
             siteFoto = (ImageView) view.findViewById(R.id.csListFotoImageView);
+            notSavedOnServerMark = (ImageView) view.findViewById(R.id.notSavedOnServerImageView);
 
             editCoffeeSiteButton = view.findViewById(R.id.button_edit_coffeesite);
             editCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onEditButtonClick);
 
-            activateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
+            activateDeactivateCoffeeSiteButton = view.findViewById(R.id.button_activate_coffeesite);
             // set original icon
-            activateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
-            activateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateButtonClick);
-
-            deactivateCoffeeSiteButton = view.findViewById(R.id.button_deactivate_coffeesite);
-            deactivateCoffeeSiteButton.setImageResource(R.drawable.ic_pause_circle_outline_black_36);
-            deactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onDeactivateButtonClick);
+            activateDeactivateCoffeeSiteButton.setImageResource(R.drawable.ic_play_circle_outline_green_36);
+            activateDeactivateCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onActivateDeactivateButtonClick);
 
             cancelCoffeeSiteButton = view.findViewById(R.id.button_cancel_coffeesite);
             cancelCoffeeSiteButton.setOnClickListener(MyCoffeeSiteItemRecyclerViewAdapter.this::onCancelButtonClick);

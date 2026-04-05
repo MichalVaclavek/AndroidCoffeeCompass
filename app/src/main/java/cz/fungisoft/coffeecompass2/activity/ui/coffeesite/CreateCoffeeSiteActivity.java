@@ -1,19 +1,16 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -31,6 +28,15 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,44 +56,55 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
-import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceCUDOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteCreateFormState;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteCreateModel;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteEntitiesViewModel;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
+import cz.fungisoft.coffeecompass2.asynctask.image.GetImageObjectAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteNewApiAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadNewApiAsyncTask;
+import cz.fungisoft.coffeecompass2.entity.ImageFile;
+import cz.fungisoft.coffeecompass2.entity.ImageObject;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSort;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteType;
+import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesServiceConnector;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
-import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageServiceConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesServiceConnectionListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceCallResultListener;
-import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteImageServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteServicesConnectionListener;
+import cz.fungisoft.coffeecompass2.services.UserAccountService;
+import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
+import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.utils.FileCompressor;
+import cz.fungisoft.coffeecompass2.utils.ImageUtil;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
-import cz.fungisoft.coffeecompass2.entity.CoffeeSiteEntity;
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
+import io.reactivex.disposables.CompositeDisposable;
 
-//import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
+import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSiteItemRecyclerViewAdapter.EDIT_COFFEESITE_REQUEST;
+import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity.CREATE_COFFEESITE_REQUEST;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService.StatusChangeOperation.COFFEE_SITE_ACTIVATE;
 
 
@@ -96,24 +113,30 @@ import static cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService
  * where the data of already created CoffeeSite can be edited.
  * It offers 2 functions in every "mode" (MODE_CREATE and MODE_MODIFY)
  * in BottomNavigationMenu.
+ * <p>
  * The functions for MODE_CREATE are: Save, Save and Activate, Delete photo
  * The functions for MODE_MODIFY are: Save and Delete photo.
+ * <p>
  * Implements many interfaces as many services and their results are to be observed.
  */
 public class CreateCoffeeSiteActivity extends ActivityWithLocationService
-                                      implements CoffeeSiteImageServiceCallResultListener,
-                                                 CoffeeSiteImageServiceConnectionListener,
+                                      implements CoffeeSiteImageManageListener,
                                                  TimePickerFragment.EnterTimeDialogListener,
                                                  SaveActivateCoffeeSiteDialogFragment.SaveActivateCoffeeSiteDialogListener,
                                                  DeleteCoffeeSiteImageDialogFragment.DeleteCoffeeSiteImageDialogListener,
                                                  PropertyChangeListener,
-                                                 CoffeeSiteEntitiesServiceConnectionListener,
-                                                 CoffeeSiteEntitiesServiceOperationsListener,
                                                  CoffeeSiteServicesConnectionListener,
                                                  CoffeeSiteServiceCUDOperationsListener,
-                                                 CoffeeSiteServiceStatusOperationsListener {
+                                                 CoffeeSiteServiceStatusOperationsListener,
+                                                 UserAccountServiceConnectionListener {
 
     private static final String TAG = "CreateCoffeeSiteAct";
+    private static final String IMAGE_TYPE_MAIN = "main";
+    private static final String IMAGE_TYPE_OTHER = "other";
+
+    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
+    private CoffeeSiteCreateModel createCoffeeSiteViewModel;
+
 
     @BindView(R.id.time_od_input_editText)
     TextInputEditText openingFromTimeEditText;
@@ -128,8 +151,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     TextInputEditText latitudeEditText;
     @BindView(R.id.longitude_input_edittext)
     TextInputEditText longitudeEditText;
-
-    private CoffeeSiteCreateModel createCoffeeSiteViewModel;
 
     // All other View input elements needed to create CoffeeSite
     @BindView(R.id.city_edittext)
@@ -168,8 +189,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     MenuItem imageDeleteMenuItem;
     MenuItem saveMenuItem; // save and/or activate
+    MenuItem manageImagesMenuItem;
 
     private Location currentLocation;
+    private boolean firstLocationDetection = true;
 
     private static final long MAX_STARI_DAT = 1000 * 60;
     private static final float LAST_PRESNOST = 100.0f;
@@ -180,15 +203,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private LatLng selectedCoffeeSiteLocation;
 
 
-    // Don't attempt to unbind from the service unless the client has received some
-    // information about the service's state.
-    private boolean mShouldUnbindCoffeeSiteImageService;
-
-    /**
-     * Service for uploading and deleting CoffeeSite's image over REST
-     */
-    protected cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService coffeeSiteImageService;
-    private CoffeeSiteImageServiceConnector coffeeSiteImageServiceConnector;
+    // UserAccountService binding
+    protected UserAccountService userAccountService;
+    private UserAccountServiceConnector userAccountServiceConnector;
+    private boolean mShouldUnbindUserAccountService;
 
     protected CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteCUDOperationsService> coffeeSiteCUDOperationsServiceConnector;
@@ -196,37 +214,57 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
     private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
 
-    protected CoffeeSiteEntitiesService coffeeSiteEntitiesService;
-    private CoffeeSiteEntitiesServiceConnector coffeeSiteEntitiesServiceConnector;
-
+    /**
+     * CoffeeSite being created or edited by this Activity
+     */
     private CoffeeSite currentCoffeeSite;
+
+    private CoffeeSite pendingImageOperationCoffeeSite;
+    private boolean pendingImageDeleteLookup = false;
+
+    // need to keep CoffeeSite id in case the CoffeeSite is only in phone DB, not saved on server,
+    // and ID has to be changed to 0 before saving on server. After return from saving on server,
+    // we need to restore original local CoffeeSie DB id for this CoffeeSite.
+    private long currentCoffeeSiteID = 0;
 
     private int coffeeSitePositionInRecyclerView;
 
-    private String[] SITE_TYPES;
-    private String[] LOCATION_TYPES;
+    private String[] SITE_TYPES_LOCAL; // array of CoffeeSite types read from local file
+    private List<String> coffeeSiteTypesAvailable; // list of CoffeeSite types. either same as SITE_TYPES_LOCAL or values read from DB
 
-    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
+    private String[] LOCATION_TYPES_LOCAL; // array of location types read from local file
+    private List<String> siteLocationTypesAvailable; // list of location types. either same as LOCATION_TYPES_LOCAL or values read from DB
 
     /**
      * To detect if the CoffeeSite/Activity is in
      * mode for Creation of a new CoffeeSite or
      * if it modifies already created CoffeeSites.
      */
-    private static final int MODE_CREATE = 0;
-    private static final int MODE_MODIFY = 1;
+    public static final int MODE_CREATE = 0;
+    public static final int MODE_MODIFY = 1;
+    public static final int MODE_CREATE_FROM_MYCOFFEESITESACTIVITY = 2;
+    public static final int MODE_MODIFY_FROM_DETAILACTIVITY = 3;
 
     /**
-     * Default mode is create
+     * Default mode is create when called from MainActivity
      */
     private int mode = MODE_CREATE;
 
     /**
-     * To indicate, that user is trying to enter longitude and latitude manually
-     * Used in CREATE mode to block automatic overwriting of long. lat. text view
-     * in such manual enter mode
+     * To indicate, that longitude and latitude TextViews should be entered using LocationService.
+     * Used in both CREATE and MODIFY mode to block automatic overwriting of longitudeTextView or latitudeTextView,
+     * when user is editing them.
      */
-    private boolean locationEnterManualMode = false;
+    private boolean locationEnterAutomaticMode = true; // default true i.e. when CREATE mode is on i.e. new CoffeeSite is being created
+
+    /**
+     * To indicate, that city and street TextViews should be entered using GeocodingService.
+     * Used in both CREATE and MODIFY mode to block automatic overwriting of city/street textViews,
+     * when user is editing them.<br>
+     * This flag is usually changing exactly as locationEnterAutomaticMode flag, but we want to
+     * keep them seaparatelly for possible future use.
+     */
+    private boolean cityOrStreetEnterAutomaticMode = true; // default true i.e. when CREATE mode is on i.e. new CoffeeSite is being created
 
     /**
      * To show snackbar
@@ -253,68 +291,56 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @BindView(R.id.create_modify_progressBar)
     ProgressBar saveCoffeeSiteProgressBar;
 
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_coffee_site);
-
-        coffeeSiteEntitiesViewModel = ViewModelProviders.of(this).get(CoffeeSiteEntitiesViewModel.class);
+        contextView = findViewById(R.id.coffeesite_create_main_scrollview);
 
         ButterKnife.bind(this);
 
-        contextView = findViewById(R.id.coffeesite_create_main_scrollview);
+        doBindUserAccountService();
+        doBindCoffeeSiteCUDOperationsService();
+        doBindCoffeeSiteStatusChangeService();
 
-        createCoffeeSiteViewModel = ViewModelProviders.of(this, new CoffeeSiteViewModelFactory())
-                .get(CoffeeSiteCreateModel.class);
+        coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
 
+        // Enable/disable bottom navigation menu items first, can be modifyed after CoffeeSite is read from bundle
+        imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
+        imageDeleteMenuItem.setEnabled(false); // default
+        saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
+        saveMenuItem.setEnabled(true);
+        saveMenuItem.setTitle(R.string.coffeesite_save_menu_item);
+        manageImagesMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_manage_images);
+        manageImagesMenuItem.setEnabled(false); // enabled only in MODIFY mode for saved CoffeeSites
+
+        mode = MODE_CREATE; // default mode (when Called from MainActivity)
+
+        // Setup mode value according the way this Activity was called from other activities
         Bundle bundle = this.getIntent().getExtras();
-        if (bundle != null) { // When called from MyCoffeeSitesListActivity ...
+        if (bundle != null) { // When called from MyCoffeeSitesListActivity or from CoffeeSiteDetailActivity
+            int requestCode = bundle.getInt("requestCode");
+            if (requestCode == CREATE_COFFEESITE_REQUEST) {
+                mode = MODE_CREATE_FROM_MYCOFFEESITESACTIVITY;
+            }
             currentCoffeeSite = (CoffeeSite) bundle.getParcelable("coffeeSite");
             coffeeSitePositionInRecyclerView = bundle.getInt("coffeeSitePosition");
-        }
-
-        /* It can changed when called from SelectedLocationMapActivity
-         * Probably not needed here as the return from SelectedLocationMapActivity is
-         * processed in onActivityResult() method
-         */
-        if (bundle != null) {
-            selectedCoffeeSiteLocation = (LatLng) getIntent().getExtras().get("selectedLocation");
-            // Location selected by user
-            // stop automatic location refresh in the respective TextInputs
-            // and insert selected coordinates in the input
-            if (selectedCoffeeSiteLocation != null) {
-                locationEnterManualMode = true;
-                showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+            // We are editing site here - insert input values to View from currentCoffeeSite
+            // "Edit mode"
+            if (currentCoffeeSite != null) {
+                mode = MODE_MODIFY;
+                if (coffeeSitePositionInRecyclerView == -1) { // called from CoffeeSiteDetailActivity
+                    mode = MODE_MODIFY_FROM_DETAILACTIVITY; // this is to go back to CoffeeSiteDetailActivity if called from there
+                }
+                setupViewToModify(currentCoffeeSite);
             }
         }
 
-        // Enable/disable bottom navigation menu items
-        imageDeleteMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_foto_delete);
-        saveMenuItem = bottomNavigation.getMenu().findItem(R.id.navigation_ulozit_and_or_aktivovat); // save and/or activate
-
-        // Enable bottom navigation menu items
-        saveMenuItem.setEnabled(true);
-        saveMenuItem.setTitle(R.string.coffeesite_save_activate);
-
-        // We are editing site here - insert input values to View from currentCoffeeSite
-        // "Edit mode"
-        if (currentCoffeeSite != null && currentCoffeeSite.getId() != 0) {
-            mode = MODE_MODIFY;
-            fillViewWithCoffeeSiteData(currentCoffeeSite);
-
-            saveMenuItem.setTitle(R.string.save_coffeesite_updated);
-
-             // delete image button
-            imageDeleteMenuItem.setEnabled(!currentCoffeeSite.getMainImageURL().isEmpty());
-
-            if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-                Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
-            }
-        }
-
-        siteFotoView.setOnClickListener(createSitePhotoViewOnClickListener());
-        mapIconToOpenActivityView.setOnClickListener(mapIconToOpenActivityViewOnClickListener());
-
+        //*** Fill fixed data from DB - START ***
+        //new InsertEntitiesDataFromDBAsyncTask().execute();
         showCoffeeSiteTypes();
         showLocationTypes();
         showPriceRanges();
@@ -326,6 +352,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
         AutoCompleteTextView otvirackaDnyDropdown = findViewById(R.id.otviracka_dny_dropdown);
         otvirackaDnyDropdown.setAdapter(otvirackaDnyAdapter);
+        //*** Fill fixed data from DB - END ***
+
+        siteFotoView.setOnClickListener(createSitePhotoViewOnClickListener());
+        mapIconToOpenActivityView.setOnClickListener(mapIconToOpenActivityViewOnClickListener());
+
+        createCoffeeSiteViewModel = new ViewModelProvider(this, new CoffeeSiteViewModelFactory(getApplication())).get(CoffeeSiteCreateModel.class);
 
         // Listener for selecting items from Bottom navigation menu
         BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
@@ -334,48 +366,73 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.navigation_ulozit_and_or_aktivovat:
+
+                                // Check if locationType and sourceType are selected
+                                boolean errorInInput = false;
+                                if (locationTypeEditText.getText().toString().isEmpty()) {
+                                    locationTypeTextInputLayout.setError(getString(R.string.invalid_locationType));
+                                    errorInInput = true;
+                                }
+                                if (sourceTypeEditText.getText().toString().isEmpty()) {
+                                    sourceTypeTextInputLayout.setError(getString(R.string.invalid_coffeesite_type));
+                                    errorInInput = true;
+                                }
+
+                                if (errorInInput) {
+                                    Toast.makeText(getApplicationContext(),
+                                            getString(R.string.create_site_missing_attributes),
+                                            Toast.LENGTH_SHORT).show();
+                                    return true;
+                                }
                                 // Create CoffeeSite instance from model
-                                if (mode == MODE_CREATE) {
-                                    // Check if locationType and sourceType are selected
-                                    boolean errorInInput = false;
-                                    if (locationTypeEditText.getText().toString().isEmpty()) {
-                                        locationTypeTextInputLayout.setError(getString(R.string.invalid_locationType));
-                                        errorInInput = true;
-                                    }
-                                    if (sourceTypeEditText.getText().toString().isEmpty()) {
-                                        sourceTypeTextInputLayout.setError(getString(R.string.invalid_coffeesite_type));
-                                        errorInInput = true;
-                                    }
-
-                                    if (errorInInput) return true;
-
-                                    currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null);
-
-                                    // Show dialog to choose, if the CoffeeSite should be only saved
-                                    // or saved and activated
-                                    if (Utils.isOnline()) {
+                                if (mode == MODE_CREATE || mode == MODE_CREATE_FROM_MYCOFFEESITESACTIVITY) {
+                                    if (Utils.isOnline(getApplicationContext())) {
+                                        // Show dialog to choose, if the CoffeeSite should be only saved
+                                        // or saved and activated
+                                        currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(null, coffeeSiteEntitiesViewModel);
+                                        if (imagePhotoFile != null) {
+                                            currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
+                                        }
                                         SaveActivateCoffeeSiteDialogFragment dialog = new SaveActivateCoffeeSiteDialogFragment();
                                         dialog.show(getSupportFragmentManager(), "SaveActivateCoffeeSiteDialogFragment");
                                     } else {
-                                        Utils.showNoInternetToast(getApplicationContext());
+                                        // Create CoffeeSite in Offline mode and go to MyCoffeeSitesListActivity
+                                        new CreateUpdateCoffeeSiteAsyncTask(coffeeSiteEntitiesViewModel).execute(currentCoffeeSite);
                                     }
                                 }
-                                if (mode == MODE_MODIFY) {
-                                    currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite);
-                                    if (Utils.isOnline()) {
-                                        updateCoffeeSite(currentCoffeeSite);
+                                // Modify CoffeeSite
+                                if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
+                                    if (Utils.isOnline(getApplicationContext())) {
+                                        currentCoffeeSite = createOrUpdateCoffeeSiteFromViewModel(currentCoffeeSite, coffeeSiteEntitiesViewModel);
+                                        if (imagePhotoFile != null) {
+                                            currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
+                                        }
+                                        // if it is update (and save) of the CoffeeSite, which is not saved on server yet,
+                                        // then it is CREATE operation from server point of view.
+                                        if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()) {
+                                            mode = MODE_CREATE_FROM_MYCOFFEESITESACTIVITY;
+                                            currentCoffeeSite.saveId(); // save current DB id to be restored later, if save would fail
+                                            currentCoffeeSite.setLastEditUserName(null);
+                                            currentCoffeeSite.setHodnoceni(null);
+                                            saveCoffeeSite(currentCoffeeSite);
+                                        } else {
+                                            updateCoffeeSite(currentCoffeeSite);
+                                        }
                                     } else {
-                                        Utils.showNoInternetToast(getApplicationContext());
+                                        // Modify CoffeeSite in Offline mode
+                                        new CreateUpdateCoffeeSiteAsyncTask(coffeeSiteEntitiesViewModel).execute(currentCoffeeSite);
                                     }
                                 }
-
                                 return true;
 
                             case R.id.navigation_foto_delete:
                                 // Show dialog to choose if the CoffeeSite should be cancelled or not
                                 DeleteCoffeeSiteImageDialogFragment dialog = new DeleteCoffeeSiteImageDialogFragment();
                                 dialog.show(getSupportFragmentManager(), "DeleteCoffeeSiteImageDialogFragment");
+                                return true;
 
+                            case R.id.navigation_manage_images:
+                                openManageImagesActivity();
                                 return true;
                         }
                         return false;
@@ -436,6 +493,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                 createCoffeeSiteViewModel.coffeeSiteDataChanged(coffeeSiteNameEditText.getText().toString(),
                         longitudeEditText.getText().toString(), latitudeEditText.getText().toString());
+
                 if (!locationTypeEditText.getText().toString().isEmpty()) {
                     locationTypeTextInputLayout.setError(null);
                 }
@@ -451,7 +509,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         locationTypeEditText.addTextChangedListener(afterTextChangedListener);
         sourceTypeEditText.addTextChangedListener(afterTextChangedListener);
 
-        /**
+        // Listeners to inputTextFields to ensure keyboard hiding when focus lost
+        View.OnFocusChangeListener ofcListener = new MyFocusChangeListener();
+        coffeeSiteNameEditText.setOnFocusChangeListener(ofcListener);
+
+        /*
          * Special TextWatcher to watch if a user entered manually longitudeTextView or latitudeTextView
          */
         TextWatcher afterLongLatTextViewChangedListener = new TextWatcher() {
@@ -464,48 +526,85 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
 
-            // Validate input in createCoffeeSiteViewModel
             @Override
             public void afterTextChanged(Editable s) {
                 // Detect if the input of longitude or latitude was changed by setText or by user
                 if (longitudeEditText.getTag() == null || latitudeEditText.getTag() == null) {
                     // Value changed by user, because before setText() programmatically entered, the tag
-                    // is set to a special value
-                    locationEnterManualMode = true; // means from now on, ignore values entered programmatically in showCurrentLocationInView()
-                                                    // as user wants to enter values manually
+                    // is set to a special value.
+                    // means from now on, ignore values entered programmatically in showCurrentLocationInView()
+                    // as user wants to enter values manually
                     // but if both  textInputs are cleared, allow automatic enter again
-                    if (longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty()) {
-                        locationEnterManualMode = false;
-                    }
+                    locationEnterAutomaticMode = longitudeEditText.getText().toString().isEmpty() && latitudeEditText.getText().toString().isEmpty();
+                    cityOrStreetEnterAutomaticMode = locationEnterAutomaticMode; // only if location is deleted by user, then automatic city/street resolving is enabled
                 }
             }
         };
 
         latitudeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
-        locationTypeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
+        longitudeEditText.addTextChangedListener(afterLongLatTextViewChangedListener);
+
+        latitudeEditText.setOnFocusChangeListener(ofcListener);
+        longitudeEditText.setOnFocusChangeListener(ofcListener);
+
+        /*
+         * Special TextWatcher to watch if a user entered manually cityTextView or streetTextView
+         */
+        TextWatcher afterCityOrStreetTextViewChangedListener = new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Detect if the input of city and street name was changed by setText or by user
+                if (cityEditText.getTag() == null || streetEditText.getTag() == null) {
+                    // Value changed by user, because before setText() programmatically entered, the tag
+                    // user wants to change text - don't change it automatically.
+                    // only if longitude/latitude TextView is deleted completely, city and street can be changed automatically
+                    cityOrStreetEnterAutomaticMode = false;
+                }
+            }
+        };
+
+        cityEditText.addTextChangedListener(afterCityOrStreetTextViewChangedListener);
+        streetEditText.addTextChangedListener(afterCityOrStreetTextViewChangedListener);
+
+        cityEditText.setOnFocusChangeListener(ofcListener);
+        streetEditText.setOnFocusChangeListener(ofcListener);
 
         openingFromTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingFromTimeEditText, event));
         openingToTimeEditText.setOnTouchListener((view, event) -> showTimePickerDialog(openingToTimeEditText, event));
 
-        //Listenrs to inputTextFields to ensure keyboard hiding when focus lost
-        View.OnFocusChangeListener ofcListener = new MyFocusChangeListener();
-        coffeeSiteNameEditText.setOnFocusChangeListener(ofcListener);
-        cityEditText.setOnFocusChangeListener(ofcListener);
-        streetEditText.setOnFocusChangeListener(ofcListener);
-        latitudeEditText.setOnFocusChangeListener(ofcListener);
-        longitudeEditText.setOnFocusChangeListener(ofcListener);
-
-        doBindCoffeeSiteImageService();
-
-        doBindCoffeeSiteCUDOperationsService();
-        doBindCoffeeSiteStatusChangeService();
-
-        // To compress image/photo files of the CoffeeSIte
+        // To compress image/photo files of the CoffeeSite
         fileCompressor = new FileCompressor(this);
         // To detect, that user did not choose new image file yet
         imagePhotoFile = null;
     }
 
+    /**
+     * Helper method to setup Activity view when modifying
+     */
+    private void setupViewToModify(CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return;
+        }
+        locationEnterAutomaticMode = false; // don't change location automatically. wait until user deletes all location info.
+        cityOrStreetEnterAutomaticMode = false; // don't change city/street info automatically. wait until user deletes all location info.
+        restoreLocalImagesFromCoffeeSite(coffeeSite);
+        fillViewWithCoffeeSiteData(coffeeSite);
+
+        saveMenuItem.setEnabled(true);
+        saveMenuItem.setTitle(R.string.save_coffeesite_updated);
+        currentImageCount = !localImagePaths.isEmpty() ? localImagePaths.size() : (hasMainImage() ? 1 : 0);
+        refreshImageActionState();
+        refreshImageCountIfNeeded();
+    }
 
     /** Operations to start Photo or Image capture Intents and saving the result **** START ***/
 
@@ -515,9 +614,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private View.OnClickListener createSitePhotoViewOnClickListener() {
         View.OnClickListener retVal;
 
-        retVal = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        retVal = view -> {
+            if (hasMainImage()) {
+                if (canOpenManageImages()) {
+                    openManageImagesActivity();
+                }
+            } else {
                 selectImage();
             }
         };
@@ -542,17 +644,22 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     static final int REQUEST_TAKE_PHOTO = 100;
     static final int REQUEST_GALLERY_PHOTO = 101;
+    static final int REQUEST_MANAGE_IMAGES = 102;
 
-    private Uri photoURI;
     private File imagePhotoFile;
     private FileCompressor fileCompressor;
+    private int currentImageCount = 0;
+    private final ArrayList<String> localImagePaths = new ArrayList<>();
+    private final ArrayList<File> pendingCreateImageUploads = new ArrayList<>();
+    private CoffeeSite pendingCreatedCoffeeSite;
+    private int pendingCreateImageUploadIndex = -1;
+    private int pendingCreateImageUploadFailures = 0;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-
             switch (requestCode) {
                 case REQUEST_TAKE_PHOTO: {
                     // Compress taken photo
@@ -561,9 +668,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress photo file from camera.");
                     }
-                    // Show it in View
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
-                    imageDeleteMenuItem.setEnabled(true);
+                    showSelectedMainImage(imagePhotoFile);
                 }
                 break;
 
@@ -575,8 +680,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to compress image file from gallery.");
                     }
-                    Picasso.get().load(imagePhotoFile).into(siteFotoView);
-                    imageDeleteMenuItem.setEnabled(true);
+                    showSelectedMainImage(imagePhotoFile);
+                }
+                break;
+
+                case REQUEST_MANAGE_IMAGES: {
+                    handleManagedImagesResult(data);
                 }
                 break;
 
@@ -588,8 +697,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                     // stop automatic location refresh in the respective TextInputs
                     // and insert selected coordinates in the input
                     if (selectedCoffeeSiteLocation != null) {
-                        locationEnterManualMode = true;
                         showLocationInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+                        showCityStreetInView(selectedCoffeeSiteLocation.latitude, selectedCoffeeSiteLocation.longitude);
+                        locationEnterAutomaticMode = false;
+                        cityOrStreetEnterAutomaticMode = false;
                 }
                 break;
                 }
@@ -609,38 +720,38 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //File storageDir = getFilesDir();
+
         File image = File.createTempFile(imageFileName,  /* prefix */
                                    ".jpg",         /* suffix */
                                         storageDir      /* directory */
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        imagePhotoFile = image;
-        String currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            Log.e(TAG, "Create image file failed.", ex);
+        }
+        if (photoFile != null) {
+            imagePhotoFile = photoFile;
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    getString(R.string.file_provider),
+                    photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            takePictureIntent.setClipData(ClipData.newRawUri("", photoURI));
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.e(TAG, "Create image file failed.");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                photoURI = FileProvider.getUriForFile(this,
-                        getString(R.string.file_provider),
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            } catch (ActivityNotFoundException | SecurityException ex) {
+                Log.e(TAG, "No camera app available for image capture.", ex);
+                Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -660,80 +771,75 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     protected void onStart() {
         super.onStart();
-        // Lets bind CoffeeSiteEtitiesService and load all CoffeeSiteEntities
-        // in onCoffeeSiteEntitiesConnected() method
-        // TODO - Verify, if calling this in onResume() would be more convenient
-        doBindCoffeeSiteEntitiesService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshImageCountIfNeeded();
     }
 
     @Override
     protected void onStop() {
-        doUnbindCoffeeSiteEntitiesService();
+        mDisposable.clear();
         super.onStop();
     }
 
-    /******************* CoffeeSiteImageService ***************************************/
+    @Override
+    protected void onDestroy() {
+        doUnbindUserAccountService();
+        doUnbindCoffeeSiteCUDOperationsService();
+        doUnbindCoffeeSiteStatusChangeService();
+        super.onDestroy();
+    }
 
-    private void doBindCoffeeSiteImageService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
-        coffeeSiteImageServiceConnector = new CoffeeSiteImageServiceConnector();
-        coffeeSiteImageServiceConnector.addCoffeeSiteImageServiceConnectionListener(this);
+    // -------- UserAccountService binding --------
 
-        if (bindService(new Intent(this, CoffeeSiteImageService.class),
-                coffeeSiteImageServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUnbindCoffeeSiteImageService = true;
+    private void doBindUserAccountService() {
+        userAccountServiceConnector = new UserAccountServiceConnector();
+        userAccountServiceConnector.addUserAccountServiceConnectionListener(this);
+        if (bindService(new Intent(this, UserAccountService.class),
+                userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindUserAccountService = true;
         } else {
-            Log.e(TAG, "Error: The requested 'CoffeeSiteImageService' service doesn't " +
+            Log.e(TAG, "Error: The requested 'UserAccountService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
         }
     }
 
-
-    /**
-     * Called when CoffeeSiteImageService is Connected
-     */
-    @Override
-    public void onCoffeeSiteImageServiceConnected() {
-        coffeeSiteImageService = coffeeSiteImageServiceConnector.getCoffeeSiteImageService();
-        if (coffeeSiteImageService != null) {
-            coffeeSiteImageService.addImageOperationsResultListener(this);
+    private void doUnbindUserAccountService() {
+        if (mShouldUnbindUserAccountService) {
+            userAccountServiceConnector.removeUserAccountServiceConnectionListener(this);
+            unbindService(userAccountServiceConnector);
+            mShouldUnbindUserAccountService = false;
         }
     }
 
-    private void doUnbindCoffeeSiteImageService() {
-        if (mShouldUnbindCoffeeSiteImageService) {
-            if (coffeeSiteImageService != null) {
-                coffeeSiteImageService.removeImageOperationsResultListener(this);
-            }
-            // Release information about the service's state.
-            coffeeSiteImageServiceConnector.removeCoffeeSiteImageServiceConnectionListener(this);
-            unbindService(coffeeSiteImageServiceConnector);
-            mShouldUnbindCoffeeSiteImageService = false;
-        }
+    @Override
+    public void onUserAccountServiceConnected() {
+        userAccountService = userAccountServiceConnector.getUserLoginService();
+        Log.i(TAG, "UserAccountService connected.");
     }
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
-    /** which can be slected by user during new CoffeeSite creation **/
+    /** which can be selected by user during new CoffeeSite creation **/
+
     /* ----- START ------- */
 
     private void showCoffeeSiteTypes() {
         // Typ zdroje
-        SITE_TYPES = getResources().getStringArray(R.array.coffee_site_type);
-
-        final ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                new ArrayList<>(Arrays.asList(SITE_TYPES)));
+        SITE_TYPES_LOCAL = getResources().getStringArray(R.array.coffee_site_type);
+        coffeeSiteTypesAvailable =  new ArrayList<>(Arrays.asList(SITE_TYPES_LOCAL));
+        ArrayAdapter<String> siteTypesAdapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popoup_item,
+                coffeeSiteTypesAvailable); // default values
 
         coffeeSiteEntitiesViewModel.getAllCoffeeSiteTypes().observe(this, new Observer<List<CoffeeSiteType>>() {
             @Override
             public void onChanged(@Nullable final List<CoffeeSiteType> coffeeSiteTypes) {
-                // Update the cached copy of the words in the adapter.
-                siteTypesAdapter.clear();
+                // Update the cached copy of the words in the adapter by values from DB.
+                coffeeSiteTypesAvailable.clear();
                 for (CoffeeSiteType cst : coffeeSiteTypes) {
-                    siteTypesAdapter.add(cst.getCoffeeSiteType());
+                    coffeeSiteTypesAvailable.add(cst.getCoffeeSiteType());
                 }
             }
         });
@@ -746,17 +852,18 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     private void showLocationTypes() {
         // Typ lokality
-        LOCATION_TYPES = getResources().getStringArray(R.array.location_type);
-        final ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter(this, R.layout.dropdown_menu_popoup_item,
-                new ArrayList<>(Arrays.asList(LOCATION_TYPES)));
+        LOCATION_TYPES_LOCAL = getResources().getStringArray(R.array.location_type);
+        siteLocationTypesAvailable = new ArrayList<>(Arrays.asList(LOCATION_TYPES_LOCAL));
+        ArrayAdapter<String> locationTypesAdapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popoup_item,
+                siteLocationTypesAvailable); // default values
 
         coffeeSiteEntitiesViewModel.getAllSiteLocationTypes().observe(this, new Observer<List<SiteLocationType>>() {
             @Override
             public void onChanged(@Nullable final List<SiteLocationType> siteLocationTypes) {
-                // Update the cached copy of the words in the adapter.
-                locationTypesAdapter.clear();
+                // Update the cached copy of the words in the adapter by values from DB.
+                siteLocationTypesAvailable.clear();
                 for (SiteLocationType cslt : siteLocationTypes) {
-                    locationTypesAdapter.add(cslt.getLocationType());
+                    siteLocationTypesAvailable.add(cslt.getLocationType());
                 }
             }
         });
@@ -764,7 +871,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         AutoCompleteTextView locationTypesDropdown = findViewById(R.id.location_type_dropdown);
         locationTypesDropdown.setAdapter(locationTypesAdapter);
         locationTypesDropdown.setValidator(new LocationTypeValidator());
-
         locationTypesDropdown.setOnFocusChangeListener(new LocationTypeInputFocusListener());
     }
 
@@ -791,59 +897,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
     /** Helper methods to correctly display lists of CoffeeSites properties/vlastnosti  **/
     /** which can be selected by user during new CoffeeSite creation **/
+
     /* ----- END ------- */
 
-
-    /*** CoffeeSiteEntitiesService ***/
-
-    // Don't attempt to unbind from the service unless the client has received some
-    // information about the service's state.
-    private boolean mShouldUnbindCoffeeSiteEntitiesService;
-
-    private void doBindCoffeeSiteEntitiesService() {
-        // Attempts to establish a connection with the service.  We use an
-        // explicit class name because we want a specific service
-        // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
-        coffeeSiteEntitiesServiceConnector = new CoffeeSiteEntitiesServiceConnector();
-        coffeeSiteEntitiesServiceConnector.addCoffeeSiteEntitiesServiceConnectionListener(this);
-        if (bindService(new Intent(this, CoffeeSiteEntitiesService.class),
-                coffeeSiteEntitiesServiceConnector, Context.BIND_AUTO_CREATE)) {
-            mShouldUnbindCoffeeSiteEntitiesService = true;
-        } else {
-            Log.e(TAG, "Error: The requested 'CoffeeSiteEntitiesService' service doesn't " +
-                    "exist, or this client isn't allowed access to it.");
-        }
-    }
-
-    private void doUnbindCoffeeSiteEntitiesService() {
-        if (mShouldUnbindCoffeeSiteEntitiesService) {
-            if (coffeeSiteEntitiesService != null) {
-                coffeeSiteEntitiesService.removeCoffeeSiteEntitiesOperationsListener(this);
-            }
-            // Release information about the service's state.
-            coffeeSiteEntitiesServiceConnector.removeCoffeeSiteEntitiesServiceConnectionListener(this);
-            unbindService( coffeeSiteEntitiesServiceConnector);
-            mShouldUnbindCoffeeSiteEntitiesService = false;
-        }
-    }
-
-
-    @Override
-    public void onCoffeeSiteEntitiesServiceConnected() {
-        coffeeSiteEntitiesService = coffeeSiteEntitiesServiceConnector.getCoffeeSiteEntitiesService();
-        if (coffeeSiteEntitiesService != null) {
-            coffeeSiteEntitiesService.addCoffeeSiteEntitiesOperationsListener(this);
-            //startLoadingCoffeeSiteEntities();
-        }
-    }
-
-    public void startLoadingCoffeeSiteEntities() {
-        if (coffeeSiteEntitiesService != null) {
-            //coffeeSiteEntitiesService.readAndSaveAllEntitiesFromServer();
-        }
-    }
 
     /********* CoffeeSiteCUDOperationsService **************/
 
@@ -855,8 +911,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
@@ -907,8 +962,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
         coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
         if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
@@ -942,27 +996,53 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
         if (dialog instanceof DeleteCoffeeSiteImageDialogFragment) {
             if (imagePhotoFile != null) {
-                deleteCoffeeSiteImageLocally(imagePhotoFile);
+                imagePhotoFile.delete();
                 imagePhotoFile = null;
+                localImagePaths.clear();
+                syncCurrentCoffeeSiteLocalImages();
+                siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
             }
-            if (currentCoffeeSite != null && !currentCoffeeSite.getMainImageURL().isEmpty()) {
-                if (Utils.isOnline()) {
-                    deleteCoffeeSiteImage(currentCoffeeSite);
-                } else {
-                    Utils.showNoInternetToast(getApplicationContext());
+
+            if (currentCoffeeSite != null) {
+                if (!currentCoffeeSite.getMainImageFilePath().isEmpty()) {
+                    ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), currentCoffeeSite);
+                    currentCoffeeSite.setMainImageFilePath("");
+                    if (isLocalOnlyDraft(currentCoffeeSite)) {
+                        currentCoffeeSite.setMainImageURL("");
+                    }
+                    currentImageCount = 0;
+                    siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                            R.drawable.ic_outline_add_photo_alternate_36));
+                    refreshImageActionState();
                 }
+
+                if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
+                    if (Utils.isOnline(getApplicationContext())) {
+                        deleteCoffeeSiteImage(currentCoffeeSite);
+                    } else {
+                        // set a default icon to the siteFotoView
+                        siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
+                        Utils.showNoInternetToast(getApplicationContext());
+                    }
+                } else if (currentCoffeeSite.getMainImageFilePath().isEmpty()) {
+                    currentImageCount = 0;
+                    refreshImageActionState();
+                }
+            } else {
+                currentImageCount = 0;
+                refreshImageActionState();
             }
         }
     }
 
     /**
      * Negative and Neutral are swapped here as we require to have
-     * Neutral item as second one in the Dialog.
+     * Neutral item as the second one in the Dialog's options list.
+     *
      * @param dialog
      */
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
-        //saveCoffeeSite(currentCoffeeSite);
     }
 
     @Override
@@ -970,81 +1050,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         if (dialog instanceof SaveActivateCoffeeSiteDialogFragment) {
             saveCoffeeSite(currentCoffeeSite);
         }
-    }
-
-    /** Methods to be called after Service request for uploading, **/
-    /** or deleting image is finished **/
-
-    /**
-     * After succeessful or failed image save we need to save updated
-     * CoffeeSite itsels.
-     *
-     * @param imageSaveResult - load URL of the newly uploaded image is expected
-     */
-    @Override
-    public void onImageSaveSuccess(String imageSaveResult) {
-        hideProgressbar();
-        if (mode == MODE_MODIFY) {
-            // If we are in MODIFY MODE, the Image was saved first, now
-            // the CoffeeSite itself has to be updated/saved
-            if (coffeeSiteCUDOperationsService != null) {
-                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
-            }
-        }
-        // Image saved, button to delete it can be enabled, but probably
-        // not needed as after Save we are going to MyCoffeeSiteActivity
-        imageDeleteMenuItem.setEnabled(true);
-        // Image saved to be shown in siteFotoView (should be same as already
-        // shown image, but as aproval, that it was saved correctly)
-        currentCoffeeSite.setMainImageURL(imageSaveResult);
-        if (!currentCoffeeSite.getMainImageURL().isEmpty()) {
-            Picasso.get().load(currentCoffeeSite.getMainImageURL()).resize(0, siteFotoView.getMaxHeight()).into(siteFotoView);
-        }
-    }
-
-    @Override
-    public void onImageSaveFailure(String imageSaveResult) {
-        hideProgressbar();
-        if (mode == MODE_MODIFY) {
-            // Even if image save failed, we need to save CoffeeSite itself
-            if (coffeeSiteCUDOperationsService != null) {
-                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
-            }
-        }
-    }
-
-    /**
-     * Called when REST Image delete request was successful.
-     * Show the inform Toast, then
-     * Disable imageDeleteButton as there is no image to delete, now
-     * Clear imageView and set the default icon to it.
-     *
-     * @param imageDeleteResult melo by byt Site id. kteremu se smazal Image
-     */
-    @Override
-    public void onImageDeleteSuccess(String imageDeleteResult) {
-        hideProgressbar();
-        String text = getString(R.string.image_delete_ok);;
-        if (Long.parseLong(imageDeleteResult) == currentCoffeeSite.getId()) {
-            text = getString(R.string.image_delete_success);
-        }
-
-        Toast toast = Toast.makeText(getApplicationContext(),
-                                    text,
-                                    Toast.LENGTH_SHORT);
-        toast.show();
-        // No image here, disable delete button
-        imageDeleteMenuItem.setEnabled(false);
-        siteFotoView.setImageDrawable(getDrawable(R.drawable.ic_outline_add_photo_alternate_36));
-    }
-
-    @Override
-    public void onImageDeleteFailure(String imageDeleteResult) {
-        hideProgressbar();
-        Toast toast = Toast.makeText(getApplicationContext(),
-                imageDeleteResult,
-                Toast.LENGTH_SHORT);
-        toast.show();
     }
 
     /* ---- Methods to invoke CoffeeSIteService operation based on user's selection */
@@ -1055,15 +1060,31 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param coffeeSite
      */
     private void saveCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = false;
         if (coffeeSiteCUDOperationsService != null) {
+            // Set new CoffeeSite ID to 0 before saving on server
+            coffeeSite.setId("");
             coffeeSiteCUDOperationsService.save(coffeeSite);
         }
     }
 
+    private void saveCoffeeSiteToDB(CoffeeSite coffeeSite) {
+        if (coffeeSiteCUDOperationsService != null) {
+            syncCurrentCoffeeSiteLocalImages(coffeeSite);
+            coffeeSiteCUDOperationsService.saveToDB(coffeeSite);
+        }
+    }
+
+    private void updateCoffeeSiteInDB(CoffeeSite coffeeSite) {
+        if (coffeeSiteCUDOperationsService != null) {
+            syncCurrentCoffeeSiteLocalImages(coffeeSite);
+            coffeeSiteCUDOperationsService.updateInDB(coffeeSite);
+        }
+    }
+
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = true;
         if (coffeeSiteCUDOperationsService != null) {
             coffeeSiteCUDOperationsService.save(coffeeSite);
@@ -1071,111 +1092,536 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void activateCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         if (coffeeSiteStatusChangeService != null) {
             coffeeSiteStatusChangeService.activate(coffeeSite);
         }
     }
 
+    /**
+     * Main, starting update method called upon users click
+     *
+     * @param coffeeSite
+     */
     private void updateCoffeeSite(CoffeeSite coffeeSite) {
-        showProgressbar();
+        showProgressbarAndDisableMenuItems();
         // If there is a photoFile, save it first to be available
         // after CoffeeSite is returned after it's update
         if (imagePhotoFile != null) {
-            uploadCoffeeSiteImage(imagePhotoFile, coffeeSite.getId());
+            uploadCoffeeSiteImage(imagePhotoFile, coffeeSite);
         } else {
             if (coffeeSiteCUDOperationsService != null) {
-                coffeeSiteCUDOperationsService.update(currentCoffeeSite);
+                coffeeSiteCUDOperationsService.update(coffeeSite);
             }
        }
     }
 
     private void deleteCoffeeSiteImage(CoffeeSite coffeeSite) {
-        showProgressbar();
-        if (coffeeSiteImageService != null) {
-            coffeeSiteImageService.deleteImage(coffeeSite.getId());
+        showProgressbarAndDisableMenuItems();
+        pendingImageOperationCoffeeSite = coffeeSite;
+        if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (coffeeSite == null || coffeeSite.getId().isEmpty()) {
+            hideProgressbarAndEnableMenuItems();
+            return;
+        }
+        ImageUtil.deleteCoffeeSiteImage(getApplicationContext(), coffeeSite);
+        pendingImageDeleteLookup = true;
+        new GetImageObjectAsyncTask(this, coffeeSite.getId()).execute();
+    }
+
+    private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite) {
+        uploadCoffeeSiteImage(imageFile, coffeeSite, IMAGE_TYPE_MAIN);
+    }
+
+    private void uploadCoffeeSiteImage(File imageFile, CoffeeSite coffeeSite, String imageType) {
+        showProgressbarAndDisableMenuItems();
+        pendingImageOperationCoffeeSite = coffeeSite;
+        if (userAccountService == null || userAccountService.getLoggedInUser() == null) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.toast_new_login_needed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (imageFile != null && imageFile.exists() && coffeeSite != null) {
+            new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile,
+                    coffeeSite.getId(), imageType).execute();
+        } else {
+            hideProgressbarAndEnableMenuItems();
         }
     }
 
-    private void uploadCoffeeSiteImage(File imageFile, int coffeeSiteId) {
-        showProgressbar();
-        if (coffeeSiteImageService != null) {
-            coffeeSiteImageService.uploadImage(imageFile, coffeeSiteId);
+    private String buildMainImageUrl(String coffeeSiteId) {
+        if (coffeeSiteId == null || coffeeSiteId.isEmpty()) {
+            return "";
         }
+        return BuildConfig.IMAGES_API_PUBLIC_URL
+                + "bytes/object/?objectExtId=" + coffeeSiteId
+                + "&type=main&size=mid";
     }
+
+    @Nullable
+    private ImageFile getMainImageFile(ImageObject imageObject) {
+        if (imageObject == null || imageObject.getObjectImages().isEmpty()) {
+            return null;
+        }
+        for (ImageFile imageFile : imageObject.getObjectImages()) {
+            if (imageFile != null && "main".equalsIgnoreCase(imageFile.getImageType())) {
+                return imageFile;
+            }
+        }
+        return imageObject.getObjectImages().get(0);
+    }
+
+    /* ====== CALLBACK methods after REST call AsyncTasks finished ============= */
 
     /**
-     * Deletes imageFile and disable image delete button
-     * and sets the default icon to the siteFotoView
-     * @param imageFile
+     * Callback after new CoffeeSite was saved.
+     *
+     * @param savedCoffeeSite
+     * @param error
      */
-    private void deleteCoffeeSiteImageLocally(File imageFile) {
-        imageFile.delete();
-        imageDeleteMenuItem.setEnabled(false); // nothing to delete now
-        // set a default icon to the siteFotoView
-        siteFotoView.setImageDrawable(getDrawable(R.drawable.ic_outline_add_photo_alternate_36));
-    }
-
-
     @Override
     public void onCoffeeSiteSaved(CoffeeSite savedCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Save OK?: " + error.isEmpty());
+
         if (error.isEmpty()) {
-            // New CoffeeSite saved successfuly
+            // New CoffeeSite saved successfully
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_SAVE, "OK");
-            // If there is a photoFile, save it too
-            if (imagePhotoFile != null) {
-                uploadCoffeeSiteImage(imagePhotoFile, savedCoffeeSite.getId());
+
+            if (startPendingCreateImageUploads(savedCoffeeSite)) {
+                return;
             }
-            // Was also activation requested?
-            if (saveAndActivateRequested) {
-                activateCoffeeSite(savedCoffeeSite);
-            } else {
-                goToMyCoffeeSitesActivity();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
+        } else { // There was error saving CoffeeSite
+            clearPendingCreateImageUploads();
+            // Was the the current/edited CoffeeSite previously saved in DB because of Offline mode?
+            // restore original, phone's DB, id of the edited CoffeeSite,
+            // which has to be changed to 0 before saving on server
+            // original ID is needed to edit further if saving failed
+            if (!currentCoffeeSite.isSavedOnServer() && !currentCoffeeSite.isStatusZaznamuAvailable()) {
+                currentCoffeeSite.restoreId();
             }
-        } else {
             showCoffeeSiteCreateFailure(error);
         }
     }
 
     @Override
     public void onCoffeeSiteUpdated(CoffeeSite updatedCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Update success?: " + error.isEmpty());
         if (!error.isEmpty()) {
             showCoffeeSiteUpdateFailure(error);
         }
         else {
+            syncUpdatedCoffeeSiteImageState(updatedCoffeeSite);
             // successful return from CoffeeSite update REST call
+            // If the CoffeeSite is updated, then it's image is updated too, we can proceed to MyCoffeeSitesListActivity
             showCoffeeSiteOperationSuccess(CoffeeSiteCUDOperationsService.CUDOperation.COFFEE_SITE_UPDATE, "OK");
-            goToMyCoffeeSitesActivityAfterUpdate(updatedCoffeeSite);
+            goBackAfterUpdate(updatedCoffeeSite);
         }
     }
 
     @Override
     public void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {
-        hideProgressbar();
+        hideProgressbarAndEnableMenuItems();
         Log.i(TAG, "Activate success?: " + error.isEmpty());
         if (!error.isEmpty()) {
             showCoffeeSiteActivateFailure(error);
-        }
-        else {
+        } else {
             showCoffeeSiteStatusChangeSuccess(COFFEE_SITE_ACTIVATE, "OK");
         }
+        saveAndActivateRequested = false;
         goToMyCoffeeSitesActivity();
     }
 
 
+    /** Methods to be called after Images API operations finished **/
+
+    @Override
+    public void onImageObjectLoaded(ImageObject imageObject) {
+        currentImageCount = imageObject != null ? imageObject.getObjectImages().size() : 0;
+        refreshImageActionState();
+        if (!pendingImageDeleteLookup) {
+            if (currentImageCount == 0) {
+                if (currentCoffeeSite != null) {
+                    currentCoffeeSite.setMainImageURL("");
+                    currentCoffeeSite.setMainImageFilePath("");
+                }
+                imagePhotoFile = null;
+                localImagePaths.clear();
+                syncCurrentCoffeeSiteLocalImages();
+                siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                        R.drawable.ic_outline_add_photo_alternate_36));
+            } else {
+                syncCurrentCoffeeSiteMainImage(imageObject);
+            }
+            return;
+        }
+        pendingImageDeleteLookup = false;
+        if (imageObject == null || imageObject.getObjectImages().isEmpty()) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+            pendingImageOperationCoffeeSite = null;
+            return;
+        }
+
+        ImageFile mainImage = getMainImageFile(imageObject);
+        if (mainImage == null || mainImage.getExternalId() == null || mainImage.getExternalId().isEmpty()) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+            pendingImageOperationCoffeeSite = null;
+            return;
+        }
+
+        String objectExtId = imageObject.getExternalObjectId();
+        if (objectExtId == null || objectExtId.isEmpty()) {
+            objectExtId = pendingImageOperationCoffeeSite != null ? pendingImageOperationCoffeeSite.getId() : "";
+        }
+        if (objectExtId.isEmpty()) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+            pendingImageOperationCoffeeSite = null;
+            return;
+        }
+        new ImageDeleteNewApiAsyncTask(this, userAccountService,
+                objectExtId, mainImage.getExternalId()).execute();
+    }
+
+    @Override
+    public void onImageObjectLoadFailed(Result.Error error) {
+        if (pendingImageDeleteLookup) {
+            pendingImageDeleteLookup = false;
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+            pendingImageOperationCoffeeSite = null;
+        }
+    }
+
+    @Override
+    public void onImageUploaded(String imageExtId) {
+        if (isPendingCreateImageUploadInProgress()) {
+            handlePendingCreateImageUploadSuccess();
+            return;
+        }
+        CoffeeSite coffeeSite = pendingImageOperationCoffeeSite != null
+                ? pendingImageOperationCoffeeSite
+                : currentCoffeeSite;
+        String imageUrl = buildMainImageUrl(coffeeSite != null ? coffeeSite.getId() : "");
+        onImageSaveSuccess(coffeeSite, imageUrl);
+        pendingImageOperationCoffeeSite = null;
+    }
+
+    @Override
+    public void onImageUploadFailed(Result.Error error) {
+        if (isPendingCreateImageUploadInProgress()) {
+            handlePendingCreateImageUploadFailure(error);
+            return;
+        }
+        CoffeeSite coffeeSite = pendingImageOperationCoffeeSite != null
+                ? pendingImageOperationCoffeeSite
+                : currentCoffeeSite;
+        onImageSaveFailure(coffeeSite, error != null ? error.getDetail() : "");
+        pendingImageOperationCoffeeSite = null;
+    }
+
+    @Override
+    public void onImageDeleted(String imageExtId) {
+        onImageDeleteSuccess(imageExtId);
+        pendingImageOperationCoffeeSite = null;
+    }
+
+    @Override
+    public void onImageDeleteFailed(Result.Error error) {
+        onImageDeleteFailure(error != null ? error.getDetail() : "");
+        pendingImageOperationCoffeeSite = null;
+    }
+
     /**
-     * Starts MyCoffeeSitesListActivity
+     * After successful or failed image save we need to save updated
+     * CoffeeSite itself.
+     *
+     * @param imageSaveResult - load URL of the newly uploaded image is expected
      */
-    private void goToMyCoffeeSitesActivityAfterUpdate(CoffeeSite updatedCoffeeSite) {
+    private void onImageSaveSuccess(CoffeeSite coffeeSite, String imageSaveResult) {
+        hideProgressbarAndEnableMenuItems();
+        currentImageCount = Math.max(currentImageCount, 1);
+        if (currentCoffeeSite != null) {
+            currentCoffeeSite.setMainImageURL(imageSaveResult);
+        }
+        if (coffeeSite != null) {
+            coffeeSite.setMainImageURL(imageSaveResult);
+        }
+        refreshImageActionState();
+
+        // if newly created CoffeeSite has now image saved too, we can delete it from DB
+        cleanupOfflineDraftAfterServerSave();
+
+        if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
+            // If we are in MODIFY MODE, then Image was saved first
+            // now the CoffeeSite itself has to be updated/saved too
+            if (coffeeSiteCUDOperationsService != null && coffeeSite != null) {
+                coffeeSiteCUDOperationsService.update(coffeeSite);
+            }
+            // Invalidate Picasso as the URL has not changed, but the image itself could
+            if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+                Picasso.get().invalidate(coffeeSite.getMainImageURL());
+            }
+            return;
+        }
+        // When in CREATE mode, coffeeSite was already saved, so Activate it, if requested
+        if (saveAndActivateRequested && coffeeSite != null) {
+            activateCoffeeSite(coffeeSite);
+            return;
+        }
+        goToMyCoffeeSitesActivity();
+    }
+
+    private void onImageSaveFailure(CoffeeSite coffeeSite, String imageSaveResult) {
+        hideProgressbarAndEnableMenuItems();
+        Toast.makeText(getApplicationContext(),
+                "Problém při ukládání obrázku.", Toast.LENGTH_SHORT)
+                .show();
+        if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) { // in MODE_MODIFY, the Image is saved first
+            // Even if image save failed, we need to save CoffeeSite itself
+            if (coffeeSiteCUDOperationsService != null && coffeeSite != null) {
+                coffeeSiteCUDOperationsService.update(coffeeSite);
+            }
+        }
+    }
+
+    private boolean startPendingCreateImageUploads(CoffeeSite savedCoffeeSite) {
+        clearPendingCreateImageUploads();
+        for (String localImagePath : localImagePaths) {
+            if (localImagePath == null || localImagePath.isEmpty()) {
+                continue;
+            }
+            File localImageFile = ImageUtil.getImageFile(localImagePath);
+            if (localImageFile.exists()) {
+                pendingCreateImageUploads.add(localImageFile);
+            } else {
+                Log.w(TAG, "Draft image file for upload does not exist: " + localImagePath);
+            }
+        }
+        if (pendingCreateImageUploads.isEmpty()) {
+            clearPendingCreateImageUploads();
+            return false;
+        }
+        pendingCreatedCoffeeSite = savedCoffeeSite;
+        pendingCreateImageUploadIndex = 0;
+        uploadNextPendingCreateImage();
+        return true;
+    }
+
+    private boolean isPendingCreateImageUploadInProgress() {
+        return pendingCreatedCoffeeSite != null
+                && pendingCreateImageUploadIndex >= 0
+                && pendingCreateImageUploadIndex < pendingCreateImageUploads.size();
+    }
+
+    private void uploadNextPendingCreateImage() {
+        if (!isPendingCreateImageUploadInProgress()) {
+            finishPendingCreateImageUploads();
+            return;
+        }
+        uploadCoffeeSiteImage(pendingCreateImageUploads.get(pendingCreateImageUploadIndex),
+                pendingCreatedCoffeeSite,
+                pendingCreateImageUploadIndex == 0 ? IMAGE_TYPE_MAIN : IMAGE_TYPE_OTHER);
+    }
+
+    private void handlePendingCreateImageUploadSuccess() {
+        if (pendingCreatedCoffeeSite == null || pendingCreateImageUploadIndex < 0) {
+            clearPendingCreateImageUploads();
+            hideProgressbarAndEnableMenuItems();
+            return;
+        }
+        if (pendingCreateImageUploadIndex == 0) {
+            String mainImageUrl = buildMainImageUrl(pendingCreatedCoffeeSite.getId());
+            pendingCreatedCoffeeSite.setMainImageURL(mainImageUrl);
+            if (currentCoffeeSite != null) {
+                currentCoffeeSite.setMainImageURL(mainImageUrl);
+            }
+            currentImageCount = Math.max(currentImageCount, 1);
+            refreshImageActionState();
+        }
+        pendingCreateImageUploadIndex++;
+        uploadNextPendingCreateImage();
+    }
+
+    private void handlePendingCreateImageUploadFailure(@Nullable Result.Error error) {
+        pendingCreateImageUploadFailures++;
+        Log.e(TAG, "Draft image upload failed: "
+                + (error != null && error.getDetail() != null ? error.getDetail() : ""));
+        pendingCreateImageUploadIndex++;
+        uploadNextPendingCreateImage();
+    }
+
+    private void finishPendingCreateImageUploads() {
+        CoffeeSite savedCoffeeSite = pendingCreatedCoffeeSite;
+        int uploadFailures = pendingCreateImageUploadFailures;
+        clearPendingCreateImageUploads();
+        hideProgressbarAndEnableMenuItems();
+        if (savedCoffeeSite != null && uploadFailures == 0) {
+            deleteLocalDraftImages();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
+            return;
+        }
+        if (savedCoffeeSite != null) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.manage_images_upload_failure),
+                    Toast.LENGTH_SHORT).show();
+            finishCoffeeSiteCreateAfterSave(savedCoffeeSite);
+        }
+    }
+
+    private void finishCoffeeSiteCreateAfterSave(CoffeeSite savedCoffeeSite) {
+        cleanupOfflineDraftAfterServerSave();
+        if (saveAndActivateRequested) {
+            activateCoffeeSite(savedCoffeeSite);
+            return;
+        }
+        goToMyCoffeeSitesActivity();
+    }
+
+    private void cleanupOfflineDraftAfterServerSave() {
+        if (currentCoffeeSite == null
+                || currentCoffeeSite.isSavedOnServer()
+                || currentCoffeeSite.isStatusZaznamuAvailable()) {
+            return;
+        }
+        currentCoffeeSite.restoreId();
+        updateCoffeeSiteInDB(currentCoffeeSite);
+        coffeeSiteCUDOperationsService.deleteFromDB(currentCoffeeSite);
+        deleteLocalDraftImages();
+    }
+
+    private void deleteLocalDraftImages() {
+        for (String localImagePath : localImagePaths) {
+            if (localImagePath == null || localImagePath.isEmpty()) {
+                continue;
+            }
+            File localImageFile = ImageUtil.getImageFile(localImagePath);
+            if (localImageFile.exists()) {
+                localImageFile.delete();
+            }
+        }
+        localImagePaths.clear();
+        imagePhotoFile = null;
+        syncCurrentCoffeeSiteLocalImages();
+    }
+
+    private void clearPendingCreateImageUploads() {
+        pendingCreateImageUploads.clear();
+        pendingCreatedCoffeeSite = null;
+        pendingCreateImageUploadIndex = -1;
+        pendingCreateImageUploadFailures = 0;
+    }
+
+    /**
+     * Called when REST Image deleteUser request was successful.
+     * Show the inform Toast, then.
+     * Disable imageDeleteButton as there is no image to deleteUser, now
+     * Clear imageView and set the default icon to it.
+     *
+     * @param imageDeleteResult external ID of the deleted image
+     */
+    private void onImageDeleteSuccess(String imageDeleteResult) {
+        hideProgressbarAndEnableMenuItems();
+        String text = getString(R.string.image_delete_success);
+
+        Toast toast = Toast.makeText(getApplicationContext(),
+                text,
+                Toast.LENGTH_SHORT);
+        toast.show();
+        currentImageCount = 0;
+        if (currentCoffeeSite != null) {
+            currentCoffeeSite.setMainImageURL("");
+            currentCoffeeSite.setMainImageFilePath("");
+        }
+        imagePhotoFile = null;
+        localImagePaths.clear();
+        syncCurrentCoffeeSiteLocalImages();
+        refreshImageActionState();
+        siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_outline_add_photo_alternate_36));
+    }
+
+    private void onImageDeleteFailure(String imageDeleteResult) {
+        hideProgressbarAndEnableMenuItems();
+        Toast toast = Toast.makeText(getApplicationContext(),
+                imageDeleteResult != null && !imageDeleteResult.isEmpty()
+                        ? imageDeleteResult
+                        : getString(R.string.manage_images_delete_failure),
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void syncCurrentCoffeeSiteMainImage(@Nullable ImageObject imageObject) {
+        if (currentCoffeeSite == null || imageObject == null) {
+            return;
+        }
+        ImageFile mainImage = getMainImageFile(imageObject);
+        if (mainImage == null) {
+            return;
+        }
+        String mainImageUrl = mainImage.getBytesUrl("mid");
+        if (mainImageUrl.isEmpty()) {
+            mainImageUrl = buildMainImageUrl(currentCoffeeSite.getId());
+        }
+        currentCoffeeSite.setMainImageURL(mainImageUrl);
+        currentCoffeeSite.setMainImageFilePath("");
+        imagePhotoFile = null;
+        Picasso.get().invalidate(mainImageUrl);
+        Picasso.get().load(mainImageUrl)
+                .resize(0, siteFotoView.getMaxHeight())
+                .placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                .into(siteFotoView);
+    }
+
+    private void syncUpdatedCoffeeSiteImageState(@Nullable CoffeeSite updatedCoffeeSite) {
+        if (updatedCoffeeSite == null || currentCoffeeSite == null) {
+            return;
+        }
+        updatedCoffeeSite.setMainImageURL(currentCoffeeSite.getMainImageURL());
+        updatedCoffeeSite.setMainImageFilePath(currentCoffeeSite.getMainImageFilePath());
+        if (!updatedCoffeeSite.getMainImageURL().isEmpty()) {
+            Picasso.get().invalidate(updatedCoffeeSite.getMainImageURL());
+        }
+    }
+
+
+    /* ===== Methods to follow after successful REST call or DB save/update ======= */
+
+    /**
+     * Starts MyCoffeeSitesListActivity or CoffeeSiteDetailActivity after editing was called from there
+     */
+    private void goBackAfterUpdate(CoffeeSite updatedCoffeeSite) {
+        if (mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
+            goToCoffeeSiteDetailActivityAfterUpdate(updatedCoffeeSite);
+            return;
+        }
         Intent activityIntent = new Intent(CreateCoffeeSiteActivity.this, MyCoffeeSitesListActivity.class);
         activityIntent.putExtra("coffeeSite", (Parcelable) updatedCoffeeSite);
         activityIntent.putExtra("coffeeSitePosition", coffeeSitePositionInRecyclerView);
 
         setResult(Activity.RESULT_OK, activityIntent);
+        finishActivity(EDIT_COFFEESITE_REQUEST);
+        finish();
+    }
+
+    /**
+     * Starts CoffeeSiteDetailActivity if this activity was called from there
+     */
+    private void  goToCoffeeSiteDetailActivityAfterUpdate(CoffeeSite updatedCoffeeSite) {
+        Intent activityIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteDetailActivity.class);
+        activityIntent.putExtra("coffeeSite", (Parcelable) updatedCoffeeSite);
+        // finishActivity(EDIT_COFFEESITE_REQUEST); do not pass requestCode to CoffeeSiteDetailActivity, but WHY???
+        activityIntent.putExtra("requestCode", EDIT_COFFEESITE_REQUEST);
+
+        setResult(Activity.RESULT_OK, activityIntent);
+        finishActivity(EDIT_COFFEESITE_REQUEST);
         finish();
     }
 
@@ -1189,31 +1635,43 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void goToMyCoffeeSitesActivity() {
         Intent activityIntent = new Intent(CreateCoffeeSiteActivity.this, MyCoffeeSitesListActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activityIntent.putExtra("mode", mode);
         setResult(Activity.RESULT_OK, activityIntent);
-        this.startActivity(activityIntent);
+        if (mode == MODE_CREATE) { // new CoffeeSite called from MainActivity
+            this.startActivity(activityIntent);
+        }
+        if (mode == MODE_CREATE_FROM_MYCOFFEESITESACTIVITY) { // new CoffeeSite called from MyCoffeeSitesListActivity
+             finishActivity(CREATE_COFFEESITE_REQUEST);
+        }
+        if (mode == MODE_MODIFY) { // edit CoffeeSite called from MyCoffeeSitesListActivity
+            finishActivity(EDIT_COFFEESITE_REQUEST);
+        }
         finish();
     }
 
     /* ********************** ****************************** */
 
     /**
-     * Setup locationService listeners ...
-     * If we are in MODIFY CoffeeSite mode,
-     * don't update LatitudeAndLongitudeView
+     * Setup locationService listeners ...<br>
+     * If we are in MODIFY CoffeeSite mode, wait until user deletes both location info
+     * to activate locationEnterManualMode and cityOrStreetEnterManualMode.
      */
     @Override
     public void onLocationServiceConnected() {
-
         super.onLocationServiceConnected();
-        if (mode == MODE_CREATE) {
-            currentLocation = locationService.posledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+        if (locationService != null) {
+            currentLocation = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
             locationService.addPropertyChangeListener(this);
-            // Initiate coffeeSite location selected by user
-            if (currentLocation != null) {
-                selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                if (!locationEnterManualMode) {
-                    showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
-                }
+        }
+        // Initiate coffeeSite location selected by user
+        if (currentLocation != null) {
+            firstLocationDetection = false;
+            selectedCoffeeSiteLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            if (locationEnterAutomaticMode) {
+                showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+            }
+            if (cityOrStreetEnterAutomaticMode) {
+                showCityStreetInView(currentLocation.getLatitude(), currentLocation.getLongitude());
             }
         }
     }
@@ -1224,7 +1682,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param v
      */
     public boolean showTimePickerDialog(View v, MotionEvent event) {
-
         if(event.getAction() == MotionEvent.ACTION_UP) {
             timeFromToPicker = newInstance((TextInputEditText) v);
             timeFromToPicker.show(getSupportFragmentManager(), "timePicker");
@@ -1250,6 +1707,9 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * @param coffeeSite
      */
     private void fillViewWithCoffeeSiteData(CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return;
+        }
         Log.i(TAG, "fillViewWithCoffeeSiteData() start");
 
         coffeeSiteNameEditText.setText(coffeeSite.getName());
@@ -1279,6 +1739,38 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             openingToTimeEditText.setText(coffeeSite.getOteviraciDobaHod().split("-")[1]);
         }
 
+        // Show photo if available
+        boolean isOnline = Utils.isOnline(getApplicationContext());
+        File localMainImageFile = getLocalMainImageFile(coffeeSite);
+
+        if (localMainImageFile != null && localMainImageFile.exists()) {
+            Picasso.get().load(localMainImageFile)
+                    .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                    .into(siteFotoView);
+            Log.i("CreateCoffeeSiteAct", "CoffeeSite created");
+            return;
+        }
+
+        if (coffeeSite.getMainImageURL().isEmpty() && !isLocalOnlyDraft(coffeeSite)) {
+            coffeeSite.setMainImageURL(buildMainImageUrl(coffeeSite.getId()));
+        }
+
+        if (isOnline && !coffeeSite.getMainImageURL().isEmpty()) {
+            Picasso.get().load(coffeeSite.getMainImageURL())
+                    .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                    .into(siteFotoView);
+        }
+        if (!isOnline || coffeeSite.getMainImageURL().isEmpty()) {
+            File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(getApplicationContext(), coffeeSite);
+            if (coffeeSiteImageFile.exists()) {
+                Picasso.get().load(coffeeSiteImageFile)
+                        .resize(0, siteFotoView.getMaxHeight()).placeholder(R.drawable.ic_outline_add_photo_alternate_36)
+                        .into(siteFotoView);
+            } else {
+                siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                        R.drawable.ic_outline_add_photo_alternate_36));
+            }
+        }
         Log.i("CreateCoffeeSiteAct", "CoffeeSite created");
     }
 
@@ -1287,29 +1779,94 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * a chip name (Chip of the group), then it is selected
      */
     private void selectChipsInGroupAccordingText(ChipGroup chipGroup, List<? extends CoffeeSiteEntity> strings) {
+        chipGroup.clearCheck();
+        if (strings == null) {
+            return;
+        }
         for (CoffeeSiteEntity str : strings) {
+            String chipSelectionValue = getChipSelectionValue(str);
+            if (chipSelectionValue.isEmpty()) {
+                continue;
+            }
             for (int i = 0; i < chipGroup.getChildCount(); i++) {
                 View child = chipGroup.getChildAt(i);
-                if (child instanceof Chip && str.toString().equalsIgnoreCase(((Chip) child).getText().toString())) {
+                if (child instanceof Chip && areChipValuesEquivalent(chipSelectionValue, ((Chip) child).getText().toString())) {
                     ((Chip) child).setChecked(true);
                 }
             }
         }
     }
 
-    /**
-     * Creates CoffeeSite instance based on data from this Activity View data.
-     * or updates inserted CoffeeSite
-     */
-    private CoffeeSite createOrUpdateCoffeeSiteFromViewModel(CoffeeSite coffeeSiteToUpdate) {
+    @NonNull
+    private String getChipSelectionValue(@Nullable CoffeeSiteEntity entity) {
+        if (entity == null) {
+            return "";
+        }
 
+        String entityValue = entity.toString();
+        if (!normalizeChipValue(entityValue).isEmpty()) {
+            return entityValue;
+        }
+
+        if (entity instanceof OtherOffer) {
+            List<OtherOffer> otherOffers = coffeeSiteEntitiesViewModel.getOtherOffers();
+            if (otherOffers == null) {
+                return "";
+            }
+            for (OtherOffer otherOffer : otherOffers) {
+                if (otherOffer != null && otherOffer.getId().equals(entity.getId())) {
+                    return otherOffer.getOtherOffer();
+                }
+            }
+        }
+
+        if (entity instanceof CoffeeSort) {
+            List<CoffeeSort> coffeeSorts = coffeeSiteEntitiesViewModel.getCoffeeSorts();
+            if (coffeeSorts == null) {
+                return "";
+            }
+            for (CoffeeSort coffeeSort : coffeeSorts) {
+                if (coffeeSort != null && coffeeSort.getId().equals(entity.getId())) {
+                    return coffeeSort.getCoffeeSort();
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private boolean areChipValuesEquivalent(String entityValue, String chipValue) {
+        String normalizedEntityValue = normalizeChipValue(entityValue);
+        String normalizedChipValue = normalizeChipValue(chipValue);
+
+        return normalizedEntityValue.equals(normalizedChipValue);
+    }
+
+    private String normalizeChipValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalizedValue = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return normalizedValue.toLowerCase(Locale.ROOT).trim();
+    }
+
+    /**
+     * Creates CoffeeSite instance based on data from this Activity View data
+     * or updates inserted CoffeeSite.
+     */
+    private CoffeeSite createOrUpdateCoffeeSiteFromViewModel(final CoffeeSite coffeeSiteToUpdate, final CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel) {
         Log.i(TAG, "Create CoffeeSiteFromViewModel() start");
 
-        CoffeeSite coffeeSite = (coffeeSiteToUpdate == null) ? new CoffeeSite() : coffeeSiteToUpdate;
-
+        CoffeeSite coffeeSite;
         if (coffeeSiteToUpdate == null) {
-            coffeeSite.setId(0);
+            coffeeSite = new CoffeeSite();
+            coffeeSite.setId("");
+            coffeeSite.setCreatedOn(new Date());
+        } else {
+            coffeeSite = coffeeSiteToUpdate;
         }
+
         coffeeSite.setName(coffeeSiteNameEditText.getText().toString().trim());
 
         coffeeSite.setLatitude(Double.parseDouble(latitudeEditText.getText().toString()));
@@ -1318,66 +1875,114 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         coffeeSite.setMesto(cityEditText.getText().toString().trim());
 
         String typPodniku = sourceTypeEditText.getText().toString();
-        typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES[0];
-        //coffeeSite.setTypPodniku(CoffeeSiteEntityRepositories.getCoffeeSiteType(typPodniku));
+        typPodniku = !typPodniku.isEmpty() ? typPodniku : SITE_TYPES_LOCAL[0];
+
         coffeeSite.setTypPodniku(coffeeSiteEntitiesViewModel.getCoffeeSiteType(typPodniku));
 
         String typLokality = locationTypeEditText.getText().toString();
-        typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES[0];
-//        coffeeSite.setTypLokality(CoffeeSiteEntityRepositories.getSiteLocationType(typLokality));
+        typLokality  = !typLokality .isEmpty() ? typLokality  : LOCATION_TYPES_LOCAL[0];
+
         coffeeSite.setTypLokality(coffeeSiteEntitiesViewModel.getSiteLocationType(typLokality));
 
-        //coffeeSite.setCena(CoffeeSiteEntityRepositories.getPriceRange(priceRangeEditText.getText().toString()));
         coffeeSite.setCena(coffeeSiteEntitiesViewModel.getPriceRange(priceRangeEditText.getText().toString()));
 
         String[] selectedCoffeeSorts = getSelectedChipsStrings(coffeeSortsChipGroup);
-//        coffeeSite.setCoffeeSorts(CoffeeSiteEntityRepositories.getCoffeeSortsList(selectedCoffeeSorts));
         coffeeSite.setCoffeeSorts(coffeeSiteEntitiesViewModel.createCoffeeSortsList(selectedCoffeeSorts));
 
-//        coffeeSiteEntitiesViewModel.getAllCoffeeSorts().observe(this, new Observer<List<CoffeeSort>>() {
-//            @Override
-//            public void onChanged(@Nullable final List<CoffeeSort> coffeeSorts) {
-//                // Update the cached copy of the words in the adapter.
-//                    coffeeSite.setCoffeeSorts(coffeeSorts);
-//            }
-//        });
-
         String[] selectedOtherOffer = getSelectedChipsStrings(otherOfferChipGroup);
-        //coffeeSite.setOtherOffers(CoffeeSiteEntityRepositories.getOtherOffersList(selectedOtherOffer));
         coffeeSite.setOtherOffers(coffeeSiteEntitiesViewModel.createOtherOffersList(selectedOtherOffer));
 
-//        coffeeSiteEntitiesViewModel.getAllOtherOffers().observe(this, new Observer<List<OtherOffer>>() {
-//            @Override
-//            public void onChanged(@Nullable final List<OtherOffer> otherOffers) {
-//                // Update the cached copy of the words in the adapter.
-//                coffeeSite.setOtherOffers(otherOffers);
-//            }
-//        });
-
-        coffeeSite.setOteviraciDobaDny(openingDaysEditText.getText().toString());
-        coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
-
-        if (mode == MODE_CREATE) {
-//            coffeeSite.setStatusZarizeni(CoffeeSiteEntityRepositories.getCoffeeSiteStatus("V provozu"));
-            coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
+        if (!openingDaysEditText.getText().toString().isEmpty()) {
+            coffeeSite.setOteviraciDobaDny(openingDaysEditText.getText().toString());
         }
+
+        if (!openingFromTimeEditText.getText().toString().isEmpty() && !openingToTimeEditText.getText().toString().isEmpty()) {
+            coffeeSite.setOteviraciDobaHod(openingFromTimeEditText.getText().toString() + "-" + openingToTimeEditText.getText().toString());
+        }
+
+        coffeeSite.setStatusZarizeni(coffeeSiteEntitiesViewModel.getCoffeeSiteStatus("V provozu"));
 
         Log.i(TAG, "CoffeeSite created/updated");
         return coffeeSite;
     }
 
+    /**
+     * Creates or updates CoffeeSite from this Activity form data, saves it to DB
+     * and goes to MyCoffeeSitesActivity.
+     * <p>
+     * The creation of the CoffeeSite must be called in separate thread of the AsyncTask
+     * as the CoffeeSiteEntitiesViewModel uses repositories Single.observe() requests (to get
+     * correct values of some CS entities), which are not invoked in main UI thread.
+     * <p>
+     * Used in OFFLINE mode only as in ONLINE the REST call AsyncTask does the job.
+     */
+    private class CreateUpdateCoffeeSiteAsyncTask {
 
-    private String[] getSelectedChipsStrings(ChipGroup chipGroup) {
-        String[] retVal = new String[chipGroup.getCheckedChipIds().size()];
+        private final CoffeeSiteEntitiesViewModel model;
 
-        int i = 0;
-        for (int chipId : chipGroup.getCheckedChipIds()) {
-            Chip chip = (Chip) findViewById(chipId);
-            retVal[i] = chip.getText().toString();
-            i++;
+        CreateUpdateCoffeeSiteAsyncTask(CoffeeSiteEntitiesViewModel model) {
+            this.model = model;
         }
 
-        return retVal;
+        // coffeeSite to update/save
+        public void execute(final CoffeeSite coffeeSite) {
+            AsyncRunner.runInBackground(() -> {
+                CoffeeSite result = createOrUpdateCoffeeSiteFromViewModel(coffeeSite, model);
+                AsyncRunner.runOnMainThread(() -> {
+                    currentCoffeeSite = result;
+                    if (imagePhotoFile != null) {
+                        currentCoffeeSite.setMainImageFilePath(imagePhotoFile.getPath());
+                    }
+                    saveCoffeeSiteToDB(result);
+                    // New CoffeeSite saved successfully to DB
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            getString(R.string.coffeesite_saved_to_db),
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                    if (coffeeSite == null) {
+                        goToMyCoffeeSitesActivity();
+                    } else {
+                        goBackAfterUpdate(result);
+                    }
+                });
+            });
+        }
+    }
+
+    /**
+     * Inserts all data from DB to Create CoffeeSite form of this activity
+     */
+    private class InsertEntitiesDataFromDBAsyncTask {
+
+        InsertEntitiesDataFromDBAsyncTask() {
+        }
+
+        // coffeeSite to update/save
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
+                showCoffeeSiteTypes();
+                showLocationTypes();
+                showPriceRanges();
+            });
+        }
+    }
+
+
+
+    private String[] getSelectedChipsStrings(ChipGroup chipGroup) {
+        List<String> selectedChipValues = new ArrayList<>();
+        for (int chipId : chipGroup.getCheckedChipIds()) {
+            Chip chip = (Chip) findViewById(chipId);
+            if (chip == null) {
+                continue;
+            }
+            String chipValue = chip.getText() != null ? chip.getText().toString().trim() : "";
+            if (!chipValue.isEmpty()) {
+                selectedChipValues.add(chipValue);
+            }
+        }
+        return selectedChipValues.toArray(new String[0]);
     }
 
     /**
@@ -1388,11 +1993,25 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (locationService != null) {
-            currentLocation = locationService.getCurrentLocation();
-        }
-        //showCurrentLocationInView();
-        if (!locationEnterManualMode) {
-            showLocationInView(currentLocation.getLatitude(), currentLocation.getLongitude());
+            Location newLocation = locationService.getCurrentLocation();
+            if (newLocation != null) {
+                if (locationEnterAutomaticMode) {
+                    showLocationInView(newLocation.getLatitude(), newLocation.getLongitude());
+                }
+                if (cityOrStreetEnterAutomaticMode) {
+                    // revoke Address if the change distance is more then 25 m
+                    // Avoid to many requests to Geolocation API if phone is moving
+                    long newDistance = 0;
+                    if (currentLocation != null) {
+                        newDistance = locationService.getDistanceFromCurrentLocation(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    }
+                    if (newDistance >= 25 || firstLocationDetection) {
+                        showCityStreetInView(newLocation.getLatitude(), newLocation.getLongitude());
+                    }
+                }
+                currentLocation = newLocation;
+                firstLocationDetection = false;
+            }
         }
     }
 
@@ -1417,6 +2036,42 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             longitudeEditText.setText(longitudeString);
             latitudeEditText.setTag( null);
             longitudeEditText.setTag( null);
+        }
+    }
+
+    /**
+     * Shows location selected by user from Map in the respective latitude and longitude view
+     */
+    private void showCityStreetInView(double latitude, double longitude) {
+        Geocoder geocoder;
+        List<Address> addresses = null;
+        geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            Log.d(TAG, "Looking for address start ...");
+            addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+        } catch (IOException e) {
+            Log.e(TAG, "Error looking for address: " + e.getMessage());
+        }
+
+        if (addresses != null && addresses.size() > 0) {
+            Log.d(TAG, "Address found");
+            // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            String[] adresa = addresses.get(0).getAddressLine(0).split(",");
+            String street = adresa[0]; // getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat
+            // Street nemuze zacinat cislem nebo slovy "Unnamed" ...
+            if (street != null && (street.startsWith("Unnamed") || street.matches("^\\d.*"))) {
+                street = "";
+            }
+            // Derive mesto from addressline withoyt PSC number (getAddressLine(0) obvykle ve tvaru: ulice s CP, PSC Mesto, Stat)
+            String mesto = adresa[1].replaceFirst("^ \\d{3} \\d{2} ", "");
+
+            cityEditText.setTag("cityChangedProgrammatically");
+            streetEditText.setTag("streetChangedProgrammatically");
+            cityEditText.setText(mesto);
+            streetEditText.setText(street);
+            cityEditText.setTag(null);
+            streetEditText.setTag(null);
         }
     }
 
@@ -1487,23 +2142,226 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
-    public void showProgressbar() {
+    public void showProgressbarAndDisableMenuItems() {
+        saveMenuItem.setEnabled(false);
+        imageDeleteMenuItem.setEnabled(false);
         saveCoffeeSiteProgressBar.setVisibility(View.VISIBLE);
     }
 
     /**
      * Helper method to be called also from RecyclerViewAdapter
      */
-    public void hideProgressbar() {
+    public void hideProgressbarAndEnableMenuItems() {
+        saveMenuItem.setEnabled(true);
+        refreshImageActionState();
         saveCoffeeSiteProgressBar.setVisibility(View.GONE);
     }
 
-    @Override
-    protected void onDestroy() {
-        doUnbindCoffeeSiteImageService();
-        doUnbindCoffeeSiteCUDOperationsService();
-        doUnbindCoffeeSiteStatusChangeService();
-        super.onDestroy();
+    private boolean hasMainImage() {
+        boolean hasLocalImage = imagePhotoFile != null && imagePhotoFile.exists();
+        boolean hasCurrentCoffeeSiteImage = currentCoffeeSite != null
+                && (!currentCoffeeSite.getMainImageFilePath().isEmpty()
+                || (!isLocalOnlyDraft(currentCoffeeSite) && !currentCoffeeSite.getMainImageURL().isEmpty()));
+        return hasLocalImage || hasCurrentCoffeeSiteImage;
+    }
+
+    private boolean isLocalOnlyDraft(@Nullable CoffeeSite coffeeSite) {
+        return coffeeSite != null
+                && !coffeeSite.isSavedOnServer()
+                && !coffeeSite.isStatusZaznamuAvailable();
+    }
+
+    private boolean isCreateMode() {
+        return mode == MODE_CREATE || mode == MODE_CREATE_FROM_MYCOFFEESITESACTIVITY;
+    }
+
+    private boolean canOpenManageImages() {
+        if (!Utils.isOnline(getApplicationContext())) {
+            return false;
+        }
+        if (currentCoffeeSite == null) {
+            return isCreateMode();
+        }
+        if (currentCoffeeSite.getId().isEmpty()) {
+            return isCreateMode();
+        }
+        if (mode == MODE_MODIFY || mode == MODE_MODIFY_FROM_DETAILACTIVITY) {
+            return true;
+        }
+        return currentCoffeeSite.isSavedOnServer() || currentCoffeeSite.isStatusZaznamuAvailable();
+    }
+
+    private void openManageImagesActivity() {
+        if (!hasMainImage() || !canOpenManageImages()) {
+            return;
+        }
+        Intent manageImagesIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteImagesActivity.class);
+        manageImagesIntent.putExtra("coffeeSite", (Parcelable) getCoffeeSiteForManageImages());
+        manageImagesIntent.putStringArrayListExtra(CoffeeSiteImagesActivity.EXTRA_LOCAL_IMAGE_PATHS,
+                new ArrayList<>(localImagePaths));
+        startActivityForResult(manageImagesIntent, REQUEST_MANAGE_IMAGES);
+    }
+
+    private void refreshImageCountIfNeeded() {
+        if (canOpenManageImages()
+                && currentCoffeeSite != null
+                && !currentCoffeeSite.getId().isEmpty()) {
+            new GetImageObjectAsyncTask(this, currentCoffeeSite.getId()).execute();
+        } else {
+            if (!localImagePaths.isEmpty()) {
+                currentImageCount = localImagePaths.size();
+                refreshImageActionState();
+                return;
+            }
+            boolean hasUnknownRemoteImages = currentCoffeeSite != null
+                    && !Utils.isOnline(getApplicationContext())
+                    && !currentCoffeeSite.getId().isEmpty()
+                    && currentCoffeeSite.getMainImageFilePath().isEmpty()
+                    && !currentCoffeeSite.getMainImageURL().isEmpty();
+            currentImageCount = hasUnknownRemoteImages ? 0 : (hasMainImage() ? 1 : 0);
+            refreshImageActionState();
+        }
+    }
+
+    private void refreshImageActionState() {
+        boolean hasMainImage = hasMainImage();
+        int effectiveImageCount = currentImageCount > 0 ? currentImageCount : (hasMainImage ? 1 : 0);
+        imageDeleteMenuItem.setEnabled(effectiveImageCount == 1);
+        manageImagesMenuItem.setEnabled(effectiveImageCount > 0 && canOpenManageImages());
+    }
+
+    private void showSelectedMainImage(File mainImageFile) {
+        if (mainImageFile == null) {
+            return;
+        }
+        Picasso.get().load(mainImageFile).into(siteFotoView);
+        replaceLocalImagesWithMainImage(mainImageFile);
+        syncCurrentCoffeeSiteLocalImages();
+        currentImageCount = 1;
+        refreshImageActionState();
+    }
+
+    private void handleManagedImagesResult(@Nullable Intent data) {
+        if (data == null) {
+            return;
+        }
+        ArrayList<String> updatedLocalImagePaths = data.getStringArrayListExtra(
+                CoffeeSiteImagesActivity.EXTRA_LOCAL_IMAGE_PATHS);
+        if (updatedLocalImagePaths == null) {
+            return;
+        }
+        localImagePaths.clear();
+        localImagePaths.addAll(updatedLocalImagePaths);
+        applyLocalImagesState();
+    }
+
+    private CoffeeSite getCoffeeSiteForManageImages() {
+        if (currentCoffeeSite != null) {
+            return currentCoffeeSite;
+        }
+        CoffeeSite draftCoffeeSite = new CoffeeSite();
+        draftCoffeeSite.setName(coffeeSiteNameEditText.getText() != null
+                ? coffeeSiteNameEditText.getText().toString().trim()
+                : "");
+        return draftCoffeeSite;
+    }
+
+    private void replaceLocalImagesWithMainImage(File mainImageFile) {
+        localImagePaths.clear();
+        if (mainImageFile != null) {
+            localImagePaths.add(mainImageFile.getPath());
+        }
+        syncCurrentCoffeeSiteLocalImages();
+    }
+
+    private void applyLocalImagesState() {
+        currentImageCount = localImagePaths.size();
+        if (localImagePaths.isEmpty()) {
+            imagePhotoFile = null;
+            syncCurrentCoffeeSiteLocalImages();
+            siteFotoView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                    R.drawable.ic_outline_add_photo_alternate_36));
+            refreshImageActionState();
+            return;
+        }
+
+        imagePhotoFile = new File(localImagePaths.get(0));
+        syncCurrentCoffeeSiteLocalImages();
+        Picasso.get().load(imagePhotoFile).into(siteFotoView);
+        refreshImageActionState();
+    }
+
+    private void restoreLocalImagesFromCoffeeSite(@Nullable CoffeeSite coffeeSite) {
+        localImagePaths.clear();
+        imagePhotoFile = null;
+        if (coffeeSite == null) {
+            return;
+        }
+
+        List<String> storedLocalImagePaths = coffeeSite.getLocalImagePaths();
+        for (String localImagePath : storedLocalImagePaths) {
+            if (localImagePath != null && !localImagePath.isEmpty()) {
+                localImagePaths.add(localImagePath);
+                break;
+            }
+        }
+
+        if (localImagePaths.isEmpty()
+                && coffeeSite.getMainImageFilePath() != null
+                && !coffeeSite.getMainImageFilePath().isEmpty()) {
+            localImagePaths.add(coffeeSite.getMainImageFilePath());
+        }
+
+        if (!localImagePaths.isEmpty()) {
+            imagePhotoFile = new File(localImagePaths.get(0));
+        }
+        syncCurrentCoffeeSiteLocalImages(coffeeSite);
+    }
+
+    private void syncCurrentCoffeeSiteLocalImages() {
+        syncCurrentCoffeeSiteLocalImages(currentCoffeeSite);
+    }
+
+    private void syncCurrentCoffeeSiteLocalImages(@Nullable CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return;
+        }
+        if (isLocalOnlyDraft(coffeeSite)) {
+            coffeeSite.setMainImageURL("");
+        }
+        if (localImagePaths.isEmpty()) {
+            coffeeSite.setLocalImagePaths(new ArrayList<>());
+            coffeeSite.setMainImageFilePath("");
+            return;
+        }
+        ArrayList<String> singleLocalImagePath = new ArrayList<>();
+        singleLocalImagePath.add(localImagePaths.get(0));
+        coffeeSite.setLocalImagePaths(singleLocalImagePath);
+        coffeeSite.setMainImageFilePath(localImagePaths.get(0));
+    }
+
+    @Nullable
+    private File getLocalMainImageFile(@Nullable CoffeeSite coffeeSite) {
+        if (coffeeSite == null) {
+            return null;
+        }
+
+        List<String> storedLocalImagePaths = coffeeSite.getLocalImagePaths();
+        if (!storedLocalImagePaths.isEmpty()) {
+            File localMainImageFile = new File(storedLocalImagePaths.get(0));
+            if (localMainImageFile.exists()) {
+                return localMainImageFile;
+            }
+        }
+
+        if (coffeeSite.getMainImageFilePath() != null && !coffeeSite.getMainImageFilePath().isEmpty()) {
+            File localMainImageFile = new File(coffeeSite.getMainImageFilePath());
+            if (localMainImageFile.exists()) {
+                return localMainImageFile;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1556,9 +2414,15 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * On permanent denial opens settings dialog
      */
     private void requestStoragePermission(boolean isCamera) {
-        Dexter.withActivity(this)
-              .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+        String[] permissions;
+        if (isCamera) {
+            permissions = new String[] { Manifest.permission.CAMERA };
+        } else {
+            permissions = new String[] { getReadImagesPermission() };
+        }
+
+        Dexter.withContext(this)
+              .withPermissions(permissions)
               .withListener(new MultiplePermissionsListener() {
 
                     @Override
@@ -1583,10 +2447,17 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                         token.continuePermissionRequest();
                     }
               })
-              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT)
-                                .show())
+              .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Chyba oprávnění! ", Toast.LENGTH_SHORT)
+                                               .show())
               .onSameThread()
               .check();
+    }
+
+    private String getReadImagesPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return Manifest.permission.READ_MEDIA_IMAGES;
+        }
+        return Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
     /**
@@ -1618,25 +2489,26 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     /*  -------------- INNER CLASSES ------------------- */
 
     /**
-     * Validators for CoffeeSiteType input and for CoffeeSiteLocationType input
+     * Helper inner class to check if CoffeeSite's type dropdown input field
+     * is correctly entered as it can be entered manually by user.
+     * If not correct, then it is fixed providing first location type item
+     * from {@link SITE_TYPES_LOCAL} list.
+     * <p></>
+     * Probably not needed in this Activity as the list of available items are inserted
+     * into list of only selectable items of {@link AutoCompleteTextView} sourceTypeEditText
      */
     class SiteTypeValidator implements AutoCompleteTextView.Validator {
 
         @Override
         public boolean isValid(CharSequence text) {
             Log.v("Test", "Checking if valid: " + text);
-            Arrays.sort(SITE_TYPES);
-            if (Arrays.binarySearch(SITE_TYPES, text.toString()) > 0) {
-                return true;
-            }
-            return false;
+            return coffeeSiteTypesAvailable.contains(text.toString());
         }
 
         @Override
         public CharSequence fixText(CharSequence invalidText) {
             Log.v("Test", "Returning fixed text");
-
-            return SITE_TYPES[0];
+            return SITE_TYPES_LOCAL[0];
         }
     }
 
@@ -1647,32 +2519,32 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.v("Test", "Focus changed");
             if (v.getId() == R.id.site_type_dropdown && !hasFocus) {
                 Log.v("Test", "Performing validation");
-                ((AutoCompleteTextView)v).performValidation();
+                ((AutoCompleteTextView) v).performValidation();
             }
         }
     }
 
     /**
      * Helper inner class to check if CoffeeSite's location type dropdown input field
-     * is correctly entered as it can be entered manually by user. If not correct
-     * then it is fixed providing first location type item from {@link LOCATION_TYPES} list.
+     * is correctly entered as it can be entered manually by user.
+     * If not correct, then it is fixed providing first location type item
+     * from {@link LOCATION_TYPES_LOCAL} list.
+     * <p></>
+     * Probably not needed in this Activity as the list of available items are inserted
+     * into list of only selectable items of {@link AutoCompleteTextView} locationTypeEditText
      */
     class LocationTypeValidator implements AutoCompleteTextView.Validator {
 
         @Override
         public boolean isValid(CharSequence text) {
             Log.v(TAG, "Checking if valid: " + text);
-            Arrays.sort(LOCATION_TYPES);
-            if (Arrays.binarySearch(LOCATION_TYPES, text.toString()) > 0) {
-                return true;
-            }
-            return false;
+            return siteLocationTypesAvailable.contains(text.toString());
         }
 
         @Override
         public CharSequence fixText(CharSequence invalidText) {
             Log.v("Test", "Returning fixed text");
-            return LOCATION_TYPES[0];
+            return LOCATION_TYPES_LOCAL[0];
         }
     }
 
@@ -1683,20 +2555,39 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.v(TAG, "Focus changed");
             if (v.getId() == R.id.location_type_dropdown && !hasFocus) {
                 Log.v(TAG, "Performing dropdown input validation.");
-                ((AutoCompleteTextView)v).performValidation();
+                ((AutoCompleteTextView) v).performValidation();
             }
         }
     }
 
     /**
-     * Helper inner class to achieve functionality of hiding keyboaard, when the inputTextView
+     * Helper inner class to achieve functionality of hiding keyboard, when the drop
+     */
+    private class HideKeyboardOnFocusListener implements View.OnFocusChangeListener {
+
+        public void onFocusChange(View v, boolean hasFocus){
+
+            if ((v.getId() == R.id.coffeesitename_input_edittext && !hasFocus)
+                    || (v.getId() == R.id.city_edittext && !hasFocus)
+                    || (v.getId() == R.id.street_edittext && !hasFocus)
+                    || (v.getId() == R.id.latitude_input_edittext && !hasFocus)
+                    || (v.getId() == R.id.longitude_input_edittext && !hasFocus)) {
+
+                InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
+        }
+    }
+
+    /**
+     * Helper inner class to achieve functionality of hiding keyboard, when the inputTextView
      * loose the focus.
      */
     private class MyFocusChangeListener implements View.OnFocusChangeListener {
 
         public void onFocusChange(View v, boolean hasFocus){
 
-            if((v.getId() == R.id.coffeesitename_input_edittext && !hasFocus)
+            if ((v.getId() == R.id.coffeesitename_input_edittext && !hasFocus)
                 || (v.getId() == R.id.city_edittext && !hasFocus)
                 || (v.getId() == R.id.street_edittext && !hasFocus)
                 || (v.getId() == R.id.latitude_input_edittext && !hasFocus)
@@ -1704,7 +2595,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
 
                 InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
             }
         }
     }

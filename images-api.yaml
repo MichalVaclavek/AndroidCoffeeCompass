@@ -1,0 +1,557 @@
+openapi: 3.0.2
+info:
+  version: '1.1.0'
+
+  title: Images storage
+
+  termsOfService: 'https://coffeecompass.cz/terms'
+  contact:
+    email: vaclavek.michal@gmail.com
+    url: 'https://www.coffeecompass.cz/contactMe'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+  description: |
+    This is an image files storage API
+    # Introduction
+    It is intended to save and retrieve image files related to given object specified by object ID
+
+    The image is identified by its related object ID and by ID of the image itself. More image files can be assigned to
+    object. All image files are saved in its original size, in HD size (1920x1080), in 50% size (called Thumbnail large),
+    in 25% size (called Thumbnail mid) and in 12.5% size (called Thumbnail small)
+
+servers:
+  - url: 'http://images:12002/api/v1/images'
+
+# Holds the relative paths to the individual endpoints. The path is appended to the
+# basePath in order to construct the full URL.
+paths:
+  # ############# GET Image sizes and numbers ###################
+
+  # ############# Sizes and numbers of all images of given ImageObject ###################
+
+  '/object/sizeKB/{objectExtId}':
+    get:
+      summary: get size of all images for given ImageObjectExtId in kB
+      description: |
+        Returns size of all images for given ImageObjectExtId in kB
+      operationId: getSizeOfAllImagesForObjectToDownload
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: string Ext-ID of the image object
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: size in kB
+          content:
+            application/json:
+              schema:
+                type: integer
+        '403':
+          description: Forbidden
+
+  '/object/number/{objectExtId}':
+    get:
+      summary: get number of all images for given ImageObjectExtId
+      description: |
+        Returns number of all images for given ImageObjectExtId
+      operationId: getNumberOfAllImagesForObjectToDownload
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: string Ext-ID of the image object
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: number of images
+          content:
+            application/json:
+              schema:
+                type: integer
+        '403':
+          description: Forbidden
+
+  # ############# Sizes and numbers of all images ###################
+
+  '/all/sizeKB?imageSize=hd':
+    get:
+      summary: get size of all images for all ImageObjects in kB for given size or for HD sizes if size param is not given
+      description: |
+        Returns size of all images for all ImageObjects in kB for given size or for HD sizes if size param is not given
+      operationId: getSizeOfAllImagesToDownload
+      parameters:
+        - in: query
+          name: imageSize
+          schema:
+            type: string
+          required: false
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: size in kB
+          content:
+            application/json:
+              schema:
+                type: integer
+        '403':
+          description: Forbidden
+
+  '/all/number?imageSize=hd':
+    get:
+      summary: get number of all images for all ImageObjects id given size or HD sizes if size param is not given
+      description: |
+        Returns number of all images for all ImageObjects id given size or HD sizes if size param is not given
+      operationId: getNumberOfAllImagesToDownload
+      parameters:
+        - in: query
+          name: imageSize
+          schema:
+            type: string
+          required: false
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: number of images
+          content:
+            application/json:
+              schema:
+                type: integer
+        '403':
+          description: Forbidden
+
+
+  # ################# UPLOAD #################################
+  '/upload':
+    post:
+      summary: Upload image file
+      description: |
+        Upload image related to object
+      operationId: uploadImage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                objectExtId:
+                  type: string
+                  format: uuid
+                description:
+                  type: string
+                  maxLength: 255
+                imageType:
+                  type: string
+                  maxLength: 32
+                file: # image file
+                  type: string
+                  format: binary
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 634175d5-6eb6-48fd-bee0-abe70046b861
+        '403':
+          description: Forbidden
+
+  '/object/{objectExtId}/replace/{imageExtId}':
+    post:
+      summary: Upload image related to object
+      description: |
+        Upload image file replacing image related to the given Object and image Ext-Id
+      operationId: replaceImage
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image object
+        - in: path
+          name: imageExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  maxLength: 255
+                imageType:
+                  type: string
+                  maxLength: 32
+                file: # image file
+                  type: string
+                  format: binary
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema: # response schema can be specified for each response
+                $ref: '#/components/schemas/ImageObject'
+        '403':
+          description: Forbidden
+
+  # ############# GET ###################
+
+  '/object/{objectExtId}':
+    get:
+      summary: get image ImageObject with all ImageFiles description
+      description: |
+        Get list of image files related to given Image object Ext-Id
+      operationId: getImageObject
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image object
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema: # response schema can be specified for each response
+                $ref: '#/components/schemas/ImageObject'
+        '403':
+          description: Forbidden
+
+  # ############# GET Image by its Ext-Id ###################
+
+  '/base64/?imageExtId=ext-id&size=hd':
+    get:
+      summary: get image file in base64
+      description: |
+        Get image as Base64 for related image Id and size
+      operationId: getImageBase64
+      parameters:
+        - in: query
+          name: imageExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: string
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: image in JPG format
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: byte64
+        '403':
+          description: Forbidden
+
+  '/bytes/?imageExtId=ext-id&size=hd':
+    get:
+      summary: get image file bytes
+      description: |
+        Get image as bytes for related image Id and size
+      operationId: getImageBytes
+      parameters:
+        - in: query
+          name: imageExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: string
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: binary image in JPG format
+          content:
+            image/jpg:
+              schema:
+                format: binary
+        '403':
+          description: Forbidden
+
+  # ############# GET Image by its Object Ext-Id ###################
+
+  '/base64/object/?objectExtId=Ext-Id&type=main&size=hd':
+    get:
+      summary: get image file in base64
+      description: |
+        Get latest image of the given type related to the Object ext-ID as base64 in given size
+      operationId: getImageOfTypeAsBase64
+      parameters:
+        - in: query
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the object
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: string
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: image in JPG format
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: byte64
+        '403':
+          description: Forbidden
+
+  '/bytes/object/?objectExtId=Ext-Id&type=main&size=hd':
+    get:
+      summary: get image file bytes
+      description: |
+        Get latest image of the given type related to the Object ext-ID as bytes in given size
+      operationId: getImageOfTypeAsBytes
+      parameters:
+        - in: query
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the object
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+          description: type of the image
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: string
+          description: string of the image size, i.e. 'original', 'hd', 'large', 'mid', 'small'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: binary image in JPG format
+          content:
+            image/jpg:
+              schema:
+                format: binary
+        '403':
+          description: Forbidden
+
+  # ############# ROTATE Image ###################
+
+  '/rotate/{imageExtId}/direction/{rotationDirection}':
+    put:
+      summary: rotate the image Right or Left by 90 degrees
+      description: |
+        Rotate the image Left or Right by 90 degrees and return it in default size
+      operationId: rotateImage
+      parameters:
+        - in: path
+          name: imageExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image
+        - in: path
+          name: rotationDirection
+          required: true
+          schema:
+            type: string
+          description: direction of rotation - either 'left' or 'right'
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: image rotated successfully
+        '403':
+          description: Forbidden
+        '404':
+          description: image does not exist
+
+  # ######################## DELETE ###################################
+
+  '/object/{objectExtId}/image/{imageExtId}':
+    delete:
+      summary: delete image file
+      description: |
+        Delete image idetified by it's Object and Image Ext-Id
+      operationId: deleteImage
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image object
+        - in: path
+          name: imageExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: image deleted successfully
+        '403':
+          description: Forbidden
+        '404':
+          description: Image does not exist
+
+  '/object/{objectExtId}/all':
+    delete:
+      summary: delete all object's images
+      description: |
+        Delete alle images related to Object  Ext-Id
+      operationId: deleteObjectImages
+      parameters:
+        - in: path
+          name: objectExtId
+          schema:
+            type: string
+          required: true
+          description: string Ext-ID of the image object
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+            - 'bearerAuth'
+      responses: # list of responses
+        '200':
+          description: all object's images deleted successfully
+        '403':
+          description: Forbidden
+        '404':
+          description: Image object does not exist
+
+
+# An object to hold reusable parts that can be used across the definition
+components:
+  schemas:
+
+    ImageObject:
+      description: Image object - contains all uploaded images
+      properties:
+        externalObjectId:
+          type: string
+        baseBytesObjectUrl:
+          description: base url of the image object as Bytes
+          type: string
+        baseBase64ObjectUrl:
+          description: base url of the image object as Base64
+          type: string
+        objectImages:
+          type: array
+          description: list of images related to this object
+          items:
+            $ref: '#/components/schemas/ImageFile'
+
+    ImageFile:
+      type: object
+      properties:
+        externalId:
+          description: id of the image file
+          type: string
+        baseBytesImageUrl:
+          description: base url of the image as Bytes
+          type: string
+        baseBase64ImageUrl:
+          description: base url of the image as Base64
+          type: string
+        savedOn:
+          description: date/time when the image was saved
+          type: string
+          format: date-time
+        description:
+          type: string
+          maxLength: 255
+        imageType:
+          type: string
+          maxLength: 32
+
+  # Security scheme definitions that can be used across the definition.
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basic_auth: # security definition name (you can name it as you want)
+      type: http
+      scheme: basic

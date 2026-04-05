@@ -9,7 +9,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
@@ -21,7 +20,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnect
 public abstract class CoffeeSiteWithUserAccountService extends Service
                                                        implements UserAccountServiceConnectionListener {
 
-    static final String TAG = "CoffeeSiteServiceBase";
+    static final String TAG = "CoffeSiteUserAccountSrv";
 
     /**
      *  Enum to identify different actions called by CoffeeSiteServices.
@@ -39,14 +38,21 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
         COFFEE_SITE_ACTIVATE,
         COFFEE_SITE_DEACTIVATE,
 
+        COFFEE_SITES_UPLOAD,
+
         COFFEE_SITE_LOAD,
         COFFEE_SITE_LOAD_ALL,
+        COFFEE_SITE_LOAD_ALL_FIRST_PAGE,
+        COFFEE_SITE_LOAD_ALL_NEXT_PAGE,
         COFFEE_SITE_LOAD_ALL_FROM_RANGE,
         COFFEE_SITES_FROM_USER_LOAD,
         COFFEE_SITES_FROM_CURRENT_USER_LOAD,
         COFFEE_SITES_FROM_CURRENT_USER_FIRST_PAGE_LOAD,
         COFFEE_SITES_FROM_CURRENT_USER_NEXT_PAGE_LOAD,
-        COFFEE_SITES_NUMBER_FROM_CURRENT_USER
+        COFFEE_SITES_NUMBER_FROM_CURRENT_USER,
+
+        COFFEE_SITES_LOAD_LATEST,
+        COFFEE_SITES_IN_TOWN
     }
 
     /**
@@ -97,18 +103,8 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      */
     protected LoggedInUser currentUser;
 
-    private static UserAccountService userAccountService;
+    protected static UserAccountService userAccountService;
     private static UserAccountServiceConnector userAccountServiceConnector;
-
-    /**
-     * Current CoffeeSite which is used for server operations save, update, activate and so on
-     */
-    private CoffeeSite coffeeSite;
-
-    /**
-     * Operation name type requested by client Activity when registering the service
-     */
-    protected int requestedOperation = 0;
 
     protected String operationResult = "";
     protected String operationError = "";
@@ -118,11 +114,7 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
      * @return
      */
     protected LoggedInUser getCurrentUser() {
-
-        if (userAccountService != null) {
-            LoggedInUser currentUser = userAccountService.getLoggedInUser();
-            return currentUser;
-        } else return null;
+        return (userAccountService != null) ? userAccountService.getLoggedInUser() : null;
     }
 
 
@@ -140,12 +132,10 @@ public abstract class CoffeeSiteWithUserAccountService extends Service
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
-        // (and thus won't be supporting component replacement by other
-        // applications).
+        // (and thus won't be supporting component replacement by other applications).
         if (userAccountService == null) {
             userAccountServiceConnector = new UserAccountServiceConnector(this);
             Intent intent = new Intent(this, UserAccountService.class);
-            //Intent intent = new Intent(getApplicationContext(), UserAccountService.class);
             if (mShouldBindUserLoginService)
                 if (bindService(intent, userAccountServiceConnector, Context.BIND_AUTO_CREATE)) {
                     mShouldUnbindUserLoginService = true;

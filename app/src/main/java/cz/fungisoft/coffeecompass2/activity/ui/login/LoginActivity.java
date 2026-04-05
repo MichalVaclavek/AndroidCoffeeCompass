@@ -1,13 +1,9 @@
 package cz.fungisoft.coffeecompass2.activity.ui.login;
 
 import android.app.Activity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,20 +16,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+
 import java.util.Objects;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
-import cz.fungisoft.coffeecompass2.utils.Utils;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.register.SignupActivity;
-
-import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserLoginServiceListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
+/**
+ * Activity to process register, login, logout of a User operations
+ */
 public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserAccountServiceConnectionListener {
 
     private LoginRegisterViewModel loginViewModel;
@@ -55,7 +59,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                                            .get(LoginRegisterViewModel.class);
 
         ButterKnife.bind(this);
@@ -72,16 +76,16 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormValidationState>() {
             @Override
             public void onChanged(@Nullable LoginFormValidationState loginFormState) {
-            if (loginFormState == null) {
-                return;
-            }
-            loginButton.setEnabled(loginFormState.isDataValid());
-            if (loginFormState.getUsernameError() != null) {
-                usernameEditText.setError(getString(loginFormState.getUsernameError()));
-            }
-            if (loginFormState.getPasswordError() != null) {
-                passwordEditText.setError(getString(loginFormState.getPasswordError()));
-            }
+                if (loginFormState == null) {
+                    return;
+                }
+                loginButton.setEnabled(loginFormState.isDataValid());
+                if (loginFormState.getUsernameError() != null) {
+                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
+                }
+                if (loginFormState.getPasswordError() != null) {
+                    passwordEditText.setError(getString(loginFormState.getPasswordError()));
+                }
             }
         });
 
@@ -164,8 +168,8 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
 
     @Override
     protected void onDestroy() {
-        doUnbindUserLoginService();
         super.onDestroy();
+        doUnbindUserLoginService();
     }
 
     /**
@@ -228,7 +232,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if (Utils.isOnline()) {
+                    if (Utils.isOnline(getApplicationContext())) {
                         userAccountService.login(usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 deviceID);
@@ -243,7 +247,7 @@ public class LoginActivity extends AppCompatActivity implements UserLoginService
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     loginProgressBar.setVisibility(View.VISIBLE);
                     loginButton.setEnabled(false);
 

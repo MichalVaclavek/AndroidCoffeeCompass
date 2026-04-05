@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -34,7 +33,7 @@
 
                 app:boxStrokeColor="@color/colorPrimary2"
                 app:counterEnabled="true"
-                app:counterMaxLength="30"
+                app:counterMaxLength="35"
                 app:errorEnabled="true"
                 app:helperText="* povinné"
                 app:helperTextEnabled="true"
@@ -46,7 +45,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:maxLength="30"
+                    android:maxLength="35"
                     android:textSize="18sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -487,6 +486,7 @@
                             android:layout_height="wrap_content"
                             android:cursorVisible="false"
                             android:editable="false"
+                            android:inputType="none"
                             android:textSize="18sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -587,7 +587,7 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary2"
             app:itemIconTint="@color/card_backround"
-            app:itemTextColor="@color/colorPrimaryDark"
+            app:itemTextColor="@color/text_color_create_site_menu"
             app:menu="@menu/menu_create_site">
 
         </com.google.android.material.bottomnavigation.BottomNavigationView>

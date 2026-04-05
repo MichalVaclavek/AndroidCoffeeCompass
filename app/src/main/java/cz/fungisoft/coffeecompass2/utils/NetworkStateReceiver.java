@@ -7,8 +7,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import cz.fungisoft.coffeecompass2.activity.AboutActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
-import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteEntitiesService;
 
 /**
@@ -41,6 +42,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context
      * @param intent
      */
+    @Override
     public void onReceive(Context context, Intent intent) {
 
         Log.d(TAG, "Network connectivity change");
@@ -48,14 +50,13 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         /**
          * Async task to check if the connection to internet is available after the IP network connectivity
          * is fine (this is the event this Receiver is listening too).
-         * IP network may be available, but not the internet. It has to b checked subsequently.
+         * IP network may be available, but not the internet. It has to be checked subsequently.
          */
         InternetCheckAsyncTask internetCheckAsyncTask = new InternetCheckAsyncTask(this);
 
         this.context = context;
 
         if (intent.getExtras() != null) {
-
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             int networkType = (int) intent.getExtras().get(ConnectivityManager.EXTRA_NETWORK_TYPE);
             boolean isWiFi = networkType == ConnectivityManager.TYPE_WIFI;
@@ -97,6 +98,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
             }
             if (intent.getExtras().getBoolean(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
                 online = false;
+                internetCheckAsyncTask.execute(); // we need to if the connection was lost
                 Log.d(TAG, "There's no network connectivity");
             }
         }
@@ -110,8 +112,8 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      */
     private void startReadStatisticsInMainActivity(boolean isOnline, Context context) {
         if (isOnline) {
-            if (context instanceof MainActivity) {
-                MainActivity ma = (MainActivity) context;
+            if (context instanceof AboutActivity) {
+                AboutActivity ma = (AboutActivity) context;
                 ma.startReadStatistics();
             }
         }
@@ -127,8 +129,7 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
         if (isOnline) {
             if (context instanceof CoffeeSiteEntitiesService) {
                 CoffeeSiteEntitiesService coffeeSiteEntitiesService = (CoffeeSiteEntitiesService) context;
-                if (!CoffeeSiteEntityRepositories.isDataReadFromServer()
-                      && !Utils.isOfflineModeOn(context)) {
+                if (!coffeeSiteEntitiesService.isDataReadFromServer()) { // read this data only once as they do not change usually
                     coffeeSiteEntitiesService.populateCSEntities();
                 }
             }
@@ -142,26 +143,58 @@ public class NetworkStateReceiver extends BroadcastReceiver implements InternetC
      * @param context calling context, usually Activity which registered this Receiver
      */
     private void startLoadNumberOfSitesOfUserInMainActivity(boolean isOnline, Context context) {
-        //TODO zohlednit OFFLINE mode
         if (isOnline) {
             if (context instanceof MainActivity) {
                 MainActivity ma = (MainActivity) context;
                 if (!ma.isNumberOfCoffeeSitesCreatedByLoggedInUserChecked()) {
-                    ma.startNumberOfCoffeeSitesFromUserService();
+                    ma.startNumberOfCoffeeSitesFromUserCall();
                 }
             }
         }
     }
 
+    /**
+     * Calls MainActivity method to start loading number of CoffeeSite created by user.
+     *
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
+     */
+    private void startLoadNumberOfSitesInRangesInMainActivity(boolean isOnline, Context context) {
+        if (isOnline) {
+            if (context instanceof MainActivity) {
+                MainActivity ma = (MainActivity) context;
+                ma.startReadingNumberOfSitesInRanges();
+            }
+        }
+    }
+
+    /**
+     * Calls MyCoffeeSitesListActivity method to start loading of current user's created CoffeeSites.
+     *
+     * @param isOnline status of internet connectivity
+     * @param context calling context, usually Activity which registered this Receiver
+     */
+    private void startMyCoffeeSitesListActivityUI(boolean isOnline, Context context) {
+        if (context instanceof MyCoffeeSitesListActivity) {
+            MyCoffeeSitesListActivity myCoffeeSitesListActivity = (MyCoffeeSitesListActivity) context;
+            myCoffeeSitesListActivity.updateActivityUI(isOnline);
+        }
+    }
+
     // *** Methods implementing InternetCheckAsyncTask.Consumer interface * //
+
     // Needed to react on internet connectivity AsyncTask check result //
 
     @Override
     public void accept(Boolean internet) {
         online = internet;
-        startReadStatisticsInMainActivity(online, this.context);
-        startLoadCSEntities(online, this.context);
-        startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
+        if (online) {
+            startReadStatisticsInMainActivity(online, this.context);
+            startLoadCSEntities(online, this.context);
+            startLoadNumberOfSitesOfUserInMainActivity(online, this.context);
+            startLoadNumberOfSitesInRangesInMainActivity(online, this.context);
+        }
+        startMyCoffeeSitesListActivityUI(online, this.context);
     }
 
     @Override

@@ -5,20 +5,19 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import java.io.IOException;
+
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-
-import java.io.IOException;
-
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
 
 /**
  * REST user login or register request to be sent to server coffeecompass.cz
@@ -34,17 +33,12 @@ public class UserLoginOrRegisterRESTRequest {
     /**
      * User register or login REST input data structure expected by server, sent using JSON
      */
-    private UserLoginOrRegisterInputData userLoginOrRegisterInputData;
+    private final UserLoginOrRegisterInputData userLoginOrRegisterInputData;
 
     /**
      * Evaluator of the user register or login REST response
      */
-    private UserAccountActionsEvaluator userLoginAndRegisterService;
-
-    /**
-     * User data obtained from server as a result of login or register process
-     */
-    private final LoggedInUser currentUser;
+    private final UserAccountActionsProvider userLoginAndRegisterService;
 
     private static final int PERFORM_LOGIN = 1;
     private static final int PERFORM_REGISTER = 2;
@@ -56,11 +50,10 @@ public class UserLoginOrRegisterRESTRequest {
      * @param userName - username to be used for registration or login of the user
      * @param password - password entered by user, used to register or login
      */
-    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsEvaluator userLoginAndRegisterService) {
+    public UserLoginOrRegisterRESTRequest(String deviceID, String email, String userName, String password, UserAccountActionsProvider userLoginAndRegisterService) {
         super();
         this.userLoginAndRegisterService = userLoginAndRegisterService;
         userLoginOrRegisterInputData = new UserLoginOrRegisterInputData(userName, deviceID, email, password);
-        currentUser = new LoggedInUser();
     }
 
 
@@ -87,12 +80,14 @@ public class UserLoginOrRegisterRESTRequest {
         Gson gson = new GsonBuilder().setDateFormat("dd.MM.yyyy HH:mm")
                                      .create();
 
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
+                                        .client(Utils.getOkHttpClientBuilder().build())
                                         .baseUrl((requestType == PERFORM_LOGIN) ? UserAccountRESTInterface.LOGIN_URL
                                                                                 : UserAccountRESTInterface.REGISTER_USER_URL)
                                         .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
+                                        .addConverterFactory(GsonConverterFactory.create(gson));
+
+        Retrofit retrofit = retrofitBuilder.build();
 
         UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
 
@@ -103,7 +98,7 @@ public class UserLoginOrRegisterRESTRequest {
             call = api.registerNewUser(userLoginOrRegisterInputData);
         }
 
-        call.enqueue(new Callback<JwtUserToken>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<JwtUserToken> call, Response<JwtUserToken> response) {
                 if (response.isSuccessful()) {
@@ -117,7 +112,6 @@ public class UserLoginOrRegisterRESTRequest {
                         } else {
                             currentUserRESTRequest.performRequestAfterRegister();
                         }
-                        return;
                     } else {
                         Log.i(REQ_TAG, "Returned empty response");
                         if (requestType == PERFORM_LOGIN) {
@@ -138,8 +132,7 @@ public class UserLoginOrRegisterRESTRequest {
                         Log.e(REQ_TAG, "Error reading error body." + e.getMessage());
                         if (requestType == PERFORM_LOGIN) {
                             userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error logging user.", e)));
-                        }
-                        else {
+                        } else {
                             userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error register user.", e)));
                         }
                     }

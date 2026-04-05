@@ -1,5 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -9,11 +10,12 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsEvaluator;
+import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -43,14 +45,14 @@ public class CurrentUserRESTRequest {
      * Service or Class implementing interface for evaluation of user register
      * or login REST request.
      */
-    private UserAccountActionsEvaluator userLoginAndRegisterService;
+    private final UserAccountActionsProvider userLoginAndRegisterService;
 
     /**
      *
      * @param userLoginRESTResponse
      * @param userLoginAndRegisterService
      */
-    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsEvaluator userLoginAndRegisterService) {
+    public CurrentUserRESTRequest(JwtUserToken userLoginRESTResponse, UserAccountActionsProvider userLoginAndRegisterService) {
         super();
         this.userJwtToken = userLoginRESTResponse;
         this.currentUser = new LoggedInUser(userJwtToken);
@@ -92,7 +94,9 @@ public class CurrentUserRESTRequest {
         };
 
         //Add the interceptor to the client builder.
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(headerAuthorizationInterceptor).build();
+        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
+
+        OkHttpClient client = clientBuilder.addInterceptor(headerAuthorizationInterceptor).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                                         .client(client)
@@ -107,7 +111,7 @@ public class CurrentUserRESTRequest {
         // We need further parsing of the JSON upon receiving response
         Call<String> call = api.getCurrentUser();
 
-        call.enqueue(new Callback<String>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
 
@@ -130,7 +134,6 @@ public class CurrentUserRESTRequest {
                                 userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error JSON parsing current user data.", e)));
                             }
                         }
-                        return;
                     } else {
                         Log.i(REQ_TAG, "Returned empty response");
                     }
@@ -147,10 +150,16 @@ public class CurrentUserRESTRequest {
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.e(REQ_TAG, "Error waiting for CurrentUserRESTAsyncTask" + t.getMessage());
+
                 if (requestType == PERFORM_LOGIN) {
                     userLoginAndRegisterService.evaluateLoginResult(new Result.Error(new IOException("Error reading current user.", t)));
                 } else {
                     userLoginAndRegisterService.evaluateRegisterResult(new Result.Error(new IOException("Error reading current user.", t)));
+                }
+                if (t.getMessage().startsWith("Refreshing access token failed")) {
+                    userLoginAndRegisterService.clearLoggedInUser();
+                    // go to login activity
+                    Utils.openLoginActivityOnRefreshTokenFailed((Context) userLoginAndRegisterService);
                 }
             }
         });

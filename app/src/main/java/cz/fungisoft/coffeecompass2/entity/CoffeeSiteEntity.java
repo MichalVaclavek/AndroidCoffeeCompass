@@ -1,7 +1,7 @@
 package cz.fungisoft.coffeecompass2.entity;
 
 
-import androidx.room.Entity;
+import androidx.annotation.NonNull;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
@@ -15,21 +15,23 @@ public abstract class CoffeeSiteEntity {
     @Expose
     @SerializedName("id")
     @PrimaryKey
-    protected int id;
+    @NonNull
+    protected String id;
 
-    public int getId() {
+    @NonNull
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 
-    public CoffeeSiteEntity(int id) {
+    public CoffeeSiteEntity(@NonNull String id) {
         this.id = id;
     }
 
     public CoffeeSiteEntity() {
-        this.id = 0;
+        this.id = "";
     }
 }

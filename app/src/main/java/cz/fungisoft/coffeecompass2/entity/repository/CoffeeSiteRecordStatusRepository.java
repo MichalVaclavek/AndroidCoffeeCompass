@@ -1,19 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteRecordStatusDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
+/**
+ * Repository class for CoffeeSiteRecord objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
 
-    private CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
-    private LiveData<List<CoffeeSiteRecordStatus>> mAllCoffeeSiteRecordStatuss;
+    private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
+    private final LiveData<List<CoffeeSiteRecordStatus>> mAllCoffeeSiteRecordStatuss;
 
     CoffeeSiteRecordStatusRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -25,7 +28,7 @@ public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
         return mAllCoffeeSiteRecordStatuss;
     }
 
-    public Flowable<CoffeeSiteRecordStatus> getCoffeeSiteRecordStatus(String recordStatusValue) {
+    public Single<CoffeeSiteRecordStatus> getCoffeeSiteRecordStatus(String recordStatusValue) {
         return coffeeSiteRecordStatusDao.getCoffeeSiteRecordStatus(recordStatusValue);
     }
 
@@ -33,18 +36,16 @@ public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
         new CoffeeSiteRecordStatusRepository.insertAsyncTask(coffeeSiteRecordStatusDao).execute(CoffeeSiteRecordStatus);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CoffeeSiteRecordStatus, Void, Void> {
+    private static class insertAsyncTask {
 
-        private CoffeeSiteRecordStatusDao mAsyncTaskDao;
+        private final CoffeeSiteRecordStatusDao mAsyncTaskDao;
 
         insertAsyncTask(CoffeeSiteRecordStatusDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSiteRecordStatus... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
+        public void execute(final CoffeeSiteRecordStatus... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insert(params[0]));
         }
     }
 
@@ -52,18 +53,16 @@ public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(coffeeSiteRecordStatusDao).execute(CoffeeSiteRecordStatuss);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CoffeeSiteRecordStatus>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private CoffeeSiteRecordStatusDao mAsyncTaskDao;
+        private final CoffeeSiteRecordStatusDao mAsyncTaskDao;
 
         InsertAllAsyncTask(CoffeeSiteRecordStatusDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<CoffeeSiteRecordStatus>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<CoffeeSiteRecordStatus>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

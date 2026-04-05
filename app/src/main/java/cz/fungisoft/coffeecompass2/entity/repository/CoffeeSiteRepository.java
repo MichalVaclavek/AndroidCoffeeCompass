@@ -1,15 +1,21 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 /**
  * Repository to work with CoffeeSite's DAO.<br>
@@ -23,28 +29,66 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
     /**
      * A multiply factor, found by experiment, which has to be used,
      * when searching from current location within circle range, when
-     * the searching itself in DB can be only performed like searching
-     * within square
+     * the searching itself in DB can only be performed like searching
+     * within square.
      */
     final double MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE = 1.4;
 
     private CoffeeSiteDao coffeeSiteDao;
-    private LiveData<List<CoffeeSite>> mAllCoffeeSites;
+
+    private final LiveData<List<CoffeeSite>> mAllCoffeeSites;
+    private final LiveData<List<CoffeeSite>> coffeeSitesWithImage;
+    private final Single<List<CoffeeSite>> coffeeSitesWithImageSingle;
+
+    // list of coffeeSites created/updated during OFFLINE mode
+    private final Single<List<CoffeeSite>> coffeeSitesNotSavedOnServerSingle;
+
+    // list of coffeeSites created/updated during OFFLINE mode
+    private final LiveData<List<CoffeeSite>> coffeeSitesNotSavedOnServer;
+
+
+    // Probably not needed
+    private final Flowable<Integer> numberOfSitesWithImage;
+
+
+    /**
+     * Needed for service downloading data for OFFLINE mode
+     * @return
+     */
+    public Single<List<CoffeeSite>> getAllCoffeeSitesWithImageSingle() {
+        return coffeeSitesWithImageSingle;
+    }
+
+
+    /**
+     * Needed to show and save list of CoffeeSites, which are not saved on server yet
+     * @return
+     */
+    public Single<List<CoffeeSite>> getCoffeeSitesNotSavedOnServerSingle() {
+        return coffeeSitesNotSavedOnServerSingle;
+    }
+
+    public LiveData<List<CoffeeSite>> getCoffeeSitesNotSavedOnServer() {
+        return coffeeSitesNotSavedOnServer;
+    }
 
     public CoffeeSiteRepository(CoffeeSiteDatabase db) {
         super(db);
         coffeeSiteDao = db.coffeeSiteDao();
         mAllCoffeeSites = coffeeSiteDao.getAllCoffeeSites();
+        coffeeSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImage();
+        coffeeSitesWithImageSingle = coffeeSiteDao.getAllCoffeeSitesWithImageSingle();
+        numberOfSitesWithImage = coffeeSiteDao.getAllCoffeeSitesWithImageNumber();
+
+        coffeeSitesNotSavedOnServerSingle = coffeeSiteDao.getCoffeeSitesNotSavedOnServerSingle();
+        coffeeSitesNotSavedOnServer = coffeeSiteDao.getCoffeeSitesNotSavedOnServer();
     }
 
-    public LiveData<List<CoffeeSite>> getAllCoffeeSites() {
-        return mAllCoffeeSites;
-    }
 
     /**
      * Inner class to hold input data of CoffeeSites LiveData searching parameters.
      */
-    class SearchParamsDataInput {
+    static class SearchParamsDataInput {
 
         public double getLatitudeFrom() {
             return latitudeFrom;
@@ -54,41 +98,50 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
             return longitudeFrom;
         }
 
-        public double getSearchRangeAsDegreePart() {
-            return searchRangeAsDegreePart;
+        public List<Integer> getAllSearchRangeMeters() {
+            return allRanges;
         }
 
         private final double latitudeFrom;
         private final double longitudeFrom;
-        private final double searchRangeAsDegreePart;
+        private final List<Integer> allRanges;
 
-        public SearchParamsDataInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
+        public SearchParamsDataInput(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
             this.latitudeFrom = latitudeFrom;
             this.longitudeFrom = longitudeFrom;
-            this.searchRangeAsDegreePart = searchRangeAsDegreePart;
+            this.allRanges = allRanges;
         }
     }
 
     /**
      * LiveData input holder for coffee sites in range input parameters
      */
-    private final MutableLiveData<SearchParamsDataInput> searchParamsInput = new MutableLiveData<>();
+    private final MutableLiveData<SearchParamsDataInput> searchLatLongRangeInput = new MutableLiveData<>();
 
-    private void setInput(double latitudeFrom, double longitudeFrom, double searchRangeAsDegreePart) {
-        searchParamsInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart));
+    private void setLatLongRangeInput(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
+        searchLatLongRangeInput.setValue(new SearchParamsDataInput(latitudeFrom, longitudeFrom, allRanges));
     }
 
-    private final LiveData<List<CoffeeSite>> coffeeSitesInRange =
-            Transformations.switchMap(searchParamsInput, (input) -> coffeeSiteDao.getCoffeeSitesInRectangle(input.getLatitudeFrom(), input.getLongitudeFrom(), input.getSearchRangeAsDegreePart()));
-
-
-    public void setNewSearchCriteria(double latitudeFrom, double longitudeFrom, int searchRangeInMeters) {
-        double searchRangeAsDegreePart = searchRangeInMeters * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
-        setInput(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+    public void setNewLatLongRangeSearchCriteriaForAllRanges(double latitudeFrom, double longitudeFrom, List<Integer> allRanges) {
+        setLatLongRangeInput(latitudeFrom, longitudeFrom, allRanges);
     }
 
-    public LiveData<List<CoffeeSite>> getCoffeeSitesInRange() {
-        return coffeeSitesInRange;
+    private final Map<String, LiveData<List<CoffeeSite>>> coffeeSitesInRangeWithRange = new HashMap<>();
+
+    private final LiveData<Map<String, LiveData<List<CoffeeSite>>>> coffeeSitesInRangeWithRangeLive = Transformations.map(searchLatLongRangeInput, input -> {
+        for (Integer range : input.getAllSearchRangeMeters()) {
+            double searchRangeAsDegreePart = range * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
+            coffeeSitesInRangeWithRange.put(range.toString(), coffeeSiteDao.getCoffeeSitesInRectangleLiveData(input.getLatitudeFrom(), input.getLongitudeFrom(), searchRangeAsDegreePart));
+        }
+        return coffeeSitesInRangeWithRange;
+    });
+
+    public LiveData<Map<String, LiveData<List<CoffeeSite>>>> getCoffeeSitesInRangeWithRange() {
+        return coffeeSitesInRangeWithRangeLive;
+    }
+
+    public Single<List<CoffeeSite>> getCoffeeSitesInTownSingle(String townName) {
+        return coffeeSiteDao.getCoffeeSitesInTownSingle(townName);
     }
 
     /**
@@ -107,6 +160,10 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSiteLive;
     }
 
+    public Maybe<CoffeeSite> getCoffeeSiteByIdMaybe(long siteId) {
+        return coffeeSiteDao.getCoffeeSiteByIdMaybe(siteId);
+    }
+
     /**
      * LiveData input holder for CoffeeSite creator user name
      */
@@ -123,25 +180,114 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         return coffeeSitesFromUser;
     }
 
+    // list of coffeeSites saved in DB (downloaded) and not modified, i.e. saved on server from user
+    LiveData<List<CoffeeSite>> coffeeSitesFromUserSavedOnServer = Transformations.switchMap(coffeeSiteAuthorUserNameInput, userName -> coffeeSiteDao.getCoffeeSitesFromUserSavedOnServer(userName));
+
+    public LiveData<List<CoffeeSite>> getCoffeeSitesFromUserSavedOnServer(String userName) {
+        setCoffeeSiteAuthorUserNameInput(userName);
+        return coffeeSitesFromUserSavedOnServer;
+    }
+
+    /* Data for MainAppWidget */
+
+    public Single<List<CoffeeSite>> getCoffeeSitesInRangeSingle(double latitudeFrom, double longitudeFrom, double searchRange) {
+        double searchRangeAsDegreePart = searchRange * MULTIPLY_FACTOR_FROM_CIRCLE_TO_RECTANGLE * ONE_METER_IN_DEGREE;
+        return coffeeSiteDao.getCoffeeSitesInRectangleSingle(latitudeFrom, longitudeFrom, searchRangeAsDegreePart);
+    }
+
+    /* Get number of CoffeeSites not saved on server, i.e. only saved in local DB */
+    public LiveData<Integer> getNumOfCoffeeSitesNotSavedOnServer() {
+        return coffeeSiteDao.getNumOfCoffeeSitesNotSavedOnServer();
+    }
+
+    /* Delete CoffeeSites not saved on server. Used when they are already saved on server */
+
+    public void deleteCoffeeSiteSavedOnServerFromDB() {
+        new DeleteCoffeeSitesNotSavedOnServerAsyncT(coffeeSiteDao).execute();
+    }
+
+    /**
+     * Deletes the CoffeeSites created in Offline mode, in the background.
+     *  Used when they are already saved on server
+     */
+    private static class DeleteCoffeeSitesNotSavedOnServerAsyncT {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        DeleteCoffeeSitesNotSavedOnServerAsyncT(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        public void execute() {
+            AsyncRunner.runInBackground(() -> {
+                //int deletedNum = mAsyncTaskDao.deleteAllCreatedAndNotSavedOnServer(CoffeeSiteRecordStatus.CREATED);
+                int deletedNum = mAsyncTaskDao.deleteAllNotSavedOnServer();
+                Log.i("DeleteCoffeeSitesAsyncT", "CoffeeSites not saved on server deleted. " + deletedNum);
+            });
+        }
+    }
+
+
+
+    //*** Delete CoffeeSite from DB **/
+    //*** Must run in a separate thread */
+    public void deleteCoffeeSiteFromDB(CoffeeSite coffeeSite) {
+        if (coffeeSite != null) {
+            new DeleteAsyncTask(coffeeSiteDao).execute(coffeeSite.getId());
+        }
+    }
+
+    private static class DeleteAsyncTask {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        DeleteAsyncTask(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        public void execute(final String... params) {
+            AsyncRunner.runInBackground(() -> {
+                int deletedNum = mAsyncTaskDao.deleteById(params[0]);
+                Log.i("DeleteCoffeeSiteAsyncT", "CoffeeSites deleted by id. " + deletedNum + ", id=" + params[0]);
+            });
+        }
+    }
+
+    /* ***** Update CoffeeSite procedures and AsyncTask ***** */
+
+    public void update(CoffeeSite coffeeSite) {
+        new UpdateAsyncTask(coffeeSiteDao).execute(coffeeSite);
+    }
+
+    private static class UpdateAsyncTask {
+
+        private final CoffeeSiteDao mAsyncTaskDao;
+
+        UpdateAsyncTask(CoffeeSiteDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        public void execute(final CoffeeSite... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.updateCoffeeSite(params[0]));
+        }
+    }
 
     /* ***** Insert CoffeeSite procedures and AsyncTask ***** */
 
     public void insert (CoffeeSite coffeeSite) {
-        new insertAsyncTask(coffeeSiteDao).execute(coffeeSite);
+        new InsertAsyncTask(coffeeSiteDao).execute(coffeeSite);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CoffeeSite, Void, Void> {
+    private static class InsertAsyncTask {
 
-        private CoffeeSiteDao mAsyncTaskDao;
+        private final CoffeeSiteDao mAsyncTaskDao;
 
-        insertAsyncTask(CoffeeSiteDao dao) {
+        InsertAsyncTask(CoffeeSiteDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CoffeeSite... params) {
-            mAsyncTaskDao.insertCoffeeSite(params[0]);
-            return null;
+        public void execute(final CoffeeSite... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertCoffeeSite(params[0]));
         }
     }
 
@@ -149,19 +295,17 @@ public class CoffeeSiteRepository extends CoffeeSiteRepositoryBase {
         new CoffeeSiteRepository.InsertAllAsyncTask(coffeeSiteDao).execute(coffeeSites);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CoffeeSite>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private CoffeeSiteDao mAsyncTaskDao;
+        private final CoffeeSiteDao mAsyncTaskDao;
 
         InsertAllAsyncTask(CoffeeSiteDao dao) {
             mAsyncTaskDao = dao;
         }
 
         @SafeVarargs
-        @Override
-        protected final Void doInBackground(List<CoffeeSite>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public final void execute(List<CoffeeSite>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

@@ -3,11 +3,6 @@ package cz.fungisoft.coffeecompass2.activity.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
 
 /**
@@ -24,10 +19,14 @@ public class StatisticsPrefencesHelper {
     private final String NUM_OF_SITES_TODAY = "numOfSitesToday";
     private final String NUM_OF_USERS = "numOfUsers";
 
+    // to indicate, that number of sites in statistics has changed from last save
+    // used to show user, that new Sites can be shown after click on Statistics card View
+    private final String NUM_OF_SITES_LAST_WEEK_CHANGED = "numOfSitesLastWeekCahnged";
+
     private final String DEFAULT_VALUE = "0";
 
-    private SharedPreferences app_prefs;
-    private Context context;
+    private final SharedPreferences app_prefs;
+    private final Context context;
 
     private final String nameOfSharedPreferences = "statistics";
 
@@ -51,9 +50,19 @@ public class StatisticsPrefencesHelper {
         edit.putString(NUM_OF_SITES_LAST_WEEK, numOfSitesLastWeek);
         edit.apply();
     }
-    private String getNumOfSitesLastWeek() {
+    public String getNumOfSitesLastWeek() {
         return app_prefs.getString(NUM_OF_SITES_LAST_WEEK, DEFAULT_VALUE);
     }
+
+    public boolean getNumOfSitesLastWeekChanged() {
+        return app_prefs.getBoolean(NUM_OF_SITES_LAST_WEEK_CHANGED, false);
+    }
+    public void putNumOfSitesLastWeekChanged(boolean numOfSitesChanged) {
+        SharedPreferences.Editor edit = app_prefs.edit();
+        edit.putBoolean(NUM_OF_SITES_LAST_WEEK_CHANGED, numOfSitesChanged);
+        edit.apply();
+    }
+
 
 
     private void putNumOfSitesToday(String numOfSitesToday) {
@@ -75,7 +84,11 @@ public class StatisticsPrefencesHelper {
         return app_prefs.getString(NUM_OF_USERS, DEFAULT_VALUE);
     }
 
-
+    /**
+     *
+     * @param statistics
+     * @param newCoffeeSitesShown - used for saving numOfSitesLastWeek value to save info, if the data changed from last users click on statistics
+     */
     public void saveStatistics(Statistics statistics) {
 
         putNumOfSitesActive(statistics.numOfSites);
@@ -95,7 +108,7 @@ public class StatisticsPrefencesHelper {
     }
 
     /**
-     * To delete/remove saved user data, if user loged-out
+     * To deleteUser/remove saved user data, if user loged-out
      */
     public void removeUserData() {
         SharedPreferences.Editor edit = app_prefs.edit();

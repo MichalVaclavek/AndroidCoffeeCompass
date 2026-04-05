@@ -1,19 +1,22 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
-import android.os.AsyncTask;
-
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.entity.CupType;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CupTypeDao;
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
+/**
+ * Repository class for CupType objects.
+ * Provides LiveData and/or other Reactive classes.
+ */
 public class CupTypeRepository extends CoffeeSiteRepositoryBase {
 
-    private CupTypeDao cupTypeDao;
-    private LiveData<List<CupType>> mAllCupTypes;
+    private final CupTypeDao cupTypeDao;
+    private final LiveData<List<CupType>> mAllCupTypes;
 
     CupTypeRepository(CoffeeSiteDatabase db) {
         super(db);
@@ -25,7 +28,7 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
         return mAllCupTypes;
     }
 
-    public Flowable<CupType> getCupType(String cupTypeValue) {
+    public Single<CupType> getCupType(String cupTypeValue) {
         return cupTypeDao.getCupType(cupTypeValue);
     }
 
@@ -33,18 +36,16 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
         new CupTypeRepository.insertAsyncTask(cupTypeDao).execute(cupType);
     }
 
-    private static class insertAsyncTask extends AsyncTask<CupType, Void, Void> {
+    private static class insertAsyncTask {
 
-        private CupTypeDao mAsyncTaskDao;
+        private final CupTypeDao mAsyncTaskDao;
 
         insertAsyncTask(CupTypeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(final CupType... params) {
-            mAsyncTaskDao.insertCupType(params[0]);
-            return null;
+        public void execute(final CupType... params) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertCupType(params[0]));
         }
     }
 
@@ -52,18 +53,16 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(cupTypeDao).execute(CupTypes);
     }
 
-    private static class InsertAllAsyncTask extends AsyncTask<List<CupType>, Void, Void> {
+    private static class InsertAllAsyncTask {
 
-        private CupTypeDao mAsyncTaskDao;
+        private final CupTypeDao mAsyncTaskDao;
 
         InsertAllAsyncTask(CupTypeDao dao) {
             mAsyncTaskDao = dao;
         }
 
-        @Override
-        protected Void doInBackground(List<CupType>... lists) {
-            mAsyncTaskDao.insertAll(lists[0]);
-            return null;
+        public void execute(List<CupType>... lists) {
+            AsyncRunner.runInBackground(() -> mAsyncTaskDao.insertAll(lists[0]));
         }
     }
 

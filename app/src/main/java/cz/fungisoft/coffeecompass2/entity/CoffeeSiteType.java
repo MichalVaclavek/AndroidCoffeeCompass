@@ -12,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "coffee_site_type_table")
 public class CoffeeSiteType extends CoffeeSiteEntity implements Parcelable {
 
-    public CoffeeSiteType(int id, String entityValue) {
+    public CoffeeSiteType(String id, String entityValue) {
         super(id);
         this.coffeeSiteType = entityValue;
     }
@@ -33,9 +33,9 @@ public class CoffeeSiteType extends CoffeeSiteEntity implements Parcelable {
         this.coffeeSiteType = coffeeSiteType;
     }
 
-    @Ignore
+    @Ignore // for Room processing
     protected CoffeeSiteType(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readString();
         coffeeSiteType = in.readString();
     }
 
@@ -58,7 +58,7 @@ public class CoffeeSiteType extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(id);
         dest.writeString(coffeeSiteType);
     }
 

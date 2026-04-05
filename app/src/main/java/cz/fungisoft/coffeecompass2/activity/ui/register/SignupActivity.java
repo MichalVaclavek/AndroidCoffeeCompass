@@ -1,17 +1,9 @@
 package cz.fungisoft.coffeecompass2.activity.ui.register;
 
 import android.app.Activity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-
-
-import cz.fungisoft.coffeecompass2.R;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,21 +16,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+
 import java.util.Objects;
 
-import butterknife.ButterKnife;
 import butterknife.BindView;
-import cz.fungisoft.coffeecompass2.utils.Utils;
+import butterknife.ButterKnife;
+import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
+import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
-import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginOrRegisterResult;
+import cz.fungisoft.coffeecompass2.activity.ui.login.LoginRegisterViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoginViewModelFactory;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserAccountServiceConnectionListener;
-//import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceConnectionListener;
 import cz.fungisoft.coffeecompass2.services.interfaces.UserRegisterServiceListener;
+import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Activity to register new user. Based on LoginActivity.
@@ -69,7 +68,7 @@ public class SignupActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        registerViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
+        registerViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginRegisterViewModel.class);
 
         ButterKnife.bind(this);
@@ -190,8 +189,8 @@ public class SignupActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        doUnbindUserRegisterService();
         super.onDestroy();
+        doUnbindUserRegisterService();
     }
 
     /**
@@ -239,13 +238,16 @@ public class SignupActivity extends AppCompatActivity
 
         if (registerResult.getError() != null) {
             showRegisterFailed(registerResult.getError().getDetail());
-            String errorParameter = registerResult.getError().getErrorParameter();
-            if (errorParameter != null) {
-                if (errorParameter.equals("userName")) {
-                    userNameEditText.setError(registerResult.getError().getErrorParameterValue());
-                }
-                if (errorParameter.equals("email")) {
-                    emailEditText.setError(registerResult.getError().getErrorParameterValue());
+            if (registerResult.getError().getRestError() != null) {
+                RestError restError = registerResult.getError().getRestError();
+                String errorParameter = restError.getErrorParameter();
+                if (errorParameter != null) {
+                    if (errorParameter.equals("userName")) {
+                        userNameEditText.setError(restError.getErrorParameterValue());
+                    }
+                    if (errorParameter.equals("email")) {
+                        emailEditText.setError(restError.getErrorParameterValue());
+                    }
                 }
             }
         }
@@ -263,7 +265,7 @@ public class SignupActivity extends AppCompatActivity
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if (Utils.isOnline()) {
+                    if (Utils.isOnline(getApplicationContext())) {
                         userAccountService.register(userNameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 emailEditText.getText().toString(),
@@ -279,7 +281,7 @@ public class SignupActivity extends AppCompatActivity
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getApplicationContext())) {
                     registerProgressBar.setVisibility(View.VISIBLE);
                     signupButton.setEnabled(false);
                     userAccountService.register(userNameEditText.getText().toString(),

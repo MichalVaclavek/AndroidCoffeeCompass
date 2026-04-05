@@ -30,32 +30,24 @@
                     android:id="@+id/user_profile_appbar"
 
                     android:layout_width="match_parent"
-                    android:layout_height="96dp"
+                    android:layout_height="62dp"
                     android:background="@color/colorPrimary2"
 
                     android:fitsSystemWindows="true"
+                    android:textAlignment="center"
                     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                    <com.google.android.material.appbar.CollapsingToolbarLayout
-                        android:id="@+id/user_profile_toolbarLayout"
+                    <androidx.appcompat.widget.Toolbar
+                        android:id="@+id/user_profile_toolbar"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:contentScrim="?attr/colorPrimary"
+                        android:layout_height="match_parent"
+                        android:textAlignment="center"
+                        app:layout_collapseMode="pin"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                        app:title="@string/user_profile_label"
+                        app:titleMargin="2dp"
+                        app:titleTextAppearance="@style/Toolbar.TitleText" />
 
-                        app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                        app:toolbarId="@+id/user_profile_toolbar">
-
-
-                        <androidx.appcompat.widget.Toolbar
-                            android:id="@+id/user_profile_toolbar"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_collapseMode="pin"
-                            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                            app:title="@string/user_profile_label"
-                            app:titleMargin="2dp" />
-
-                    </com.google.android.material.appbar.CollapsingToolbarLayout>
                 </com.google.android.material.appbar.AppBarLayout>
 
                 <!-- Email Label -->
@@ -82,27 +74,28 @@
                     android:layout_margin="10dp"
                     android:src="@drawable/cup_basic" />
 
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="10dp"
                     app:cardCornerRadius="6dp"
                     app:cardElevation="4dp"
-                    app:contentPadding="14dp">
+                    app:contentPadding="14dp"
+                    app:strokeColor="@color/colorAccent"
+                    app:strokeWidth="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@android:color/background_light"
                         android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -113,7 +106,7 @@
                                 android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
-                                android:textStyle="italic" />
+                                android:textStyle="normal" />
 
                             <TextView
                                 android:id="@+id/userName"
@@ -121,6 +114,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -130,8 +124,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -142,7 +136,7 @@
                                 android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
-                                android:textStyle="italic" />
+                                android:textStyle="normal" />
 
                             <TextView
                                 android:id="@+id/userProfileEmail"
@@ -150,6 +144,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -159,8 +154,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -171,7 +166,7 @@
                                 android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
-                                android:textStyle="italic" />
+                                android:textStyle="normal" />
 
                             <TextView
                                 android:id="@+id/userProfileNumOfCreatedSites"
@@ -179,6 +174,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -190,8 +186,8 @@
                             android:id="@+id/firstNameLayout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal"
                             android:visibility="visible">
 
@@ -203,7 +199,7 @@
                                 android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
-                                android:textStyle="italic" />
+                                android:textStyle="normal|italic" />
 
                             <TextView
                                 android:id="@+id/firstName"
@@ -211,6 +207,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -222,8 +219,8 @@
                             android:id="@+id/lastNameLayout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -242,6 +239,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -251,8 +249,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -263,7 +261,7 @@
                                 android:textAlignment="viewStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14sp"
-                                android:textStyle="italic" />
+                                android:textStyle="normal" />
 
                             <TextView
                                 android:id="@+id/userCreatedOn"
@@ -271,6 +269,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:clickable="false"
+                                android:lines="1"
                                 android:textAlignment="viewEnd"
                                 android:textColor="@android:color/black"
                                 android:textSize="16dip"
@@ -278,7 +277,7 @@
                         </LinearLayout>
 
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <ProgressBar
                     android:id="@+id/progress_login"
@@ -295,21 +294,38 @@
                     android:orientation="vertical"
                     android:padding="10dp">
 
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btn_logout"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginBottom="4dp"
-                        android:padding="12dp"
-                        android:text="@string/user_profile_logout" />
-
-                    <Button
-                        android:id="@+id/btn_deleteUser"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/user_profile_delete_button" />
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_logout"
+                            style="@style/Widget.AppCompat.Button.Colored"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="4dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/rounded_grey_button"
+                            android:padding="12dp"
+                            android:text="@string/user_profile_logout"
+                            android:textColor="@color/colorPrimary" />
+
+                        <Button
+                            android:id="@+id/btn_deleteUser"
+                            style="@style/Widget.MaterialComponents.Button"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:layout_weight="1"
+                            android:text="@string/user_profile_delete_button"
+                            android:textColor="@color/colorAccent"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

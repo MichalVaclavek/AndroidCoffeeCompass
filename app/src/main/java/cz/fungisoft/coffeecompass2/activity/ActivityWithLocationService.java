@@ -3,18 +3,16 @@ package cz.fungisoft.coffeecompass2.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -57,10 +55,21 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             requestLocationPermission(this);
-        } else {
-            doBindLocationService();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        doBindLocationService();
+    }
+
+    @Override
+    protected void onPause() {
+       doUnbindLocationService();
+       super.onPause();
+    }
+
 
     private void doBindLocationService() {
         // Attempts to establish a connection with the service.  We use an
@@ -80,6 +89,8 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     private void doUnbindLocationService() {
         if (mShouldUnbind) {
+            // Remove all locationSerice's listeners
+            //locationService.removeAllLocationChangeListeners();
             // Release information about the service's state.
             unbindService(locationServiceConnector);
             mShouldUnbind = false;
@@ -106,7 +117,7 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
      * Needed for Android 6 ???
      */
     private void requestLocationPermission(AppCompatActivity activity) {
-        Dexter.withActivity(activity)
+        Dexter.withContext(activity)
                 .withPermissions(Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(new MultiplePermissionsListener() {
@@ -164,7 +175,6 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        doUnbindLocationService();
         super.onDestroy();
     }
 

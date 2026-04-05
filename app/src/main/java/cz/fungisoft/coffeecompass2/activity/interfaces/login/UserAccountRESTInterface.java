@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.activity.interfaces.login;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.RefreshTokenRequestData;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.UserLoginOrRegisterInputData;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -12,13 +13,14 @@ import retrofit2.http.Path;
 
 /**
  * Interface for Retrofit framework to define REST endpoints
- * for user account login, registration, delete and for
+ * for user account login, registration, deleteUser and for
  * obtaining logged-in user data.
  */
 public interface UserAccountRESTInterface {
 
     // Definition of string constants accessible from interface are defined in build.gradle (app)
     String LOGIN_URL = BuildConfig.USER_API_PUBLIC_URL;
+    String REFRESH_TOKEN_URL = BuildConfig.USER_API_PUBLIC_URL;
     String REGISTER_USER_URL = BuildConfig.USER_API_PUBLIC_URL;
 
     String CURRENT_USER_URL = BuildConfig.USER_API_SECURED_URL;
@@ -40,9 +42,9 @@ public interface UserAccountRESTInterface {
     Call<Boolean> logoutCurrentUser();
 
     @GET("logout/{userId}")
-    Call<Boolean> logoutCurrentUserWithId(@Path("userId") Long userId);
+    Call<Boolean> logoutCurrentUserWithId(@Path("userId") String userId);
 
-    @DELETE("delete/{userName}")
+    @DELETE("deleteUser/{userName}")
     Call<String> deleteUser(@Path("userName") String userName);
 
     /**
@@ -51,10 +53,12 @@ public interface UserAccountRESTInterface {
      * @param userId
      * @return
      */
-    @DELETE("delete/id/{userId}")
-    Call<String> deleteUserById(@Path("userId") Long userId);
+    @DELETE("deleteUser/id/{userId}")
+    Call<String> deleteUserById(@Path("userId") String userId);
 
     @POST("register")
     Call<JwtUserToken> registerNewUser(@Body UserLoginOrRegisterInputData loginDataBody);
 
+    @POST("refreshToken")
+    Call<JwtUserToken> refreshToken(@Body RefreshTokenRequestData refreshTokenRequestData);
 }

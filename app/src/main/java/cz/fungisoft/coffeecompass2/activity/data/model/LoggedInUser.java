@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -18,30 +19,10 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.JwtUserToken;
 /**
  * Data class that collects user information for logged in users retrieved from UserAccountRepository.
  * Based on server REST API available items for current logged-in user.
- *
- * authProvider": "string",
- *   "createdOn": {
- *     "date": 0,
- *   },
- *   "createdSites": 0,
- *   "deletedSites": 0,
- *   "email": "string",
- *   "firstName": "string",
- *   "id": 0,
- *   "lastName": "string",
- *   "toManageItself": true,
- *   "updatedSites": 0,
- *   "userName": "string",
- *   "userProfiles": [
- *     {
- *       "id": 0,
- *       "type": "string"
- *     }
- *   ]
  */
 public class LoggedInUser implements Serializable {
 
-    private long userId;
+    private String userId;
     private String displayName;
 
     private String userName;
@@ -99,7 +80,7 @@ public class LoggedInUser implements Serializable {
      * Also used for all other REST requests to coffeecompass.cz
      * which are allowed for authenticated users only.
      */
-    private JwtUserToken loginToken;
+    private JwtUserToken token;
 
 
     public void setDisplayName(String displayName) {
@@ -152,11 +133,11 @@ public class LoggedInUser implements Serializable {
     }
 
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -175,12 +156,12 @@ public class LoggedInUser implements Serializable {
         this.userName = userName;
         this.displayName = userName;
         this.email = email;
-        this.loginToken = userJwtToken;
+        this.token = userJwtToken;
         userRoles = new ArrayList<>();
     }
 
     public LoggedInUser(JwtUserToken userJwtToken) {
-        this.loginToken = userJwtToken;
+        this.token = userJwtToken;
         userRoles = new ArrayList<>();
     }
 
@@ -195,12 +176,28 @@ public class LoggedInUser implements Serializable {
         this.deviceID = deviceID;
     }
 
-    public JwtUserToken getLoginToken() {
-        return loginToken;
+    public JwtUserToken getToken() {
+        return token;
     }
 
-    public void setLoginToken(JwtUserToken loginToken) {
-        this.loginToken = loginToken;
+    public boolean isAccessTokenExpired() {
+        return Calendar.getInstance().after(token.getExpiryDate());
+    }
+
+    public void setToken(JwtUserToken token) {
+        this.token = token;
+    }
+
+    public String getAccessToken() {
+        return token.getAccessToken();
+    }
+
+    public String getAccessTokenType() {
+        return token.getTokenType();
+    }
+
+    public String getRefreshToken() {
+        return token.getRefreshToken();
     }
 
     public String getEmail() {
@@ -248,7 +245,7 @@ public class LoggedInUser implements Serializable {
         setEmail(currentUser.getEmail());
         setFirstName(currentUser.getFirstName());
         setLastName(currentUser.getLastName());
-        setLoginToken(currentUser.getLoginToken());
+        setToken(currentUser.getToken());
         setNumOfDeletedSites(currentUser.getNumOfDeletedSites());
         setNumOfUpdatedSites(currentUser.getNumOfUpdatedSites());
     }
@@ -264,7 +261,7 @@ public class LoggedInUser implements Serializable {
 
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            this.setUserId(jsonObject.getInt("id"));
+            this.setUserId(jsonObject.getString("id"));
             this.setUserName(jsonObject.getString("userName"));
             this.setFirstName(jsonObject.getString("firstName"));
             this.setLastName(jsonObject.getString("lastName"));

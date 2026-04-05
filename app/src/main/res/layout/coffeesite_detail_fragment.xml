@@ -1,398 +1,401 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coffeesite_detail"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:foreground="?attr/selectableItemBackground"
-    card_view:cardCornerRadius="6dp"
-    card_view:cardElevation="5dp"
-    card_view:contentPadding="10dp"
-    tools:context="ui.fragments.CoffeeSiteDetailFragment">
+    android:orientation="vertical"
+    tools:context=".activity.ui.fragments.CoffeeSiteDetailFragment">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/white_transparent"
+        app:cardCornerRadius="6dp"
+        app:contentPadding="10dp">
 
-        <TableLayout
-            android:id="@+id/detailsTable"
+        <ImageView
+            android:id="@+id/edit_coffeesite_detail_imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/ic_baseline_edit_32"
+            tools:visibility="gone" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true">
+            android:orientation="vertical">
 
-            <TableRow
+            <TableLayout
+                android:id="@+id/detailsTable"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/jmenoLabel"
-                    android:layout_width="wrap_content"
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/typZdrojeLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Typ zdroje:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/siteTypeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/coffeeSortTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/druhKavyLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Druhy kávy:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/coffeeSortTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/lokalitaLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lokalita:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/locationTypeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+
+                <TableRow
+                    android:id="@+id/streetTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/uliceLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Ulice:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/streetTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/townNameTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/townNameLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Město:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/townNameTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/nextOfferTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/dalsiNabidkaLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Další nabídka:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/otherOfferTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/nextToMachineTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/automatVedleLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Automat vedle:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/nextToMachineOfferTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/openingTableRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/oteviraciDobaLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Otevírací doba:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/openingTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/cenaLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Cena:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/cenaTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/autorLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Vytvořil uživatel:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/createdByUserTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/vytvorenoLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Vytvořeno:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/createdOnTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/statusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Status:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/statusZarizeniTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/hodnoceni_tablerow"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="8dp"
+                    tools:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/hodnoceniLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:paddingRight="5dp"
+                        android:text="Hodnocení:"
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <LinearLayout
+                        android:id="@+id/rating_icons_detail_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="25dp"
+                        android:orientation="horizontal"
+                        android:weightSum="5">
+
+                        <ImageView
+                            android:id="@+id/rating_cup_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/cup_rating_empty_4" />
+
+                        <ImageView
+                            android:id="@+id/rating_cup_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/cup_rating_empty_4" />
+
+                        <ImageView
+                            android:id="@+id/rating_cup_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/cup_rating_empty_4" />
+
+                        <ImageView
+                            android:id="@+id/rating_cup_4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/cup_rating_empty_4" />
+
+                        <ImageView
+                            android:id="@+id/rating_cup_5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/cup_rating_empty_4" />
+
+                        <TextView
+                            android:id="@+id/hodnoceni_detail_TextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/authorCommentTableRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Jméno:"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp" />
+                    android:layout_marginTop="5dp">
 
-                <TextView
-                    android:id="@+id/nameTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
+                    <TextView
+                        android:id="@+id/commentLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="5dp"
+                        android:text="Komentář autora:"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                </TableRow>
 
-                <TextView
-                    android:id="@+id/statusLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Status:"
-                    android:textColor="@color/colorPrimaryDark" />
+            </TableLayout>
 
-                <TextView
-                    android:id="@+id/statusZarizeniTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/typZdrojeLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Typ zdroje:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/siteTypeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/coffeeSortTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/druhKavyLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Druhy kávy:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/coffeeSortTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/lokalitaLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lokalita:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/locationTypeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/cs_detail_distance_row"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/vzdalenostLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Vzdálenost: "
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <cz.fungisoft.coffeecompass2.activity.support.DistanceChangeTextView
-                    android:id="@+id/distanceTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/streetTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/uliceLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Ulice:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/streetTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/cupTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/kelimeklabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Kelímek:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/cupTypeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/nextOfferTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/dalsiNabidkaLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Další nabídka:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/otherOfferTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/nextToMachineTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/automatVedleLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Automat vedle:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/nextToMachineOfferTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/openingTableRow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/oteviraciDobaLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Otevírací doba:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/openingTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/cenaLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Cena:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/cenaTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/hodnoceni_tablerow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/hodnoceniLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Hodnoceni:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/hodnoceniTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/autorLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Vytvořil uživatel:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/createdByUserTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/vytvorenoLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Vytvořeno:"
-                    android:textColor="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:id="@+id/createdOnTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/authorCommentTableRow"
+            <TextView
+                android:id="@+id/initialCommentTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp">
+                android:textAlignment="viewStart"
+                android:textColor="@color/colorPrimary"
+                android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/commentLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="5dp"
-                    android:text="Komentář zakladatele:"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="14sp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-            </TableRow>
-
-        </TableLayout>
-
-        <TextView
-            android:id="@+id/initialCommentTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/detailsTable"
-            android:textAlignment="viewStart"
-            android:textColor="@color/colorPrimary"
-            android:textSize="14sp" />
-
-    </RelativeLayout>
-
-</androidx.cardview.widget.CardView>
+</LinearLayout>
 
 
