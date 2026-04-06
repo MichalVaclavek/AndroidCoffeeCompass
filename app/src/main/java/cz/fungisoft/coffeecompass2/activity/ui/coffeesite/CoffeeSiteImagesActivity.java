@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.NonNull;
@@ -128,6 +129,13 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         countLabel = findViewById(R.id.manage_images_count_label);
         addButton = findViewById(R.id.manage_images_add_button);
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleBackPressed();
+            }
+        });
+
         // Setup RecyclerView with 2-column grid
         recyclerView = findViewById(R.id.manage_images_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
@@ -168,7 +176,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            handleBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -287,12 +295,11 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onBackPressed() {
+    private void handleBackPressed() {
         if (isDraftMode) {
             setResult(RESULT_OK, buildDraftResultIntent());
         }
-        super.onBackPressed();
+        finish();
     }
 
     // -------- Image picker (camera / gallery) --------

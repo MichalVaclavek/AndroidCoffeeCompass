@@ -58,13 +58,13 @@ public class CoffeeSiteImagePagerAdapter extends RecyclerView.Adapter<CoffeeSite
                 .into(holder.imageView, new Callback() {
                     @Override
                     public void onSuccess() {
-                        Log.i(TAG, "Picasso onSuccess position=" + position);
+                        Log.i(TAG, "Picasso onSuccess position=" + holder.getBindingAdapterPosition());
                         holder.progressBar.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onError(Exception e) {
-                        Log.e(TAG, "Picasso onError position=" + position + " url=" + url, e);
+                        Log.e(TAG, "Picasso onError position=" + holder.getBindingAdapterPosition() + " url=" + url, e);
                         holder.progressBar.setVisibility(View.GONE);
                     }
                 });

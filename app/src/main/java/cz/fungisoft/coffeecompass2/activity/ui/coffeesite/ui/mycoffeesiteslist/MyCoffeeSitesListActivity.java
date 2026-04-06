@@ -13,6 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -287,6 +288,13 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         // To save images of the CoffeeSites created/updated in Offline
         doBindCoffeeSiteImageService();
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleBackPressed();
+            }
+        });
+
         prepareAndActivateRecyclerView();
     }
 
@@ -296,10 +304,9 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
         createCoffeeSiteActivityResultLauncher.launch(intent);
     }
 
-    @Override
-    public void onBackPressed() {
+    private void handleBackPressed() {
         if (!isLoadingPage()) {
-            super.onBackPressed();
+            finish();
         }
     }
 
@@ -384,7 +391,7 @@ public class MyCoffeeSitesListActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            this.onBackPressed();
+            handleBackPressed();
             return true;
         }
         if (id == R.id.action_go_to_create_coffeesite) {

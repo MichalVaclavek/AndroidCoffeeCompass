@@ -68,7 +68,7 @@
             android:id="@+id/csListFotoImageView"
             android:layout_width="72dp"
             android:layout_height="96dp"
-            android:layout_alignEnd="@+id/noSiteTextViewLabel"
+            android:layout_alignEnd="@id/initialSearchingTextView"
             android:layout_alignParentEnd="true"
             android:background="@drawable/kafe_backround_120x160"
             android:rotation="0"

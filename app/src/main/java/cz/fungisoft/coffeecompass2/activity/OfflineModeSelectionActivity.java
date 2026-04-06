@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -16,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -102,6 +102,13 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Offline");
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleBackPressed();
+            }
+        });
+
         dataDownloadPreferenceHelper = new DataForOfflineModePreferenceHelper(this);
         hideDownloadOverview();
 
@@ -180,7 +187,7 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            handleBackPressed();
         }
         return true;
     }
@@ -189,11 +196,9 @@ public class OfflineModeSelectionActivity extends AppCompatActivity implements C
      * Back button available only if downloading is not in progress.
      * //TODO should be implemented that blocking is not needed
      */
-    @SuppressLint("MissingSuperCall")
-    @Override
-    public void onBackPressed() {
+    private void handleBackPressed() {
         if (!downloadInProgress) {
-            super.onBackPressed(); // Comment this super call to avoid calling finish() or fragmentmanager's backstack pop operation.
+            finish();
         }
     }
 

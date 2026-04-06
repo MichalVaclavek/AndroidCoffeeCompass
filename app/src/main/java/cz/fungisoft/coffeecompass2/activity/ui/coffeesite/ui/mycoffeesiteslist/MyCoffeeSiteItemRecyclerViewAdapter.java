@@ -10,12 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -789,10 +789,10 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         final ImageView siteFoto;
 
         /* Buttons */
-        final AppCompatImageButton editCoffeeSiteButton;
-        final AppCompatImageButton activateDeactivateCoffeeSiteButton;
-        final AppCompatImageButton cancelCoffeeSiteButton;
-        final AppCompatImageButton insertCommentButton;
+        final ImageButton editCoffeeSiteButton;
+        final ImageButton activateDeactivateCoffeeSiteButton;
+        final ImageButton cancelCoffeeSiteButton;
+        final ImageButton insertCommentButton;
 
         /**
          * Standard constructor for ViewHolder.
