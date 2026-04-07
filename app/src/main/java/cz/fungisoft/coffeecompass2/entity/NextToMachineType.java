@@ -61,7 +61,7 @@ public class NextToMachineType extends CoffeeSiteEntity implements Parcelable {
     }
 
     @Expose
-    @SerializedName("type")
+    @SerializedName("nextToMachineType")
     private String type;
 
     @Override
