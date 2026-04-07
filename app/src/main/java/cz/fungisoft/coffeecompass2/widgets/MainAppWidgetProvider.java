@@ -1,4 +1,3 @@
-
 package cz.fungisoft.coffeecompass2.widgets;
 
 import android.app.PendingIntent;
@@ -17,6 +16,7 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -371,9 +371,12 @@ public class MainAppWidgetProvider extends AppWidgetProvider {
                             .resize(270, 360)
                             .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
                 } else {
-                    Picasso.get().load(ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, picturePath))
-                            .resize(270, 360)
-                            .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+                    File imageFile = ImageUtil.getImageFile(context, ImageUtil.COFFEESITE_IMAGE_DIR, picturePath);
+                    if (imageFile.exists() && imageFile.isFile()) {
+                        Picasso.get().load(imageFile)
+                                .resize(270, 360)
+                                .into(remoteViews, R.id.widget_nearest_site_image, appWidgetIds);
+                    }
                 }
             }
         }

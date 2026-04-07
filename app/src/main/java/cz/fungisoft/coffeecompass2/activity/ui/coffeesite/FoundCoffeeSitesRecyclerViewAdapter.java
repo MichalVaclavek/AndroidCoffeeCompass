@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite;
 
 import android.content.Context;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -19,12 +20,10 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Request;
-import com.squareup.picasso.RequestHandler;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -592,9 +591,12 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
                     .into(viewHolder.siteFoto);
         }
         if (!isOnline || this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position)))
-                    .fit().placeholder(R.drawable.kafe_backround_120x160)
-                    .into(viewHolder.siteFoto);
+            File imageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position));
+            if (imageFile.exists() && imageFile.isFile()) {
+                Picasso.get().load(imageFile)
+                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .into(viewHolder.siteFoto);
+            }
         }
 
         viewHolder.itemView.setTag(this.mValues.get(position));

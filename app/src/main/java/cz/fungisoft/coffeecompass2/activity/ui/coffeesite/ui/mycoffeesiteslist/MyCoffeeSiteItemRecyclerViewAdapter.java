@@ -132,6 +132,8 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
      *
      * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
      * @param offlineModeOn
+     * @param content - instance of the CoffeeSiteMovableListContent to be displayed by this activity
+     * @param offlineModeOn
      * @param parent - parent Activity for the Adapter, in this case this FoundCoffeeSitesListActivity
      */
      public MyCoffeeSiteItemRecyclerViewAdapter( MyCoffeeSitesListActivity parent) {
@@ -305,7 +307,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
         if (!isOnline || mainImageUrl.isEmpty()) {
             File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), coffeeSite);
-            if (coffeeSiteImageFile.exists()) {
+            if (coffeeSiteImageFile.exists() && coffeeSiteImageFile.isFile()) {
                 Picasso.get().load(coffeeSiteImageFile)
                         .fit().placeholder(R.drawable.kafe_backround_120x160)
                         .into(viewHolder.siteFoto);

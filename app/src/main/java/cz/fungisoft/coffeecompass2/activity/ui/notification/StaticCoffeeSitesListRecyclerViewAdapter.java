@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -176,9 +177,12 @@ public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapt
                    .into(viewHolder.siteFoto);
         }
         if (!isOnline || this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position)))
-                         .fit().placeholder(R.drawable.kafe_backround_120x160)
-                         .into(viewHolder.siteFoto);
+            File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position));
+            if (coffeeSiteImageFile.exists() && coffeeSiteImageFile.isFile()) {
+                Picasso.get().load(coffeeSiteImageFile)
+                        .fit().placeholder(R.drawable.kafe_backround_120x160)
+                        .into(viewHolder.siteFoto);
+            }
         }
 
         // Foto and main Label with CoffeeSite name are clickable
