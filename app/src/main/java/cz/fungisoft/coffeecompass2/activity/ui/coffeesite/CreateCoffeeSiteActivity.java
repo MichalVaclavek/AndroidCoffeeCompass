@@ -55,7 +55,9 @@ import com.squareup.picasso.Picasso;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -675,10 +677,12 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
                 case REQUEST_GALLERY_PHOTO: {
                     Uri selectedImage = data.getData();
                     try {
-                        // Compress chosen image file
-                        imagePhotoFile = fileCompressor.compressToFile(new File(Utils.getRealPathFromUri(selectedImage, this)));
+                        File selectedImageFile = createImageFileFromUri(selectedImage);
+                        if (selectedImageFile != null) {
+                            imagePhotoFile = fileCompressor.compressToFile(selectedImageFile);
+                        }
                     } catch (IOException e) {
-                        Log.e(TAG, "Failed to compress image file from gallery.");
+                        Log.e(TAG, "Failed to process image file from gallery.", e);
                     }
                     showSelectedMainImage(imagePhotoFile);
                 }
@@ -762,10 +766,45 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * Select image from gallery
      */
     private void dispatchGalleryIntent() {
-        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pickPhoto.addCategory(Intent.CATEGORY_OPENABLE);
+        pickPhoto.setType("image/*");
         pickPhoto.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        pickPhoto.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO);
+    }
+
+    @Nullable
+    private File createImageFileFromUri(@Nullable Uri imageUri) throws IOException {
+        if (imageUri == null) {
+            return null;
+        }
+
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        try {
+            inputStream = getContentResolver().openInputStream(imageUri);
+            if (inputStream == null) {
+                return null;
+            }
+
+            File destinationFile = createImageFile();
+            outputStream = new FileOutputStream(destinationFile);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            return destinationFile;
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
     }
 
     @Override
@@ -2374,7 +2413,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             if (items[item].equals("Foto")) {
                 requestStoragePermission(true);
             } else if (items[item].equals("Vybrat z galerie")) {
-                requestStoragePermission(false);
+                dispatchGalleryIntent();
             } else if (items[item].equals("Zrušit")) {
                 dialog.dismiss();
             }

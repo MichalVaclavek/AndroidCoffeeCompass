@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -36,7 +35,9 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -312,7 +313,7 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
                     if (items[which].equals("Foto")) {
                         requestStoragePermission(true);
                     } else if (items[which].equals("Vybrat z galerie")) {
-                        requestStoragePermission(false);
+                        dispatchGalleryIntent();
                     } else {
                         dialog.dismiss();
                     }
@@ -321,12 +322,12 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     }
 
     private void requestStoragePermission(final boolean isCamera) {
-        String[] permissions;
-        if (isCamera) {
-            permissions = new String[] { Manifest.permission.CAMERA };
-        } else {
-            permissions = new String[] { getReadImagesPermission() };
+        if (!isCamera) {
+            dispatchGalleryIntent();
+            return;
         }
+
+        String[] permissions = new String[] { Manifest.permission.CAMERA };
 
         Dexter.withContext(this)
                 .withPermissions(permissions)
@@ -351,13 +352,6 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
                         token.continuePermissionRequest();
                     }
                 }).check();
-    }
-
-    private String getReadImagesPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return Manifest.permission.READ_MEDIA_IMAGES;
-        }
-        return Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
     private void dispatchTakePictureIntent() {
@@ -386,9 +380,11 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
     }
 
     private void dispatchGalleryIntent() {
-        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pickPhoto.addCategory(Intent.CATEGORY_OPENABLE);
+        pickPhoto.setType("image/*");
         pickPhoto.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        pickPhoto.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO);
     }
 
@@ -526,11 +522,11 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
         protected File doInBackground(Void... voids) {
             try {
                 if (selectedImageUri != null) {
-                    String realPath = Utils.getRealPathFromUri(selectedImageUri, appContext);
-                    if (realPath == null || realPath.isEmpty()) {
+                    File copiedImageFile = copyUriToTempFile(selectedImageUri);
+                    if (copiedImageFile == null || !copiedImageFile.exists()) {
                         return null;
                     }
-                    return fileCompressor.compressToFile(new File(realPath));
+                    return fileCompressor.compressToFile(copiedImageFile);
                 }
 
                 if (sourceImageFile == null || !sourceImageFile.exists()) {
@@ -541,6 +537,39 @@ public class CoffeeSiteImagesActivity extends AppCompatActivity
             } catch (Exception e) {
                 compressionException = e;
                 return null;
+            }
+        }
+
+        @Nullable
+        private File copyUriToTempFile(@NonNull Uri imageUri) throws IOException {
+            InputStream inputStream = null;
+            FileOutputStream outputStream = null;
+            try {
+                inputStream = appContext.getContentResolver().openInputStream(imageUri);
+                if (inputStream == null) {
+                    return null;
+                }
+
+                File destinationFile = File.createTempFile(
+                        "IMG_" + System.currentTimeMillis() + "_",
+                        ".jpg",
+                        appContext.getCacheDir());
+
+                outputStream = new FileOutputStream(destinationFile);
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+                return destinationFile;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             }
         }
 
