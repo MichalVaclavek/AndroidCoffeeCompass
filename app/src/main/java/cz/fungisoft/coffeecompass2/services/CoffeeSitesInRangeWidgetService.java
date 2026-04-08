@@ -217,6 +217,8 @@ public class CoffeeSitesInRangeWidgetService extends JobIntentService
             unbindService(locationServiceConnector);
             Log.i(TAG, "Location service unbinded.");
             mShouldUnbind = false;
+            locationService = null;
+            locationServiceConnector = null;
         }
     }
 

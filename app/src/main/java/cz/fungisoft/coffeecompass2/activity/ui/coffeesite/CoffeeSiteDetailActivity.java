@@ -255,6 +255,14 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (locationService == null) {
+            forceRebindLocationService();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         // Always try to load actual instance of CoffeeSite and convert it to CoffeeSiteMovable in

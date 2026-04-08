@@ -72,15 +72,27 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
 
 
     private void doBindLocationService() {
+        if (mShouldUnbind) {
+            return;
+        }
+        Intent locationServiceIntent = new Intent(this, LocationService.class);
+        try {
+            startService(locationServiceIntent);
+            Log.i(TAG, "LocationService startService() requested.");
+        } catch (Exception e) {
+            Log.e(TAG, "LocationService startService() failed.", e);
+        }
+
         // Attempts to establish a connection with the service.  We use an
         // explicit class name because we want a specific service
         // implementation that we know will be running in our own process
         // (and thus won't be supporting component replacement by other
         // applications).
         locationServiceConnector = new LocationServiceConnector(this);
-        if (bindService(new Intent(this, LocationService.class),
+        if (bindService(locationServiceIntent,
                 locationServiceConnector, Context.BIND_AUTO_CREATE)) {
             mShouldUnbind = true;
+            Log.i(TAG, "LocationService bindService() requested.");
         } else {
             Log.e(TAG, "Error: The requested 'LocationService' service doesn't " +
                     "exist, or this client isn't allowed access to it.");
@@ -93,8 +105,16 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
             //locationService.removeAllLocationChangeListeners();
             // Release information about the service's state.
             unbindService(locationServiceConnector);
+            Log.i(TAG, "LocationService unbound.");
             mShouldUnbind = false;
+            locationService = null;
+            locationServiceConnector = null;
         }
+    }
+
+    protected void forceRebindLocationService() {
+        doUnbindLocationService();
+        doBindLocationService();
     }
 
     /**
@@ -103,6 +123,7 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
      */
     public void onLocationServiceConnected() {
         locationService = locationServiceConnector.getLocationService();
+        Log.i(TAG, "LocationService connected: " + (locationService != null));
     }
 
     /***** Requesting PERMISSIONS on User's action demand ******************/

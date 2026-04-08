@@ -254,11 +254,15 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
     }
 
     private void doUnbindLocationService() {
-        if (mShouldUnbind && locationService != null) {
-            locationService.removePropertyChangeListener(this);
+        if (mShouldUnbind) {
+            if (locationService != null) {
+                locationService.removePropertyChangeListener(this);
+            }
             // Release information about the service's state.
             unbindService(locationServiceConnector);
             mShouldUnbind = false;
+            locationService = null;
+            locationServiceConnector = null;
         }
     }
 

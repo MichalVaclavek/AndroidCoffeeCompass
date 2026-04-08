@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.services;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 
@@ -11,6 +12,8 @@ import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
  * when the LocationService is really connected and ready to use.
  */
 public class LocationServiceConnector implements ServiceConnection {
+
+    private static final String TAG = "LocationServiceConn";
 
     private ActivityWithLocationService callingActivity;
 
@@ -54,6 +57,7 @@ public class LocationServiceConnector implements ServiceConnection {
         // service that we know is running in our own process, we can
         // cast its IBinder to a concrete class and directly access it.
         mBoundService = ((LocationService.LocalBinder)service).getService();
+        Log.i(TAG, "onServiceConnected(): " + name);
 
         if (this.callingActivity != null) {
             this.callingActivity.onLocationServiceConnected();
@@ -75,5 +79,6 @@ public class LocationServiceConnector implements ServiceConnection {
         // Because it is running in our same process, we should never
         // see this happen.
         mBoundService = null;
+        Log.w(TAG, "onServiceDisconnected(): " + name);
     }
 }

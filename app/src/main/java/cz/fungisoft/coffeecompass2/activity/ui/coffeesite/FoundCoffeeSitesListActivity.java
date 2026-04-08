@@ -34,6 +34,7 @@ import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.StaticCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.notification.TownNamesArrayAdapter;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteListContent;
 import cz.fungisoft.coffeecompass2.services.CoffeeSitesFoundService;
@@ -188,8 +189,29 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     @Override
     public void onResume() {
         super.onResume();
+        if (locationService == null) {
+            forceRebindLocationService();
+        }
         if (mListState != null) {
             layoutManager.onRestoreInstanceState(mListState);
+        }
+    }
+
+    @Override
+    public void onLocationServiceConnected() {
+        super.onLocationServiceConnected();
+        if (locationService == null) {
+            return;
+        }
+        if (currentContent != null && currentContent.getItems() != null) {
+            for (CoffeeSite cs : currentContent.getItems()) {
+                if (cs instanceof CoffeeSiteMovable) {
+                    CoffeeSiteMovable csm = (CoffeeSiteMovable) cs;
+                    csm.setLocationService(locationService);
+                    locationService.removePropertyChangeListener(csm);
+                    locationService.addPropertyChangeListener(csm);
+                }
+            }
         }
     }
 

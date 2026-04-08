@@ -122,7 +122,7 @@ public class MainActivity extends ActivityWithLocationService
     private static final String TAG = "MainActivity";
 
     private static final long MAX_STARI_DAT = 1000 * 60 * 15; // pokud jsou posledni zname udaje o poloze starsi jako 1 minuta, zjistit nove (po spusteni app.)
-    private static final float GOOD_PRESNOST = 20.0f;
+    private static final float GOOD_PRESNOST = 30.0f;
     private static final float LAST_PRESNOST = 500.0f;
 
     private boolean firstLocationDetection = true;
@@ -1056,16 +1056,22 @@ public class MainActivity extends ActivityWithLocationService
             return;
         }
 
-        if (locationService != null) {
-            locationService.addPropertyChangeListener(this);
-            location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
-
-            updateAccuracyIndicator(location);
-
-            searchKafeButton.setEnabled(location != null);
-
-            startReadingNumberOfSitesInRanges();
+        if (locationService == null) {
+            forceRebindLocationService();
+            updateAccuracyIndicator(null);
+            searchKafeButton.setEnabled(false);
+            doBindCoffeeSiteLoadOperationsService();
+            return;
         }
+
+        locationService.addPropertyChangeListener(this);
+        location = locationService.getPosledniPozice(LAST_PRESNOST, MAX_STARI_DAT);
+
+        updateAccuracyIndicator(location);
+
+        searchKafeButton.setEnabled(location != null);
+
+        startReadingNumberOfSitesInRanges();
 
         doBindCoffeeSiteLoadOperationsService();
     }
