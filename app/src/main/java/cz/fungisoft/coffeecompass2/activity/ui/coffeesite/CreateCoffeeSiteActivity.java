@@ -10,7 +10,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -2453,15 +2452,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * On permanent denial opens settings dialog
      */
     private void requestStoragePermission(boolean isCamera) {
-        String[] permissions;
-        if (isCamera) {
-            permissions = new String[] { Manifest.permission.CAMERA };
-        } else {
-            permissions = new String[] { getReadImagesPermission() };
+        if (!isCamera) {
+            dispatchGalleryIntent();
+            return;
         }
 
         Dexter.withContext(this)
-              .withPermissions(permissions)
+              .withPermissions(Manifest.permission.CAMERA)
               .withListener(new MultiplePermissionsListener() {
 
                     @Override
@@ -2488,15 +2485,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
               })
               .withErrorListener(error -> Toast.makeText(getApplicationContext(), "Chyba oprávnění! ", Toast.LENGTH_SHORT)
                                                .show())
-              .onSameThread()
-              .check();
-    }
-
-    private String getReadImagesPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return Manifest.permission.READ_MEDIA_IMAGES;
-        }
-        return Manifest.permission.READ_EXTERNAL_STORAGE;
+               .onSameThread()
+               .check();
     }
 
     /**

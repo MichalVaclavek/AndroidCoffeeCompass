@@ -32,7 +32,7 @@
     <string name="about_sentence4">Pokud se vám aplikace líbí, zaregistrujte se prosím v této aplikaci nebo na stránce <b><a href="https://www.coffeecompass.cz">coffeecompass.cz</a></b>, a pomozte evidovat další kávové lokace.</string>
 <!--    <string name="about_sentence_widget">Součástí aplikace je i \'Nástroj na domovskou obrazovku\' (Widget), který zobrazuje nejbližší kávovou lokaci.</string>-->
     <string name="about_sentence_widget"></string>
-    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku a úložišti (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
+    <string name="about_permissions_needed">Aplikace ke své činnosti potřebuje přístup k poloze vašeho zařízení (aby našla nejbližší lokace), přístup k foťáku (aby bylo možné udělat foto lokace) a přístup k internetu, aby bylo možné komunikovat se serverem  <b>coffeecompass.cz</b>, kde jsou uložena data o lokacích.</string>
     <string name="about_coffeecompass_link">"<a href="https://www.coffeecompass.cz">coffeecompass.cz</a>"</string>
 
     <string name="local_service_started">Location Service started</string>
@@ -159,7 +159,7 @@
     <string name="invalid_locationType">Chybí typ lokality</string>
     <string name="invalid_coffeesite_type">Chybí typ zdroje</string>
     <string name="permissions_camera_storage_title">Oprávnění</string>
-    <string name="permissions_camera_storage_request">Pro provedení této operace je nutný souhlas s použitím fotoaparátu a úložiště zařízení.</string>
+    <string name="permissions_camera_storage_request">Pro provedení této operace je nutný souhlas s použitím fotoaparátu.</string>
     <string name="permissions_camera_storage_canel">Zrušit</string>
     <string name="permissions_camera_storage_settings">NASTAVENÍ</string>
     <string name="no_camera_available">V zařízení není dostupná aplikace fotoaparátu.</string>
