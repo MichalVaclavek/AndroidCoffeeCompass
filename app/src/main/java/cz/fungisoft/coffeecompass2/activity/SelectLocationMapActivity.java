@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,7 +27,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivi
  * Usually called only from {@link CreateCoffeeSiteActivity} by startActivityForResult()<br>
  * method.
  */
-public class SelectLocationMapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class SelectLocationMapActivity extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
 

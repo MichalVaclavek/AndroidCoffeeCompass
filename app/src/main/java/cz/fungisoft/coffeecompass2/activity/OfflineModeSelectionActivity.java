@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import java.text.DecimalFormat;
@@ -41,7 +40,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Activity to download all CoffeeSites,their Comments and Images. All such items are saved into DB
  * and used in case of OFFLINE mode.
  */
-public class OfflineModeSelectionActivity extends AppCompatActivity implements CoffeeSiteEntitiesServiceConnectionListener,
+public class OfflineModeSelectionActivity extends BaseActivity implements CoffeeSiteEntitiesServiceConnectionListener,
                                                                                DataDownloadSizeRESTResultListener,
                                                                                CoffeeSiteEntitiesService.DataDownloadIndicatorListener {
 

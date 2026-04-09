@@ -22,7 +22,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -46,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.asynctask.image.GetImageObjectAsyncTask;
@@ -68,7 +68,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Requires an existing CoffeeSite to be passed via Intent extra "coffeeSite".
  * Uses the new Images API for all operations.
  */
-public class CoffeeSiteImagesActivity extends AppCompatActivity
+public class CoffeeSiteImagesActivity extends BaseActivity
         implements CoffeeSiteImageManageListener,
                    UserAccountServiceConnectionListener,
                    CoffeeSiteImageManageAdapter.OnImageDeleteClickListener {

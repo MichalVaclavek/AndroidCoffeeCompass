@@ -11,7 +11,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.karumi.dexter.Dexter;
@@ -35,7 +34,7 @@ import cz.fungisoft.coffeecompass2.services.LocationServiceConnector;
  *
  * When the LocationService is really started and connected, it provides reference to that LocationService.
  */
-public abstract class ActivityWithLocationService extends AppCompatActivity {
+public abstract class ActivityWithLocationService extends BaseActivity {
 
     private static final String TAG = "ActivityWithLocationSrv";
 
@@ -137,7 +136,7 @@ public abstract class ActivityWithLocationService extends AppCompatActivity {
      *
      * Needed for Android 6 ???
      */
-    private void requestLocationPermission(AppCompatActivity activity) {
+    private void requestLocationPermission(BaseActivity activity) {
         Dexter.withContext(activity)
                 .withPermissions(Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION)

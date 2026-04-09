@@ -18,7 +18,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
@@ -64,7 +64,7 @@ import static android.view.View.VISIBLE;
  * It also allows to add a Comment for current logged-in user
  * using {@link EnterCommentAndRatingDialogFragment}.
  */
-public class CommentsListActivity extends AppCompatActivity
+public class CommentsListActivity extends BaseActivity
                                   implements UserAccountServiceConnectionListener,
                                              EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
                                              DeleteCommentDialogFragment.DeleteCommentDialogListener,

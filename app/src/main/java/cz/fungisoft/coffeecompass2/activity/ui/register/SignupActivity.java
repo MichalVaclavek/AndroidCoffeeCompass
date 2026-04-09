@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -27,6 +26,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
 import cz.fungisoft.coffeecompass2.activity.ui.login.LoggedInUserView;
@@ -43,7 +43,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Activity to register new user. Based on LoginActivity.
  * UserAccountServiceConnectionListener
  */
-public class SignupActivity extends AppCompatActivity
+public class SignupActivity extends BaseActivity
                             implements UserRegisterServiceListener, UserAccountServiceConnectionListener {
 
     private static final String TAG = "SignupActivity";

@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
@@ -41,7 +41,7 @@ import static android.view.View.GONE;
  * Or after user searches CoffeeSites in town.<br>
  * Allows to select the CoffeeSite from the list and open detail activity for that CoffeeSite.
  */
-public class StaticCoffeeSitesListActivity extends AppCompatActivity
+public class StaticCoffeeSitesListActivity extends BaseActivity
                                            implements CoffeeSiteServicesConnectionListener,
                                                       CoffeeSiteLoadServiceOperationsListener  {
 

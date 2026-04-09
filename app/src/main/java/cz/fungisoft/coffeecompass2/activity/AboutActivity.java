@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
@@ -30,7 +29,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 /**
  * Shows the About app. info, author, version, aim of the app.
  */
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
     private ProgressBar aboutActivityProgressBar;
 

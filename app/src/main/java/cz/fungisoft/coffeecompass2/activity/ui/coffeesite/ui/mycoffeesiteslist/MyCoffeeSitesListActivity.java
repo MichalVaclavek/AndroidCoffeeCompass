@@ -17,7 +17,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
@@ -35,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -77,7 +77,7 @@ import static cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesite
  * <p>
  * Also allows upload of the CoffeeSites created when offline.
  */
-public class MyCoffeeSitesListActivity extends AppCompatActivity
+public class MyCoffeeSitesListActivity extends BaseActivity
                                        implements UserAccountServiceConnectionListener,
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,

@@ -1,7 +1,6 @@
 package cz.fungisoft.coffeecompass2.activity.ui.notification;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.DialogFragment;
@@ -39,6 +38,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.NotificationSubscriptionPreferencesHelper;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
@@ -57,7 +57,7 @@ import static cz.fungisoft.coffeecompass2.activity.ui.notification.SelectedTownF
  * Activity to allow user to subscribe for push notifications about new CoffeeSites
  * created/activated.
  */
-public class NewsSubscriptionActivity extends AppCompatActivity
+public class NewsSubscriptionActivity extends BaseActivity
                                       implements NotificationSubscriptionCallListener,
                                                  UserAccountServiceConnectionListener,
                                                  FragmentRemovableListener,

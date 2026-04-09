@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 
@@ -23,6 +22,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -35,7 +35,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * Activity to show logged-in user profile details.
  * Allows to log-out or deleteUser user's account.
  */
-public class UserDataViewActivity extends AppCompatActivity implements UserLogoutAndDeleteServiceListener,
+public class UserDataViewActivity extends BaseActivity implements UserLogoutAndDeleteServiceListener,
                                                                        UserAccountServiceConnectionListener,
                                                                        DeleteUserAccountDialogFragment.DeleteUserAccountDialogListener {
 

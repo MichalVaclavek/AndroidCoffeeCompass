@@ -13,11 +13,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceFragmentCompat;
 
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
 
 /**
@@ -26,7 +26,7 @@ import cz.fungisoft.coffeecompass2.activity.data.WidgetSettingsPreferenceHelper;
  * Currently only search distance for Widget is implemented, but also
  * some colors of the Widget should be implemented too.
  */
-public class WidgetConfigurationActivity extends AppCompatActivity {
+public class WidgetConfigurationActivity extends BaseActivity {
 
     private LinearLayout container;
 

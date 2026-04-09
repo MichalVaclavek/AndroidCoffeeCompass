@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -27,6 +26,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.fungisoft.coffeecompass2.R;
+import cz.fungisoft.coffeecompass2.activity.BaseActivity;
 import cz.fungisoft.coffeecompass2.activity.MainActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.register.SignupActivity;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
@@ -38,7 +38,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 /**
  * Activity to process register, login, logout of a User operations
  */
-public class LoginActivity extends AppCompatActivity implements UserLoginServiceListener, UserAccountServiceConnectionListener {
+public class LoginActivity extends BaseActivity implements UserLoginServiceListener, UserAccountServiceConnectionListener {
 
     private LoginRegisterViewModel loginViewModel;
 
