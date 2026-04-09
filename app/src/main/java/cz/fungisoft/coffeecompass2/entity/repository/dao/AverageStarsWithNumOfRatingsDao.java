@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.entity.repository.dao;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public interface AverageStarsWithNumOfRatingsDao {
     @Query("DELETE FROM average_stars_with_numOfRatings_table")
     void deleteAll();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<AverageStarsWithNumOfRatings> averageStarsWithNumOfHodnoceniList);
 
     @Insert

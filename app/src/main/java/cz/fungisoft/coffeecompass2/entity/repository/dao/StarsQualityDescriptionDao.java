@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.entity.repository.dao;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public interface StarsQualityDescriptionDao {
     @Query("DELETE FROM stars_quality_description_table")
     void deleteAll();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<StarsQualityDescription> starsQualityDescriptions);
 
     @Insert

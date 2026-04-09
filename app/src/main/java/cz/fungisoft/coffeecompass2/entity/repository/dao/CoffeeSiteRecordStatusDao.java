@@ -3,6 +3,7 @@ package cz.fungisoft.coffeecompass2.entity.repository.dao;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface CoffeeSiteRecordStatusDao {
     @Query("DELETE FROM coffee_site_record_status_table")
     void deleteAll();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<CoffeeSiteRecordStatus> csRecordStatuses);
 
     @Insert

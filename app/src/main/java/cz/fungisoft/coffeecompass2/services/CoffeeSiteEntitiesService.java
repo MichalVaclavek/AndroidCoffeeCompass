@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
@@ -82,6 +83,8 @@ public class CoffeeSiteEntitiesService extends LifecycleService
     private DataForOfflineModePreferenceHelper dataDownloadPreferenceHelper;
 
     private static boolean downloadInProgress = false;
+
+    private static final AtomicBoolean csEntitiesLoadInProgress = new AtomicBoolean(false);
 
     public boolean isDownloadInProgress() {
         return downloadInProgress;
@@ -194,6 +197,11 @@ public class CoffeeSiteEntitiesService extends LifecycleService
      * Deletes current CS entities data from DB and loads and saves new ones
      */
     public void populateCSEntities() {
+        if (!csEntitiesLoadInProgress.compareAndSet(false, true)) {
+            Log.i(TAG, "CoffeeSite entities load already in progress, skipping duplicate request.");
+            return;
+        }
+
         downloadInProgress = true;
         db.deleteCSEntitiesAsync();
     }
@@ -212,15 +220,24 @@ public class CoffeeSiteEntitiesService extends LifecycleService
         if (Utils.isOnline(getApplicationContext())) {
             downloadInProgress = true;
             new ReadCoffeeSiteEntitiesAsyncTask(COFFEE_SITE_ENTITIES_LOAD, this, entitiesRepository).execute();
+        } else {
+            csEntitiesLoadInProgress.set(false);
+            downloadInProgress = false;
+            Log.w(TAG, "CoffeeSite entities load canceled - device is offline.");
         }
     }
 
     @Override
     public void onCoffeeSiteEntitiesLoaded(Result<Boolean> result) {
+        csEntitiesLoadInProgress.set(false);
+        downloadInProgress = false;
+
         if (result instanceof Result.Success) {
-            downloadInProgress = false;
             CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
             informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
+        } else {
+            Log.e(TAG, "Error while loading CoffeeSite entities.");
+            informClientAboutCSEntitiesLoadResult(false);
         }
     }
 
