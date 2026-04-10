@@ -24,3 +24,18 @@
 -keep class * {
     public private *;
 }
+
+# Keep runtime metadata used by Gson/Retrofit in release builds.
+-keepattributes Signature
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
+-keepattributes RuntimeVisibleParameterAnnotations,RuntimeInvisibleParameterAnnotations
+-keepattributes AnnotationDefault
+
+# Entity/model classes are deserialized reflectively by Gson and many fields are protected.
+# The generic keep rule above only covers public/private members, which is not enough here.
+-keep class cz.fungisoft.coffeecompass2.entity.** { *; }
+
+# Keep Retrofit interfaces and generic signatures used by Gson converters.
+-keep interface cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.** { *; }
+-keep class retrofit2.** { *; }
+-keep class okhttp3.** { *; }

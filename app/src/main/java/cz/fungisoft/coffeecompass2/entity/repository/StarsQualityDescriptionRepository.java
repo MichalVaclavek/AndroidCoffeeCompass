@@ -62,6 +62,10 @@ public class StarsQualityDescriptionRepository extends CoffeeSiteRepositoryBase 
         new InsertAllAsyncTask(starsQualityDescriptionDao).execute(StarsQualityDescriptions);
     }
 
+    void insertAllBlocking(List<StarsQualityDescription> starsQualityDescriptions) {
+        starsQualityDescriptionDao.insertAll(starsQualityDescriptions);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final StarsQualityDescriptionDao mAsyncTaskDao;

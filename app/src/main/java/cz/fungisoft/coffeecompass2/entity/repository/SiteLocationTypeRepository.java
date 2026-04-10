@@ -60,6 +60,10 @@ public class SiteLocationTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(siteLocationTypeDao).execute(SiteLocationTypes);
     }
 
+    void insertAllBlocking(List<SiteLocationType> siteLocationTypes) {
+        siteLocationTypeDao.insertAll(siteLocationTypes);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final SiteLocationTypeDao mAsyncTaskDao;

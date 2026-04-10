@@ -71,6 +71,23 @@ public class GetCoffeeSitesInRangeAsyncTask {
         Log.i(TAG, "start call");
 
         call.enqueue(new Callback<>() {
+            private String describeCoffeeSite(CoffeeSite coffeeSite) {
+                if (coffeeSite == null) {
+                    return "null";
+                }
+
+                int cupTypesCount = coffeeSite.getCupTypes() != null ? coffeeSite.getCupTypes().size() : -1;
+                int coffeeSortsCount = coffeeSite.getCoffeeSorts() != null ? coffeeSite.getCoffeeSorts().size() : -1;
+
+                return "id=" + coffeeSite.getId()
+                        + ", name=" + coffeeSite.getName()
+                        + ", status=" + (coffeeSite.getStatusZaznamu() != null ? coffeeSite.getStatusZaznamu().toString() : "null")
+                        + ", imageUrl=" + coffeeSite.getMainImageURL()
+                        + ", city=" + coffeeSite.getMesto()
+                        + ", cups=" + cupTypesCount
+                        + ", sorts=" + coffeeSortsCount;
+            }
+
             @Override
             public void onResponse(Call<List<CoffeeSite>> call, Response<List<CoffeeSite>> response) {
                 List<CoffeeSiteMovable> coffeeSiteMovables = new ArrayList<>();
@@ -78,6 +95,8 @@ public class GetCoffeeSitesInRangeAsyncTask {
                     Log.i(TAG, "onSuccess()");
                     if (response.body() != null) {
                         List<CoffeeSite> coffeeSites = response.body();
+                        Log.i(TAG, "CoffeeSites in range loaded. count=" + coffeeSites.size()
+                                + (coffeeSites.isEmpty() ? "" : ", first={" + describeCoffeeSite(coffeeSites.get(0)) + "}"));
                         for (CoffeeSite cs : coffeeSites) {
                             coffeeSiteMovables.add(new CoffeeSiteMovable(cs));
                         }

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.DataForOfflineModePreferenceHelper;
@@ -28,6 +30,7 @@ import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
 import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteEntityRepositories;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteEntitiesLoadRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -52,18 +55,46 @@ public class ReadCoffeeSiteEntitiesAsyncTask {
 
     private final CoffeeSiteEntitiesLoadRESTResultListener callingListenerService;
 
-    private Result.Error error;
+    private volatile Result.Error error;
 
-    private int entitiesCallCounter = 0;
+    private final AtomicInteger entitiesCallCounter = new AtomicInteger(0);
 
-    private synchronized void incrementEntitiesCallCounter() {
-        entitiesCallCounter = entitiesCallCounter + 1;
+    private final AtomicBoolean entitiesLoadFailed = new AtomicBoolean(false);
+
+    private void resetEntitiesCallCounter() {
+        entitiesCallCounter.set(0);
+        entitiesLoadFailed.set(false);
+        error = null;
     }
-    private synchronized void resetEntitiesCallCounter() {
-        entitiesCallCounter = 0;
+
+    private void markFailure(Result.Error resultError) {
+        entitiesLoadFailed.set(true);
+        error = resultError;
     }
-    private synchronized int getEntitiesCallCounter() {
-        return entitiesCallCounter;
+
+    private void finishEntitiesRequest() {
+        if (entitiesCallCounter.incrementAndGet() == COFFEE_SITE_ENTITY_CLASSES.length
+                && callingListenerService != null) {
+            if (entitiesLoadFailed.get()) {
+                Result.Error resultError = error != null
+                        ? error
+                        : new Result.Error("Error retrieving info about CoffeeSite entities REST request.");
+                AsyncRunner.runOnMainThread(() -> callingListenerService.onCoffeeSiteEntitiesLoaded(resultError));
+            } else {
+                Log.i(REQ_ENTITIES_TAG, "onResponse() success ALL.");
+                Result.Success<Boolean> result = new Result.Success<>(true);
+                AsyncRunner.runOnMainThread(() -> callingListenerService.onCoffeeSiteEntitiesLoaded(result));
+            }
+        }
+    }
+
+    private String describeFirstEntity(List<? extends CoffeeSiteEntity> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return "empty";
+        }
+
+        CoffeeSiteEntity firstEntity = entities.get(0);
+        return firstEntity.getClass().getSimpleName() + "[id=" + firstEntity.getId() + "]";
     }
 
 
@@ -159,56 +190,48 @@ public class ReadCoffeeSiteEntitiesAsyncTask {
             call.enqueue(new Callback<T>() {
                 @Override
                 public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
-                    incrementEntitiesCallCounter();
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
-                            Log.i(REQ_ENTITIES_TAG, "onResponse() success");
-                            // Saves data to repository
-                            entitiesRepository.setEntities(response.body());
-
-                            if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length) {
-                                Log.i(REQ_ENTITIES_TAG, "onResponse() success ALL.");
-                                //CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
-                                Result.Success<Boolean> result = new Result.Success<>(true);
-                                if (callingListenerService != null) {
-                                    callingListenerService.onCoffeeSiteEntitiesLoaded(result);
+                            Log.i(REQ_ENTITIES_TAG, "Loaded entities from server. Type="
+                                    + entityClass.getSimpleName() + ", count=" + response.body().size()
+                                    + ", first=" + describeFirstEntity(response.body()));
+                            AsyncRunner.runInBackground(() -> {
+                                try {
+                                    Log.i(REQ_ENTITIES_TAG, "onResponse() success");
+                                    entitiesRepository.setEntities(response.body());
+                                } catch (Exception e) {
+                                    Log.e(REQ_ENTITIES_TAG, "Failed to save CoffeeSite entities.", e);
+                                    markFailure(new Result.Error(new IOException("Error saving CoffeeSite entities to DB.", e)));
+                                } finally {
+                                    finishEntitiesRequest();
                                 }
-                            }
+                            });
                         } else {
                             Log.i(REQ_ENTITIES_TAG, "Returned empty response retrieving info about CoffeeSite entities REST request.");
-                            error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request."));
+                            markFailure(new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request.")));
                             operationError = "ERROR";
-                            if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSiteEntitiesLoaded(error);
-                            }
+                            finishEntitiesRequest();
                         }
                     } else {
                         try {
-                            error = new Result.Error(Utils.getRestError(response.errorBody().string()));
+                            markFailure(new Result.Error(Utils.getRestError(response.errorBody().string())));
                         } catch (IOException e) {
                             Log.e(REQ_ENTITIES_TAG, e.getMessage());
                             operationError = "Chyba komunikace se serverem.";
                         }
                         if (error == null) {
-                            error = new Result.Error(operationError);
+                            markFailure(new Result.Error(operationError));
                         }
-                        if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length
-                            && callingListenerService != null) {
-                            callingListenerService.onCoffeeSiteEntitiesLoaded(error);
-                        }
+                        finishEntitiesRequest();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<T> call, Throwable t) {
-                    incrementEntitiesCallCounter();
                     Log.e(REQ_ENTITIES_TAG, "Error retrieving info about CoffeeSite entities REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request.", t));
+                    markFailure(new Result.Error(new IOException("Error retrieving info about CoffeeSite entities REST request.", t)));
                     operationError = error.getDetail();
-                    if (getEntitiesCallCounter() == COFFEE_SITE_ENTITY_CLASSES.length
-                       && callingListenerService != null) {
-                        callingListenerService.onCoffeeSiteEntitiesLoaded(error);
-                    }
+                    finishEntitiesRequest();
                 }
             });
         }

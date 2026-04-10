@@ -53,6 +53,10 @@ public class CoffeeSiteRecordStatusRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(coffeeSiteRecordStatusDao).execute(CoffeeSiteRecordStatuss);
     }
 
+    void insertAllBlocking(List<CoffeeSiteRecordStatus> coffeeSiteRecordStatuses) {
+        coffeeSiteRecordStatusDao.insertAll(coffeeSiteRecordStatuses);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final CoffeeSiteRecordStatusDao mAsyncTaskDao;

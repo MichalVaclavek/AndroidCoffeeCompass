@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.entity.repository;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
  * Can return instances of any such type.<br>
  */
 public class CoffeeSiteEntityRepositories {
+
+    private static final String TAG = "CSEntityRepos";
 
     /**
      *  Array of all CoffeeSiteEntity Classes to be loaded from server to repository
@@ -47,10 +50,6 @@ public class CoffeeSiteEntityRepositories {
         CoffeeSiteEntityRepositories.dataSaved = dataSaved;
         DataForOfflineModePreferenceHelper dataForOfflineModePreferenceHelper = new DataForOfflineModePreferenceHelper(mContext);
         dataForOfflineModePreferenceHelper.putCSEntitiesDownloaded(dataSaved);
-    }
-
-    public AverageStarsWithNumOfRatingsRepository getAverageStarsWithNumOfHodnoceniRepository() {
-        return averageStarsWithNumOfHodnoceniRepository;
     }
 
     public CoffeeSiteTypeRepository getCoffeeSiteTypesRepository() {
@@ -94,7 +93,6 @@ public class CoffeeSiteEntityRepositories {
     }
 
     /* REPOSITORIES */
-    private final AverageStarsWithNumOfRatingsRepository averageStarsWithNumOfHodnoceniRepository;
     private final CoffeeSiteTypeRepository coffeeSiteTypesRepository;
     private final CoffeeSiteRecordStatusRepository coffeeSiteRecordStatusRepository;
     private final CoffeeSiteStatusRepository coffeeSiteStatusRepository;
@@ -112,7 +110,6 @@ public class CoffeeSiteEntityRepositories {
 
     private CoffeeSiteEntityRepositories(final CoffeeSiteDatabase db) {
         coffeeSiteTypesRepository = new CoffeeSiteTypeRepository(db);
-        averageStarsWithNumOfHodnoceniRepository = new AverageStarsWithNumOfRatingsRepository(db);
         coffeeSiteRecordStatusRepository = new CoffeeSiteRecordStatusRepository(db);
         coffeeSiteStatusRepository = new CoffeeSiteStatusRepository(db);
         coffeeSortRepository = new CoffeeSortRepository(db);
@@ -136,51 +133,52 @@ public class CoffeeSiteEntityRepositories {
     /** SETTERS **/
 
     public void setAllCoffeeSiteTypes(List<CoffeeSiteType> allCoffeeSiteTypes) {
-        coffeeSiteTypesRepository.insertAll(allCoffeeSiteTypes);
+        coffeeSiteTypesRepository.insertAllBlocking(allCoffeeSiteTypes);
     }
 
     public void setAllCoffeeSiteRecordStatuses(List<CoffeeSiteRecordStatus> allCoffeeSiteRecordStatuses) {
-        coffeeSiteRecordStatusRepository.insertAll(allCoffeeSiteRecordStatuses);
+        coffeeSiteRecordStatusRepository.insertAllBlocking(allCoffeeSiteRecordStatuses);
     }
 
     public void setAllCoffeeSiteStatuses(List<CoffeeSiteStatus> allCoffeeSiteStatuses) {
-        coffeeSiteStatusRepository.insertAll(allCoffeeSiteStatuses);
+        coffeeSiteStatusRepository.insertAllBlocking(allCoffeeSiteStatuses);
     }
 
     public void setAllCoffeeSorts(List<CoffeeSort> allCoffeeSorts) {
-        coffeeSortRepository.insertAll(allCoffeeSorts);
+        coffeeSortRepository.insertAllBlocking(allCoffeeSorts);
     }
 
     public void setAllCupTypes(List<CupType> allCupTypes) {
-        cupTypeRepository.insertAll(allCupTypes);
+        cupTypeRepository.insertAllBlocking(allCupTypes);
     }
 
     public void setAllNextToMachineTypes(List<NextToMachineType> allNextToMachineTypes) {
-        nextToMachineTypeRepository.insertAll(allNextToMachineTypes);
+        nextToMachineTypeRepository.insertAllBlocking(allNextToMachineTypes);
     }
 
     public void setAllOtherOffers(List<OtherOffer> allOtherOffers) {
-        otherOfferRepository.insertAll(allOtherOffers);
+        otherOfferRepository.insertAllBlocking(allOtherOffers);
     }
 
     public void setAllPriceRanges(List<PriceRange> allPriceRanges) {
-        priceRangeRepository.insertAll(allPriceRanges);
+        priceRangeRepository.insertAllBlocking(allPriceRanges);
     }
 
     public void setAllSiteLocationTypes(List<SiteLocationType> allSiteLocationTypes) {
-        siteLocationTypeRepository.insertAll(allSiteLocationTypes);
+        siteLocationTypeRepository.insertAllBlocking(allSiteLocationTypes);
     }
 
     public void setAllStarsQualityDescriptions(List<StarsQualityDescription> allStarsQualityDescriptions) {
-//        for (StarsQualityDescription stars : allStarsQualityDescriptions) {
-//            stars.setId(stars.getNumOfStars());
-//        }
-        starsQualityDescriptionRepository.insertAll(allStarsQualityDescriptions);
+        starsQualityDescriptionRepository.insertAllBlocking(allStarsQualityDescriptions);
     }
 
 
     public void setEntities(List<? extends CoffeeSiteEntity> response) {
         if (response.size() > 0) {
+            CoffeeSiteEntity firstEntity = response.get(0);
+            Log.i(TAG, "Saving entities to DB. Type=" + firstEntity.getClass().getSimpleName()
+                    + ", count=" + response.size() + ", firstId=" + firstEntity.getId());
+
             if (response.get(0) instanceof CoffeeSiteType) {
                 setAllCoffeeSiteTypes((List<CoffeeSiteType>) response);
             }

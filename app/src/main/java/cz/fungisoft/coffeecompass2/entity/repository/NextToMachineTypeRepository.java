@@ -53,6 +53,10 @@ public class NextToMachineTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(nextToMachineTypeDao).execute(NextToMachineTypes);
     }
 
+    void insertAllBlocking(List<NextToMachineType> nextToMachineTypes) {
+        nextToMachineTypeDao.insertAll(nextToMachineTypes);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final NextToMachineTypeDao mAsyncTaskDao;

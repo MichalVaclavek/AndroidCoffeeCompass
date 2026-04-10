@@ -53,6 +53,10 @@ public class CupTypeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(cupTypeDao).execute(CupTypes);
     }
 
+    void insertAllBlocking(List<CupType> cupTypes) {
+        cupTypeDao.insertAll(cupTypes);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final CupTypeDao mAsyncTaskDao;

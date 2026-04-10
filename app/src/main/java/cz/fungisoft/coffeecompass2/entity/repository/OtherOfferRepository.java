@@ -63,6 +63,10 @@ public class OtherOfferRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(otherOfferDao).execute(OtherOffers);
     }
 
+    void insertAllBlocking(List<OtherOffer> otherOffers) {
+        otherOfferDao.insertAll(otherOffers);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final OtherOfferDao mAsyncTaskDao;

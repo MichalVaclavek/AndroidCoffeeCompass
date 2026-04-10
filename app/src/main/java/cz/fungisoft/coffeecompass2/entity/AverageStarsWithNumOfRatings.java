@@ -3,9 +3,6 @@ package cz.fungisoft.coffeecompass2.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.room.Entity;
-import androidx.room.Ignore;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -13,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import cz.fungisoft.coffeecompass2.utils.Utils;
 
-@Entity(tableName = "average_stars_with_numOfRatings_table")
 public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Parcelable {
 
     @Expose
@@ -32,7 +28,6 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
         super();
     }
 
-    @Ignore // for Room processing
     public AverageStarsWithNumOfRatings(String id, float avgStars, int numOfHodnoceni, String common) {
         super(id);
         this.avgStars = avgStars;
@@ -40,7 +35,6 @@ public class AverageStarsWithNumOfRatings extends CoffeeSiteEntity implements Pa
         this.common = common;
     }
 
-    @Ignore // for Room processing
     protected AverageStarsWithNumOfRatings(@NotNull Parcel in) {
         this.id = in.readString();
         avgStars = in.readFloat();

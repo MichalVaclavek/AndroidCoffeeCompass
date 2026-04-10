@@ -60,6 +60,10 @@ public class PriceRangeRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(priceRangeDao).execute(PriceRanges);
     }
 
+    void insertAllBlocking(List<PriceRange> priceRanges) {
+        priceRangeDao.insertAll(priceRanges);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final PriceRangeDao mAsyncTaskDao;

@@ -234,6 +234,7 @@ public class CoffeeSiteEntitiesService extends LifecycleService
 
         if (result instanceof Result.Success) {
             CoffeeSiteEntityRepositories.setDataSaved(true); // all data saved
+            Log.i(TAG, "CoffeeSite entities load finished successfully.");
             informClientAboutCSEntitiesLoadResult( ((Result.Success<Boolean>) result).getData());
         } else {
             Log.e(TAG, "Error while loading CoffeeSite entities.");

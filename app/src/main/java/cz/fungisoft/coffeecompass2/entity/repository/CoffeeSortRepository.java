@@ -60,6 +60,10 @@ public class CoffeeSortRepository extends CoffeeSiteRepositoryBase {
         new InsertAllAsyncTask(coffeeSortDao).execute(CoffeeSorts);
     }
 
+    void insertAllBlocking(List<CoffeeSort> coffeeSorts) {
+        coffeeSortDao.insertAll(coffeeSorts);
+    }
+
     private static class InsertAllAsyncTask {
 
         private final CoffeeSortDao mAsyncTaskDao;

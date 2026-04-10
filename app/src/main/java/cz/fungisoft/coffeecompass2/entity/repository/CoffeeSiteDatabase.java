@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
-import cz.fungisoft.coffeecompass2.entity.AverageStarsWithNumOfRatings;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteRecordStatus;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
@@ -27,7 +26,6 @@ import cz.fungisoft.coffeecompass2.entity.OtherOffer;
 import cz.fungisoft.coffeecompass2.entity.PriceRange;
 import cz.fungisoft.coffeecompass2.entity.SiteLocationType;
 import cz.fungisoft.coffeecompass2.entity.StarsQualityDescription;
-import cz.fungisoft.coffeecompass2.entity.repository.dao.AverageStarsWithNumOfRatingsDao;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteDao;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteRecordStatusDao;
 import cz.fungisoft.coffeecompass2.entity.repository.dao.CoffeeSiteStatusDao;
@@ -46,11 +44,10 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
  * entities.
  */
 @Database(entities = {CoffeeSite.class, CoffeeSiteStatus.class, CoffeeSiteRecordStatus.class,
-                      CoffeeSiteType.class, CoffeeSort.class, CupType.class,
-                      AverageStarsWithNumOfRatings.class, NextToMachineType.class,
-                      OtherOffer.class, PriceRange.class, SiteLocationType.class,
-                      StarsQualityDescription.class , Comment.class},
-                      version = 29, exportSchema = false)
+                       CoffeeSiteType.class, CoffeeSort.class, CupType.class,
+                       NextToMachineType.class, OtherOffer.class, PriceRange.class, SiteLocationType.class,
+                       StarsQualityDescription.class , Comment.class},
+                      version = 30, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
@@ -85,6 +82,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                             // if no Migration object.
                             .fallbackToDestructiveMigration()
                             .addMigrations(MIGRATION_28_29)
+                            .addMigrations(MIGRATION_29_30)
                             .addCallback(sCoffeeSiteDatabaseCallback)
                             .build();
                 }
@@ -97,6 +95,13 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE coffee_site_table ADD COLUMN localImagePaths TEXT");
+        }
+    };
+
+    static final Migration MIGRATION_29_30 = new Migration(29, 30) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("DROP TABLE IF EXISTS average_stars_with_numOfRatings_table");
         }
     };
 
@@ -151,7 +156,6 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
         private final CoffeeSiteDatabase mDB;
 
-        private final AverageStarsWithNumOfRatingsDao averageStarsWithNumOfRatingsDao;
         private final CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao;
         private final CoffeeSiteStatusDao coffeeSiteStatusDao;
         private final CoffeeSiteTypeDao coffeeSiteTypeDao;
@@ -167,7 +171,6 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         DeleteCSEntitiesAsync(CoffeeSiteDatabase db) {
             this.mDB = db;
 
-            averageStarsWithNumOfRatingsDao = db.averageStarsWithNumOfHodnoceniDao();
             coffeeSiteRecordStatusDao = db.coffeeSiteRecordStatusDao();
             coffeeSiteStatusDao = db.coffeeSiteStatusDao();
             coffeeSiteTypeDao = db.coffeeSiteTypeDao();
@@ -185,7 +188,6 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
             AsyncRunner.runInBackground(() -> {
                 // Start the app with a clean database every time.
                 // Not needed if you only populate the database when it is first created
-                averageStarsWithNumOfRatingsDao.deleteAll();
                 coffeeSiteRecordStatusDao.deleteAll();
                 coffeeSiteStatusDao.deleteAll();
                 coffeeSiteTypeDao.deleteAll();
@@ -280,8 +282,6 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
     public abstract CoffeeSiteDao coffeeSiteDao();
 
     public abstract CoffeeSiteStatusDao coffeeSiteStatusDao();
-
-    public abstract AverageStarsWithNumOfRatingsDao averageStarsWithNumOfHodnoceniDao();
 
     public abstract CoffeeSiteRecordStatusDao coffeeSiteRecordStatusDao();
 
