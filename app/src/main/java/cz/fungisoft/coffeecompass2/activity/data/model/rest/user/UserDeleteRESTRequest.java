@@ -10,15 +10,13 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * REST user deleteUser request to be sent to server coffeecompass.cz
@@ -55,19 +53,11 @@ public class UserDeleteRESTRequest {
             }
         };
 
-        // Add the interceptor to the client builder.
-        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
-
-        OkHttpClient client = clientBuilder.authenticator(new TokenAuthenticator(userAccountService))
-                                              .addInterceptor(headerAuthorizationInterceptor).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                                        .client(client)
-                                        .baseUrl(UserAccountRESTInterface.DELETE_USER_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .build();
-
-        UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
+        UserAccountRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofitWithAuth(UserAccountRESTInterface.DELETE_USER_URL,
+                        headerAuthorizationInterceptor,
+                        new TokenAuthenticator(userAccountService))
+                .create(UserAccountRESTInterface.class);
 
         Call<String> call = api.deleteUserById(userAccountService.getLoggedInUser().getUserId());
 

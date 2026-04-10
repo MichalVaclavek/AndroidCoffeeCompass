@@ -2,24 +2,18 @@ package cz.fungisoft.coffeecompass2.asynctask.places;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.places.CuzkCandidates;
 import cz.fungisoft.coffeecompass2.activity.interfaces.places.PlacesCandidatesCUZKRESTInterface;
 import cz.fungisoft.coffeecompass2.services.interfaces.PlacesCandidatesCUZKRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Async Task to run REST api request to get {@link cz.fungisoft.coffeecompass2.activity.data.model.rest.places.Candidate}
@@ -54,21 +48,8 @@ public class GetPlacesCandidatesCUZKTask {
         operationError = "";
         Call<CuzkCandidates> call;
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(2, TimeUnit.SECONDS)
-                .writeTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .build();
-
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(PlacesCandidatesCUZKRESTInterface.CUZK_PLACES_API_SEARCH_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance()
+                .getRetrofit(PlacesCandidatesCUZKRESTInterface.CUZK_PLACES_API_SEARCH_URL);
 
         PlacesCandidatesCUZKRESTInterface api = retrofit.create(PlacesCandidatesCUZKRESTInterface.class);
         call = api.getPlacesCandidates(this.nameOfPlace, this.maxPlaces);

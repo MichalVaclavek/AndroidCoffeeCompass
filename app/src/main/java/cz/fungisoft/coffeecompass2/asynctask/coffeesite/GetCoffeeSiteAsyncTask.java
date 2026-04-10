@@ -2,9 +2,6 @@ package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
@@ -13,14 +10,11 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteREST
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * ASyncTask to call REST api obtaining one CoffeeSite
@@ -63,23 +57,9 @@ public class GetCoffeeSiteAsyncTask {
         operationResult = "";
         operationError = "";
 
-        //Add the interceptor to the client builder.
-        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
-
-        OkHttpClient client = clientBuilder.build();
-
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("dd. MM. yyyy HH:mm")
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
+        CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofit(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
+                .create(CoffeeSiteRESTInterface.class);
 
         Call<CoffeeSite> call;
         if (this.coffeeSiteURL.isEmpty()) {

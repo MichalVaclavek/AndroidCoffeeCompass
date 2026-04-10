@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
@@ -12,15 +11,13 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteREST
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteNumbersRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * AsyncTask to perform REST Retrofit call to coffeecompass.cz to get number of active CoffeeSites
@@ -68,22 +65,11 @@ public class GetNumberOfCoffeeSitesFromCurrentUserAsyncTask {
                 }
             };
 
-            //Add the interceptor to the client builder.
-            OkHttpClient client = Utils.getOkHttpClientBuilder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .authenticator(new TokenAuthenticator(userAccountService))
-                    .addInterceptor(headerAuthorizationInterceptor)
-                    .build();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .build();
-
-            CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
+            CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                    .getRetrofitWithAuth(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL,
+                            headerAuthorizationInterceptor,
+                            new TokenAuthenticator(userAccountService))
+                    .create(CoffeeSiteRESTInterface.class);
 
             Call<Integer> call = api.getNumberOfSitesNotCanceledFromCurrentUser();
 

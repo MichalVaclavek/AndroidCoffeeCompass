@@ -22,8 +22,6 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiRESTInter
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Copy from https://androidwave.com/capture-image-from-camera-gallery/
@@ -54,7 +52,7 @@ public class ImageUtil {
     private synchronized Picasso getOfflineDownloadPicasso(Context context) {
         if (offlineDownloadPicasso == null) {
             offlineDownloadPicasso = new Picasso.Builder(context.getApplicationContext())
-                    .downloader(new OkHttp3Downloader(Utils.getOkHttpClientBuilder().build()))
+                    .downloader(new OkHttp3Downloader(RetrofitClientProvider.getInstance().getClient()))
                     .build();
         }
         return offlineDownloadPicasso;
@@ -314,12 +312,9 @@ public class ImageUtil {
 
     private ImagesApiRESTInterface getImagesApi() {
         if (imagesApi == null) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(Utils.getOkHttpClientBuilder().build())
-                    .baseUrl(ImagesApiRESTInterface.IMAGES_API_BASE_URL)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .build();
-            imagesApi = retrofit.create(ImagesApiRESTInterface.class);
+            imagesApi = RetrofitClientProvider.getInstance()
+                    .getRetrofit(ImagesApiRESTInterface.IMAGES_API_BASE_URL)
+                    .create(ImagesApiRESTInterface.class);
         }
         return imagesApi;
     }

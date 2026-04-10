@@ -11,15 +11,14 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthentica
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiSecuredRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Deletes a single image from the Images API.
@@ -65,16 +64,8 @@ public class ImageDeleteNewApiAsyncTask {
             return chain.proceed(request);
         };
 
-        OkHttpClient client = Utils.getOkHttpClientBuilder()
-                .addInterceptor(authInterceptor)
-                .authenticator(new TokenAuthenticator(userAccountService))
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(ImagesApiSecuredRESTInterface.BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance()
+                .getRetrofitWithAuth(ImagesApiSecuredRESTInterface.BASE_URL, authInterceptor, new TokenAuthenticator(userAccountService));
 
         ImagesApiSecuredRESTInterface api = retrofit.create(ImagesApiSecuredRESTInterface.class);
         Call<Void> call = api.deleteImage(objectExtId, imageExtId);

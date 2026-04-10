@@ -7,12 +7,11 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingLoadOperationListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Runs async task for REST call to get rating for one site ID from one user
@@ -35,14 +34,9 @@ public class GetNumberOfStarsAsyncTask {
     public void execute() {
         Log.d(REQ_TAG, "GetNumberOfStarsAsyncTask REST request initiated");
 
-        //Add the interceptor to the client builder.
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(Utils.getOkHttpClientBuilder().build())
-                .baseUrl(CoffeeSiteRESTInterface.GET_NUMBER_OF_STARS_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
-
-        CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
+        CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofit(CoffeeSiteRESTInterface.GET_NUMBER_OF_STARS_URL)
+                .create(CoffeeSiteRESTInterface.class);
 
         Call<Integer> call = api.getNumberOfStars(this.coffeeSiteId, this.userID);
 
