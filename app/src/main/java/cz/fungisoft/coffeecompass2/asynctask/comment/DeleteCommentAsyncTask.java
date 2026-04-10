@@ -11,15 +11,14 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthentica
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Calls REST for deleting comment of the CommentID
@@ -44,26 +43,14 @@ public class DeleteCommentAsyncTask {
         Log.d(REQ_TAG, "DeleteCommentAsyncTask REST request initiated");
 
         // Inserts user authorization token to Authorization header
-        Interceptor headerAuthorizationInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                okhttp3.Request request = chain.request();
-                Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
-                request = request.newBuilder().headers(headers).build();
-                return chain.proceed(request);
-            }
+        Interceptor headerAuthorizationInterceptor = chain -> {
+            okhttp3.Request request = chain.request();
+            Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
+            request = request.newBuilder().headers(headers).build();
+            return chain.proceed(request);
         };
 
-        //Add the interceptor to the client builder.
-        OkHttpClient client = Utils.getOkHttpClientBuilder()
-                                              .authenticator(new TokenAuthenticator(userAccountService))
-                                              .addInterceptor(headerAuthorizationInterceptor).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(CommentsAndStarsRESTInterface.DELETE_COMMENT_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance().getRetrofitWithAuth(CommentsAndStarsRESTInterface.DELETE_COMMENT_URL, headerAuthorizationInterceptor, new TokenAuthenticator(userAccountService));
 
         CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 

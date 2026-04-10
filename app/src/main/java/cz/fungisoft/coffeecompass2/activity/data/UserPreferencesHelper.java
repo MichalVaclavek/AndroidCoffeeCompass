@@ -2,7 +2,13 @@ package cz.fungisoft.coffeecompass2.activity.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,15 +51,34 @@ public class UserPreferencesHelper {
     private final String LOGIN_TOKEN_TYPE = "loginTokenType";
     private final String LOGIN_TOKEN_EXPIRY = "loginTokenExpiry";
 
+    private static final String TAG = "UserPreferencesHelper";
+
     private final SharedPreferences app_prefs;
     private final Context context;
 
-    private final String nameOfSharedPreferences = "sharedUser2";
+    private final String nameOfSharedPreferences = "sharedUser2_encrypted";
 
     public UserPreferencesHelper(Context context) {
-        app_prefs = context.getSharedPreferences(nameOfSharedPreferences,
-                Context.MODE_PRIVATE);
         this.context = context;
+        this.app_prefs = createEncryptedPreferences(context);
+    }
+
+    private SharedPreferences createEncryptedPreferences(Context context) {
+        try {
+            MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+            return EncryptedSharedPreferences.create(
+                    context,
+                    nameOfSharedPreferences,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (GeneralSecurityException | IOException e) {
+            Log.e(TAG, "Failed to create encrypted preferences, falling back to standard", e);
+            return context.getSharedPreferences(nameOfSharedPreferences, Context.MODE_PRIVATE);
+        }
     }
 
     private void putIsLogin(boolean loginorout) {

@@ -2,9 +2,6 @@ package cz.fungisoft.coffeecompass2.asynctask.image;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
@@ -12,13 +9,11 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.ImageObject;
-import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Loads the {@link ImageObject} (with all {@link cz.fungisoft.coffeecompass2.entity.ImageFile}
@@ -43,15 +38,7 @@ public class GetImageObjectAsyncTask {
             return;
         }
 
-        Gson gson = new GsonBuilder().create();
-
-        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(ImagesApiRESTInterface.IMAGES_API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance().getRetrofit(ImagesApiRESTInterface.IMAGES_API_BASE_URL);
 
         ImagesApiTypedRESTInterface api = retrofit.create(ImagesApiTypedRESTInterface.class);
         Call<ImageObject> call = api.getImageObject(objectExtId);

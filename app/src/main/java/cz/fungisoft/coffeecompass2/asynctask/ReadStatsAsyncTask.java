@@ -2,23 +2,17 @@ package cz.fungisoft.coffeecompass2.asynctask;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import cz.fungisoft.coffeecompass2.activity.AboutActivity;
 import cz.fungisoft.coffeecompass2.activity.interfaces.stats.StatisticsRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.Statistics;
-import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * AsyncTask to read basic statistics from coffeecompass.cz about saved CoffeeSites.
@@ -38,16 +32,8 @@ public class ReadStatsAsyncTask {
     public void execute() {
         Log.d(TAG, "ReadStatsAsyncTask REST request initiated");
 
-        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
-
-        Gson gson = new GsonBuilder().create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(StatisticsRESTInterface.HOME_BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance()
+                .getRetrofit(StatisticsRESTInterface.HOME_BASE_URL);
 
         StatisticsRESTInterface api = retrofit.create(StatisticsRESTInterface.class);
 

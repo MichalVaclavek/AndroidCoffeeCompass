@@ -7,12 +7,19 @@ android {
     namespace 'cz.fungisoft.coffeecompass2'
     compileSdk 36
 
+    // Load signing credentials from local.properties (gitignored)
+    def localProps = new Properties()
+    def localPropsFile = rootProject.file('local.properties')
+    if (localPropsFile.exists()) {
+        localProps.load(new FileInputStream(localPropsFile))
+    }
+
     signingConfigs {
         release {
-            storeFile file('E:\\Programming\\CoffeeCompas_Docs\\Android\\keys\\new_android_keystore.jks')
-            storePassword 'Sicilia.2'
-            keyAlias = 'key0'
-            keyPassword 'Sicilia.2'
+            storeFile file(localProps.getProperty('RELEASE_STORE_FILE', 'keystore.jks'))
+            storePassword localProps.getProperty('RELEASE_STORE_PASSWORD', '')
+            keyAlias localProps.getProperty('RELEASE_KEY_ALIAS', 'key0')
+            keyPassword localProps.getProperty('RELEASE_KEY_PASSWORD', '')
         }
     }
     defaultConfig {
@@ -109,6 +116,10 @@ android {
         buildConfig true
     }
 
+    // Inject Google Maps API key from local.properties into manifest
+    def mapsApiKey = localProps.getProperty('MAPS_API_KEY', 'YOUR_API_KEY_HERE')
+    defaultConfig.manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -118,6 +129,7 @@ android {
 dependencies {
 
     implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'com.google.firebase:firebase-messaging:23.4.1'
     implementation 'org.jetbrains:annotations:24.1.0'
 

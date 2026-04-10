@@ -2,26 +2,19 @@ package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Async Task to run REST api request to load CoffeeSites activated within last X days.
@@ -52,25 +45,9 @@ public class GetLatestCoffeeSitesAsyncTask {
         Log.i(TAG, "start");
         operationError = "";
 
-        //Add the interceptor to the client builder.
-        OkHttpClient client = Utils.getOkHttpClientBuilder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS) // 1 minute
-                .build();
-
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("dd. MM. yyyy HH:mm")
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
+        CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofit(CoffeeSiteRESTInterface.GET_COFFEE_SITE_URL)
+                .create(CoffeeSiteRESTInterface.class);
 
         Call<List<CoffeeSite>> call = api.getLatestCoffeeSites(this.numberOfDaysBack);
 

@@ -3,9 +3,6 @@ package cz.fungisoft.coffeecompass2.activity.data.model.rest.user;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -15,16 +12,13 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountRESTInterface;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Class to create, run and process REST request for obtaining current logged-in user profile
@@ -78,34 +72,17 @@ public class CurrentUserRESTRequest {
 
         Log.i(REQ_TAG, "CurrentUserRESTRequest perform request start.");
 
-        // Gson (JSON google) serializer/deserializer
-        GsonBuilder gb = new GsonBuilder();
-        Gson gson = gb.setDateFormat("dd.MM. yyyy HH:mm").create(); // setup format of user's account creation date received by REST
-
         // Inserts user authorization token to Authorization header
-        Interceptor headerAuthorizationInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                okhttp3.Request request = chain.request();
-                Headers headers = request.headers().newBuilder().add("Authorization", userJwtToken.getTokenType() + " " + userJwtToken.getAccessToken()).build();
-                request = request.newBuilder().headers(headers).build();
-                return chain.proceed(request);
-            }
+        Interceptor headerAuthorizationInterceptor = chain -> {
+            okhttp3.Request request = chain.request();
+            Headers headers = request.headers().newBuilder().add("Authorization", userJwtToken.getTokenType() + " " + userJwtToken.getAccessToken()).build();
+            request = request.newBuilder().headers(headers).build();
+            return chain.proceed(request);
         };
 
-        //Add the interceptor to the client builder.
-        OkHttpClient.Builder clientBuilder = Utils.getOkHttpClientBuilder();
-
-        OkHttpClient client = clientBuilder.addInterceptor(headerAuthorizationInterceptor).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                                        .client(client)
-                                        .baseUrl(UserAccountRESTInterface.CURRENT_USER_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
-
-        UserAccountRESTInterface api = retrofit.create(UserAccountRESTInterface.class);
+        UserAccountRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofitWithInterceptor(UserAccountRESTInterface.CURRENT_USER_URL, headerAuthorizationInterceptor)
+                .create(UserAccountRESTInterface.class);
 
         // Call to is defined as returning String, which should contain user's data in JSON format
         // We need further parsing of the JSON upon receiving response

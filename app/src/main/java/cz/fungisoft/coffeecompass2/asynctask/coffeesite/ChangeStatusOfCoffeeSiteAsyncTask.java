@@ -3,30 +3,25 @@ package cz.fungisoft.coffeecompass2.asynctask.coffeesite;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.RestError;
-import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Class to call AsyncTasks operations to change CoffeeSite status. Statuses can be:
@@ -83,22 +78,8 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
                 }
             };
 
-            //Add the interceptor to the client builder.
-            OkHttpClient client = Utils.getOkHttpClientBuilder()
-                    .addInterceptor(headerAuthorizationInterceptor)
-                    .authenticator(new TokenAuthenticator(userAccountService))
-                    .build();
-
-            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                    .setDateFormat("dd. MM. yyyy HH:mm")
-                    .create();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build();
+            Retrofit retrofit = RetrofitClientProvider.getInstance()
+                    .getRetrofitWithAuth(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL, headerAuthorizationInterceptor, new TokenAuthenticator(userAccountService));
 
             CoffeeSiteRESTInterface api = retrofit.create(CoffeeSiteRESTInterface.class);
 

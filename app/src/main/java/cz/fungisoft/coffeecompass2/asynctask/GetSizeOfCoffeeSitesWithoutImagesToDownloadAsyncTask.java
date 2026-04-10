@@ -7,12 +7,12 @@ import java.io.IOException;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.datadownload.DataDownloadSizesRESTInterface;
 import cz.fungisoft.coffeecompass2.services.interfaces.DataDownloadSizeRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Runs Async Task to call REST API endpoint for obtaining size of data to be downloaded,
@@ -31,12 +31,8 @@ public class GetSizeOfCoffeeSitesWithoutImagesToDownloadAsyncTask {
     public void execute() {
         Log.d(REQ_TAG, "GetSizeOfCoffeeSitesWithoutImageToDownloadAsyncTask REST request initiated");
 
-        //Add the interceptor to the client builder.
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(Utils.getOkHttpClientBuilder().build())
-                .baseUrl(DataDownloadSizesRESTInterface.GET_DATA_DOWNLOAD_SIZE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance()
+                .getRetrofit(DataDownloadSizesRESTInterface.GET_DATA_DOWNLOAD_SIZE_URL);
 
         DataDownloadSizesRESTInterface api = retrofit.create(DataDownloadSizesRESTInterface.class);
 

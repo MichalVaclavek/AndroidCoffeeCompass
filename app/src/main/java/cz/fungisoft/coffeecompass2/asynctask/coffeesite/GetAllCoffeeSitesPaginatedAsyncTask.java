@@ -13,6 +13,7 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.coffeesite.CoffeeSit
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSitesRESTResultListener;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;

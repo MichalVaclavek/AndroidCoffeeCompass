@@ -12,19 +12,17 @@ import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthentica
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiSecuredRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Uploads a new image to the Images API using the new multipart upload endpoint.
@@ -84,20 +82,8 @@ public class ImageUploadNewApiAsyncTask {
             return chain.proceed(request);
         };
 
-//        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-//        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = Utils.getOkHttpClientBuilder()
-                .addInterceptor(authInterceptor)
-                .authenticator(new TokenAuthenticator(userAccountService))
-//                .addInterceptor(logging)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(ImagesApiSecuredRESTInterface.BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance()
+                .getRetrofitWithAuth(ImagesApiSecuredRESTInterface.BASE_URL, authInterceptor, new TokenAuthenticator(userAccountService));
 
         // Build multipart parts
         RequestBody objectExtIdBody = RequestBody.create(objectExtId, MediaType.parse("text/plain"));

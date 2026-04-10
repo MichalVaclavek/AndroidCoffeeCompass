@@ -16,18 +16,17 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImageRESTInterface
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ImageUploadAsyncTask {
 
@@ -75,21 +74,8 @@ public class ImageUploadAsyncTask {
                 }
             };
 
-            //HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-            //Add the interceptor to the client builder.
-            OkHttpClient client = Utils.getOkHttpClientBuilder()
-                    .addInterceptor(headerAuthorizationInterceptor)
-                    .authenticator(new TokenAuthenticator(userAccountService))
-                    //.addInterceptor(logging)
-                    .build();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(ImageRESTInterface.UPLOAD_IMAGE_URL)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .build();
+            Retrofit retrofit = RetrofitClientProvider.getInstance()
+                    .getRetrofitWithAuth(ImageRESTInterface.UPLOAD_IMAGE_URL, headerAuthorizationInterceptor, new TokenAuthenticator(userAccountService));
 
             // Create a request body with file and image media type
             RequestBody fileReqBody = RequestBody.create(imageFile, MediaType.parse("image/jpg"));

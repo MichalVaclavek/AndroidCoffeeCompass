@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Authenticator;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -89,6 +90,30 @@ public final class RetrofitClientProvider {
     public Retrofit getRetrofitWithInterceptor(String baseUrl, Interceptor interceptor) {
         OkHttpClient authenticatedClient = client.newBuilder()
                 .addInterceptor(interceptor)
+                .build();
+
+        return new Retrofit.Builder()
+                .client(authenticatedClient)
+                .baseUrl(baseUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+    }
+
+    /**
+     * Returns a Retrofit instance with both an interceptor and an authenticator
+     * (e.g. for Authorization headers with automatic token refresh).
+     * Not cached since interceptor/authenticator may vary per request.
+     *
+     * @param baseUrl       the base URL for the REST API
+     * @param interceptor   the interceptor to add (e.g. authorization header)
+     * @param authenticator the authenticator for token refresh
+     * @return a new Retrofit instance
+     */
+    public Retrofit getRetrofitWithAuth(String baseUrl, Interceptor interceptor, Authenticator authenticator) {
+        OkHttpClient authenticatedClient = client.newBuilder()
+                .addInterceptor(interceptor)
+                .authenticator(authenticator)
                 .build();
 
         return new Retrofit.Builder()

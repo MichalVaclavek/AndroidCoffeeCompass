@@ -8,12 +8,12 @@ import java.lang.ref.WeakReference;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivity;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Calls REST for obtaining number of comments already created for CoffeeSite.
@@ -36,12 +36,7 @@ public class GetNumberOfCommentsAsyncTask {
 
         Log.d(REQ_TAG, "GetNumberOfCommentsAsyncTask REST request initiated");
 
-        //Add the interceptor to the client builder.
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(Utils.getOkHttpClientBuilder().build())
-                .baseUrl(CommentsAndStarsRESTInterface.GET_COMMENT_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance().getRetrofit(CommentsAndStarsRESTInterface.GET_COMMENT_URL);
 
         CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 

@@ -2,9 +2,6 @@ package cz.fungisoft.coffeecompass2.asynctask.comment;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -14,14 +11,12 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStars
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsLoadOperationListener;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * AsyncTask to call REST methods/interface to save or modify Comment and Stars for CoffeeSite
@@ -43,17 +38,7 @@ public class GetCommentsOfCoffeeSiteAsyncTask {
     public void execute() {
         Log.d(REQ_TAG, "GetAllCommentsAsyncTask REST request initiated");
 
-        OkHttpClient client = Utils.getOkHttpClientBuilder().build();
-
-        Gson gson = new GsonBuilder().setDateFormat("dd.MM. yyyy HH:mm")
-                                     .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                                        .client(client)
-                                        .baseUrl(CommentsAndStarsRESTInterface.GET_COMMENT_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create(gson))
-                                        .build();
+        Retrofit retrofit = RetrofitClientProvider.getInstance().getRetrofit(CommentsAndStarsRESTInterface.GET_COMMENT_URL);
 
         CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
