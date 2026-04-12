@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -1899,7 +1900,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         CoffeeSite coffeeSite;
         if (coffeeSiteToUpdate == null) {
             coffeeSite = new CoffeeSite();
-            coffeeSite.setId(java.util.UUID.randomUUID().toString());
+            coffeeSite.setId(UUID.randomUUID().toString());
             coffeeSite.setCreatedOn(new Date());
         } else {
             coffeeSite = coffeeSiteToUpdate;
