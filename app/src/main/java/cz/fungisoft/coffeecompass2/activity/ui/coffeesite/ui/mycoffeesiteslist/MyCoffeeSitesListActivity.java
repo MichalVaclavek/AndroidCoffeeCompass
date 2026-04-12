@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -128,6 +129,9 @@ public class MyCoffeeSitesListActivity extends BaseActivity
     public View contextView;
 
     private ProgressBar loadMyCoffeeSitesProgressBar;
+
+    private View uploadProgressOverlay;
+    private TextView uploadProgressText;
 
     /**
      * Used to change selected CoffeeSite's status (ACTIVE, INACTIVE, CANCELED)
@@ -259,6 +263,8 @@ public class MyCoffeeSitesListActivity extends BaseActivity
 
         contextView = findViewById(R.id.my_coffeesite_frameLayout);
         loadMyCoffeeSitesProgressBar = findViewById(R.id.progress_my_coffeesites_load);
+        uploadProgressOverlay = findViewById(R.id.upload_progress_overlay);
+        uploadProgressText = findViewById(R.id.upload_progress_text);
         layoutManager = new LinearLayoutManager(this);
 
         myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
@@ -641,6 +647,7 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         if (coffeeSiteCUDOperationsService != null && !isLoadingPage()
                 && !coffeeSites.isEmpty()) {
             showProgressbar();
+            showUploadOverlay(R.string.coffeesites_upload_progress);
             setLoadingPage(true);
             coffeeSiteCUDOperationsService.uploadCoffeeSites(coffeeSites);
         }
@@ -684,6 +691,7 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         setLoadingPage(false);
         Log.i(TAG, "Processing uploaded CoffeeSites. Error? :" + error);
         if (!error.isEmpty()) {
+            hideUploadOverlay();
             showCoffeeSitesUploadFailure(error);
             Log.w(TAG, "CoffeeSites upload failure. Error: " + error);
             return;
@@ -702,12 +710,14 @@ public class MyCoffeeSitesListActivity extends BaseActivity
             if (originalCoffeeSitesWithImages.isEmpty()) {
                 // delete already uploaded coffee sites from local DB, if without images
                 // if with images, then will be deleted after images upload
+                hideUploadOverlay();
                 coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
                 return;
             }
 
             coffeeSitesWithImageUploaded = 0;
             showProgressbar();
+            showUploadOverlay(R.string.coffeesites_images_upload_progress);
             List<CoffeeSite> unmatchedOriginalCoffeeSites = new ArrayList<>(originalCoffeeSitesWithImages);
             for (CoffeeSite returnedCoffeeSite : returnedCoffeeSites) {
                 CoffeeSite originalCoffeeSite = findOriginalCoffeeSiteForReturnedSite(
@@ -721,6 +731,7 @@ public class MyCoffeeSitesListActivity extends BaseActivity
 
             if (coffeeSitesWithImageToBeUploaded <= 0) {
                 hideProgressbar();
+                hideUploadOverlay();
                 coffeeSiteCUDOperationsService.deleteAllNotSavedCoffeeSitesFromDB();
                 reloadAllUsersCoffeeSites();
                 return;
@@ -920,6 +931,7 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         } else {
             showImageUploadFailure("");
         }
+        hideUploadOverlay();
         hideProgressbar();
         reloadAllUsersCoffeeSites();
     }
@@ -1266,6 +1278,16 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         if (uploadCoffeeSitesMenuItem != null) {
             uploadCoffeeSitesMenuItem.setEnabled(true);
         }
+    }
+
+    private void showUploadOverlay(int messageResId) {
+        uploadProgressText.setText(messageResId);
+        uploadProgressOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private void hideUploadOverlay() {
+        uploadProgressOverlay.setVisibility(View.GONE);
+        uploadProgressText.setText(null);
     }
 
     private void showMyCoffeeSitesLoadSuccess()

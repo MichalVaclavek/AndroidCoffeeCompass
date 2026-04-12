@@ -274,6 +274,8 @@
     <string name="coffeesites_image_upload_failure">Chyba při nahrávání fotky na server.</string>
     <string name="toast_site_not_saved_on_server">Lokaci nejprve uložte na server.</string>
     <string name="coffeesites_images_upload_success">Obrázky k lokacím nahrány na server úspěšně.</string>
+    <string name="coffeesites_upload_progress">Ukládání lokací na server…</string>
+    <string name="coffeesites_images_upload_progress">Nahrávání fotek na server…</string>
 
     <string name="my_sites_activity_toolbar_mainlabel">Moje lokace</string>
     <string name="my_sites_activity_toolbar_tosave_label">K uložení na server</string>
