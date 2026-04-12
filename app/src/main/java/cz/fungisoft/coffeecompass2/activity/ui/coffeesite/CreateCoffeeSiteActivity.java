@@ -1899,7 +1899,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         CoffeeSite coffeeSite;
         if (coffeeSiteToUpdate == null) {
             coffeeSite = new CoffeeSite();
-            coffeeSite.setId("");
+            coffeeSite.setId(java.util.UUID.randomUUID().toString());
             coffeeSite.setCreatedOn(new Date());
         } else {
             coffeeSite = coffeeSiteToUpdate;
