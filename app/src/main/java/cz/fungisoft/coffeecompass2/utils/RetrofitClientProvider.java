@@ -45,7 +45,7 @@ public final class RetrofitClientProvider {
 
         gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("dd. MM. yyyy HH:mm")
+                .setDateFormat("dd.MM. yyyy HH:mm")
                 .create();
     }
 
