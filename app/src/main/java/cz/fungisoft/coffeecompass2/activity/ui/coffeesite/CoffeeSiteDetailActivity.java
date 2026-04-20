@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -24,17 +25,21 @@ import cz.fungisoft.coffeecompass2.activity.data.Result;
 import cz.fungisoft.coffeecompass2.activity.data.model.LoggedInUser;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteLoadServiceOperationsListener;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServiceStatusOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentSaveOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
 import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.CancelCoffeeSiteDialogFragment;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
 import cz.fungisoft.coffeecompass2.entity.Comment;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
+import cz.fungisoft.coffeecompass2.services.CoffeeSiteStatusChangeService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteServicesConnector;
 import cz.fungisoft.coffeecompass2.services.UserAccountService;
 import cz.fungisoft.coffeecompass2.services.UserAccountServiceConnector;
@@ -56,12 +61,14 @@ import java.util.List;
  * We need CoffeeSiteService to load current instance of CoffeeSite.
  */
 public class CoffeeSiteDetailActivity extends ActivityWithLocationService
-                                      implements CoffeeSiteServicesConnectionListener,
-                                                 UserAccountServiceConnectionListener,
-                                                 EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
-                                                 UsersCSRatingAndCommentSaveOperationListener,
-                                                 UsersCSRatingAndCommentUpdateOperationListener,
-                                                 CoffeeSiteLoadServiceOperationsListener {
+                                       implements CoffeeSiteServicesConnectionListener,
+                                                  UserAccountServiceConnectionListener,
+                                                  CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
+                                                  EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
+                                                  UsersCSRatingAndCommentSaveOperationListener,
+                                                  UsersCSRatingAndCommentUpdateOperationListener,
+                                                  CoffeeSiteLoadServiceOperationsListener,
+                                                  CoffeeSiteServiceStatusOperationsListener {
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
@@ -71,6 +78,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     protected CoffeeSiteLoadOperationsService coffeeSiteLoadOperationsService;
     private CoffeeSiteServicesConnector<CoffeeSiteLoadOperationsService> coffeeSiteLoadOperationsServiceConnector;
+
+    protected CoffeeSiteStatusChangeService coffeeSiteStatusChangeService;
+    private CoffeeSiteServicesConnector<CoffeeSiteStatusChangeService> coffeeSiteStatusChangeServiceConnector;
+
+    protected CoffeeSiteCUDOperationsService coffeeSiteCUDOperationsService;
+    private CoffeeSiteServicesConnector<CoffeeSiteCUDOperationsService> coffeeSiteCUDOperationsServiceConnector;
 
     private ProgressBar asyncRestCallTaskProgressBar;
     private LoggedInUser currentUser;
@@ -108,6 +121,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     private boolean showImageFirstRequest = false;
 
     private int numOfStarsSelectedByUser = 0;
+
+    private CoffeeSite coffeeSitePendingDeletion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -252,6 +267,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     protected void onStop() {
         super.onStop();
         doUnbindCoffeeSiteLoadOperationsService();
+        doUnbindCoffeeSiteStatusChangeService();
+        doUnbindCoffeeSiteCUDOperationsService();
     }
 
     @Override
@@ -266,6 +283,8 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
     protected void onStart() {
         super.onStart();
         // Always try to load actual instance of CoffeeSite and convert it to CoffeeSiteMovable in
+        doBindCoffeeSiteStatusChangeService();
+        doBindCoffeeSiteCUDOperationsService();
         doBindCoffeeSiteLoadOperationsService();
     }
 
@@ -445,24 +464,92 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         }
     }
 
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteStatusChangeService;
+
+    private void doBindCoffeeSiteStatusChangeService() {
+        coffeeSiteStatusChangeServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteStatusChangeServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteStatusChangeService.class),
+                coffeeSiteStatusChangeServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteStatusChangeService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteStatusChangeService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindCoffeeSiteStatusChangeService() {
+        if (mShouldUnbindCoffeeSiteStatusChangeService) {
+            if (coffeeSiteStatusChangeService != null) {
+                coffeeSiteStatusChangeService.removeCoffeeSiteStatusOperationsListener(this);
+            }
+            coffeeSiteStatusChangeServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteStatusChangeServiceConnector);
+            mShouldUnbindCoffeeSiteStatusChangeService = false;
+            coffeeSiteStatusChangeService = null;
+        }
+    }
+
+    // Don't attempt to unbind from the service unless the client has received some
+    // information about the service's state.
+    private boolean mShouldUnbindCoffeeSiteCUDOperationsService;
+
+    private void doBindCoffeeSiteCUDOperationsService() {
+        coffeeSiteCUDOperationsServiceConnector = new CoffeeSiteServicesConnector<>();
+        coffeeSiteCUDOperationsServiceConnector.addCoffeeSiteServiceConnectionListener(this);
+        if (bindService(new Intent(this, CoffeeSiteCUDOperationsService.class),
+                coffeeSiteCUDOperationsServiceConnector, Context.BIND_AUTO_CREATE)) {
+            mShouldUnbindCoffeeSiteCUDOperationsService = true;
+        } else {
+            Log.e(TAG, "Error: The requested 'CoffeeSiteCUDOperationsService' service doesn't " +
+                    "exist, or this client isn't allowed access to it.");
+        }
+    }
+
+    private void doUnbindCoffeeSiteCUDOperationsService() {
+        if (mShouldUnbindCoffeeSiteCUDOperationsService) {
+            coffeeSiteCUDOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
+            unbindService(coffeeSiteCUDOperationsServiceConnector);
+            mShouldUnbindCoffeeSiteCUDOperationsService = false;
+            coffeeSiteCUDOperationsService = null;
+        }
+    }
+
     /**
      * When the CoffeeSiteLoadOperationsService is connected, loads the current CoffeeSite's data
      * from server.
      */
     @Override
     public void onCoffeeSiteServiceConnected() {
-        if (coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
+        if (coffeeSiteStatusChangeService == null
+                && coffeeSiteStatusChangeServiceConnector != null
+                && coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService() != null) {
+            coffeeSiteStatusChangeService = coffeeSiteStatusChangeServiceConnector.getCoffeeSiteService();
+            coffeeSiteStatusChangeService.addCoffeeSiteStatusOperationsListener(this);
+        }
+
+        if (coffeeSiteCUDOperationsService == null
+                && coffeeSiteCUDOperationsServiceConnector != null
+                && coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService() != null) {
+            coffeeSiteCUDOperationsService = coffeeSiteCUDOperationsServiceConnector.getCoffeeSiteService();
+        }
+
+        if (coffeeSiteLoadOperationsService == null
+                && coffeeSiteLoadOperationsServiceConnector != null
+                && coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService() != null) {
             coffeeSiteLoadOperationsService = coffeeSiteLoadOperationsServiceConnector.getCoffeeSiteService();
             coffeeSiteLoadOperationsService.addLoadOperationsListener(this);
             // refresh CoffeeSite after start if possible
             if (Utils.isOnline(getApplicationContext())) {
                 if (coffeeSite != null && coffeeSite.isStatusZaznamuAvailable()) {
-                   startCoffeeSiteLoadById(coffeeSite.getId());
-                   return;
-               }
-               if (coffeeSiteURL != null && !coffeeSiteURL.isEmpty()) {
-                   startCoffeeSiteLoad(coffeeSiteURL);
-               }
+                    startCoffeeSiteLoadById(coffeeSite.getId());
+                    return;
+                }
+                if (coffeeSiteURL != null && !coffeeSiteURL.isEmpty()) {
+                    startCoffeeSiteLoad(coffeeSiteURL);
+                }
             }
         }
     }
@@ -476,8 +563,144 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
             coffeeSiteLoadOperationsServiceConnector.removeCoffeeSiteServiceConnectionListener(this);
             unbindService(coffeeSiteLoadOperationsServiceConnector);
             mShouldUnbindCoffeeSiteLoadOperationsService = false;
+            coffeeSiteLoadOperationsService = null;
         }
     }
+
+    /** **************** Cancel/Delete CoffeeSite ******************* START ****/
+
+    public void requestDeleteCoffeeSite(CoffeeSite coffeeSiteToDelete) {
+        if (coffeeSiteToDelete == null) {
+            return;
+        }
+
+        if (currentUser == null
+                || currentUser.getUserName() == null
+                || !currentUser.getUserName().equals(coffeeSiteToDelete.getCreatedByUserName())) {
+            return;
+        }
+
+        coffeeSitePendingDeletion = coffeeSiteToDelete;
+        CancelCoffeeSiteDialogFragment dialog = new CancelCoffeeSiteDialogFragment();
+        dialog.show(getSupportFragmentManager(), "CancelCoffeeSiteDialogFragment");
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        performCoffeeSiteDeleteOrCancel();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+    private void performCoffeeSiteDeleteOrCancel() {
+        CoffeeSite targetCoffeeSite = coffeeSitePendingDeletion != null ? coffeeSitePendingDeletion : coffeeSite;
+        if (targetCoffeeSite == null) {
+            return;
+        }
+
+        // Only newly created and not saved on server CoffeeSite can be deleted from DB
+        if (!targetCoffeeSite.isSavedOnServer()) {
+            if (coffeeSiteCUDOperationsService == null) {
+                Toast.makeText(getApplicationContext(),
+                        getString(R.string.coffeesiteservice_error_message_not_available),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!targetCoffeeSite.isStatusZaznamuAvailable()) { // newly created site
+                coffeeSiteCUDOperationsService.deleteFromDB(targetCoffeeSite);
+            } else { // modified site
+                // means modification was cancelled - keep previously modified site as unmodified id DB
+                coffeeSiteCUDOperationsService.cancelUpdateInDB(targetCoffeeSite);
+            }
+            showCoffeeSiteCancelSuccess();
+            finishAfterCoffeeSiteDeleted(targetCoffeeSite);
+            return;
+        }
+
+        if (Utils.isOnline(getApplicationContext())) {
+            if (coffeeSiteStatusChangeService != null) {
+                showProgressbar();
+                coffeeSiteStatusChangeService.cancel(targetCoffeeSite);
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        getString(R.string.coffeesiteservice_error_message_not_available),
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Utils.showNoInternetToast(getApplicationContext());
+        }
+    }
+
+    @Override
+    public void onCoffeeSiteCanceled(CoffeeSite canceledCoffeeSite, String error) {
+        hideProgressbar();
+
+        if (error != null && !error.isEmpty()) {
+            if (deleteCoffeeSiteLocallyIfMissingOnServer(error)) {
+                showCoffeeSiteCancelSuccess();
+                finishAfterCoffeeSiteDeleted(coffeeSitePendingDeletion);
+            } else {
+                showCoffeeSiteCancelFailure(error);
+            }
+            return;
+        }
+
+        showCoffeeSiteCancelSuccess();
+        finishAfterCoffeeSiteDeleted(canceledCoffeeSite);
+    }
+
+    private void showCoffeeSiteCancelSuccess() {
+        Toast toast = Toast.makeText(getApplicationContext(),
+                R.string.coffeesite_canceled_successfuly,
+                Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void showCoffeeSiteCancelFailure(String error) {
+        error = (error != null && !error.isEmpty()) ? error : getString(R.string.coffee_site_cancel_failure);
+        Snackbar mySnackbar = Snackbar.make(contextView, error, Snackbar.LENGTH_LONG);
+        mySnackbar.show();
+    }
+
+    private boolean deleteCoffeeSiteLocallyIfMissingOnServer(String error) {
+        CoffeeSite targetCoffeeSite = coffeeSitePendingDeletion != null ? coffeeSitePendingDeletion : coffeeSite;
+        if (!isCoffeeSiteMissingOnServer(error) || targetCoffeeSite == null) {
+            return false;
+        }
+
+        if (coffeeSiteCUDOperationsService != null) {
+            coffeeSiteCUDOperationsService.deleteFromDB(targetCoffeeSite);
+        }
+        Log.i(TAG, "CoffeeSite missing on server, deleting local DB record too. ID=" + targetCoffeeSite.getId());
+        return true;
+    }
+
+    private boolean isCoffeeSiteMissingOnServer(String error) {
+        if (error == null || error.isEmpty()) {
+            return false;
+        }
+
+        String normalizedError = error.toLowerCase(java.util.Locale.ROOT);
+        return normalizedError.contains("no value present")
+                || normalizedError.contains("not found")
+                || normalizedError.contains("does not exist")
+                || normalizedError.contains("neexist");
+    }
+
+    private void finishAfterCoffeeSiteDeleted(CoffeeSite deletedCoffeeSite) {
+        Intent resultIntent = new Intent();
+        if (deletedCoffeeSite != null) {
+            resultIntent.putExtra("coffeeSiteId", deletedCoffeeSite.getId());
+        }
+        resultIntent.putExtra("coffeeSiteDeleted", true);
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    /** **************** Cancel/Delete CoffeeSite ******************* END ****/
 
     /**
      * CoffeeSites's data reloaded from server, show the data.

@@ -52,6 +52,8 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
 
     private ImageView editCoffeeSiteIcon;
 
+    private ImageView deleteCoffeeSiteIcon;
+
     /**
      * We need to know current to determine if the edit CoffeeSite image can be shown
      */
@@ -98,17 +100,13 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
         if (rootView != null && coffeeSite != null) {
             showAllCoffeeSiteInfo(rootView, coffeeSite);
         }
+
+        updateEditAndDeleteIconsVisibility();
     }
 
     public void setCurrentUser(LoggedInUser mCurrentUser) {
        currentUser = mCurrentUser;
-       if (editCoffeeSiteIcon != null && coffeeSite != null) {
-           if (currentUser != null && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
-               editCoffeeSiteIcon.setVisibility(View.VISIBLE);
-           } else {
-               editCoffeeSiteIcon.setVisibility(View.GONE);
-           }
-       }
+       updateEditAndDeleteIconsVisibility();
     }
 
     @Override
@@ -134,6 +132,10 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
         rootView = inflater.inflate(R.layout.coffeesite_detail_fragment, container, false);
         editCoffeeSiteIcon = rootView.findViewById(R.id.edit_coffeesite_detail_imageView);
         editCoffeeSiteIcon.setOnClickListener(createOnClickListenerForEditCoffeeSiteImageView());
+
+        deleteCoffeeSiteIcon = rootView.findViewById(R.id.delete_coffeesite_detail_imageView);
+        deleteCoffeeSiteIcon.setOnClickListener(createOnClickListenerForDeleteCoffeeSiteImageView());
+
         asyncRestCallTaskProgressBar = getActivity().findViewById(R.id.load_coffeeSite_progressBar);
 
         averageStartRatingLayout = rootView.findViewById(R.id.rating_icons_detail_layout);
@@ -151,7 +153,29 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
                 coffeeSite = new CoffeeSiteMovable(coffeeSite);
             }
         }
+
+        updateEditAndDeleteIconsVisibility();
         return rootView;
+    }
+
+    private void updateEditAndDeleteIconsVisibility() {
+        if (editCoffeeSiteIcon == null && deleteCoffeeSiteIcon == null) {
+            return;
+        }
+
+        boolean showIcons = false;
+        if (currentUser != null && coffeeSite != null
+                && currentUser.getUserName() != null
+                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+            showIcons = true;
+        }
+
+        if (editCoffeeSiteIcon != null) {
+            editCoffeeSiteIcon.setVisibility(showIcons ? View.VISIBLE : View.GONE);
+        }
+        if (deleteCoffeeSiteIcon != null) {
+            deleteCoffeeSiteIcon.setVisibility(showIcons ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void showAllCoffeeSiteInfo(View rootView, CoffeeSite coffeeSite) {
@@ -291,6 +315,26 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
             }
         };
         return retVal;
+    }
+
+    private View.OnClickListener createOnClickListenerForDeleteCoffeeSiteImageView() {
+        return view -> {
+            if (!(view instanceof ImageView)) {
+                return;
+            }
+
+            if (currentUser == null || coffeeSite == null) {
+                return;
+            }
+
+            if (!currentUser.getUserName().equals(coffeeSite.getCreatedByUserName())) {
+                return;
+            }
+
+            if (getActivity() instanceof CoffeeSiteDetailActivity) {
+                ((CoffeeSiteDetailActivity) getActivity()).requestDeleteCoffeeSite(coffeeSite);
+            }
+        };
     }
 
     private void goToEditCoffeeSiteActivity() {

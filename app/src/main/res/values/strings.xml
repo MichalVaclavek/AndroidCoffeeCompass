@@ -144,6 +144,8 @@
     <string name="coffeesite_activated_successfuly">Lokace úspěšně aktivována.</string>
     <string name="coffeesite_deactivated_successfuly">Lokace úspěšně deaktivována.</string>
     <string name="coffeesite_created_and_activated_successfuly">Lokace vytvořena a aktivována.</string>
+    <string name="coffeesite_edit_content_description">Upravit lokaci</string>
+    <string name="coffeesite_delete_content_description">Smazat lokaci</string>
     <string name="cancel_coffeesite_dialog_question">Smazat tuto lokaci?</string>
     <string name="cancel_coffeesite_confirm">SMAZAT</string>
     <string name="cancel_coffeesite_cancelation">Ponechat</string>

@@ -161,6 +161,12 @@ public class MyCoffeeSitesListActivity extends BaseActivity
     public static final int CREATE_COFFEESITE_REQUEST = 2;
 
     /**
+     * Request type to open CoffeeSiteDetailActivity from this Activity.
+     * Used to refresh the list after CoffeeSite delete/cancel from detail.
+     */
+    public static final int COFFEESITE_DETAIL_REQUEST = 3;
+
+    /**
      * Flag to indicate if the list of user's CoffeeSites is being loading
      * to check if the MenuItems should be enabled or disabled
      */
@@ -199,6 +205,16 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         removeCoffeeSiteById(content, coffeeSite.getId());
         removeCoffeeSiteById(notUploadedCoffeeSites, coffeeSite.getId());
         removeCoffeeSiteById(coffeeSitesInDBDownloaded, coffeeSite.getId());
+    }
+
+    public synchronized void removeCoffeeSiteFromCachedListsById(String coffeeSiteId) {
+        if (coffeeSiteId == null || coffeeSiteId.isEmpty()) {
+            return;
+        }
+
+        removeCoffeeSiteById(content, coffeeSiteId);
+        removeCoffeeSiteById(notUploadedCoffeeSites, coffeeSiteId);
+        removeCoffeeSiteById(coffeeSitesInDBDownloaded, coffeeSiteId);
     }
 
     private void removeCoffeeSiteById(List<CoffeeSite> coffeeSites, String coffeeSiteId) {
@@ -1336,6 +1352,18 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.i(TAG, "onActivityResult() from CreateCoffeeSiteActivity. Request code: " + requestCode + ". Result code: " + resultCode);
+
+        if (requestCode == COFFEESITE_DETAIL_REQUEST && resultCode == RESULT_OK && data != null) {
+            boolean coffeeSiteDeleted = data.getBooleanExtra("coffeeSiteDeleted", false);
+            String deletedCoffeeSiteId = data.getStringExtra("coffeeSiteId");
+            if (coffeeSiteDeleted && deletedCoffeeSiteId != null && !deletedCoffeeSiteId.isEmpty()) {
+                removeCoffeeSiteFromCachedListsById(deletedCoffeeSiteId);
+                if (recyclerViewAdapter != null && content != null) {
+                    recyclerViewAdapter.setCoffeeSites(content);
+                }
+            }
+            return;
+        }
 
         // Check which request we're responding to
         // Modified CoffeeSite - update this CoffeeSite in the current recyclerViewAdapter list

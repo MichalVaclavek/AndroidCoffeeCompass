@@ -16,13 +16,37 @@
         app:cardCornerRadius="6dp"
         app:contentPadding="10dp">
 
-        <ImageView
-            android:id="@+id/edit_coffeesite_detail_imageView"
+        <LinearLayout
+            android:id="@+id/coffeesite_detail_action_icons_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:src="@drawable/ic_baseline_edit_32"
-            tools:visibility="gone" />
+            android:layout_gravity="end"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/edit_coffeesite_detail_imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="@string/coffeesite_edit_content_description"
+                android:focusable="true"
+                android:src="@drawable/ic_baseline_edit_32"
+                android:visibility="gone"
+                tools:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/delete_coffeesite_detail_imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:clickable="true"
+                android:contentDescription="@string/coffeesite_delete_content_description"
+                android:focusable="true"
+                android:src="@drawable/ic_baseline_delete_outline_36"
+                android:visibility="gone"
+                tools:visibility="gone" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

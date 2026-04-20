@@ -1,6 +1,5 @@
 package cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -153,10 +152,9 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         retVal = view -> {
             CoffeeSite item = (CoffeeSite) view.getTag();
             if (item != null) {
-                Context context = view.getContext();
-                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                Intent intent = new Intent(mParentActivity, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSite", (Parcelable) item);
-                context.startActivity(intent);
+                mParentActivity.startActivityForResult(intent, MyCoffeeSitesListActivity.COFFEESITE_DETAIL_REQUEST);
             }
         };
         return retVal;
@@ -175,11 +173,10 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         retVal = view -> {
             CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
             if (coffeeSite != null && !getDisplayMainImageUrl(coffeeSite).isEmpty()) {
-                Context context = view.getContext();
-                Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
+                Intent intent = new Intent(mParentActivity, CoffeeSiteDetailActivity.class);
                 intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
                 intent.putExtra("showImageFirst", true);
-                context.startActivity(intent);
+                mParentActivity.startActivityForResult(intent, MyCoffeeSitesListActivity.COFFEESITE_DETAIL_REQUEST);
             }
         };
         return retVal;
