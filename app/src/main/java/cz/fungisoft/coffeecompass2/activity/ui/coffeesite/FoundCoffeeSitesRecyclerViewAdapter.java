@@ -26,6 +26,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
@@ -202,7 +203,7 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
             csmToRemove.removePropertyChangeListener(this);
 
             for (int i = mValues.size() - 1; i >= 0  ; i--) {
-                if (mValues.get(i).getId() == csmToRemove.getId()) {
+                if (Objects.equals(mValues.get(i).getId(), csmToRemove.getId())) {
                     mValues.remove(i);
                     this.notifyItemRemoved(i);
                     break;

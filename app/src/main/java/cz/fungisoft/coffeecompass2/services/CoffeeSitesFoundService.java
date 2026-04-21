@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -42,7 +43,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * detection.<br>
  */
 public class CoffeeSitesFoundService extends Service implements PropertyChangeListener,
-                                                                CoffeeSitesFoundFromServerResultListener {
+                                                                 CoffeeSitesFoundFromServerResultListener {
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -84,6 +85,13 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * To detect, that search request for number of sites in range to server is running
      */
     private boolean isSearchingNumOfSites = false;
+
+    /**
+     * If location changes while a REST request is running (for the CoffeeSites in range),
+     * we remember the latest location and trigger a follow-up refresh right after the current request finishes.
+     */
+    @Nullable
+    private LatLng pendingSearchLocation;
 
 
     /**
@@ -285,25 +293,80 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
                 if (movedDistance >= DISTANCE_TO_RANGE_NEW_SEARCH_RATIO * currentSearchRange
                         || firstLocationDetection) {
+
+                    LatLng currentLocation = locationService.getCurrentLatLng();
+                    if (currentLocation == null || this.coffeeSort == null) {
+                        return;
+                    }
+
+                    // If a request is running, don't move the "baseline" location.
+                    // Store a pending update instead and run it right after the request finishes.
+                    if (isSearching || isSearchingNumOfSites) {
+                        pendingSearchLocation = currentLocation;
+                        Log.d(TAG, "Location changed while searching. Pending refresh stored.");
+                        return;
+                    }
+
                     firstLocationDetection = false;
+
                     // get current location for searching
-                    this.searchLocationOfCurrentSites = locationService.getCurrentLatLng();
-                    if (this.searchLocationOfCurrentSites != null
-                            && this.coffeeSort != null) {
-                        Log.d(TAG, "Location property changed. Start searching ...");
-                        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
-                            startSearchingSitesInRange(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
-                        }
-                        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
-                            startSearchingNumbersOfSitesInRanges(this.coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
-                        }
-                        updateDBLiveDataInput( this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.allSearchRanges);
-                        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                            listener.onStartSearchingSites();
-                        }
+                    this.searchLocationOfCurrentSites = currentLocation;
+
+                    Log.d(TAG, "Location property changed. Start searching ...");
+                    if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
+                        startSearchingSitesInRange(this.coffeeSort,
+                                this.searchLocationOfCurrentSites.latitude,
+                                this.searchLocationOfCurrentSites.longitude,
+                                this.currentSearchRange);
+                    }
+                    if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
+                        startSearchingNumbersOfSitesInRanges(this.coffeeSort,
+                                this.searchLocationOfCurrentSites.latitude,
+                                this.searchLocationOfCurrentSites.longitude,
+                                this.allSearchRanges);
+                    }
+                    updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude,
+                            this.searchLocationOfCurrentSites.longitude,
+                            this.allSearchRanges);
+                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+                        listener.onStartSearchingSites();
                     }
                 }
             }
+        }
+    }
+
+    private void triggerPendingRefreshIfAny() {
+        if (isSearching || isSearchingNumOfSites) {
+            return;
+        }
+        if (pendingSearchLocation == null || coffeeSort == null) {
+            pendingSearchLocation = null;
+            return;
+        }
+
+        LatLng locationToSearchFrom = pendingSearchLocation;
+        pendingSearchLocation = null;
+        this.searchLocationOfCurrentSites = locationToSearchFrom;
+
+        Log.d(TAG, "Triggering pending refresh after search finished.");
+        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
+            startSearchingSitesInRange(coffeeSort,
+                    this.searchLocationOfCurrentSites.latitude,
+                    this.searchLocationOfCurrentSites.longitude,
+                    this.currentSearchRange);
+        }
+        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
+            startSearchingNumbersOfSitesInRanges(coffeeSort,
+                    this.searchLocationOfCurrentSites.latitude,
+                    this.searchLocationOfCurrentSites.longitude,
+                    this.allSearchRanges);
+        }
+        updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude,
+                this.searchLocationOfCurrentSites.longitude,
+                this.allSearchRanges);
+        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+            listener.onStartSearchingSites();
         }
     }
 
@@ -434,6 +497,8 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
             listener.onSitesInRangeFound(coffeeSites);
         }
+
+        triggerPendingRefreshIfAny();
     }
 
     @Override
@@ -444,6 +509,8 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
             listener.onSearchingSitesError(error);
             listener.onSearchingSitesFinished(0);
         }
+
+        triggerPendingRefreshIfAny();
     }
 
     /**
@@ -459,6 +526,8 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesFinished(0);
         }
+
+        triggerPendingRefreshIfAny();
     }
 
 
