@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.BaseActivity;
@@ -371,7 +372,7 @@ public class CommentsListActivity extends BaseActivity
     public void  processUpdatedComment(Comment updatedComment) {
         if (this.siteComments != null) {
             for (Comment comment : this.siteComments) {
-                if (comment != null && comment.getId() == updatedComment.getId()) {
+                if (comment != null && Objects.equals(comment.getId(), updatedComment.getId())) {
                     this.siteComments.set(this.siteComments.indexOf(comment), updatedComment);
                     break;
                 }
