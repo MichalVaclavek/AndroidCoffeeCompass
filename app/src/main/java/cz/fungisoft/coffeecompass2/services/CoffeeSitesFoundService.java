@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -309,30 +311,36 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
                     firstLocationDetection = false;
 
-                    // get current location for searching
-                    this.searchLocationOfCurrentSites = currentLocation;
-
                     Log.d(TAG, "Location property changed. Start searching ...");
-                    if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
-                        startSearchingSitesInRange(this.coffeeSort,
-                                this.searchLocationOfCurrentSites.latitude,
-                                this.searchLocationOfCurrentSites.longitude,
-                                this.currentSearchRange);
-                    }
-                    if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
-                        startSearchingNumbersOfSitesInRanges(this.coffeeSort,
-                                this.searchLocationOfCurrentSites.latitude,
-                                this.searchLocationOfCurrentSites.longitude,
-                                this.allSearchRanges);
-                    }
-                    updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude,
-                            this.searchLocationOfCurrentSites.longitude,
-                            this.allSearchRanges);
-                    for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-                        listener.onStartSearchingSites();
-                    }
+                    startSearchingFromLocation(currentLocation);
                 }
             }
+        }
+    }
+
+    private void startSearchingFromLocation(@NonNull LatLng searchLocation) {
+        this.searchLocationOfCurrentSites = searchLocation;
+        if (this.coffeeSort == null) {
+            return;
+        }
+
+        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
+            startSearchingSitesInRange(this.coffeeSort,
+                    this.searchLocationOfCurrentSites.latitude,
+                    this.searchLocationOfCurrentSites.longitude,
+                    this.currentSearchRange);
+        }
+        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
+            startSearchingNumbersOfSitesInRanges(this.coffeeSort,
+                    this.searchLocationOfCurrentSites.latitude,
+                    this.searchLocationOfCurrentSites.longitude,
+                    this.allSearchRanges);
+        }
+        updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude,
+                this.searchLocationOfCurrentSites.longitude,
+                this.allSearchRanges);
+        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
+            listener.onStartSearchingSites();
         }
     }
 
@@ -347,27 +355,9 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
         LatLng locationToSearchFrom = pendingSearchLocation;
         pendingSearchLocation = null;
-        this.searchLocationOfCurrentSites = locationToSearchFrom;
 
         Log.d(TAG, "Triggering pending refresh after search finished.");
-        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
-            startSearchingSitesInRange(coffeeSort,
-                    this.searchLocationOfCurrentSites.latitude,
-                    this.searchLocationOfCurrentSites.longitude,
-                    this.currentSearchRange);
-        }
-        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
-            startSearchingNumbersOfSitesInRanges(coffeeSort,
-                    this.searchLocationOfCurrentSites.latitude,
-                    this.searchLocationOfCurrentSites.longitude,
-                    this.allSearchRanges);
-        }
-        updateDBLiveDataInput(this.searchLocationOfCurrentSites.latitude,
-                this.searchLocationOfCurrentSites.longitude,
-                this.allSearchRanges);
-        for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
-            listener.onStartSearchingSites();
-        }
+        startSearchingFromLocation(locationToSearchFrom);
     }
 
     /**
@@ -508,6 +498,12 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         for (CoffeeSitesInRangeSearchOperationListener listener : sitesInRangeSearchOperationListeners) {
             listener.onSearchingSitesError(error);
             listener.onSearchingSitesFinished(0);
+        }
+
+        // Even on backend errors, update listeners with an empty list so that UI can remove
+        // stale items that are now out of the current range.
+        for (CoffeeSitesFoundListener listener : sitesFoundListeners) {
+            listener.onSitesInRangeFound(Collections.emptyList());
         }
 
         triggerPendingRefreshIfAny();

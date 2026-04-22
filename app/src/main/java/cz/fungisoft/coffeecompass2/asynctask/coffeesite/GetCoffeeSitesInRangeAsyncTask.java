@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
@@ -112,7 +113,17 @@ public class GetCoffeeSitesInRangeAsyncTask {
                     }
                 } else {
                     try {
-                        Log.i(TAG, "No CoffeeSite found.");
+                        // Some backends return 404/204 for "no items". Treat that as an empty result,
+                        // not as an error, so that UI can clear the list.
+                        if (response.code() == 404 || response.code() == 204) {
+                            Log.i(TAG, "No CoffeeSite found (code=" + response.code() + ").");
+                            if (callingService != null) {
+                                callingService.onSitesInRangeReturnedFromServer(Collections.emptyList());
+                            }
+                            return;
+                        }
+
+                        Log.i(TAG, "REST error when loading CoffeeSites in range. code=" + response.code());
                         if (callingService != null) {
                             String error = response.errorBody() != null
                                     ? response.errorBody().string()
@@ -122,9 +133,7 @@ public class GetCoffeeSitesInRangeAsyncTask {
                     } catch (IOException e) {
                         String error = e.getMessage();
                         Log.e(TAG, error);
-                        if (callingService != null) {
-                            callingService.onSitesInRangeReturnedFromServerError(error);
-                        }
+                        callingService.onSitesInRangeReturnedFromServerError(error);
                     }
                 }
             }

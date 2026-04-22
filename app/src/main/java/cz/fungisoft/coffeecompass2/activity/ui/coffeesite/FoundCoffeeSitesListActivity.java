@@ -421,7 +421,11 @@ public class FoundCoffeeSitesListActivity extends ActivityWithLocationService
     @Override
     public void onSearchingSitesError(String error) {
         recyclerViewAdapter.newSitesSearchingFinished();
-        Toast toast = Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT);
+        String message = error;
+        if (message == null || message.trim().isEmpty()) {
+            message = getString(R.string.coffeesiteservice_error_message_not_available);
+        }
+        Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
         toast.show();
     }
 }
