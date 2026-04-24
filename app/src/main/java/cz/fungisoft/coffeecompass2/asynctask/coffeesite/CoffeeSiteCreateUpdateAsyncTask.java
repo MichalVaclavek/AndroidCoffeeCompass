@@ -62,14 +62,11 @@ public class CoffeeSiteCreateUpdateAsyncTask {
         Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
         if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
-            Interceptor headerAuthorizationInterceptor = new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    okhttp3.Request request = chain.request();
-                    Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
-                    request = request.newBuilder().headers(headers).build();
-                    return chain.proceed(request);
-                }
+            Interceptor headerAuthorizationInterceptor = chain -> {
+                okhttp3.Request request = chain.request();
+                Headers headers = request.headers().newBuilder().add("Authorization", userAccountService.getAccessTokenType() + " " + userAccountService.getAccessToken()).build();
+                request = request.newBuilder().headers(headers).build();
+                return chain.proceed(request);
             };
 
             CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()

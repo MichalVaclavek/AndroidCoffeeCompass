@@ -1125,7 +1125,10 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private void saveCoffeeSiteAndActivate(CoffeeSite coffeeSite) {
         showProgressbarAndDisableMenuItems();
         saveAndActivateRequested = true;
-        if (coffeeSiteCUDOperationsService != null) {
+        if (coffeeSiteCUDOperationsService != null && coffeeSite != null) {
+            // New CoffeeSite must be saved on server with empty ID so backend can generate numeric ID.
+            // createOrUpdateCoffeeSiteFromViewModel() uses UUID for offline/local DB drafts.
+            coffeeSite.setId("");
             coffeeSiteCUDOperationsService.save(coffeeSite);
         }
     }
