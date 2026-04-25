@@ -1,5 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.notification;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.List;
 
 /**
@@ -14,16 +16,19 @@ public class NotificationSubscription {
     /**
      * Token string assigned by Firebase to the device
      */
+    @Expose
     private String token;
     /**
-     * Token string assigned by Firebase to the device
+     * Main topic of subscription (for example: 'new_coffeeSite')
      */
+    @Expose
     private String topic;
 
 
     /**
      * List of towns for new CoffeeSites notification subscription as selected by user in respetive Activity
      */
+    @Expose
     private List<String> subTopics;
 
     public NotificationSubscription() {

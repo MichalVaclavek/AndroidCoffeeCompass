@@ -13,8 +13,10 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.graphics.Rect;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -282,6 +284,24 @@ public class NewsSubscriptionActivity extends BaseActivity
         });
 
         doBindUserAccountService();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            // When the AutoComplete drop-down is open, a tap outside may only dismiss the popup
+            // and not reach the underlying view (e.g. the subscribe button). Dismiss it here so
+            // the tap can be processed normally.
+            if (townNameEditTextDropDown != null && townNameEditTextDropDown.isPopupShowing()) {
+                Rect inputRect = new Rect();
+                townNameEditTextDropDown.getGlobalVisibleRect(inputRect);
+                if (!inputRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    townNameEditTextDropDown.dismissDropDown();
+                    hideKeyboardForTownNameInput();
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
