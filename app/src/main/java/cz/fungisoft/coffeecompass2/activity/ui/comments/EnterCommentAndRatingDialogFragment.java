@@ -128,7 +128,7 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
         }
 
         // Inflate and set the layout for the dialog
-        // Pass null as the parent view because its going in the dialog layout
+        // Pass null as the parent view because it's going in the dialog layout
         builder.setView(dialogView)
                 .setTitle(R.string.comment_dialog_title)
                 .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {

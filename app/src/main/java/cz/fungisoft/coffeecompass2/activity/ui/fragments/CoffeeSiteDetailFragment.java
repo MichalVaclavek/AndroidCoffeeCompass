@@ -351,7 +351,21 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
      * Starts Async task to obtain number of stars assigned by current user to this coffee site
      */
     private void startNumberOfStarsAsyncTask() {
-        if (Utils.isOnline(rootView.getContext())) {
+        if (getContext() == null) {
+            return;
+        }
+
+        if (currentUser == null) {
+            Toast.makeText(getContext(), R.string.comments_only_for_registered_user,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (coffeeSite == null) {
+            return;
+        }
+
+        if (Utils.isOnline(getContext())) {
             asyncRestCallTaskProgressBar.setVisibility(View.VISIBLE);
             // Async task for loading current user's rating for this CoffeeSite
             // The EnterCommentAndRatingDialog dialog is opened after the Async task finishes

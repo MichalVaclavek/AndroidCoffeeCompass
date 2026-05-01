@@ -3,4 +3,5 @@
     <root-path name="root" path="." />
     <external-files-path name="coffeesite_images" path="Pictures/" />
     <files-path name="coffeesite_photos" path="photos/" />
+    <cache-path name="cache" path="." />
 </paths>

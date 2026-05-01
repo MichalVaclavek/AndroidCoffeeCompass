@@ -22,8 +22,8 @@
     <string name="currentPosition">Vaše poloha</string>
 
     <string name="about_author">Vytvořil: Michal Václavek</string>
-    <string name="about_version">v. 2.3.2</string>
-    <string name="about_datum">25. 04. 2026</string>
+    <string name="about_version">v. 2.4.0</string>
+    <string name="about_datum">02.05. 2026</string>
 
     <string name="about_sentence1">Tato aplikace umožňuje vyhledat <b>"kávové lokace"</b>, které zadali zaregistrovaní uživatelé a to podle aktuální polohy zařízení.</string>
     <string name="about_sentence2">Kávové lokace jsou místa, která jsou veřejně přístupná a kde lze zakoupit kávu s sebou. Jde tedy např. o standardní <b>automaty na kávu, pekárny, bistra, občerstvení, trafiky, benzinky</b>, atp.</string>
@@ -45,6 +45,16 @@
     <string name="no_site_in_town">Káva ve městě %1$s neevidována.</string>
     <string name="current_range_label">"Aktuální okruh vyhledávání: "</string>
     <string name="still_searching">vyhledávám ... </string>
+
+    <!-- Android Auto (projected) -->
+    <string name="car_found_sites_title">Káva poblíž</string>
+    <string name="car_loading">Načítám…</string>
+    <string name="car_no_sites">Žádná káva v okruhu 10 km</string>
+    <string name="car_action_navigate">Navigovat</string>
+    <string name="car_action_comments">Komentáře</string>
+    <string name="car_error_generic">Chyba načítání</string>
+    <string name="car_label_rating">Hodnocení</string>
+    <string name="car_label_opening_hours">Otevírací doba</string>
 
     <string name="title_activity_user_login">Káva s sebou</string>
     <string name="title_activity_login">Přihlášení</string>

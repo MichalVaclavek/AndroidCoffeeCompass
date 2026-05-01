@@ -43,6 +43,15 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
 
+        <!-- Android Auto (projected) - Car App Library templates -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="1" />
+
         <activity
             android:name=".widgets.WidgetConfigurationActivity"
             android:screenOrientation="portrait"
@@ -155,6 +164,16 @@
             android:name=".services.CoffeeSiteStatusChangeService"
             android:enabled="true"
             android:exported="false">
+        </service>
+
+        <!-- Android Auto (projected) entry point using Car App Library templates -->
+        <service
+            android:name=".auto.CoffeeCompassCarAppService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+            </intent-filter>
         </service>
 
         <activity

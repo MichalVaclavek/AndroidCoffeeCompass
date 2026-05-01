@@ -26,8 +26,8 @@ android {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 66
-        versionName "5.6"
+        versionCode 70
+        versionName "6.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -187,4 +187,9 @@ dependencies {
 
     // Google PLACES SDK to get names of towns
     implementation 'com.google.android.libraries.places:places:3.3.0'
+
+    // Android Auto (projected) - Car App Library (templates)
+    def car_app_version = '1.4.0'
+    implementation "androidx.car.app:app:$car_app_version"
+    implementation "androidx.car.app:app-projected:$car_app_version"
 }

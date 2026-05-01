@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundCoffeeSitesViewModel;
-import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.FoundNumberOfCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.coffeesite.GetNumberOfCoffeeSitesInRangeAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
@@ -45,7 +43,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * detection.<br>
  */
 public class CoffeeSitesFoundService extends Service implements PropertyChangeListener,
-                                                                 CoffeeSitesFoundFromServerResultListener {
+                                                                  CoffeeSitesFoundFromServerResultListener {
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
@@ -66,6 +64,18 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
 
     private List<Integer> allSearchRanges;
     private String coffeeSort;
+
+    /**
+     * Enables searching of CoffeeSites in range on location changes.
+     * Set to true via {@link #requestUpdatesOfCurrentSitesInRange(LatLng, int, List, String)}.
+     */
+    private boolean searchSitesInRangeEnabled = false;
+
+    /**
+     * Enables searching of numbers of CoffeeSites in ranges on location changes.
+     * Set to true via {@link #requestUpdateOfCoffeeSitesNumberInRanges(LatLng, int, List, String)}.
+     */
+    private boolean searchNumbersInRangesEnabled = false;
 
     /**
      * To detect a first successful detection of the location
@@ -122,7 +132,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
      * IPC.
      */
     public class LocalBinder extends Binder {
-        CoffeeSitesFoundService getService() {
+        public CoffeeSitesFoundService getService() {
             return CoffeeSitesFoundService.this;
         }
     }
@@ -318,19 +328,24 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         }
     }
 
+    @Nullable
+    public LocationService getLocationService() {
+        return locationService;
+    }
+
     private void startSearchingFromLocation(@NonNull LatLng searchLocation) {
         this.searchLocationOfCurrentSites = searchLocation;
         if (this.coffeeSort == null) {
             return;
         }
 
-        if (sitesFoundListenersContainsListenerClass(FoundCoffeeSitesViewModel.class)) {
+        if (searchSitesInRangeEnabled) {
             startSearchingSitesInRange(this.coffeeSort,
                     this.searchLocationOfCurrentSites.latitude,
                     this.searchLocationOfCurrentSites.longitude,
                     this.currentSearchRange);
         }
-        if (sitesFoundListenersContainsListenerClass(FoundNumberOfCoffeeSitesViewModel.class)) {
+        if (searchNumbersInRangesEnabled) {
             startSearchingNumbersOfSitesInRanges(this.coffeeSort,
                     this.searchLocationOfCurrentSites.latitude,
                     this.searchLocationOfCurrentSites.longitude,
@@ -370,6 +385,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
         this.allSearchRanges = allRanges;
+        this.searchSitesInRangeEnabled = true;
 
         if (this.searchLocationOfCurrentSites != null) {
             startSearchingSitesInRange(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, this.currentSearchRange);
@@ -389,6 +405,7 @@ public class CoffeeSitesFoundService extends Service implements PropertyChangeLi
         this.currentSearchRange = range;
         this.coffeeSort = coffeeSort;
         this.allSearchRanges = allRanges;
+        this.searchNumbersInRangesEnabled = true;
 
         if (this.searchLocationOfCurrentSites != null) {
             startSearchingNumbersOfSitesInRanges(coffeeSort, this.searchLocationOfCurrentSites.latitude, this.searchLocationOfCurrentSites.longitude, allRanges);
