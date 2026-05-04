@@ -26,8 +26,8 @@ android {
         applicationId "cz.fungisoft.coffeecompass2"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 70
-        versionName "6.0"
+        versionCode 71
+        versionName "6.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -123,6 +123,63 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+/**
+ * Android Studio Image Asset wizard sometimes writes resource XML with the XML declaration
+ * (<?xml ...?>) *after* a leading comment block. AAPT2 rejects this.
+ *
+ * Keep builds resilient by sanitizing the generated launcher icon resource XML on every build.
+ */
+def sanitizeXmlDeclarationAfterComment = { File xmlFile ->
+    if (xmlFile == null || !xmlFile.exists() || !xmlFile.isFile()) {
+        return
+    }
+
+    String original = xmlFile.getText('UTF-8')
+    // Strip UTF-8 BOM if present.
+    if (original != null && !original.isEmpty() && original.charAt(0) == '\uFEFF') {
+        original = original.substring(1)
+    }
+
+    // If the file already starts with XML declaration (or no declaration at all), keep it.
+    String trimmedStart = original.replaceFirst(/^\s+/, '')
+    if (trimmedStart.startsWith('<?xml')) {
+        return
+    }
+
+    // Remove any XML declaration that appears later in the document.
+    // (Common case: it's placed after a leading comment header.)
+    String sanitized = original.replaceAll(/(?m)^\s*<\?xml\s+version="1\.0"\s+encoding="utf-8"\s*\?>\s*\r?\n?/, '')
+    if (sanitized != original) {
+        xmlFile.write(sanitized, 'UTF-8')
+    }
+}
+
+def launcherIconXmlFilesToSanitize = [
+        layout.projectDirectory.file('src/main/res/mipmap-anydpi-v26/ic_launcher.xml').asFile,
+        layout.projectDirectory.file('src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml').asFile,
+        layout.projectDirectory.file('src/main/res/drawable/ic_launcher_background.xml').asFile,
+        layout.projectDirectory.file('src/main/res/values/ic_launcher_background.xml').asFile
+]
+
+tasks.register('sanitizeLauncherIconXml') {
+    group = 'build'
+    description = 'Sanitizes generated launcher icon XML resources (AAPT2 compatibility).'
+
+    doLast {
+        // Explicit list to avoid touching unrelated resources.
+        launcherIconXmlFilesToSanitize.each { f ->
+            sanitizeXmlDeclarationAfterComment(f)
+        }
+    }
+}
+
+afterEvaluate {
+    // Ensure this runs before resource processing/merging.
+    tasks.matching { it.name == 'preBuild' }.configureEach {
+        dependsOn(tasks.named('sanitizeLauncherIconXml'))
     }
 }
 
