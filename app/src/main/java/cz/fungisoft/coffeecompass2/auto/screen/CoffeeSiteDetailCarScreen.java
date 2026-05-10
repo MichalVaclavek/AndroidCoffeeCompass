@@ -56,17 +56,14 @@ public final class CoffeeSiteDetailCarScreen extends Screen {
     private boolean invalidateScheduled;
     private static final long INVALIDATE_THROTTLE_MS = 1500;
 
-    private final PropertyChangeListener distanceChangeListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt == null || evt.getPropertyName() == null) {
-                return;
-            }
-            if (!"distance".equals(evt.getPropertyName())) {
-                return;
-            }
-            throttleInvalidate();
+    private final PropertyChangeListener distanceChangeListener = evt -> {
+        if (evt == null || evt.getPropertyName() == null) {
+            return;
         }
+        if (!"distance".equals(evt.getPropertyName())) {
+            return;
+        }
+        throttleInvalidate();
     };
 
     private final ServiceConnection foundSitesServiceConnection = new ServiceConnection() {

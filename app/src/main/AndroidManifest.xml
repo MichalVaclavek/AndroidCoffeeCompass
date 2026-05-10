@@ -174,11 +174,8 @@
             android:permission="android.permission.BIND_CAR_APP">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.POI"/>
             </intent-filter>
-
-            <meta-data
-                android:name="androidx.car.app.category"
-                android:value="androidx.car.app.category.POI" />
         </service>
 
         <activity
