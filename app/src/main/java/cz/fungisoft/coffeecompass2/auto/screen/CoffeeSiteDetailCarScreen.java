@@ -174,16 +174,25 @@ public final class CoffeeSiteDetailCarScreen extends Screen {
 
     private void startNavigation() {
         String dest = coffeeSite.getLatitude() + "," + coffeeSite.getLongitude();
-        Uri navUri = Uri.parse("google.navigation:q=" + dest);
-        Intent navIntent = new Intent(Intent.ACTION_VIEW, navUri);
-        navIntent.setPackage("com.google.android.apps.maps");
-        navIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Uri geoUri = Uri.parse("geo:" + dest);
+
+        Intent carNavIntent = new Intent(CarContext.ACTION_NAVIGATE, geoUri);
+        try {
+            getCarContext().startCarApp(carNavIntent);
+            return;
+        } catch (Exception ex) {
+            // Host refused (e.g. no default nav app on car). Fall through to phone-side Maps.
+        }
+
+        Uri phoneNavUri = Uri.parse("google.navigation:q=" + dest);
+        Intent phoneIntent = new Intent(Intent.ACTION_VIEW, phoneNavUri);
+        phoneIntent.setPackage("com.google.android.apps.maps");
+        phoneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         try {
-            getCarContext().startActivity(navIntent);
+            getCarContext().startActivity(phoneIntent);
         } catch (ActivityNotFoundException ex) {
-            // Fallback without explicit package.
-            Intent fallback = new Intent(Intent.ACTION_VIEW, navUri);
+            Intent fallback = new Intent(Intent.ACTION_VIEW, phoneNavUri);
             fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             getCarContext().startActivity(fallback);
         }

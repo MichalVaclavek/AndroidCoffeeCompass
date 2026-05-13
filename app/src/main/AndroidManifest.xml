@@ -170,8 +170,7 @@
         <service
             android:name=".auto.CoffeeCompassCarAppService"
             android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_CAR_APP">
+            android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
                 <category android:name="androidx.car.app.category.POI"/>
