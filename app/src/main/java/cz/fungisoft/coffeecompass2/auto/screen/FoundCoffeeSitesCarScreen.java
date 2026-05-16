@@ -2,6 +2,7 @@ package cz.fungisoft.coffeecompass2.auto.screen;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -11,10 +12,17 @@ import androidx.annotation.Nullable;
 import androidx.car.app.CarContext;
 import androidx.car.app.Screen;
 import androidx.car.app.model.Action;
+import androidx.car.app.model.CarColor;
+import androidx.car.app.model.CarIcon;
+import androidx.car.app.model.CarLocation;
 import androidx.car.app.model.ItemList;
-import androidx.car.app.model.ListTemplate;
+import androidx.car.app.model.Metadata;
+import androidx.car.app.model.Place;
+import androidx.car.app.model.PlaceListMapTemplate;
+import androidx.car.app.model.PlaceMarker;
 import androidx.car.app.model.Row;
 import androidx.car.app.model.Template;
+import androidx.core.graphics.drawable.IconCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,8 +55,9 @@ public final class FoundCoffeeSitesCarScreen extends Screen
 
     private static final String TAG = "CarFoundSites";
 
-    private static final int DEFAULT_RANGE_METERS = 10_000;
-    private static final int MAX_ITEMS = 20;
+    private static final int DEFAULT_RANGE_METERS = 5_000;
+    // PlaceListMapTemplate has a hard content limit of 6 items.
+    private static final int MAX_ITEMS = 6;
 
     @Nullable
     private CoffeeSitesFoundService foundSitesService;
@@ -64,6 +73,9 @@ public final class FoundCoffeeSitesCarScreen extends Screen
     private LocationService locationService;
 
     private final Set<CoffeeSiteMovable> distanceTrackedSites = new HashSet<>();
+
+    @Nullable
+    private CarIcon cupMarkerIcon;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private long lastInvalidateAtMs;
@@ -275,31 +287,86 @@ public final class FoundCoffeeSitesCarScreen extends Screen
         invalidate();
     }
 
+    @Nullable
+    private CarIcon getCupMarkerIcon() {
+        if (cupMarkerIcon != null) {
+            return cupMarkerIcon;
+        }
+        try {
+            cupMarkerIcon = new CarIcon.Builder(
+                    IconCompat.createWithResource(getCarContext(), R.drawable.ic_coffee_cup_main))
+                    .build();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to build marker icon, falling back to label", e);
+            cupMarkerIcon = null;
+        }
+        return cupMarkerIcon;
+    }
+
     @NonNull
     @Override
     public Template onGetTemplate() {
-        ListTemplate.Builder template = new ListTemplate.Builder()
+        PlaceListMapTemplate.Builder template = new PlaceListMapTemplate.Builder()
                 .setTitle(getCarContext().getString(R.string.car_found_sites_title))
-                .setHeaderAction(Action.APP_ICON);
+                .setHeaderAction(Action.APP_ICON)
+                .setCurrentLocationEnabled(true);
 
         if (loading) {
             return template.setLoading(true).build();
         }
 
         ItemList.Builder items = new ItemList.Builder();
+        int count = Math.min(currentSites.size(), MAX_ITEMS);
+
+        // Anchor tells the host to fit the map so the anchor + all markers are visible.
+        // Use the centroid of the closest few sites (plus current location if known) so a
+        // distant outlier among the 6 displayed doesn't pull the zoom too far out.
+        if (count > 0) {
+            int anchorSites = Math.min(count, 3);
+            double sumLat = 0;
+            double sumLon = 0;
+            int anchorPoints = 0;
+            for (int i = 0; i < anchorSites; i++) {
+                CoffeeSiteMovable s = currentSites.get(i);
+                sumLat += s.getLatitude();
+                sumLon += s.getLongitude();
+                anchorPoints++;
+            }
+            Location here = (locationService != null) ? locationService.getCurrentLocation() : null;
+            if (here != null) {
+                sumLat += here.getLatitude();
+                sumLon += here.getLongitude();
+                anchorPoints++;
+            }
+            CarLocation anchorLoc = CarLocation.create(sumLat / anchorPoints, sumLon / anchorPoints);
+            template.setAnchor(new Place.Builder(anchorLoc).build());
+        }
 
         if (!currentSites.isEmpty()) {
-            int count = Math.min(currentSites.size(), MAX_ITEMS);
             for (int i = 0; i < count; i++) {
-                CoffeeSiteMovable site = currentSites.get(i);
+                final CoffeeSiteMovable site = currentSites.get(i);
                 String distance = Utils.getDistanceInBetterReadableForm(site.getDistance());
                 String line1 = site.getTypPodniku() + ", " + site.getTypLokality();
-                String line2 = distance;
+
+                PlaceMarker.Builder markerBuilder = new PlaceMarker.Builder()
+                        .setColor(CarColor.YELLOW);
+                CarIcon icon = getCupMarkerIcon();
+                if (icon != null) {
+                    markerBuilder.setIcon(icon, PlaceMarker.TYPE_ICON);
+                } else {
+                    markerBuilder.setLabel(String.valueOf(i + 1));
+                }
+
+                Place place = new Place.Builder(CarLocation.create(
+                                site.getLatitude(), site.getLongitude()))
+                        .setMarker(markerBuilder.build())
+                        .build();
 
                 Row row = new Row.Builder()
                         .setTitle(site.getName())
                         .addText(line1)
-                        .addText(line2)
+                        .addText(distance)
+                        .setMetadata(new Metadata.Builder().setPlace(place).build())
                         .setBrowsable(true)
                         .setOnClickListener(() -> getScreenManager().push(
                                 new CoffeeSiteDetailCarScreen(getCarContext(), site)))
@@ -314,6 +381,6 @@ public final class FoundCoffeeSitesCarScreen extends Screen
             items.addItem(new Row.Builder().setTitle(noSites).build());
         }
 
-        return template.setSingleList(items.build()).build();
+        return template.setItemList(items.build()).build();
     }
 }

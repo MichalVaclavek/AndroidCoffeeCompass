@@ -16,6 +16,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Required by PlaceListMapTemplate (Car App Library). -->
+    <uses-permission android:name="androidx.car.app.MAP_TEMPLATES" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
