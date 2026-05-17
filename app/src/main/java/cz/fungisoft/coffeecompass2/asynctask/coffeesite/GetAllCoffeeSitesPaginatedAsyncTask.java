@@ -66,7 +66,7 @@ public class GetAllCoffeeSitesPaginatedAsyncTask {
                 .build();
 
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("dd. MM. yyyy HH:mm")
+                .setDateFormat("dd.MM. yyyy HH:mm")
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -82,7 +82,7 @@ public class GetAllCoffeeSitesPaginatedAsyncTask {
 
         Log.i(TAG, "start call");
 
-        call.enqueue(new Callback<CoffeeSitePageEnvelope>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<CoffeeSitePageEnvelope> call, Response<CoffeeSitePageEnvelope> response) {
                 if (response.isSuccessful()) {

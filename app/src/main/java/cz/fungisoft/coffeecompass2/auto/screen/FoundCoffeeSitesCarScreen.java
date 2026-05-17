@@ -378,7 +378,7 @@ public final class FoundCoffeeSitesCarScreen extends Screen
             if (lastError != null && !lastError.trim().isEmpty()) {
                 noSites = lastError;
             }
-            items.addItem(new Row.Builder().setTitle(noSites).build());
+            items.setNoItemsMessage(noSites);
         }
 
         return template.setItemList(items.build()).build();
