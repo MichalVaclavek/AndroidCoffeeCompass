@@ -43,12 +43,12 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
  * detection.<br>
  */
 public class CoffeeSitesFoundService extends Service implements PropertyChangeListener,
-                                                                  CoffeeSitesFoundFromServerResultListener {
+                                                                CoffeeSitesFoundFromServerResultListener {
 
     private static final String TAG = "SitesInRangeUpdateSrv";
 
     private static final long MAX_STARI_DAT = 1000 * 300; // pokud jsou posledni zname udaje o poloze starsi jako 5 minuty, zjistit nove
-    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnosy polohy horsi, zkus pockat na lepsi
+    private static final float LAST_PRESNOST = 100.0f; // pokud je posledni presnost polohy horsi, zkus pockat na lepsi
 
 
     /**

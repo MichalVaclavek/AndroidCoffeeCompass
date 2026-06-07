@@ -28,6 +28,7 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Shows the About app. info, author, version, aim of the app.
+ * Also shows some statistics about the app. usage, like number of CoffeeSites in the database, number of new CoffeeSites in the last week and today.
  */
 public class AboutActivity extends BaseActivity {
 
@@ -75,12 +76,7 @@ public class AboutActivity extends BaseActivity {
 
         statisticsLayout = findViewById(R.id.statistics_layout);
 
-        statisticsLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onStatisticsClick(v);
-            }
-        });
+        statisticsLayout.setOnClickListener(this::onStatisticsClick);
     }
 
     @Override
@@ -153,7 +149,7 @@ public class AboutActivity extends BaseActivity {
         sites7View.setText(stats.numOfSitesLastWeek);
 
         // if number of sites in last week is greater then 0, color the label text to Blue and make it Bol
-        // to indicate, that it is clicable showing list of new sites
+        // to indicate, that it is clickable showing list of new sites
         TextView sites7ViewLabel = findViewById(R.id.last7DaysLabelTextView);
         if (Integer.parseInt(stats.numOfSitesLastWeek) > 0) {
 //            sites7ViewLabel.setTypeface(null, Typeface.BOLD);

@@ -2015,7 +2015,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     private String[] getSelectedChipsStrings(ChipGroup chipGroup) {
         List<String> selectedChipValues = new ArrayList<>();
         for (int chipId : chipGroup.getCheckedChipIds()) {
-            Chip chip = (Chip) findViewById(chipId);
+            Chip chip = findViewById(chipId);
             if (chip == null) {
                 continue;
             }
@@ -2061,7 +2061,6 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
      * Shows location selected by user from Map in the respective latitude and longitude view
      */
     private void showLocationInView(double latitude, double longitude) {
-
         if (latitude >= -180 && latitude <= 180
                && longitude >= -180 && longitude <= 180 ) {
 
@@ -2096,7 +2095,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
             Log.e(TAG, "Error looking for address: " + e.getMessage());
         }
 
-        if (addresses != null && addresses.size() > 0) {
+        if (addresses != null && !addresses.isEmpty()) {
             Log.d(TAG, "Address found");
             // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
             String[] adresa = addresses.get(0).getAddressLine(0).split(",");
@@ -2269,7 +2268,8 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         boolean hasMainImage = hasMainImage();
         int effectiveImageCount = currentImageCount > 0 ? currentImageCount : (hasMainImage ? 1 : 0);
         imageDeleteMenuItem.setEnabled(effectiveImageCount == 1);
-        manageImagesMenuItem.setEnabled(effectiveImageCount > 0 && canOpenManageImages());
+//        manageImagesMenuItem.setEnabled(effectiveImageCount > 0 && canOpenManageImages());
+        manageImagesMenuItem.setEnabled(canOpenManageImages());
     }
 
     private void showSelectedMainImage(File mainImageFile) {
