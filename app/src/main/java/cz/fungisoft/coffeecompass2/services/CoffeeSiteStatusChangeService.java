@@ -18,6 +18,7 @@ import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListe
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_ACTIVATE;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_CANCEL;
 import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_DEACTIVATE;
+import static cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper.COFFEE_SITE_STATUS_CHANGE;
 
 /**
  * Service to cover all actions regarding CoffeeSite status changes i.e. activation,
@@ -40,7 +41,8 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
     public enum StatusChangeOperation {
         COFFEE_SITE_ACTIVATE,
         COFFEE_SITE_DEACTIVATE,
-        COFFEE_SITE_CANCEL
+        COFFEE_SITE_CANCEL,
+        COFFEE_SITE_STATUS_CHANGE
     }
 
     // Listeners, usually Activities, which called respective service method
@@ -112,6 +114,15 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
         }
     }
 
+    public void changeStatus(CoffeeSite coffeeSite, String status, String validFrom) {
+        requestedRESTOperation = COFFEE_SITE_STATUS_CHANGE;
+        currentUser = getCurrentUser();
+        if (currentUser != null) {
+            new ChangeStatusOfCoffeeSiteAsyncTask(requestedRESTOperation, coffeeSite, status, validFrom,
+                    userAccountService, this).execute();
+        }
+    }
+
     @Override
     public void onCoffeeSiteReturned(CoffeeSiteRESTOper oper, Result<CoffeeSite> result) {
         CoffeeSite returnedCoffeeSite;
@@ -135,6 +146,8 @@ public class CoffeeSiteStatusChangeService extends CoffeeSiteWithUserAccountServ
                 case COFFEE_SITE_DEACTIVATE: listener.onCoffeeSiteDeactivated(coffeeSite, error);
                     break;
                 case COFFEE_SITE_CANCEL: listener.onCoffeeSiteCanceled(coffeeSite, error);
+                    break;
+                case COFFEE_SITE_STATUS_CHANGE: listener.onCoffeeSiteStatusChanged(coffeeSite, error);
                     break;
                 default: break;
             }

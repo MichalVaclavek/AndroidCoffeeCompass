@@ -194,6 +194,11 @@ public interface CoffeeSiteRESTInterface {
     @PUT("{siteId}/cancel")
     Call<CoffeeSite> cancelCoffeeSite(@Path("siteId") String siteId);
 
+    @PUT("{siteId}/status")
+    Call<CoffeeSite> changeCoffeeSiteStatus(@Path("siteId") String siteId,
+                                            @Query("status") String status,
+                                            @Query("validFrom") String validFrom);
+
 
     /**
      * Calls upload of CoffeeSites. Expects boolean as return value

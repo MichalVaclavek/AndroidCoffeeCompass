@@ -72,6 +72,8 @@ public class CoffeeSiteEntitiesFactory {
             if (entityType.equalsIgnoreCase("CoffeeSiteStatus")) {
                 retVal = new CoffeeSiteStatus();
                 ((CoffeeSiteStatus) retVal).setStatus(jsonObject.getString("status"));
+                ((CoffeeSiteStatus) retVal).setValueCz(jsonObject.optString("valueCz", null));
+                ((CoffeeSiteStatus) retVal).setValueEn(jsonObject.optString("valueEn", null));
             }
             if (entityType.equalsIgnoreCase("CoffeeSiteType")) {
                 retVal = new CoffeeSiteType();
@@ -102,7 +104,9 @@ public class CoffeeSiteEntitiesFactory {
                 ((SiteLocationType) retVal).setLocationType(jsonObject.getString("locationType"));
             }
 
-            if (retVal != null) {
+            if (retVal instanceof CoffeeSiteStatus && !jsonObject.has("id")) {
+                retVal.setId(((CoffeeSiteStatus) retVal).getStatus());
+            } else if (retVal != null) {
                 retVal.setId(jsonObject.getString("id"));
             }
         } catch (JSONException e) {

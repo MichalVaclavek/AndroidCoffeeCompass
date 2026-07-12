@@ -141,6 +141,11 @@ public class CoffeeSiteEntityRepositories {
     }
 
     public void setAllCoffeeSiteStatuses(List<CoffeeSiteStatus> allCoffeeSiteStatuses) {
+        for (CoffeeSiteStatus status : allCoffeeSiteStatuses) {
+            if (status.getId().isEmpty() && status.getStatus() != null) {
+                status.setId(status.getStatus());
+            }
+        }
         coffeeSiteStatusRepository.insertAllBlocking(allCoffeeSiteStatuses);
     }
 

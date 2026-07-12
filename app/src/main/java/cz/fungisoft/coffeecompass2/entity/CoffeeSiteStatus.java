@@ -25,6 +25,8 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
     protected CoffeeSiteStatus(Parcel in) {
         this.id = in.readString();
         status = in.readString();
+        valueCz = in.readString();
+        valueEn = in.readString();
     }
 
     public static final Creator<CoffeeSiteStatus> CREATOR = new Creator<CoffeeSiteStatus>() {
@@ -47,9 +49,33 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
         this.status = status;
     }
 
+    public String getValueCz() {
+        return valueCz;
+    }
+
+    public void setValueCz(String valueCz) {
+        this.valueCz = valueCz;
+    }
+
+    public String getValueEn() {
+        return valueEn;
+    }
+
+    public void setValueEn(String valueEn) {
+        this.valueEn = valueEn;
+    }
+
     @Expose
     @SerializedName("status")
     private String status;
+
+    @Expose
+    @SerializedName("valueCz")
+    private String valueCz;
+
+    @Expose
+    @SerializedName("valueEn")
+    private String valueEn;
 
 
     @Override
@@ -66,5 +92,7 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
         dest.writeString(status);
+        dest.writeString(valueCz);
+        dest.writeString(valueEn);
     }
 }

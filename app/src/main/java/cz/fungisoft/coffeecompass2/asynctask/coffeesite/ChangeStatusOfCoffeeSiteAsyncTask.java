@@ -35,6 +35,10 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
 
     private final CoffeeSite coffeeSiteToModify;
 
+    private final String status;
+
+    private final String validFrom;
+
     /**
      * Provides current logged-in user info
      */
@@ -57,6 +61,23 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
         this.userAccountService = userAccountService;
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
+        this.status = null;
+        this.validFrom = null;
+        tag = "SiteStatusAsynTask";
+    }
+
+    public ChangeStatusOfCoffeeSiteAsyncTask(CoffeeSiteWithUserAccountService.CoffeeSiteRESTOper requestedRESTOperationCode,
+                                             CoffeeSite coffeeSite,
+                                             String status,
+                                             String validFrom,
+                                             UserAccountActionsProvider userAccountService,
+                                             CoffeeSiteRESTResultListener callingService) {
+        this.coffeeSiteToModify = coffeeSite;
+        this.userAccountService = userAccountService;
+        this.callingListenerService = callingService;
+        this.requestedRESTOperationCode = requestedRESTOperationCode;
+        this.status = status;
+        this.validFrom = validFrom;
         tag = "SiteStatusAsynTask";
     }
 
@@ -96,6 +117,9 @@ public class ChangeStatusOfCoffeeSiteAsyncTask {
                     break;
                 case COFFEE_SITE_CANCEL:
                     call = api.cancelCoffeeSite(coffeeSiteToModify.getId());
+                    break;
+                case COFFEE_SITE_STATUS_CHANGE:
+                    call = api.changeCoffeeSiteStatus(coffeeSiteToModify.getId(), status, validFrom);
                     break;
             }
 

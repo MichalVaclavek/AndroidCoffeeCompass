@@ -11,4 +11,5 @@ public interface CoffeeSiteServiceStatusOperationsListener {
     default void onCoffeeSiteActivated(CoffeeSite activeCoffeeSite, String error) {}
     default void onCoffeeSiteDeactivated(CoffeeSite inactiveCoffeeSite, String error) {}
     default void onCoffeeSiteCanceled(CoffeeSite canceledCoffeeSite, String error) {}
+    default void onCoffeeSiteStatusChanged(CoffeeSite coffeeSite, String error) {}
 }

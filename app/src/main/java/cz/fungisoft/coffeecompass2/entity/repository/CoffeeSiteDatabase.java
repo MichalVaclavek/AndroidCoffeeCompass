@@ -47,7 +47,7 @@ import cz.fungisoft.coffeecompass2.entity.repository.dao.StarsQualityDescription
                        CoffeeSiteType.class, CoffeeSort.class, CupType.class,
                        NextToMachineType.class, OtherOffer.class, PriceRange.class, SiteLocationType.class,
                        StarsQualityDescription.class , Comment.class},
-                      version = 30, exportSchema = false)
+                       version = 31, exportSchema = false)
 @TypeConverters(DbDataConverters.class)
 public abstract class CoffeeSiteDatabase extends RoomDatabase {
 
@@ -83,6 +83,7 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
                             .fallbackToDestructiveMigration()
                             .addMigrations(MIGRATION_28_29)
                             .addMigrations(MIGRATION_29_30)
+                            .addMigrations(MIGRATION_30_31)
                             .addCallback(sCoffeeSiteDatabaseCallback)
                             .build();
                 }
@@ -102,6 +103,14 @@ public abstract class CoffeeSiteDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("DROP TABLE IF EXISTS average_stars_with_numOfRatings_table");
+        }
+    };
+
+    static final Migration MIGRATION_30_31 = new Migration(30, 31) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE coffee_site_status_table ADD COLUMN valueCz TEXT");
+            database.execSQL("ALTER TABLE coffee_site_status_table ADD COLUMN valueEn TEXT");
         }
     };
 
