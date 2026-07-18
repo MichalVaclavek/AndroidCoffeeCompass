@@ -146,6 +146,16 @@
                     android:layout_weight="1"
                     android:src="@drawable/ic_baseline_comment_36" />
 
+                <ImageButton
+                    android:id="@+id/button_change_site_status"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/change_site_status"
+                    android:src="@drawable/ic_site_status_change_36" />
+
             </LinearLayout>
 
         </LinearLayout>

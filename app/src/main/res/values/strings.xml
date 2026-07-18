@@ -194,6 +194,15 @@
     <string name="author_comment_dialog_title">Komentář zakladatele</string>
     <string name="author_comment_save_failure">Kometář zakladatele se nepodařilo uložit.</string>
     <string name="author_comment_save_success">Komentář uložen.</string>
+    <string name="change_site_status">Změnit provozní status</string>
+    <string name="change_site_status_with_current">Změnit provozní status (%1$s)</string>
+    <string name="change_site_status_confirm">Změnit</string>
+    <string name="site_status_select_label">Nový provozní status:</string>
+    <string name="site_status_valid_from_label">Platí od: </string>
+    <string name="select_valid_from_date">Vybrat datum platnosti</string>
+    <string name="site_statuses_not_available">Seznam provozních statusů není k dispozici.</string>
+    <string name="coffeesite_status_changed_successfully">Provozní status lokace byl změněn.</string>
+    <string name="coffee_site_status_change_failure">Změna provozního statusu se nezdařila.</string>
     <string name="user_no_value_present_error">No value present</string>
 
     <string name="title_activity_select_location_map">Vybrat polohu</string>

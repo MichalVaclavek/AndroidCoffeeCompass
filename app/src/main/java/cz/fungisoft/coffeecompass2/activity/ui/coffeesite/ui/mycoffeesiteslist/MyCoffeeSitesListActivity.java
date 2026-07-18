@@ -46,9 +46,11 @@ import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteServ
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteUploadServiceOperationsListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.CoffeeSiteImageManageListener;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CreateCoffeeSiteActivity;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteEntitiesViewModel;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.MyCoffeeSitesViewModel;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.ImageObject;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteImageService;
@@ -83,12 +85,13 @@ public class MyCoffeeSitesListActivity extends BaseActivity
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,
                                                   UploadCoffeeSitesDialogFragment.UploadCoffeeSitesDialogListener,
-                                                  CoffeeSiteServicesConnectionListener,
-                                                  CoffeeSiteImageServiceConnectionListener,
-                                                  CoffeeSiteImageServiceCallResultListener,
-                                                  CoffeeSiteLoadServiceOperationsListener,
-                                                  CoffeeSiteUploadServiceOperationsListener,
-                                                  CoffeeSiteServiceCUDOperationsListener {
+                                                   CoffeeSiteServicesConnectionListener,
+                                                   CoffeeSiteImageServiceConnectionListener,
+                                                   CoffeeSiteImageServiceCallResultListener,
+                                                   CoffeeSiteLoadServiceOperationsListener,
+                                                   CoffeeSiteUploadServiceOperationsListener,
+                                                   CoffeeSiteServiceCUDOperationsListener,
+                                                   ChangeSiteStatusDialogFragment.ChangeSiteStatusDialogListener {
 
     private static final String TAG = "MyCoffeeSitesListAct";
 
@@ -177,6 +180,8 @@ public class MyCoffeeSitesListActivity extends BaseActivity
     public static final int PAGE_SIZE = 20;
 
     private MyCoffeeSitesViewModel myCoffeeSitesViewModel;
+
+    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
 
 
     /**
@@ -284,6 +289,12 @@ public class MyCoffeeSitesListActivity extends BaseActivity
         layoutManager = new LinearLayoutManager(this);
 
         myCoffeeSitesViewModel = new MyCoffeeSitesViewModel(getApplication());
+        coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
+        coffeeSiteEntitiesViewModel.getAllCoffeeSiteStatuses().observe(this, statuses -> {
+            if (recyclerViewAdapter != null && statuses != null) {
+                recyclerViewAdapter.setSiteStatuses(new ArrayList<CoffeeSiteStatus>(statuses));
+            }
+        });
 
         /* If called from MainActivity, we can pass the number of CoffeeSites from user
          * to be shown/loadedGetNumSitesFromUserAT
@@ -1442,6 +1453,9 @@ public class MyCoffeeSitesListActivity extends BaseActivity
             if (dialog instanceof InsertAuthorCommentDialogFragment) {
                 recyclerViewAdapter.onInsertAuthorCommentDialogPositiveClick((InsertAuthorCommentDialogFragment) dialog);
             }
+            if (dialog instanceof ChangeSiteStatusDialogFragment) {
+                recyclerViewAdapter.onChangeSiteStatusDialogPositiveClick((ChangeSiteStatusDialogFragment) dialog);
+            }
             if (dialog instanceof UploadCoffeeSitesDialogFragment) {
                 onUploadCoffeeSitesDialogPositiveClick((UploadCoffeeSitesDialogFragment) dialog);
             }
@@ -1456,6 +1470,9 @@ public class MyCoffeeSitesListActivity extends BaseActivity
             }
             if (dialog instanceof InsertAuthorCommentDialogFragment) {
                 recyclerViewAdapter.onInsertAuthorCommentDialogNegativeClick((InsertAuthorCommentDialogFragment) dialog);
+            }
+            if (dialog instanceof ChangeSiteStatusDialogFragment) {
+                recyclerViewAdapter.onChangeSiteStatusDialogNegativeClick((ChangeSiteStatusDialogFragment) dialog);
             }
             if (dialog instanceof UploadCoffeeSitesDialogFragment) {
                 onUploadCoffeeSitesDialogNegativeClick((UploadCoffeeSitesDialogFragment) dialog);

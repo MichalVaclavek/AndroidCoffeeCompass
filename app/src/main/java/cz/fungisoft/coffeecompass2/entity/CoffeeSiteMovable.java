@@ -115,6 +115,7 @@ public class CoffeeSiteMovable extends CoffeeSite implements PropertyChangeListe
         this.setTypPodniku(coffeeSite.getTypPodniku());
         this.setTypLokality(coffeeSite.getTypLokality());
         this.setStatusZarizeni(coffeeSite.getStatusZarizeni());
+        this.setStatusValidFrom(coffeeSite.getStatusValidFrom());
         this.setHodnoceni(coffeeSite.getHodnoceni());
         this.setCreatedByUserName(coffeeSite.getCreatedByUserName());
         this.setCreatedOnString(coffeeSite.getCreatedOnString());

@@ -1,6 +1,7 @@
 package cz.fungisoft.coffeecompass2.activity.ui.fragments;
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -15,6 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.data.Result;
@@ -75,6 +81,10 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
 
     private static final String UNKNOWN_VALUE = "-";
 
+    private static final String SERVER_DATE_PATTERN = "yyyy-MM-dd";
+
+    private static final String DISPLAY_DATE_PATTERN = "dd.MM. yyyy";
+
     /**
      * to show EnterCommentAndRatingDialogFragment with current user's rating of the coffee site in this activity
      */
@@ -86,6 +96,8 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
      * Layout with average rating of the coffee site as cup icons. Is clickable to se user's rating of the coffee site.
      */
     private LinearLayout averageStartRatingLayout;
+
+    private TextView statusZarizeniTextView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -136,6 +148,9 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
         deleteCoffeeSiteIcon = rootView.findViewById(R.id.delete_coffeesite_detail_imageView);
         deleteCoffeeSiteIcon.setOnClickListener(createOnClickListenerForDeleteCoffeeSiteImageView());
 
+        statusZarizeniTextView = rootView.findViewById(R.id.statusZarizeniTextView);
+        statusZarizeniTextView.setOnClickListener(createOnClickListenerForStatusTextView());
+
         asyncRestCallTaskProgressBar = getActivity().findViewById(R.id.load_coffeeSite_progressBar);
 
         averageStartRatingLayout = rootView.findViewById(R.id.rating_icons_detail_layout);
@@ -176,12 +191,17 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
         if (deleteCoffeeSiteIcon != null) {
             deleteCoffeeSiteIcon.setVisibility(showIcons ? View.VISIBLE : View.GONE);
         }
+        if (statusZarizeniTextView != null) {
+            updateStatusTextViewClickability();
+        }
     }
 
     private void showAllCoffeeSiteInfo(View rootView, CoffeeSite coffeeSite) {
         // Show the CoffeeSite info in a TextViews.
         if (coffeeSite != null) {
-            ((TextView) rootView.findViewById(R.id.statusZarizeniTextView)).setText(coffeeSite.getStatusZarizeni().toString());
+            statusZarizeniTextView = rootView.findViewById(R.id.statusZarizeniTextView);
+            statusZarizeniTextView.setText(getStatusDisplayText(coffeeSite));
+            updateStatusTextViewClickability();
             ((TextView) rootView.findViewById(R.id.siteTypeTextView)).setText(coffeeSite.getTypPodniku().toString());
             ((TextView) rootView.findViewById(R.id.locationTypeTextView)).setText(coffeeSite.getTypLokality().toString());
 
@@ -264,6 +284,39 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
         }
     }
 
+    private String getStatusDisplayText(CoffeeSite coffeeSite) {
+        String statusText = coffeeSite.getStatusZarizeni() != null
+                ? coffeeSite.getStatusZarizeni().toString()
+                : UNKNOWN_VALUE;
+        if (statusText == null || statusText.isEmpty()) {
+            statusText = UNKNOWN_VALUE;
+        }
+        String validFrom = coffeeSite.getStatusValidFrom();
+        if (!isInServiceStatus(coffeeSite) && validFrom != null && !validFrom.isEmpty()) {
+            return statusText + " (" + formatDisplayDate(validFrom) + ")";
+        }
+        return statusText;
+    }
+
+    private boolean isInServiceStatus(CoffeeSite coffeeSite) {
+        if (coffeeSite.getStatusZarizeni() == null) {
+            return false;
+        }
+        return "INSERVICE".equalsIgnoreCase(coffeeSite.getStatusZarizeni().getStatus())
+                || "V provozu".equalsIgnoreCase(coffeeSite.getStatusZarizeni().toString());
+    }
+
+    private String formatDisplayDate(String serverDate) {
+        try {
+            Date date = new SimpleDateFormat(SERVER_DATE_PATTERN, Locale.US).parse(serverDate);
+            if (date != null) {
+                return new SimpleDateFormat(DISPLAY_DATE_PATTERN, Locale.getDefault()).format(date);
+            }
+        } catch (ParseException ignored) {
+        }
+        return serverDate;
+    }
+
     /**
      * Defines cup icons for all rating cups image views
      *
@@ -335,6 +388,42 @@ public class CoffeeSiteDetailFragment extends Fragment implements UsersCSRatingL
                 ((CoffeeSiteDetailActivity) getActivity()).requestDeleteCoffeeSite(coffeeSite);
             }
         };
+    }
+
+    private View.OnClickListener createOnClickListenerForStatusTextView() {
+        return view -> {
+            if (!canCurrentUserModifyCoffeeSite()) {
+                return;
+            }
+            if (getActivity() instanceof CoffeeSiteDetailActivity) {
+                ((CoffeeSiteDetailActivity) getActivity()).requestChangeCoffeeSiteStatus(coffeeSite);
+            }
+        };
+    }
+
+    private boolean canCurrentUserModifyCoffeeSite() {
+        return currentUser != null
+                && coffeeSite != null
+                && currentUser.getUserName() != null
+                && currentUser.getUserName().equals(coffeeSite.getCreatedByUserName());
+    }
+
+    private void updateStatusTextViewClickability() {
+        if (statusZarizeniTextView == null || getContext() == null) {
+            return;
+        }
+
+        boolean clickable = canCurrentUserModifyCoffeeSite();
+        statusZarizeniTextView.setClickable(clickable);
+        statusZarizeniTextView.setTextColor(getResources().getColor(
+                clickable ? R.color.colorPrimary : R.color.colorPrimaryDark));
+
+        int paintFlags = statusZarizeniTextView.getPaintFlags();
+        if (clickable) {
+            statusZarizeniTextView.setPaintFlags(paintFlags | Paint.UNDERLINE_TEXT_FLAG);
+        } else {
+            statusZarizeniTextView.setPaintFlags(paintFlags & ~Paint.UNDERLINE_TEXT_FLAG);
+        }
     }
 
     private void goToEditCoffeeSiteActivity() {

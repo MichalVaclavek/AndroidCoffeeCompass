@@ -284,10 +284,15 @@ public class CoffeeSiteEntitiesViewModel extends AndroidViewModel {
     }
 
     public CoffeeSiteStatus getCoffeeSiteStatus(String value) {
-        CoffeeSiteStatus retVal = mCoffeeSiteStatuses != null ? mCoffeeSiteStatuses.get(0)
-                                                              : new CoffeeSiteStatus();
+        CoffeeSiteStatus retVal = mCoffeeSiteStatuses != null && !mCoffeeSiteStatuses.isEmpty() ? mCoffeeSiteStatuses.get(0)
+                                                               : new CoffeeSiteStatus();
+        if (mCoffeeSiteStatuses == null || value == null) {
+            return retVal;
+        }
         for (CoffeeSiteStatus coffeeSiteStatus : mCoffeeSiteStatuses) {
-            if (coffeeSiteStatus.getStatus().equals(value)) {
+            if (value.equals(coffeeSiteStatus.getStatus())
+                    || value.equals(coffeeSiteStatus.getValueCz())
+                    || value.equals(coffeeSiteStatus.getValueEn())) {
                 retVal = coffeeSiteStatus;
                 break;
             }

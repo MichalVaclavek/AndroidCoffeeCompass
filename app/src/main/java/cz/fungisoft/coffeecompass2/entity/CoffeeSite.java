@@ -181,6 +181,11 @@ public class CoffeeSite implements Serializable,
     protected CoffeeSiteStatus statusZarizeni = new CoffeeSiteStatus();
 
     @Expose
+    @SerializedName(value = "statusValidFrom", alternate = {"validFrom"})
+    @ColumnInfo(name = "statusValidFrom")
+    protected String statusValidFrom = "";
+
+    @Expose
     @SerializedName("recordStatus")
     @TypeConverters(DbDataConverters.class)
     protected CoffeeSiteRecordStatus statusZaznamu; // better for checking in SELECT requests for NULL value
@@ -337,6 +342,7 @@ public class CoffeeSite implements Serializable,
 
         oteviraciDobaDny = in.readString();
         oteviraciDobaHod = in.readString();
+        statusValidFrom = in.readString();
 
         canBeModified = in.readByte() != 0;
         canBeActivated  = in.readByte() != 0;
@@ -389,6 +395,7 @@ public class CoffeeSite implements Serializable,
 
         dest.writeString(oteviraciDobaDny);
         dest.writeString(oteviraciDobaHod);
+        dest.writeString(statusValidFrom);
 
         dest.writeByte((byte) (canBeModified ? 1 : 0));
         dest.writeByte((byte) (canBeActivated  ? 1 : 0));
@@ -537,6 +544,14 @@ public class CoffeeSite implements Serializable,
 
     public void setStatusZarizeni(CoffeeSiteStatus statusZarizeni) {
         this.statusZarizeni = statusZarizeni;
+    }
+
+    public String getStatusValidFrom() {
+        return statusValidFrom;
+    }
+
+    public void setStatusValidFrom(String statusValidFrom) {
+        this.statusValidFrom = statusValidFrom != null ? statusValidFrom : "";
     }
 
     public String getOteviraciDobaDny() {

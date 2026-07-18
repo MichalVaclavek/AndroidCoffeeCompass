@@ -20,7 +20,7 @@ public interface CoffeeSiteStatusDao {
     @Query("SELECT * FROM coffee_site_status_table")
     Single<List<CoffeeSiteStatus>> getAllCoffeeSiteStatusesSingle();
 
-    @Query("SELECT * FROM coffee_site_status_table WHERE status = :stringValue LIMIT 1")
+    @Query("SELECT * FROM coffee_site_status_table WHERE status = :stringValue OR valueCz = :stringValue OR valueEn = :stringValue LIMIT 1")
     Single<CoffeeSiteStatus> getCoffeeSiteStatus(String stringValue);
 
     @Query("DELETE FROM coffee_site_status_table")

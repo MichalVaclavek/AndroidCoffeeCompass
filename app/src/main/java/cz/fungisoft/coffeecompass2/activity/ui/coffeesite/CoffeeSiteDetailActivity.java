@@ -18,6 +18,9 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.MapsActivity;
@@ -32,10 +35,13 @@ import cz.fungisoft.coffeecompass2.activity.ui.support.DistanceChangeTextView;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.CommentsListActivity;
 import cz.fungisoft.coffeecompass2.activity.ui.comments.EnterCommentAndRatingDialogFragment;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.CancelCoffeeSiteDialogFragment;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteEntitiesViewModel;
+import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.ChangeSiteStatusDialogFragment;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.comment.UpdateStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSiteMovable;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
 import cz.fungisoft.coffeecompass2.entity.Comment;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteCUDOperationsService;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteLoadOperationsService;
@@ -51,8 +57,6 @@ import cz.fungisoft.coffeecompass2.utils.Utils;
 
 import static android.view.View.GONE;
 
-import java.util.List;
-
 /**
  * An activity representing a single CoffeeSite detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
@@ -66,9 +70,10 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   EnterCommentAndRatingDialogFragment.CommentAndRatingDialogListener,
                                                   UsersCSRatingAndCommentSaveOperationListener,
-                                                  UsersCSRatingAndCommentUpdateOperationListener,
-                                                  CoffeeSiteLoadServiceOperationsListener,
-                                                  CoffeeSiteServiceStatusOperationsListener {
+                                                   UsersCSRatingAndCommentUpdateOperationListener,
+                                                   CoffeeSiteLoadServiceOperationsListener,
+                                                   CoffeeSiteServiceStatusOperationsListener,
+                                                   ChangeSiteStatusDialogFragment.ChangeSiteStatusDialogListener {
 
     private static final String TAG = "CoffeeSiteDetailAct";
 
@@ -124,6 +129,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private CoffeeSite coffeeSitePendingDeletion;
 
+    private CoffeeSiteEntitiesViewModel coffeeSiteEntitiesViewModel;
+
+    private ArrayList<CoffeeSiteStatus> siteStatuses = new ArrayList<>();
+
+    private String pendingStatusValidFrom = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -133,6 +144,13 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         contextView = findViewById(R.id.coffeesite_detaill_main_layout);
 
         asyncRestCallTaskProgressBar = findViewById(R.id.load_coffeeSite_progressBar);
+
+        coffeeSiteEntitiesViewModel = new CoffeeSiteEntitiesViewModel(getApplication());
+        coffeeSiteEntitiesViewModel.getAllCoffeeSiteStatuses().observe(this, statuses -> {
+            if (statuses != null) {
+                siteStatuses = new ArrayList<>(statuses);
+            }
+        });
 
         // Read coffee site data from calling activity
         Intent intent = this.getIntent();
@@ -432,6 +450,44 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         // But we need it as it is really called from GetNumberOfCommentsAsyncTask
     }
 
+    public void requestChangeCoffeeSiteStatus(CoffeeSite coffeeSiteToModify) {
+        if (coffeeSiteToModify == null) {
+            return;
+        }
+
+        if (currentUser == null
+                || currentUser.getUserName() == null
+                || !currentUser.getUserName().equals(coffeeSiteToModify.getCreatedByUserName())) {
+            return;
+        }
+
+        if (!Utils.isOnline(getApplicationContext())) {
+            Utils.showNoInternetToast(getApplicationContext());
+            return;
+        }
+
+        if (!coffeeSiteToModify.isSavedOnServer()) {
+            Utils.showSiteNotSavedOnServerToast(getApplicationContext());
+            return;
+        }
+
+        if (siteStatuses.isEmpty()) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.site_statuses_not_available,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        coffeeSite = coffeeSiteToModify;
+        String currentStatus = coffeeSiteToModify.getStatusZarizeni() != null
+                ? coffeeSiteToModify.getStatusZarizeni().getStatus()
+                : "";
+        ChangeSiteStatusDialogFragment dialog = ChangeSiteStatusDialogFragment.newInstance(
+                siteStatuses,
+                currentStatus);
+        dialog.show(getSupportFragmentManager(), "ChangeSiteStatusDialogFragment");
+    }
+
     public void showRESTCallError(Result.Error error) {
         hideProgressbar();
         if (error != null) {
@@ -587,11 +643,33 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
+        if (dialog instanceof ChangeSiteStatusDialogFragment) {
+            onChangeSiteStatusDialogPositiveClick((ChangeSiteStatusDialogFragment) dialog);
+            return;
+        }
         performCoffeeSiteDeleteOrCancel();
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+    private void onChangeSiteStatusDialogPositiveClick(ChangeSiteStatusDialogFragment dialog) {
+        if (dialog == null || dialog.getSelectedStatus() == null || coffeeSite == null) {
+            return;
+        }
+
+        if (coffeeSiteStatusChangeService != null) {
+            showProgressbar();
+            pendingStatusValidFrom = dialog.getValidFrom();
+            coffeeSiteStatusChangeService.changeStatus(coffeeSite,
+                    dialog.getSelectedStatus().getStatus(),
+                    dialog.getValidFrom());
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.coffeesiteservice_error_message_not_available),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void performCoffeeSiteDeleteOrCancel() {
@@ -652,6 +730,34 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
         finishAfterCoffeeSiteDeleted(canceledCoffeeSite);
     }
 
+    @Override
+    public void onCoffeeSiteStatusChanged(CoffeeSite changedCoffeeSite, String error) {
+        hideProgressbar();
+
+        if (error != null && !error.isEmpty()) {
+            pendingStatusValidFrom = "";
+            showCoffeeSiteStatusChangeFailure(error);
+            return;
+        }
+
+        if (changedCoffeeSite != null) {
+            if ((changedCoffeeSite.getStatusValidFrom() == null || changedCoffeeSite.getStatusValidFrom().isEmpty())
+                    && pendingStatusValidFrom != null && !pendingStatusValidFrom.isEmpty()) {
+                changedCoffeeSite.setStatusValidFrom(pendingStatusValidFrom);
+            }
+            changedCoffeeSite.setDistance(coffeeSite != null ? coffeeSite.getDistance() : changedCoffeeSite.getDistance());
+            coffeeSite = new CoffeeSiteMovable(changedCoffeeSite);
+            mainToolbar.setSubtitle(coffeeSite.getName());
+            refreshDetailFragment(coffeeSite);
+        }
+
+        pendingStatusValidFrom = "";
+
+        Toast.makeText(getApplicationContext(),
+                R.string.coffeesite_status_changed_successfully,
+                Toast.LENGTH_SHORT).show();
+    }
+
     private void showCoffeeSiteCancelSuccess() {
         Toast toast = Toast.makeText(getApplicationContext(),
                 R.string.coffeesite_canceled_successfuly,
@@ -661,6 +767,12 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
     private void showCoffeeSiteCancelFailure(String error) {
         error = (error != null && !error.isEmpty()) ? error : getString(R.string.coffee_site_cancel_failure);
+        Snackbar mySnackbar = Snackbar.make(contextView, error, Snackbar.LENGTH_LONG);
+        mySnackbar.show();
+    }
+
+    private void showCoffeeSiteStatusChangeFailure(String error) {
+        error = (error != null && !error.isEmpty()) ? error : getString(R.string.coffee_site_status_change_failure);
         Snackbar mySnackbar = Snackbar.make(contextView, error, Snackbar.LENGTH_LONG);
         mySnackbar.show();
     }

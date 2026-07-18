@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="18dp"
+            android:layout_marginBottom="6dp"
+            android:text="@string/site_status_select_label" />
+
+        <Spinner
+            android:id="@+id/site_status_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginBottom="6dp"
+            android:text="@string/site_status_valid_from_label" />
+
+        <TextView
+            android:id="@+id/site_status_valid_from_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="6dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:text="@string/select_valid_from_date"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

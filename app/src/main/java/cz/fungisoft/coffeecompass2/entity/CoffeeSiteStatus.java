@@ -9,6 +9,8 @@ import androidx.room.Ignore;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Locale;
+
 @Entity(tableName = "coffee_site_status_table")
 public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
 
@@ -80,7 +82,18 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
 
     @Override
     public String toString() {
-        return  status;
+        return getLocalizedValue();
+    }
+
+    public String getLocalizedValue() {
+        if (Locale.getDefault().getLanguage().equals("cs")
+                && valueCz != null && !valueCz.isEmpty()) {
+            return valueCz;
+        }
+        if (valueEn != null && !valueEn.isEmpty()) {
+            return valueEn;
+        }
+        return status;
     }
 
     @Override
