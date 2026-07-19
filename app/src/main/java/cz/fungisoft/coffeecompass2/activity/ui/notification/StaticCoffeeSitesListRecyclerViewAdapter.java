@@ -14,11 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.List;
 
 import cz.fungisoft.coffeecompass2.R;
@@ -26,7 +23,6 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.CoffeeSiteDetailActivi
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import cz.fungisoft.coffeecompass2.activity.ui.fragments.CoffeeSiteDetailFragment;
 import cz.fungisoft.coffeecompass2.utils.ImageUtil;
-import cz.fungisoft.coffeecompass2.utils.Utils;
 
 /**
  * Adapter to show list of CoffeeSites received upon Notification
@@ -117,7 +113,7 @@ public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapt
             @Override
             public void onClick(View view) {
                 CoffeeSite coffeeSite = (CoffeeSite) view.getTag();
-                if (coffeeSite != null && !coffeeSite.getMainImageURL().isEmpty()) {
+                if (coffeeSite != null && !ImageUtil.getDisplayMainImageUrl(coffeeSite).isEmpty()) {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, CoffeeSiteDetailActivity.class);
                     intent.putExtra("coffeeSite", (Parcelable) coffeeSite);
@@ -170,20 +166,9 @@ public class StaticCoffeeSitesListRecyclerViewAdapter extends RecyclerView.Adapt
             viewHolder.cityView.setText(this.mValues.get(position).getMesto());
         }
 
-        boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
-        if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                   .fit().placeholder(R.drawable.kafe_backround_120x160)
-                   .into(viewHolder.siteFoto);
-        }
-        if (!isOnline || this.mValues.get(position).getMainImageURL().isEmpty()) {
-            File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position));
-            if (coffeeSiteImageFile.exists() && coffeeSiteImageFile.isFile()) {
-                Picasso.get().load(coffeeSiteImageFile)
-                        .fit().placeholder(R.drawable.kafe_backround_120x160)
-                        .into(viewHolder.siteFoto);
-            }
-        }
+        CoffeeSite coffeeSite = this.mValues.get(position);
+        ImageUtil.loadCoffeeSiteListImage(mParentActivity.getApplicationContext(), coffeeSite,
+                viewHolder.siteFoto, R.drawable.kafe_backround_120x160);
 
         // Foto and main Label with CoffeeSite name are clickable
         viewHolder.siteFoto.setTag(this.mValues.get(position));

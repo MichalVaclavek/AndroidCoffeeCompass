@@ -85,13 +85,13 @@ public class MyCoffeeSitesListActivity extends BaseActivity
                                                   CancelCoffeeSiteDialogFragment.CancelCoffeeSiteDialogListener,
                                                   InsertAuthorCommentDialogFragment.InsertAuthorCommentDialogListener,
                                                   UploadCoffeeSitesDialogFragment.UploadCoffeeSitesDialogListener,
-                                                   CoffeeSiteServicesConnectionListener,
-                                                   CoffeeSiteImageServiceConnectionListener,
-                                                   CoffeeSiteImageServiceCallResultListener,
-                                                   CoffeeSiteLoadServiceOperationsListener,
-                                                   CoffeeSiteUploadServiceOperationsListener,
-                                                   CoffeeSiteServiceCUDOperationsListener,
-                                                   ChangeSiteStatusDialogFragment.ChangeSiteStatusDialogListener {
+                                                  CoffeeSiteServicesConnectionListener,
+                                                  CoffeeSiteImageServiceConnectionListener,
+                                                  CoffeeSiteImageServiceCallResultListener,
+                                                  CoffeeSiteLoadServiceOperationsListener,
+                                                  CoffeeSiteUploadServiceOperationsListener,
+                                                  CoffeeSiteServiceCUDOperationsListener,
+                                                  ChangeSiteStatusDialogFragment.ChangeSiteStatusDialogListener {
 
     private static final String TAG = "MyCoffeeSitesListAct";
 

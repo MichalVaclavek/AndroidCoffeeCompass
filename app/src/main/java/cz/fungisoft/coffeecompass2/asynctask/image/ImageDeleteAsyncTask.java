@@ -67,18 +67,18 @@ public class ImageDeleteAsyncTask {
 
             ImageRESTInterface api = retrofit.create(ImageRESTInterface .class);
 
-            Call<Integer> call = api.deleteImageBySiteId(coffeeSiteId);
+            Call<String> call = api.deleteImageBySiteId(coffeeSiteId);
 
             Log.i(TAG, "start call");
 
-            call.enqueue(new Callback<Integer>() {
+            call.enqueue(new Callback<>() {
                 @Override
-                public void onResponse(Call<Integer> call, Response<Integer> response) {
+                public void onResponse(Call<String> call, Response<String> response) {
                     if (response.isSuccessful()) {
                         if (response.body() != null) {
                             Log.i(TAG, "onSuccess()");
                             operationResult = "OK";
-                            int coffeeSiteID = response.body();
+                            String coffeeSiteID = response.body();
                             if (callingService.get() != null) {
                                 callingService.get().evaluateImageDeleteResult(coffeeSite, new Result.Success<>(coffeeSiteID));
                             }
@@ -106,7 +106,7 @@ public class ImageDeleteAsyncTask {
                 }
 
                 @Override
-                public void onFailure(Call<Integer> call, Throwable t) {
+                public void onFailure(Call<String> call, Throwable t) {
                     Log.e(TAG, "Error deleting image REST request." + t.getMessage());
                     Result.Error error = new Result.Error(new IOException("Error deleting image.", t));
                     operationError = error.toString();

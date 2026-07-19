@@ -19,11 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -585,20 +582,9 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         viewHolder.distanceView.setTag(TAG + ". DistanceTextView for " + this.mValues.get(position).getName());
         Log.d(TAG, ". Distance Text View " + viewHolder.distanceView.getTag() + " added to listen distance change of " + this.mValues.get(position).getName() + ". Object id: " + this.mValues.get(position));
 
-        boolean isOnline = Utils.isOnline(mParentActivity.getApplicationContext());
-        if (isOnline && !this.mValues.get(position).getMainImageURL().isEmpty()) {
-            Picasso.get().load(this.mValues.get(position).getMainImageURL())
-                    .fit().placeholder(R.drawable.kafe_backround_120x160)
-                    .into(viewHolder.siteFoto);
-        }
-        if (!isOnline || this.mValues.get(position).getMainImageURL().isEmpty()) {
-            File imageFile = ImageUtil.getCoffeeSiteImageFile(mParentActivity.getApplicationContext(), this.mValues.get(position));
-            if (imageFile.exists() && imageFile.isFile()) {
-                Picasso.get().load(imageFile)
-                        .fit().placeholder(R.drawable.kafe_backround_120x160)
-                        .into(viewHolder.siteFoto);
-            }
-        }
+        CoffeeSite coffeeSite = this.mValues.get(position);
+        ImageUtil.loadCoffeeSiteListImage(mParentActivity.getApplicationContext(), coffeeSite,
+                viewHolder.siteFoto, R.drawable.kafe_backround_120x160);
 
         viewHolder.itemView.setTag(this.mValues.get(position));
         viewHolder.itemView.setOnClickListener(this.mOnClickListener);
@@ -610,8 +596,6 @@ public class FoundCoffeeSitesRecyclerViewAdapter extends RecyclerView.Adapter<Re
         // so it cannot be reseted by animation itself
         animationRunning = false;
     }
-
-
 
         /**
          * Inner ViewHolder class for MyCoffeeSiteItemRecyclerViewAdapter

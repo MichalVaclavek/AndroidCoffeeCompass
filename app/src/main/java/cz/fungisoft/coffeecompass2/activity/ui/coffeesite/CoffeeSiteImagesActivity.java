@@ -79,6 +79,7 @@ public class CoffeeSiteImagesActivity extends BaseActivity
     private static final int REQUEST_TAKE_PHOTO = 200;
     private static final int REQUEST_GALLERY_PHOTO = 201;
     private static final int MAX_IMAGES = 10;
+    private static final String IMAGE_TYPE_MAIN = "main";
     private static final String IMAGE_TYPE_OTHER = "other";
 
     private CoffeeSite coffeeSite;
@@ -225,8 +226,9 @@ public class CoffeeSiteImagesActivity extends BaseActivity
             return;
         }
         showProgress(R.string.manage_images_upload_progress);
+        String imageType = adapter.getImageCount() == 0 ? IMAGE_TYPE_MAIN : IMAGE_TYPE_OTHER;
         new ImageUploadNewApiAsyncTask(this, userAccountService, imageFile,
-                coffeeSite.getId(), IMAGE_TYPE_OTHER).execute();
+                coffeeSite.getId(), imageType).execute();
     }
 
     @Override

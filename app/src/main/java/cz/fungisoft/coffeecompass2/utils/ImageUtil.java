@@ -7,8 +7,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import androidx.exifinterface.media.ExifInterface;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.interfaces.images.ImagesApiRESTInterface;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
 import okhttp3.ResponseBody;
@@ -138,6 +141,78 @@ public class ImageUtil {
 
     public static File getImageFile(String imageFilePath) {
         return new File(imageFilePath);
+    }
+
+    public static String getDisplayMainImageUrl(CoffeeSite coffeeSite) {
+        return getDisplayImageUrl(coffeeSite, "main", "mid");
+    }
+
+    public static String getDisplayImageUrl(CoffeeSite coffeeSite, String imageType, String imageSize) {
+        if (coffeeSite == null) {
+            return "";
+        }
+        String mainImageUrl = coffeeSite.getMainImageURL();
+        if ("main".equals(imageType) && mainImageUrl != null && !mainImageUrl.isEmpty()) {
+            return mainImageUrl;
+        }
+        if (coffeeSite.getId().isEmpty() || !coffeeSite.isSavedOnServer()) {
+            return "";
+        }
+
+        return getDisplayImageUrl(coffeeSite.getId(), imageType, imageSize);
+    }
+
+    public static String getDisplayImageUrl(String objectExtId, String imageType, String imageSize) {
+        if (objectExtId == null || objectExtId.isEmpty()) {
+            return "";
+        }
+        return BuildConfig.IMAGES_API_PUBLIC_URL
+                + "bytes/object/?objectExtId=" + objectExtId
+                + "&type=" + imageType
+                + "&size=" + imageSize;
+    }
+
+    public static void loadCoffeeSiteListImage(Context context, CoffeeSite coffeeSite,
+                                               ImageView imageView, int placeholderResId) {
+        Picasso.get().cancelRequest(imageView);
+        imageView.setImageResource(placeholderResId);
+        if (coffeeSite == null) {
+            return;
+        }
+
+        boolean isOnline = Utils.isOnline(context.getApplicationContext());
+        String mainImageUrl = getDisplayMainImageUrl(coffeeSite);
+        if (isOnline && !mainImageUrl.isEmpty()) {
+            String otherImageUrl = getDisplayImageUrl(coffeeSite, "other", "mid");
+            Picasso.get().load(mainImageUrl)
+                    .fit().placeholder(placeholderResId)
+                    .into(imageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            if (otherImageUrl.isEmpty()) {
+                                imageView.setImageResource(placeholderResId);
+                                return;
+                            }
+                            Picasso.get().load(otherImageUrl)
+                                    .fit()
+                                    .placeholder(placeholderResId)
+                                    .error(placeholderResId)
+                                    .into(imageView);
+                        }
+                    });
+            return;
+        }
+
+        File coffeeSiteImageFile = ImageUtil.getCoffeeSiteImageFile(context.getApplicationContext(), coffeeSite);
+        if (coffeeSiteImageFile.exists() && coffeeSiteImageFile.isFile()) {
+            Picasso.get().load(coffeeSiteImageFile)
+                    .fit().placeholder(placeholderResId)
+                    .into(imageView);
+        }
     }
 
     public static File getCoffeeSiteImageFile(Context appContext, CoffeeSite coffeeSite) {

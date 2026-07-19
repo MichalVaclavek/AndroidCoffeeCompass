@@ -43,7 +43,7 @@ public interface ImageRESTInterface {
      * @return
      */
     @DELETE("delete/site/{siteId}")
-    Call<Integer> deleteImageBySiteId(@Path("siteId") String siteId);
+    Call<String> deleteImageBySiteId(@Path("siteId") String siteId);
 
     /**
      * Calls deleteUser of CoffeeSite|s image. Input is an ID of the CoffeeSite
@@ -56,5 +56,4 @@ public interface ImageRESTInterface {
      */
     @DELETE("delete/{imageId}")
     Call<Integer> deleteImageByImageId(@Path("imageId") int imageId);
-
 }

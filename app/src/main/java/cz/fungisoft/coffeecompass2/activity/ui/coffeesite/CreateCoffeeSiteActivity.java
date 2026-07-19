@@ -68,7 +68,6 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.R;
 import cz.fungisoft.coffeecompass2.activity.ActivityWithLocationService;
 import cz.fungisoft.coffeecompass2.activity.SelectLocationMapActivity;
@@ -81,6 +80,7 @@ import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteCreat
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.models.CoffeeSiteEntitiesViewModel;
 import cz.fungisoft.coffeecompass2.activity.ui.coffeesite.ui.mycoffeesiteslist.MyCoffeeSitesListActivity;
 import cz.fungisoft.coffeecompass2.asynctask.image.GetImageObjectAsyncTask;
+import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteBySiteIdAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageDeleteNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.asynctask.image.ImageUploadNewApiAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.ImageFile;
@@ -1196,12 +1196,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private String buildMainImageUrl(String coffeeSiteId) {
-        if (coffeeSiteId == null || coffeeSiteId.isEmpty()) {
-            return "";
-        }
-        return BuildConfig.IMAGES_API_PUBLIC_URL
-                + "bytes/object/?objectExtId=" + coffeeSiteId
-                + "&type=main&size=mid";
+        return ImageUtil.getDisplayImageUrl(coffeeSiteId, IMAGE_TYPE_MAIN, "mid");
     }
 
     @Nullable
@@ -1289,6 +1284,11 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         refreshImageActionState();
         if (!pendingImageDeleteLookup) {
             if (currentImageCount == 0) {
+                if (hasLegacyMainImageUrl()) {
+                    currentImageCount = 1;
+                    refreshImageActionState();
+                    return;
+                }
                 if (currentCoffeeSite != null) {
                     currentCoffeeSite.setMainImageURL("");
                     currentCoffeeSite.setMainImageFilePath("");
@@ -1305,17 +1305,13 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
         pendingImageDeleteLookup = false;
         if (imageObject == null || imageObject.getObjectImages().isEmpty()) {
-            hideProgressbarAndEnableMenuItems();
-            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
-            pendingImageOperationCoffeeSite = null;
+            deleteLegacyCoffeeSiteImage();
             return;
         }
 
         ImageFile mainImage = getMainImageFile(imageObject);
         if (mainImage == null || mainImage.getExternalId() == null || mainImage.getExternalId().isEmpty()) {
-            hideProgressbarAndEnableMenuItems();
-            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
-            pendingImageOperationCoffeeSite = null;
+            deleteLegacyCoffeeSiteImage();
             return;
         }
 
@@ -1331,6 +1327,19 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         }
         new ImageDeleteNewApiAsyncTask(this, userAccountService,
                 objectExtId, mainImage.getExternalId()).execute();
+    }
+
+    private void deleteLegacyCoffeeSiteImage() {
+        CoffeeSite coffeeSite = pendingImageOperationCoffeeSite != null
+                ? pendingImageOperationCoffeeSite
+                : currentCoffeeSite;
+        if (!hasLegacyMainImageUrl(coffeeSite)) {
+            hideProgressbarAndEnableMenuItems();
+            Toast.makeText(this, R.string.manage_images_delete_failure, Toast.LENGTH_SHORT).show();
+            pendingImageOperationCoffeeSite = null;
+            return;
+        }
+        new ImageDeleteBySiteIdAsyncTask(this, userAccountService, coffeeSite).execute();
     }
 
     @Override
@@ -2206,6 +2215,17 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
         return hasLocalImage || hasCurrentCoffeeSiteImage;
     }
 
+    private boolean hasLegacyMainImageUrl() {
+        return hasLegacyMainImageUrl(currentCoffeeSite);
+    }
+
+    private boolean hasLegacyMainImageUrl(@Nullable CoffeeSite coffeeSite) {
+        return coffeeSite != null
+                && !isLocalOnlyDraft(coffeeSite)
+                && coffeeSite.getMainImageFilePath().isEmpty()
+                && !coffeeSite.getMainImageURL().isEmpty();
+    }
+
     private boolean isLocalOnlyDraft(@Nullable CoffeeSite coffeeSite) {
         return coffeeSite != null
                 && !coffeeSite.isSavedOnServer()
@@ -2233,7 +2253,7 @@ public class CreateCoffeeSiteActivity extends ActivityWithLocationService
     }
 
     private void openManageImagesActivity() {
-        if (!hasMainImage() || !canOpenManageImages()) {
+        if (!canOpenManageImages()) {
             return;
         }
         Intent manageImagesIntent = new Intent(CreateCoffeeSiteActivity.this, CoffeeSiteImagesActivity.class);
