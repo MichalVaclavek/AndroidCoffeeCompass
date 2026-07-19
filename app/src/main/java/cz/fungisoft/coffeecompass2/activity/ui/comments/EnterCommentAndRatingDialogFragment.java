@@ -59,6 +59,7 @@ public class EnterCommentAndRatingDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.numOfStarsForSiteAndUser = getArguments().getInt("numOfStars");
+        this.selectedRatingNumber = this.numOfStarsForSiteAndUser;
         this.currentCommentText = getArguments().getString("commentText");
         // If comment is not to be editable, then show only star/cup rating
         this.commentEditable = getArguments().getBoolean("commentEditable", true);

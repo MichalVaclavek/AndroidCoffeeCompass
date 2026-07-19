@@ -33,7 +33,7 @@ public class Comment extends CoffeeSiteEntity implements Serializable, Parcelabl
     private String createdOnString;
 
     @Expose
-    @SerializedName("coffeeSiteID")
+    @SerializedName(value = "coffeeSiteId", alternate = "coffeeSiteID")
     private String coffeeSiteID;
 
     @Expose

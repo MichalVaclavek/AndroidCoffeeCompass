@@ -173,6 +173,7 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
      */
     public LiveData<List<CoffeeSiteWithComments>> getCommentsForCoffeeSite(CoffeeSite coffeeSite, boolean offlineModeOn) {
         if (!offlineModeOn) {
+            setInput(false, coffeeSite);
             new GetCommentsOfCoffeeSiteAsyncTask(this, coffeeSite).execute();
         } else {
             setInput(true, coffeeSite);
@@ -201,7 +202,6 @@ public class CommentRepository extends CoffeeSiteRepositoryBase implements Comme
         listOfCommentsForCoffeeSite.add(coffeeSiteWithComments);
 
         commentsOfCoffeeSiteFromServer.setValue(listOfCommentsForCoffeeSite);
-        setInput(false, coffeeSite);
     }
 
     @Override

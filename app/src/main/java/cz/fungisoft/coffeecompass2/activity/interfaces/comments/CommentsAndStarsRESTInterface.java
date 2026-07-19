@@ -4,6 +4,7 @@ import java.util.List;
 
 import cz.fungisoft.coffeecompass2.BuildConfig;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStars;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsUpdate;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentsPageEnvelope;
 import cz.fungisoft.coffeecompass2.asynctask.comment.SaveCommentAndStarsAsyncTask;
 import cz.fungisoft.coffeecompass2.entity.Comment;
@@ -64,7 +65,7 @@ public interface CommentsAndStarsRESTInterface {
      * @return
      */
     @PUT("updateCommentAndStars")
-    Call<Comment> updateCommentAndStars(@Body Comment commentAndStarsToUpdate);
+    Call<Comment> updateCommentAndStars(@Body CommentAndStarsUpdate commentAndStarsToUpdate);
 
     /**
      * Calls REST updating of Stars for CoffeeSiteID=siteID and user ID.

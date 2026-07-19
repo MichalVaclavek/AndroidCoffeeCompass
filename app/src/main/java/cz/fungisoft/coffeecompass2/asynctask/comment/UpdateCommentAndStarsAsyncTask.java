@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.data.model.rest.comments.CommentAndStarsUpdate;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.CommentsAndStarsRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.comments.UsersCSRatingAndCommentUpdateOperationListener;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
@@ -56,7 +57,14 @@ public class UpdateCommentAndStarsAsyncTask {
 
             CommentsAndStarsRESTInterface api = retrofit.create(CommentsAndStarsRESTInterface.class);
 
-            Call<Comment> call = api.updateCommentAndStars(commentAndStarsToUpdate);
+            CommentAndStarsUpdate requestBody = new CommentAndStarsUpdate(
+                    commentAndStarsToUpdate.getId(),
+                    commentAndStarsToUpdate.getText(),
+                    commentAndStarsToUpdate.getCoffeeSiteID(),
+                    commentAndStarsToUpdate.getUserId(),
+                    commentAndStarsToUpdate.getStarsFromUser());
+
+            Call<Comment> call = api.updateCommentAndStars(requestBody);
 
             call.enqueue(new Callback<Comment>() {
                 @Override

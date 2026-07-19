@@ -1,13 +1,20 @@
 package cz.fungisoft.coffeecompass2.activity.data.model.rest.comments;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Class for holding Comment and Stars for CoffeeSite entered by user
  * to be saved on server via REST call.
  */
 public class CommentAndStars {
 
+    @Expose
+    @SerializedName("stars")
     private Stars stars;
 
+    @Expose
+    @SerializedName("comment")
     private String comment;
 
     public void setComment(String comment) {
@@ -43,6 +50,8 @@ public class CommentAndStars {
      */
     public static class Stars {
 
+        @Expose
+        @SerializedName("numOfStars")
         private int numOfStars = 3;
 
         public Stars() {}

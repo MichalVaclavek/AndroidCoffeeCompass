@@ -166,9 +166,11 @@ public class CommentsListActivity extends BaseActivity
             public void onChanged(@Nullable final List<CoffeeSiteWithComments> commentsLive) {
                 // Update the cached copy of the Comments in the adapter.
                 assert commentsLive != null;
-                if (commentsLive.size() > 0) {
+                if (!commentsLive.isEmpty()) {
                     siteComments = commentsLive.get(0).comments;
                     showComments(siteComments);
+                } else {
+                    showComments(null);
                 }
             }
         });
