@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import cz.fungisoft.coffeecompass2.BuildConfig;
 import okhttp3.Authenticator;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -118,6 +120,31 @@ public final class RetrofitClientProvider {
 
         return new Retrofit.Builder()
                 .client(authenticatedClient)
+                .baseUrl(baseUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+    }
+
+    /**
+     * Returns a Retrofit instance with optional HTTP body logging for debugging
+     * selected requests without enabling verbose logging globally.
+     */
+    public Retrofit getRetrofitWithAuth(String baseUrl, Interceptor interceptor,
+                                        Authenticator authenticator, boolean logBody) {
+        OkHttpClient.Builder clientBuilder = client.newBuilder()
+                .addInterceptor(interceptor)
+                .authenticator(authenticator);
+
+        if (BuildConfig.DEBUG && logBody) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            loggingInterceptor.redactHeader("Authorization");
+            clientBuilder.addInterceptor(loggingInterceptor);
+        }
+
+        return new Retrofit.Builder()
+                .client(clientBuilder.build())
                 .baseUrl(baseUrl)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))

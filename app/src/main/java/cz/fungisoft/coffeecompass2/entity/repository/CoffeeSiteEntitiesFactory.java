@@ -104,9 +104,7 @@ public class CoffeeSiteEntitiesFactory {
                 ((SiteLocationType) retVal).setLocationType(jsonObject.getString("locationType"));
             }
 
-            if (retVal instanceof CoffeeSiteStatus && !jsonObject.has("id")) {
-                retVal.setId(((CoffeeSiteStatus) retVal).getStatus());
-            } else if (retVal != null) {
+            if (retVal != null) {
                 retVal.setId(jsonObject.getString("id"));
             }
         } catch (JSONException e) {

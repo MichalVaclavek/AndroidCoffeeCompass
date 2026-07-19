@@ -181,7 +181,7 @@ public class CoffeeSite implements Serializable,
     protected CoffeeSiteStatus statusZarizeni = new CoffeeSiteStatus();
 
     @Expose
-    @SerializedName(value = "statusValidFrom", alternate = {"validFrom"})
+    @SerializedName(value = "statusZarizeniOd", alternate = {"validFrom", "statusValidFrom"})
     @ColumnInfo(name = "statusValidFrom")
     protected String statusValidFrom = "";
 

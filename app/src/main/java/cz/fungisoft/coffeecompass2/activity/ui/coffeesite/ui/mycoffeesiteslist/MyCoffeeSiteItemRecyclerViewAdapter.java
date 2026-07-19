@@ -698,7 +698,7 @@ public class MyCoffeeSiteItemRecyclerViewAdapter extends RecyclerView.Adapter<Re
         }
 
         String currentStatus = selectedCoffeeSite.getStatusZarizeni() != null
-                ? selectedCoffeeSite.getStatusZarizeni().getStatus()
+                ? selectedCoffeeSite.getStatusZarizeni().toString()
                 : "";
         ChangeSiteStatusDialogFragment dialog = ChangeSiteStatusDialogFragment.newInstance(
                 siteStatuses,

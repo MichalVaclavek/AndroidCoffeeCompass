@@ -71,11 +71,11 @@ public class CoffeeSiteStatus extends CoffeeSiteEntity implements Parcelable {
     @SerializedName("status")
     private String status;
 
-    @Expose
-    @SerializedName("valueCz")
+    @Expose(serialize = false, deserialize = true)
+    @SerializedName(value = "statusCz", alternate = {"valueCz"})
     private String valueCz;
 
-    @Expose
+    @Expose(serialize = false, deserialize = true)
     @SerializedName("valueEn")
     private String valueEn;
 

@@ -162,7 +162,7 @@ public class ChangeSiteStatusDialogFragment extends DialogFragment {
         String currentStatus = getArguments() != null ? getArguments().getString(ARG_CURRENT_STATUS, "") : "";
         for (int i = 0; i < statuses.size(); i++) {
             CoffeeSiteStatus status = statuses.get(i);
-            if (status != null && status.getStatus() != null && status.getStatus().equals(currentStatus)) {
+            if (isCurrentStatus(status, currentStatus)) {
                 return i;
             }
         }
@@ -172,11 +172,19 @@ public class ChangeSiteStatusDialogFragment extends DialogFragment {
     private String getCurrentStatusLabel() {
         String currentStatus = getArguments() != null ? getArguments().getString(ARG_CURRENT_STATUS, "") : "";
         for (CoffeeSiteStatus status : statuses) {
-            if (status != null && status.getStatus() != null && status.getStatus().equals(currentStatus)) {
+            if (isCurrentStatus(status, currentStatus)) {
                 return status.toString();
             }
         }
         return currentStatus;
+    }
+
+    private boolean isCurrentStatus(CoffeeSiteStatus status, String currentStatus) {
+        return status != null
+                && currentStatus != null
+                && (currentStatus.equals(status.getStatus())
+                || currentStatus.equals(status.getId())
+                || currentStatus.equals(status.toString()));
     }
 
     private void showDatePicker(TextView validFromText) {

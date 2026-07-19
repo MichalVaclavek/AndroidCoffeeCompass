@@ -4,14 +4,19 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 
 import cz.fungisoft.coffeecompass2.activity.data.Result;
+import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteEntitiesRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.coffeesite.CoffeeSiteRESTInterface;
 import cz.fungisoft.coffeecompass2.activity.interfaces.login.UserAccountActionsProvider;
 import cz.fungisoft.coffeecompass2.entity.CoffeeSite;
+import cz.fungisoft.coffeecompass2.entity.CoffeeSiteStatus;
+import cz.fungisoft.coffeecompass2.entity.repository.CoffeeSiteDatabase;
 import cz.fungisoft.coffeecompass2.services.CoffeeSiteWithUserAccountService;
 import cz.fungisoft.coffeecompass2.services.interfaces.CoffeeSiteRESTResultListener;
 import cz.fungisoft.coffeecompass2.activity.data.model.rest.user.TokenAuthenticator;
+import cz.fungisoft.coffeecompass2.utils.AsyncRunner;
 import cz.fungisoft.coffeecompass2.utils.RetrofitClientProvider;
 import cz.fungisoft.coffeecompass2.utils.Utils;
 import okhttp3.Headers;
@@ -19,7 +24,6 @@ import okhttp3.Interceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 /**
  * AsyncTasky pro Create, Update operace s CoffeeSite
@@ -52,14 +56,14 @@ public class CoffeeSiteCreateUpdateAsyncTask {
         this.callingListenerService = callingService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
 
-        tag = "SiteOperationAsyncTask";
+        tag = "CoffeeSiteCreateUpdateAsyncTask";
     }
 
     public void execute() {
         Log.i(tag, "start");
         operationError = "";
 
-        Log.i(tag, "currentUSer is null? " + (userAccountService.getLoggedInUser() == null));
+        Log.i(tag, "currentUser is null? " + (userAccountService.getLoggedInUser() == null));
         if (userAccountService.getLoggedInUser() != null) {
             // Inserts user authorization token to Authorization header
             Interceptor headerAuthorizationInterceptor = chain -> {
@@ -69,78 +73,172 @@ public class CoffeeSiteCreateUpdateAsyncTask {
                 return chain.proceed(request);
             };
 
-            CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
-                    .getRetrofitWithAuth(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL,
-                            headerAuthorizationInterceptor,
-                            new TokenAuthenticator(userAccountService))
-                    .create(CoffeeSiteRESTInterface.class);
+            AsyncRunner.runInBackground(() -> {
+                normalizeCoffeeSiteStatusForRequest();
 
-            Call<CoffeeSite> call = null;
+                CoffeeSiteRESTInterface api = RetrofitClientProvider.getInstance()
+                        .getRetrofitWithAuth(CoffeeSiteRESTInterface.COFFEE_SITE_SECURED_URL,
+                                headerAuthorizationInterceptor,
+                                new TokenAuthenticator(userAccountService),
+                                true)
+                        .create(CoffeeSiteRESTInterface.class);
 
-            switch (this.requestedRESTOperationCode) {
-                case COFFEE_SITE_SAVE:
-                    call = api.createCoffeeSite(coffeeSite);
-                    break;
-                case COFFEE_SITE_UPDATE:
-                    call = api.updateCoffeeSite(coffeeSite.getId(), coffeeSite);
-                    break;
-            }
+                Call<CoffeeSite> call = switch (this.requestedRESTOperationCode) {
+                    case COFFEE_SITE_SAVE -> api.createCoffeeSite(coffeeSite);
+                    case COFFEE_SITE_UPDATE -> api.updateCoffeeSite(coffeeSite.getId(), coffeeSite);
+                    default -> null;
+                };
 
-            Log.i(tag, "start call");
+                if (call == null) {
+                    return;
+                }
 
-            call.enqueue(new Callback<>() {
-                @Override
-                public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
-                    if (response.isSuccessful()) {
-                        if (response.body() != null) {
-                            Log.i(tag, "onSuccess()");
-                            //operationResult = "OK";
-                            CoffeeSite coffeeSite = response.body();
-                            Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
-                            if (callingListenerService != null) {
-                                callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+                Log.i(tag, "start call");
+
+                call.enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(Call<CoffeeSite> call, Response<CoffeeSite> response) {
+                        if (response.isSuccessful()) {
+                            if (response.body() != null) {
+                                Log.i(tag, "onSuccess()");
+                                //operationResult = "OK";
+                                CoffeeSite coffeeSite = response.body();
+                                Result.Success<CoffeeSite> result = new Result.Success<>(coffeeSite);
+                                if (callingListenerService != null) {
+                                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, result);
+                                }
+                            } else {
+                                Log.i(tag, "Returned empty response for saving CoffeeSite request.");
+                                error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
+                                operationError = error.toString();
+                                if (callingListenerService != null) {
+                                    callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
+                                }
                             }
                         } else {
-                            Log.i(tag, "Returned empty response for saving CoffeeSite request.");
-                            error = new Result.Error(new IOException("Error saving CoffeeSite. Response empty."));
-                            operationError = error.toString();
+                            try {
+                                operationError = Utils.getRestError(response.errorBody().string()).getDetail();
+                                error = new Result.Error(operationError);
+                            } catch (IOException e) {
+                                Log.e(tag, e.getMessage());
+                                operationError = "Chyba komunikace se serverem.";
+                            }
+                            if (error == null) {
+                                error = new Result.Error(operationError);
+                            }
                             if (callingListenerService != null) {
                                 callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                             }
                         }
-                    } else {
-                        try {
-                            operationError = Utils.getRestError(response.errorBody().string()).getDetail();
-                            error = new Result.Error(operationError);
-                        } catch (IOException e) {
-                            Log.e(tag, e.getMessage());
-                            operationError = "Chyba komunikace se serverem.";
-                        }
-                        if (error == null) {
-                            error = new Result.Error(operationError);
-                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CoffeeSite> call, Throwable t) {
+                        Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
+                        error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
+                        operationError = error.toString();
+
                         if (callingListenerService != null) {
                             callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
                         }
+                        if (t.getMessage().startsWith("Refreshing access token failed")) {
+                            userAccountService.clearLoggedInUser();
+                            // go to login activity
+                            Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
+                        }
                     }
-                }
-
-                @Override
-                public void onFailure(Call<CoffeeSite> call, Throwable t) {
-                    Log.e(tag, "Error saving CoffeeSite REST request." + t.getMessage());
-                    error = new Result.Error(new IOException("Error saving CoffeeSite.", t));
-                    operationError = error.toString();
-
-                    if (callingListenerService != null) {
-                        callingListenerService.onCoffeeSiteReturned(requestedRESTOperationCode, error);
-                    }
-                    if (t.getMessage().startsWith("Refreshing access token failed")) {
-                        userAccountService.clearLoggedInUser();
-                        // go to login activity
-                        Utils.openLoginActivityOnRefreshTokenFailed((Context) userAccountService);
-                    }
-                }
+                });
             });
+        }
+    }
+
+    private void normalizeCoffeeSiteStatusForRequest() {
+        if (coffeeSite.getStatusZarizeni() == null
+                || coffeeSite.getStatusZarizeni().getStatus() == null) {
+            return;
+        }
+
+        String status = coffeeSite.getStatusZarizeni().getStatus();
+        try {
+            CoffeeSiteDatabase db = CoffeeSiteDatabase.getDatabase((Context) userAccountService);
+            CoffeeSiteStatus dbStatus = findCoffeeSiteStatusInDb(db);
+            if (!isValidStatusId(dbStatus, status)) {
+                refreshCoffeeSiteStatuses(db);
+                dbStatus = findCoffeeSiteStatusInDb(db);
+            }
+            if (isValidStatusId(dbStatus, status)) {
+                coffeeSite.setStatusZarizeni(new CoffeeSiteStatus(dbStatus.getId(), dbStatus.getStatus()));
+            } else {
+                Log.e(tag, "CoffeeSite status UUID not available for status: " + status);
+            }
+        } catch (Exception e) {
+            Log.e(tag, "Failed to resolve CoffeeSite status from local DB.", e);
+        }
+    }
+
+    private CoffeeSiteStatus findCoffeeSiteStatusInDb(CoffeeSiteDatabase db) {
+        CoffeeSiteStatus currentStatus = coffeeSite.getStatusZarizeni();
+        CoffeeSiteStatus dbStatus = getCoffeeSiteStatusFromDb(db, currentStatus.getStatus());
+        if (isValidStatusId(dbStatus, currentStatus.getStatus())) {
+            return dbStatus;
+        }
+
+        dbStatus = getCoffeeSiteStatusFromDb(db, currentStatus.getValueCz());
+        if (isValidStatusId(dbStatus, currentStatus.getStatus())) {
+            return dbStatus;
+        }
+
+        dbStatus = getCoffeeSiteStatusFromDb(db, getLocalizedStatusForCode(currentStatus.getStatus()));
+        if (isValidStatusId(dbStatus, currentStatus.getStatus())) {
+            return dbStatus;
+        }
+
+        return getCoffeeSiteStatusFromDb(db, currentStatus.toString());
+    }
+
+    private CoffeeSiteStatus getCoffeeSiteStatusFromDb(CoffeeSiteDatabase db, String status) {
+        if (status == null || status.isEmpty()) {
+            return null;
+        }
+        return db.coffeeSiteStatusDao()
+                .getCoffeeSiteStatus(status)
+                .blockingGet();
+    }
+
+    private boolean isValidStatusId(CoffeeSiteStatus status, String statusValue) {
+        return status != null && !status.getId().isEmpty() && !status.getId().equals(statusValue);
+    }
+
+    private String getLocalizedStatusForCode(String status) {
+        if ("INSERVICE".equalsIgnoreCase(status)) {
+            return "V provozu";
+        }
+        if ("CANCELED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status)) {
+            return "Zrušeno";
+        }
+        if ("TEMP_CANCELED".equalsIgnoreCase(status)
+                || "TEMPORARILY_CLOSED".equalsIgnoreCase(status)
+                || "TEMPORARILYCLOSED".equalsIgnoreCase(status)) {
+            return "Dočasně zrušeno";
+        }
+        if ("TEMP_OPENED".equalsIgnoreCase(status)
+                || "TEMPORARILY_OPEN".equalsIgnoreCase(status)
+                || "TEMPORARILYOPEN".equalsIgnoreCase(status)) {
+            return "Dočasně otevřeno";
+        }
+        return status;
+    }
+
+    private void refreshCoffeeSiteStatuses(CoffeeSiteDatabase db) throws IOException {
+        CoffeeSiteEntitiesRESTInterface api = RetrofitClientProvider.getInstance()
+                .getRetrofit(CoffeeSiteEntitiesRESTInterface.GET_ENTITY_BASE)
+                .create(CoffeeSiteEntitiesRESTInterface.class);
+        Response<List<CoffeeSiteStatus>> response = api.getAllCoffeeSiteSiteStatuses().execute();
+        if (response.isSuccessful() && response.body() != null) {
+            db.coffeeSiteStatusDao().deleteAll();
+            db.coffeeSiteStatusDao().insertAll(response.body());
+        } else {
+            Log.e(tag, "Failed to refresh CoffeeSite statuses from server.");
         }
     }
 

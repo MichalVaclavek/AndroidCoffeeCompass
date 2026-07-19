@@ -33,7 +33,7 @@ public interface CoffeeSiteEntitiesRESTInterface {
     @GET("allOtherOffers")
     Call<List<OtherOffer>> getAllOtherOffers();
 
-    @GET("allSiteStatusValues")
+    @GET("allSiteStatuses")
     Call<List<CoffeeSiteStatus>> getAllCoffeeSiteSiteStatuses();
 
     @GET("allSiteRecordStatuses")

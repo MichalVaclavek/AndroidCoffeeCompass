@@ -480,7 +480,7 @@ public class CoffeeSiteDetailActivity extends ActivityWithLocationService
 
         coffeeSite = coffeeSiteToModify;
         String currentStatus = coffeeSiteToModify.getStatusZarizeni() != null
-                ? coffeeSiteToModify.getStatusZarizeni().getStatus()
+                ? coffeeSiteToModify.getStatusZarizeni().toString()
                 : "";
         ChangeSiteStatusDialogFragment dialog = ChangeSiteStatusDialogFragment.newInstance(
                 siteStatuses,

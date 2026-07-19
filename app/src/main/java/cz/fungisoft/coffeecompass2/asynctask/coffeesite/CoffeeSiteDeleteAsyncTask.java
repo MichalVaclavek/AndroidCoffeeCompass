@@ -19,7 +19,6 @@ import okhttp3.Interceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 /**
  * AsyncTask pro Delete operaci s CoffeeSite
@@ -54,7 +53,7 @@ public class CoffeeSiteDeleteAsyncTask {
         this.callingListenerDeleteService = callingDeleteService;
         this.requestedRESTOperationCode = requestedRESTOperationCode;
 
-        tag = "SiteOperationAsyncTask";
+        tag = "CoffeeSiteDeleteAsyncTask";
     }
 
     public void execute() {
